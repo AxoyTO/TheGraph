@@ -2,25 +2,19 @@
 #include <vector>
 #include <fstream>
 
-
 using std::cout;
 using std::endl;
 using std::vector;
-//using std::ofstream;
 
 //using namespace std;
 
 struct Vertex {
     int id;
     int output_edg_num;
-    int depth;
 
-    Vertex(): id(-1), depth(-1) {}
+    Vertex(): id(-1), output_edg_num(-1) {}
     Vertex(int iid): id(iid), output_edg_num(0) {}
-    Vertex(int id, int depth): output_edg_num(0) {
-        this->id = id;
-        this->depth = depth;
-    }
+    Vertex(int id, int edg): id(id), output_edg_num(edg) {}
 };
 
 struct Edge {
@@ -34,20 +28,19 @@ struct Edge {
     }
 };
 
-//совокупность вершин и соединений (рёбер) между вершинами, и информация о них.
 class Graph {
 //privat
-int size;
+int size, depth;
 vector<Vertex> vertices;
 vector<Edge> edges;
 
 public:
     Graph(): size(0) {}
 
-    Graph(const int size, const vector<Edge> & init_edges, const vector<Vertex> init_vertices) {
-        this->size = size;
+    Graph(const vector<Edge> & init_edges, const vector<Vertex> & init_vertices) {
         vertices = init_vertices;
         edges = init_edges;
+        size = vertices.size();
     }
 
     ~Graph() {
@@ -98,7 +91,8 @@ int main(int argc, char**argv) {
         init_vertices[(*it).node[0]].output_edg_num++;
     }
 
-    Graph A(14, init_edges, init_vertices);
+    Graph A(init_edges, init_vertices);
     A.write_json();
+
     return 0;
 }
