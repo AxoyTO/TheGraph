@@ -34,14 +34,7 @@ struct Edge
 		this->dest_node = dest_node;
 		this->edge_val = edge_val;
 	}
-	//friend ostream &operator<<(ostream &os, const Edge &e);
 };
-/*
-ostream &operator<<(ostream &os, const Edge &e)
-{
-	os << e.src_node.node_id << e.dest_node.node_id << e.edge_val;
-	return os;
-}*/
 
 class Graph
 {
@@ -62,7 +55,6 @@ public:
 
 	void insert_edge(const Edge &e);
 	void remove_edge(const Edge &e, set<int> nodes_s, vector<Edge> &edges);
-	//void insert_edges(vector<Edge> &edges, int node_count);
 
 	~Graph()
 	{
@@ -79,11 +71,9 @@ void Graph::insert_edge(const Edge &e)
 //Remove an edge from the graph(Это тоже просто для практики написал)
 void Graph::remove_edge(const Edge &e, set<int> nodes_s, vector<Edge> &edges)
 {
-	//cout << get<0>(graphVec[1][0]) << endl;
 	int src_index = -1, dest_index = -1, val;
 	try
 	{
-		//cout << e.src_node.node_id << endl;
 		for (auto &i : nodes_s)
 		{
 			if (e.src_node.node_id == i)
@@ -93,11 +83,8 @@ void Graph::remove_edge(const Edge &e, set<int> nodes_s, vector<Edge> &edges)
 			throw 1;
 		else
 		{
-			//cout << src_index << endl;
 			for (int i = 0; i < graphVec[src_index].size(); i++)
 			{
-				//cout << e.dest_node.node_id << endl;
-				//cout << get<1>(graphVec[src_index][i]) << endl;
 				if (e.dest_node.node_id == get<0>(graphVec[src_index][i]))
 					dest_index = i;
 			}
@@ -165,7 +152,6 @@ void writeJson(const Graph &graph, int node_c, const vector<Edge> &edges)
 	else
 	{
 		ofile << "{\n  \"vertices\": [\n    {\n";
-		//writeVertices(ofile, graph, node_c);
 		for (int i = 0; i < node_c; i++)
 		{
 			ofile << "      \"id\": " << i << "," << endl;
@@ -211,12 +197,7 @@ int main()
 	}
 	int node_count = nodes_set.size();
 	Graph graph(edges, node_count);
-	//Edge e = Edge(Node(13), Node(13), 18);
-	//graph.insert_edge(e);
 	Edge k(12, 13, 17);
-	//cout << edges[0].src_node.node_id << edges[0].dest_node.node_id << endl;
-	//graph.remove_edge(k, nodes_set, edges);
-	//displayGraph(graph);
 	writeJson(graph, node_count, edges);
 
 	return 0;
