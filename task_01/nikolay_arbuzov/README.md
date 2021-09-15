@@ -3,4 +3,5 @@ Repository for first homework
 
 Nikolay Arbuzov
 
-![image](./screenshot)
+![image](./screenshot.png)
+
