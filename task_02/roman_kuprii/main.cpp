@@ -10,11 +10,11 @@ using std::vector;
 
 struct Vertex {
     int id;
-    int output_edg_num;
+    int edges;
 
-    Vertex(): id(-1), output_edg_num(-1) {}
-    Vertex(int iid): id(iid), output_edg_num(0) {}
-    Vertex(int id, int edg): id(id), output_edg_num(edg) {}
+    Vertex(): id(-1), edges(0) {}
+    Vertex(int _id): id(_id), edges(0) {}
+    Vertex(int _id, int edg): id(_id), edges(edg) {}
 };
 
 struct Edge {
@@ -30,7 +30,7 @@ struct Edge {
 
 class Graph {
 //privat
-int size, depth;
+int size;
 vector<Vertex> vertices;
 vector<Edge> edges;
 
@@ -56,9 +56,9 @@ public:
             out << "{\n\t\t\t\"id\": " << i << ",\n\t\t\t\"edge_ids\": [";
             int cnt(0);
             for (vector<Edge>::iterator it = edges.begin(); it != edges.end(); it++) {
-                if ((*it).node[0] == i) {
+                if (((*it).node[0] == i) || ((*it).node[1] == i)) {
                     cnt++;
-                    if (cnt < vertices[i].output_edg_num) {
+                    if (cnt < vertices[i].edges) {
                         out << it->id << ", ";
                     } else out << (*it).id;
                 }
@@ -88,7 +88,8 @@ int main(int argc, char**argv) {
     vector<Vertex> init_vertices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 
     for (auto it = init_edges.begin(); it != init_edges.end(); it++) {
-        init_vertices[(*it).node[0]].output_edg_num++;
+        init_vertices[(*it).node[0]].edges++;
+        init_vertices[(*it).node[1]].edges++;
     }
 
     Graph A(init_edges, init_vertices);
