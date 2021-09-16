@@ -5,11 +5,16 @@
 #include <set>
 #include <fstream>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::set;
+using std::tuple;
+using std::vector;
+
 //Structure of nodes(vertices)
 struct Node
 {
-	int node_id;
+	int node_id = 0;
 	Node()
 	{
 		node_id = 0;
@@ -26,8 +31,9 @@ typedef tuple<int, int> DoubleTuple;
 //Structure of the edge including the source and destination nodes in it
 struct Edge
 {
-	Node src_node, dest_node;
-	int edge_val;
+	Node src_node = {};
+	Node dest_node = {};
+	int edge_val = 0;
 	Edge(Node src_node, Node dest_node, int edge_val)
 	{
 		this->src_node = src_node;
@@ -49,12 +55,9 @@ public:
 			int dest_id = edges[i].dest_node.node_id;
 			int edge_val = edges[i].edge_val;
 
-			graphVec[src_id].push_back(make_tuple(dest_id, edge_val));
+			graphVec[src_id].push_back(std::make_tuple(dest_id, edge_val));
 		}
 	};
-
-	void insert_edge(const Edge &e);
-	void remove_edge(const Edge &e, set<int> nodes_s, vector<Edge> &edges);
 
 	~Graph()
 	{
@@ -62,92 +65,14 @@ public:
 	}
 };
 
-//Insert an edge to the graph (Это я просто для практики написал)
-void Graph::insert_edge(const Edge &e)
-{
-	graphVec[e.src_node.node_id].push_back(make_tuple(e.dest_node.node_id, e.edge_val));
-}
-
-//Remove an edge from the graph(Это тоже просто для практики написал)
-void Graph::remove_edge(const Edge &e, set<int> nodes_s, vector<Edge> &edges)
-{
-	int src_index = -1, dest_index = -1, val;
-	try
-	{
-		for (auto &i : nodes_s)
-		{
-			if (e.src_node.node_id == i)
-				src_index = i;
-		}
-		if (src_index == -1)
-			throw 1;
-		else
-		{
-			for (int i = 0; i < graphVec[src_index].size(); i++)
-			{
-				if (e.dest_node.node_id == get<0>(graphVec[src_index][i]))
-					dest_index = i;
-			}
-			if (dest_index == -1)
-				throw 2;
-			else
-			{
-				if (e.edge_val == get<1>(graphVec[src_index][dest_index]))
-				{
-					val = e.edge_val;
-					graphVec[src_index].erase(graphVec[src_index].begin() + dest_index);
-					for (int i = 0; i < edges.size(); i++)
-					{
-						if (edges[i].src_node.node_id == e.src_node.node_id && edges[i].dest_node.node_id == e.dest_node.node_id && edges[i].edge_val == e.edge_val)
-							edges.erase(edges.begin() + i);
-					}
-				}
-				else
-					throw 3;
-			}
-		}
-	}
-	catch (int a)
-	{
-		switch (a)
-		{
-		case 1:
-			cout << "No such source node to remove." << endl;
-			break;
-		case 2:
-			cout << "No such destination node to remove." << endl;
-			break;
-		case 3:
-			cout << "No such edge value to remove." << endl;
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-//To display graph
-void displayGraph(const Graph &graph)
-{
-	//vector<vector<DoubleTuple>> gVec = graph.graphVec;
-	for (int i = 0; i < graph.graphVec.size(); i++)
-	{
-		for (int j = 0; j < graph.graphVec[i].size(); j++)
-		{
-			cout << "(" << i << ", " << get<0>(graph.graphVec[i][j]) << ", " << get<1>(graph.graphVec[i][j]) << ")";
-		}
-		cout << endl;
-	}
-}
-
 //Opens a json file for writing and writes on it info from the graph
 void writeJson(const Graph &graph, int node_c, const vector<Edge> &edges)
 {
-	ofstream ofile("graph.json", ios::out);
+	std::ofstream ofile("graph.json", std::ios::out);
 	if (!ofile.is_open())
 	{
 #line 151 "graph.json"
-		cerr << "Error while opening the file " << __FILE__ << endl;
+		std::cerr << "Error while opening the file " << __FILE__ << endl;
 	}
 	else
 	{
@@ -159,9 +84,9 @@ void writeJson(const Graph &graph, int node_c, const vector<Edge> &edges)
 			for (int j = 0; j < graph.graphVec[i].size(); j++)
 			{
 				if (graph.graphVec[i].size() != j + 1)
-					ofile << get<1>(graph.graphVec[i][j]) << ",";
+					ofile << std::get<1>(graph.graphVec[i][j]) << ",";
 				else
-					ofile << get<1>(graph.graphVec[i][j]) << "]\n";
+					ofile << std::get<1>(graph.graphVec[i][j]) << "]\n";
 			}
 			if (node_c != i + 1)
 				ofile << "	}, {\n";
@@ -202,4 +127,3 @@ int main()
 
 	return 0;
 }
-
