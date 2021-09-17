@@ -5,6 +5,7 @@
 #include <iterator>
 #include <vector>
 #include <fstream>
+#include <utility>
 
 class Edge;
 
@@ -21,7 +22,6 @@ public:
     int get_id() { return id; }
 
     void bindWithVertex(Vertex *vx, Edge *ed, int new_edge_id) {
-        std::cout << new_edge_id << std::endl;
         vertices[vx->id] = vx;
         edges[vx->id] = ed;
         edges_ids.push_back(new_edge_id);
@@ -124,6 +124,17 @@ public:
                 int vertex_to_bind2 = std::rand() % vertices_amount;
                 this->BindVertices(vertex_to_bind1, vertex_to_bind2);
             }
+        }
+    }
+
+    Graph(int vert_number, std::vector<std::pair<int, int>> connections) {
+        vertices_amount = 0;
+        edges_amount = 0;
+        for(int i = 0; i < vert_number; i++) {
+            this->AddNewVertex();
+        }
+        for(int i = 0; i < connections.size(); i++) {
+            this->BindVertices(connections[i].first, connections[i].second);
         }
     }
 
