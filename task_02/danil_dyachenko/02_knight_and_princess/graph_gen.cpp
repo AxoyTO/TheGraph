@@ -91,7 +91,7 @@ public:
             else
                 my_graph << " }\n";
         }
-        my_graph << "\t]\n}";
+        my_graph << "\t]\n}\n";
     }
 };
 
