@@ -7,177 +7,154 @@
 #include <fstream>
 #include <utility>
 
-class Edge;
 
 class Vertex {
-
     int id;
-    //access to the edge by id of connected vertex
-    std::map<int, Edge *> edges;
-    std::map<int, Vertex *> vertices;
-    std::vector<int> edges_ids;
-
 public:
-    Vertex(int x = 0): id(x) {}
-    int get_id() { return id; }
-
-    void bindWithVertex(Vertex *vx, Edge *ed, int new_edge_id) {
-        vertices[vx->id] = vx;
-        edges[vx->id] = ed;
-        edges_ids.push_back(new_edge_id);
-    }
-
-    operator std::string() {
-        std::string res = "";
-        res += "    {\n      \"id\": " + std::to_string(id);
-        res += ",\n      \"edge_ids\": ";
-        for (auto it = edges_ids.begin(); it != edges_ids.end(); it++) {
-            if(it == edges_ids.begin()) {
-                res += "[";
-            } else {
-                res += ", ";
-            }
-            res += std::to_string(*it);
-        }
-        res += "]\n    }";
-        return res;
-    } 
-
+    explicit Vertex(int init_id = 0): id(init_id) {}
+    int get_id() const { return id; }
 };
 
 class Edge{
     int id;
-    int is_binded;
-    std::map<int, Vertex *> vertices;
-
+    int vertex1_id;
+    int vertex2_id;
 public:
-    Edge(int x = 0): id(x), is_binded(0) {};
-    int get_id() { return id; }
-
-    void bindWithVertices(Vertex *vx1, Vertex *vx2) {
-        if (is_binded) {
-            return;
-        }
-        is_binded = 1;
-        vertices[vx1->get_id()] = vx1;
-        vertices[vx2->get_id()] = vx2;
-    }
-
-    operator std::string() {
-        std::string res = "";
-        res += "    {\n      \"id\": " + std::to_string(id);
-        res += ",\n      \"edge_ids\": ";
-        for (auto it = vertices.begin(); it != vertices.end(); it++) {
-            if(it == vertices.begin()) {
-                res += "[";
-            } else {
-                res += ", ";
-            }
-            res += std::to_string(it->second->get_id());
-        }
-        res += "]\n    }";
-        return res;
-    }
-
+    Edge(int init_id, int v1_init, int v2_init): id(init_id), vertex1_id(v1_init), vertex2_id(v2_init) {};
+    int get_id() const { return id; }
+    int get_v1_id() const { return vertex1_id; }
+    int get_v2_id() const { return vertex2_id; }
 };
 
 class Graph{
-    std::map<int, Edge> edges;
-    std::map<int, Vertex> vertices;
+    std::vector<Edge> edges;
+    std::vector<Vertex> vertices;
+
+    //connections_map: vertex1 -> edge -> vertex2
+    std::map<int, std::map<int, int>> connections_map;
+
     int vertices_amount;
     int edges_amount;
 
 public:
-    Graph(std::string mode = "empty", int max_vertices = 10, int max_edges = 15) {
-        vertices_amount = 0;
-        edges_amount = 0;
-        if(mode == "empty") {
-            return;
-        } else if (mode != "random") {
-            std::cout << "Wrong mode. Empty graph was created" << std::endl;
-            return;
-        }
+    Graph(): vertices_amount(0), edges_amount(0) {}
 
-        enum {
-            PROBABILITY_COEF = 100
-        };
+    int get_vertices_amount() const { return vertices_amount; }
+    int get_edges_amount() const { return edges_amount; }
 
-        srand(std::time(NULL));
-
-        for(int i = 0; i < max_vertices; i++) {
-            double new_vertex_prob = PROBABILITY_COEF - (double)PROBABILITY_COEF * vertices_amount / max_vertices;
-            if ( ((double)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_vertex_prob) {
-                this->AddNewVertex();
-                if (vertices_amount == 1) {
-                    continue;
-                }
-
-                int vertex_to_bind = std::rand() % (vertices_amount-1);
-                this->BindVertices(vertices_amount - 1, vertex_to_bind);
-            }
-        }
-
-        for(int i = edges_amount; i < max_edges; i++) {
-            double new_edge_prob = PROBABILITY_COEF - (double)PROBABILITY_COEF * edges_amount / max_edges;
-            if ( ((double)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_edge_prob) {
-                int vertex_to_bind1 = std::rand() % vertices_amount;
-                int vertex_to_bind2 = std::rand() % vertices_amount;
-                this->BindVertices(vertex_to_bind1, vertex_to_bind2);
-            }
-        }
-    }
-
-    Graph(int vert_number, std::vector<std::pair<int, int>> connections) {
-        vertices_amount = 0;
-        edges_amount = 0;
-        for(int i = 0; i < vert_number; i++) {
-            this->AddNewVertex();
-        }
-        for(int i = 0; i < connections.size(); i++) {
-            this->BindVertices(connections[i].first, connections[i].second);
-        }
-    }
-
-    int get_vertices_amount() { return vertices_amount; }
-    int get_edges_amount() { return edges_amount; }
-
-    void AddNewVertex(){
-        vertices[vertices_amount] = Vertex(vertices_amount);
+    void add_new_vertex(){
+        vertices.push_back(Vertex(vertices_amount));
         vertices_amount++;
     }
 
-    void BindVertices(int id1, int id2) {
-        edges[edges_amount] = Edge(edges_amount);
+    void bind_vertices(int id1, int id2) {
+        edges.push_back(Edge(edges_amount, id1, id2));
         edges_amount++;
-        edges[edges_amount - 1].bindWithVertices(&vertices[id1], &vertices[id2]);
-        vertices[id1].bindWithVertex(&vertices[id2], &edges[edges_amount - 1], edges_amount - 1);
-        vertices[id2].bindWithVertex(&vertices[id1], &edges[edges_amount - 1], edges_amount - 1);
+        connections_map[id1][edges_amount - 1] = id2;
+        connections_map[id2][edges_amount - 1] = id1;
     }
 
     operator std::string() {
         std::string result = "{\n  \"vertices\": [\n";
+
         for(int i = 0; i < vertices_amount; i++) {
-            result += (std::string)vertices[i];
+
+            std::string vertex_string = "";
+            vertex_string += "    {\n      \"id\": " + std::to_string(i);
+            vertex_string += ",\n      \"edge_ids\": ";
+
+            auto &cur_vertex = connections_map[i];
+            for (auto it = cur_vertex.begin(); it != cur_vertex.end(); it++) {
+                if(it == cur_vertex.begin()) {
+                    vertex_string += "[";
+                } else {
+                    vertex_string += ", ";
+                }
+                vertex_string += std::to_string(it->first);
+            }
+            vertex_string += "]\n    }";
+
+            result += vertex_string;
             if(i != vertices_amount - 1)
                 result += ",\n";
         }
+
         result += "\n  ],\n  \"edges\": [\n";
+
         for(int i = 0; i < edges_amount; i++) {
-            result += (std::string)edges[i];
+
+            std::string edge_string = "";
+            edge_string += "    {\n      \"id\": " + std::to_string(i);
+            edge_string += ",\n      \"vertex_ids\": ";
+
+            edge_string += "[" + std::to_string(edges[i].get_v1_id());
+            edge_string += ", " + std::to_string(edges[i].get_v2_id());
+            edge_string += "]\n    }";
+
+            result += edge_string;
             if(i != edges_amount - 1)
                 result += ",\n";
         }
+
         result += "\n  ]\n}";
         return result;
     }
 
 };
 
+void generateGraph(Graph &g, int max_vertices = 10, int max_edges = 15) {
+
+    enum {
+            PROBABILITY_COEF = 100
+        };
+
+        srand(std::time(NULL));
+
+        for(int i = 0; i < max_vertices; i++) {
+            const float new_vertex_prob = PROBABILITY_COEF - (float)PROBABILITY_COEF * g.get_vertices_amount() / max_vertices;
+            if ( ((float)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_vertex_prob) {
+                g.add_new_vertex();
+                if (g.get_vertices_amount() == 1) {
+                    continue;
+                }
+
+                int vertex_to_bind = std::rand() % (g.get_vertices_amount()-1);
+                g.bind_vertices(g.get_vertices_amount() - 1, vertex_to_bind);
+            }
+        }
+
+        for(int i = g.get_edges_amount(); i < max_edges; i++) {
+            float new_edge_prob = PROBABILITY_COEF - (float)PROBABILITY_COEF * g.get_edges_amount() / max_edges;
+            if ( ((double)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_edge_prob) {
+                int vertex_to_bind1 = std::rand() % g.get_vertices_amount();
+                int vertex_to_bind2 = std::rand() % g.get_vertices_amount();
+                g.bind_vertices(vertex_to_bind1, vertex_to_bind2);
+            }
+        }
+
+}
+
+void generateGraph(Graph &g, int vert_number, std::vector<std::pair<int, int>> connections){
+
+    for(int i = 0; i < vert_number; i++) {
+        g.add_new_vertex();
+    }
+    for(int i = 0; i < connections.size(); i++) {
+        g.bind_vertices(connections[i].first, connections[i].second);
+    }
+}
 
 
 int main() {
 
-    Graph g("random");
+    Graph g;
+
+    std::vector<std::pair<int, int>> g_connections{{0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {1, 6}, {2, 7}, {2, 8},
+        {3, 9}, {4, 10}, {5, 10}, {6, 10}, {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
+
+
+    generateGraph(g, 14, g_connections);
+
 
     std::ofstream file;
     file.open("graph.json");
