@@ -56,10 +56,10 @@ public:
         int n = 0;
         std::vector<Vertex> v_ans;
         std::vector<Edge> e_ans;
-        std::vector<std::vector<int> > adjacency_ans;
+        std::vector<std::vector<int> > a_ans;
         if (s == "task_02") {
             n = 14;
-            adjacency_ans = std::vector<std::vector<int> >(n, std::vector<int>());
+            a_ans = std::vector<std::vector<int> >(n, std::vector<int>());
             for (int i = 0; i < n; ++i) {    
                 v_ans.push_back(Vertex(i));
             }
@@ -82,16 +82,16 @@ public:
             e_ans.push_back(Edge(16, 11, 13));
             e_ans.push_back(Edge(17, 12, 13));
             for (auto el : e_ans) {
-                adjacency_ans[el.v1_id].push_back(el.id);
-                adjacency_ans[el.v2_id].push_back(el.id);
+                a_ans[el.v1_id].push_back(el.id);
+                a_ans[el.v2_id].push_back(el.id);
             }
         }
         vertices = v_ans;
         edges = e_ans;
-        adjacency = adjacency_ans;
+        adjacency = a_ans;
     }
 
-    /* Генерация рандомного связного графа на n вершинах" */
+    /* generation of random graph with n nodes */
     Graph(int n, bool loops = false)
     {
         std::vector<std::pair<int, int> > e_ans;
