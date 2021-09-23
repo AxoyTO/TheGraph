@@ -11,11 +11,8 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
     - name: Install Clang
-      shell: bash
       run: sudo apt install clang
     - name: build
-      shell: bash
       run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do clang++ $d/*.cpp -o $d/test_build -std=c++17 -Werror; done;
     - name: run
-      shell: bash
       run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do $d/test_build; done;
