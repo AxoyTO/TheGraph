@@ -1,3 +1,4 @@
+---
 name: C++ Build and Run
 on:
   push:
@@ -8,11 +9,11 @@ jobs:
   build_and_run:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out repository code
+    - name: Checkout Repository Code
       uses: actions/checkout@v2
     - name: Install Clang
       run: sudo apt install clang
-    - name: build
+    - name: Build
       run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do clang++ $d/*.cpp -o $d/test_build -std=c++17 -Werror; done;
-    - name: run
+    - name: Run
       run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do $d/test_build; done;
