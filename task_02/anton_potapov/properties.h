@@ -5,7 +5,7 @@ struct Boss
     int health;
     int atk;
     int stamina_consumption;
-    Boss(random=true)
+    Boss()
     {
         health = std::rand() % 100;
         atk = std::rand() % 20;
@@ -16,7 +16,7 @@ struct Boss
 struct Camp
 {
     int stamina_boost;
-    Boss(random=true)
+    Camp()
     {
         stamina_boost = std::rand() % 50 + 20;
     }

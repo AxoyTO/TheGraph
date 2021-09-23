@@ -1,24 +1,26 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <string>
 #include <cstdlib>
 #include <map>
 #include <set>
 #include <cassert>
+#include <fstream>
 
-#include <properties.h>
+#include "properties.h"
 
 enum 
 {
     ROAD_EDGE_CHANCE_FACTOR = 1,
-    COMMOD_EDGE_CHANCE_FACTOR = 3
+    COMMOD_EDGE_CHANCE_FACTOR = 7
 };
 
 struct Vertex
 {
     int id;
     Camp camp_info;
-    Vertex(int v_id, c_info = Camp()) : id(v_id), camp_info(c_info) {}
+    Vertex(int v_id, Camp c_info = Camp()) : id(v_id), camp_info(c_info) {}
 };
 
 struct Edge
@@ -26,7 +28,7 @@ struct Edge
     int id;
     int v1_id, v2_id;
     Boss boss_info;
-    Edge(int e_id, int ver1, int ver2, b_info = Boss()) : id(e_id), v1_id(ver1), v2_id(ver2), boss_info(b_info) {}
+    Edge(int e_id, int ver1, int ver2, Boss b_info = Boss()) : id(e_id), v1_id(ver1), v2_id(ver2), boss_info(b_info) {}
 };
 
 void dfs_get_colors(std::vector<std::vector<int> > &adjacency_list, std::vector<int> &color, int cur_color, int cur_v)
@@ -39,7 +41,7 @@ void dfs_get_colors(std::vector<std::vector<int> > &adjacency_list, std::vector<
     }
 }
 
-int get_rand_el(std::set<int> s)
+int get_rand_el(std::set<int> &s)
 {
     int id = rand() % s.size();
     auto it = s.begin();
@@ -50,17 +52,57 @@ int get_rand_el(std::set<int> s)
 class Graph
 {
 public:
-    Graph(int n, bool loops = False)
+    Graph(const std::string &s) {
+        int n = 0;
+        std::vector<Vertex> v_ans;
+        std::vector<Edge> e_ans;
+        std::vector<std::vector<int> > adjacency_ans;
+        if (s == "task_02") {
+            n = 14;
+            adjacency_ans = std::vector<std::vector<int> >(n, std::vector<int>());
+            for (int i = 0; i < n; ++i) {    
+                v_ans.push_back(Vertex(i));
+            }
+            e_ans.push_back(Edge(0, 0, 1));
+            e_ans.push_back(Edge(1, 0, 2));
+            e_ans.push_back(Edge(2, 0, 3));
+            e_ans.push_back(Edge(3, 1, 4));
+            e_ans.push_back(Edge(4, 1, 5));
+            e_ans.push_back(Edge(5, 1, 6));
+            e_ans.push_back(Edge(6, 2, 7));
+            e_ans.push_back(Edge(7, 2, 8));
+            e_ans.push_back(Edge(8, 3, 9));
+            e_ans.push_back(Edge(9, 4, 10));
+            e_ans.push_back(Edge(10, 5, 10));
+            e_ans.push_back(Edge(11, 6, 10));
+            e_ans.push_back(Edge(12, 7, 11));
+            e_ans.push_back(Edge(13, 8, 11));
+            e_ans.push_back(Edge(14, 9, 12));
+            e_ans.push_back(Edge(15, 10, 13));
+            e_ans.push_back(Edge(16, 11, 13));
+            e_ans.push_back(Edge(17, 12, 13));
+            for (auto el : e_ans) {
+                adjacency_ans[el.v1_id].push_back(el.id);
+                adjacency_ans[el.v2_id].push_back(el.id);
+            }
+        }
+        vertices = v_ans;
+        edges = e_ans;
+        adjacency = adjacency_ans;
+    }
+
+    /* Генерация рандомного связного графа на n вершинах" */
+    Graph(int n, bool loops = false)
     {
         std::vector<std::pair<int, int> > e_ans;
 
         int roads = rand() % n + 1;
         for (int i = 0; i < roads; ++i) {
-            std::vector<int> v_cur();
+            std::vector<int> v_cur;
             v_cur.push_back(0);
             v_cur.push_back(n - 1);
             for (int i = 1; i < n - 1; ++i) {
-                if (rand() & ROAD_EDGE_CHANCE_FACTOR) {
+                if (!(rand() & ROAD_EDGE_CHANCE_FACTOR)) {
                     v_cur.push_back(i);
                 }
             }
@@ -75,7 +117,7 @@ public:
                 if (i == j && !loops) {
                     continue;
                 }
-                if (rand() & COMMOD_EDGE_CHANCE_FACTOR) {
+                if (!(rand() & COMMOD_EDGE_CHANCE_FACTOR)) {
                     e_ans.push_back(std::make_pair(i, j));
                     if (i != j) {
                         e_ans.push_back(std::make_pair(j, i));
@@ -84,7 +126,7 @@ public:
             }
         }
 
-        std::vector<std::vector<int> > adjacency_list(n, std::vector<int>(0));
+        std::vector<std::vector<int> > adjacency_list(n, std::vector<int>());
         for (auto el : e_ans) {
             adjacency_list[el.first].push_back(el.second);
         }
@@ -98,6 +140,7 @@ public:
                 ++cur_color;
             }
         }
+
         std::map<int, std::set<int> > color_distribution;
         for (int i = 0; i < n; ++i) {
             color_distribution[color[i]].insert(i);
@@ -122,10 +165,10 @@ public:
 
         std::vector<Vertex> v_ans;
         for (int i = 0; i < n; ++i) {
-            v_ans.push_back(Vertex(v_id=i));
+            v_ans.push_back(Vertex(i));
         }
         
-        std::map<int, std::vector<int> > adjacency_ans;
+        std::vector<std::vector<int> > adjacency_ans(n, std::vector<int>());
         std::vector<Edge> edges_ans;
         int cur_e_id = 1;
         for (auto el : e_ans) {
@@ -142,13 +185,60 @@ public:
         edges = edges_ans;
         adjacency = adjacency_ans;
     }
+
+    void create_json(std::string file_name)
+    {
+        std::fstream json_file;
+        json_file.open(file_name, std::ios::out);
+        assert(json_file && "file not created");
+        json_file << "{\n";
+
+        json_file << "\t\"vertices\": [\n";
+        for (size_t i = 0; i < adjacency.size(); ++i) {
+            json_file << "\t\t{\n";
+            json_file << "\t\t\t\"id\": " << i << ",\n";
+            json_file << "\t\t\t\"edge_ids\": [";
+            for (size_t j = 0; j < adjacency[i].size(); ++j) {
+                json_file << adjacency[i][j];
+                if (j != adjacency[i].size() - 1) {
+                    json_file << ", ";
+                }
+            }
+            json_file <<  "]\n";
+            json_file << "\t\t}";
+            if (i == adjacency.size() - 1) {
+                json_file << "\n";
+            } else {
+                json_file << ",\n";
+            }
+        }
+        json_file << "\t],";
+
+        json_file << " \"edges\": [\n";
+        for (size_t i = 0; i < edges.size(); ++i) {
+            json_file << "\t\t{\n";
+            json_file << "\t\t\t\"id\": " << edges[i].id << ",\n";
+            json_file << "\t\t\t\"vertex_ids\": [" << edges[i].v1_id << ", " << edges[i].v2_id << "]\n";
+            json_file << "\t\t}";
+            if (i == edges.size() - 1) {
+                json_file << "\n";
+            } else {
+                json_file << ",\n";
+            }
+        }
+        json_file << "\t]\n";
+
+        json_file << "}\n";
+        json_file.close();
+    }
 private:
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
-    std::map<int, std::vector<int> > adjacency;
+    std::vector<std::vector<int> > adjacency;
 };
 
 int main()
 {
-    Graph g = Graph(n=20, loops=true)
+    Graph g("task_02");
+    g.create_json("graph.json");
 }
