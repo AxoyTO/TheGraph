@@ -5,7 +5,7 @@ const int maxDots = 14;
 const int maxVecPerDot = 4;
 const int maxEdges=18; 
 //constexpr will be generator a error so cant use maybe completer's problem 
-typedef struct liner{
+struct liner{
     int maindot;
     int net[maxVecPerDot][2];
 }liner;
@@ -109,7 +109,7 @@ class vecSetUp{
         return true;
     }
     private:
-    liner netWork[maxDots];
+    struct liner netWork[maxDots];
 };
 int main(){
     vecSetUp vec;
