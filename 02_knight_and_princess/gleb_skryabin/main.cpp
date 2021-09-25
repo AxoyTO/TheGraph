@@ -5,33 +5,21 @@
 #include <utility>
 #include <vector>
 
-//------
-
 class Graph {
    public:
     struct Edge {
         int id;
-        std::pair<int, int> vertices;  // = {-1, -1};
+        std::pair<int, int> vertices;
     };
-
-    // template <typename T>
-    /*std::ostream& operator<<(std::ostream& o, const Edge<T>& a) {
-        o << "id: " << p.id << "\tfirst: " << p.vertices.first << std::endl;
-        return o;
-    }*/
 
     struct Vertex {
         int id;
-        std::set<int> edges;  // = {};
+        std::set<int> edges;
     };
 
     Graph(std::vector<Edge> inpEdges) {
         printf("Graph constructor by edges\n");
         for (auto edge : inpEdges) {
-            /*auto result = edges.emplace(edge.id, edge);
-            if (!result.second) {
-                edges[edge.id] = edge;
-            }*/
             auto e = edges.find(edge.id);
             if (e == edges.end()) {
                 // add edge
@@ -59,13 +47,7 @@ class Graph {
     }
 
     void show() {
-        printf(" * Edges:\n");
-        for (auto edge_pair : edges) {
-            int id = edge_pair.first;
-            std::pair<int, int> v = edge_pair.second.vertices;
-            printf("[%2d]  <%d, %d>\n", id, v.first, v.second);
-        }
-        printf(" * Vertices:\n");
+        printf("  * Vertices:\n");
         for (auto vertex_pair : vertices) {
             int id = vertex_pair.first;
             printf("[%2d]  <", id);
@@ -74,18 +56,62 @@ class Graph {
             }
             printf(">\n");
         }
+        printf("  * Edges:\n");
+        for (auto edge_pair : edges) {
+            int id = edge_pair.first;
+            std::pair<int, int> v = edge_pair.second.vertices;
+            printf("[%2d]  <%d, %d>\n", id, v.first, v.second);
+        }
+    }
+
+    void printJSON(char const* filename) {
+        std::ofstream json(filename);
+        if (json.is_open()) {
+            printf("  * Print JSON to %s\n", filename);
+            json << "{\n  \" vertices\": [\n    ";
+
+            for (auto vertex_pair : vertices) {
+                auto v = vertex_pair.second;
+                json << "{\n      \"id\": " << v.id << ",\n";
+                json << "      \"edge_ids\": [";
+
+                /*auto it = edges.end();
+                it--;
+                int lastId = it->first;
+                for (int edgeId : v.edges) {
+                    json << edgeId;
+                    if (edgeId != lastId) {
+                        json << ",";
+                    }
+                    json << " ";
+                }*/
+                for (auto peid = v.edges.begin();;) {
+                    json << *peid;
+                    if (++peid != v.edges.end()) {
+                        json << ", ";
+                    } else {
+                        break;
+                    }
+                }
+                json << "]\n    }, ";
+            }
+            json << "\n  ],\n  \"edges\": [\n    ";
+            /*printf("  * Edges:\n");
+            for (auto edge_pair : edges) {
+                int id = edge_pair.first;
+                std::pair<int, int> v = edge_pair.second.vertices;
+                printf("[%2d]  <%d, %d>\n", id, v.first, v.second);
+            }*/
+            json << "\n\t]\n}";
+            json.close();
+        } else {
+            std::cout << "Unable to open file";
+        }
     }
 
    private:
     std::map<int, Edge> edges;
     std::map<int, Vertex> vertices;
-
-    /*template <typename T>
-    void addToMap(std::map<int, T> map, T el) {
-        // weg
-        // wef
-    }*/
-    // void dbg(char* s) { printf("  * %s\n", &s); }
 };
 
 int main(void) {
@@ -99,6 +125,18 @@ int main(void) {
         {16, {11, 13}}, {17, {12, 13}}};
 
     Graph g(edges);
-    g.show();
+    g.printJSON("graph.json");
+    return 0;
+}
+
+int main_() {
+    std::ofstream myfile("example.txt");
+    if (myfile.is_open()) {
+        myfile << "This is a line.\n";
+        myfile << "This is another line.\n";
+        myfile.close();
+    } else {
+        std::cout << "Unable to open file";
+    }
     return 0;
 }
