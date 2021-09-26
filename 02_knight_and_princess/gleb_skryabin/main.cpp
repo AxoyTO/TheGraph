@@ -49,9 +49,9 @@ class Graph {
     void show() {
         printf("  * Vertices:\n");
         for (auto vertex_pair : vertices) {
-            int id = vertex_pair.first;
-            printf("[%2d]  <", id);
-            for (int edgeId : vertex_pair.second.edges) {
+            auto v = vertex_pair.second;
+            printf("[%2d]  <", v.id);
+            for (int edgeId : v.edges) {
                 printf("%d, ", edgeId);
             }
             printf(">\n");
@@ -69,43 +69,50 @@ class Graph {
         if (json.is_open()) {
             printf("  * Print JSON to %s\n", filename);
             json << "{\n  \" vertices\": [\n    ";
+            for (auto pVertexPair = vertices.begin();;) {
+                auto v = pVertexPair->second;
+                json << "{\n      \"id\": " << v.id;
+                json << ",\n      \"edge_ids\": [";
 
-            for (auto vertex_pair : vertices) {
-                auto v = vertex_pair.second;
-                json << "{\n      \"id\": " << v.id << ",\n";
-                json << "      \"edge_ids\": [";
-
-                /*auto it = edges.end();
-                it--;
-                int lastId = it->first;
-                for (int edgeId : v.edges) {
-                    json << edgeId;
-                    if (edgeId != lastId) {
-                        json << ",";
-                    }
-                    json << " ";
-                }*/
-                for (auto peid = v.edges.begin();;) {
-                    json << *peid;
-                    if (++peid != v.edges.end()) {
+                for (auto pEdgeId = v.edges.begin();;) {
+                    json << *pEdgeId;
+                    if (++pEdgeId != v.edges.end()) {
                         json << ", ";
                     } else {
                         break;
                     }
                 }
-                json << "]\n    }, ";
+                json << "]\n    }";
+                if (++pVertexPair != vertices.end()) {
+                    json << ", ";
+                } else {
+                    break;
+                }
             }
+
+            // -------------------------------
+
             json << "\n  ],\n  \"edges\": [\n    ";
-            /*printf("  * Edges:\n");
-            for (auto edge_pair : edges) {
-                int id = edge_pair.first;
-                std::pair<int, int> v = edge_pair.second.vertices;
-                printf("[%2d]  <%d, %d>\n", id, v.first, v.second);
-            }*/
-            json << "\n\t]\n}";
+            for (auto pEdgePair = edges.begin();;) {
+                int edgeId = pEdgePair->first;
+                auto vs = pEdgePair->second.vertices;
+                json << "{\n      \"id\": " << edgeId;
+                json << ",\n      \"vertex_ids\": [";
+                json << vs.first << ", " << vs.second;
+                json << "]\n    }";
+
+                if (++pEdgePair != edges.end()) {
+                    json << ", ";
+                } else {
+                    break;
+                }
+            }
+
+            json << "\n\t]\n}\n";
             json.close();
+            printf("  * Done\n");
         } else {
-            std::cout << "Unable to open file";
+            printf("  * Unable to open file\n");
         }
     }
 
@@ -115,7 +122,7 @@ class Graph {
 };
 
 int main(void) {
-    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    printf("\n\n\n\n\n\n");
 
     std::vector<Graph::Edge> edges = {
         {0, {0, 1}},    {1, {0, 2}},   {2, {0, 3}},   {3, {1, 4}},
@@ -126,17 +133,5 @@ int main(void) {
 
     Graph g(edges);
     g.printJSON("graph.json");
-    return 0;
-}
-
-int main_() {
-    std::ofstream myfile("example.txt");
-    if (myfile.is_open()) {
-        myfile << "This is a line.\n";
-        myfile << "This is another line.\n";
-        myfile.close();
-    } else {
-        std::cout << "Unable to open file";
-    }
     return 0;
 }
