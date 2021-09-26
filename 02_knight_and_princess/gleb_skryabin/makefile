@@ -1,5 +1,5 @@
 all:	
-	clang-format -i -style='{BasedOnStyle: Chromium, IndentWidth: 4}' *.hpp
-	clang-format -i -style='{BasedOnStyle: Chromium, IndentWidth: 4}' *.cpp
+	clang-format -i -style=Chromium *.hpp
+	clang-format -i -style=Chromium *.cpp
 	clang++ main.cpp -o run -std=c++17
 	
