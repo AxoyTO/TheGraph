@@ -47,7 +47,7 @@ class Graph {
   void printJSON(char const* filename) {
     std::ofstream json(filename);
     if (json.is_open()) {
-      json << "{\n  \" vertices\": [\n    ";
+      json << "{\n  \"vertices\": [\n    ";
       for (auto pVertexPair = vertices.begin();;) {
         auto v = pVertexPair->second;
         json << "{\n      \"id\": " << v.id;
@@ -87,7 +87,7 @@ class Graph {
         }
       }
 
-      json << "\n\t]\n}\n";
+      json << "\n  ]\n}\n";
       json.close();
       printf("Graph is written to %s\n", filename);
     } else {
