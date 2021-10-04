@@ -110,7 +110,7 @@ void generateGraph(Graph& g, int max_vertices = 10, int max_edges = 15) {
     const float new_vertex_prob =
         PROBABILITY_COEF -
         (float)PROBABILITY_COEF * g.get_vertices_amount() / max_vertices;
-    if (((float)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_vertex_prob) {
+    if (((double)std::rand() / RAND_MAX) * PROBABILITY_COEF < new_vertex_prob) {
       g.add_new_vertex();
       if (g.get_vertices_amount() == 1) {
         continue;
