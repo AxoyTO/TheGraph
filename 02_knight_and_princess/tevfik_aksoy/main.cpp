@@ -295,10 +295,34 @@ void Graph::generate_vertices() {
 }
 
 void Graph::generate_edges() {
+  // clock_t begin, end;
+  // double elapsed_time;
+  // std::cout << "Generating green edges...   ";
+  // begin = clock();
   generate_green_edges();
+  // end = clock();
+  // elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
+  // std::cout << "Generated green edges. Elapsed Time: " << elapsed_time <<
+  // "\n"; std::cout << "Generating blue edges...   "; begin = clock();
   generate_blue_edges();
+  // end = clock();
+  // elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
+  // std::cout << "Generated blue edges. Elapsed Time: " << elapsed_time <<
+  // "\n";
+  // std::cout << "Generating yellow edges...   ";
+  // begin = clock();
   generate_yellow_edges();
+  // end = clock();
+  // elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
+  // std::cout << "Generated yellow edges. Elapsed Time: " << elapsed_time <<
+  // "\n";
+  // std::cout << "Generating red edges...   ";
+  // begin = clock();
   generate_red_edges();
+  // end = clock();
+  // elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
+  // std::cout << "Generated red edges. Elapsed Time: " << elapsed_time <<
+  // "\n\n";
 }
 
 void Graph::generate_green_edges() {
@@ -554,7 +578,7 @@ int Graph::total_edges_of_color(const string& color) const {
       if (get<4>(j) == color)
         ret_val++;
   }
-  return ret_val;
+  return ret_val / 2;
 }
 
 [[maybe_unused]] Edge Graph::edge_info(int edge_val) {
@@ -739,8 +763,9 @@ struct Logger {
         PrintandWrite(cout, logfile, ", ");
     }
     PrintandWrite(cout, logfile, "],\n");
-    PrintandWrite(cout, logfile,
-                  " edges: " + std::to_string(graph.total_num_edges()) + ", {");
+    PrintandWrite(
+        cout, logfile,
+        "  edges: " + std::to_string(graph.total_num_edges()) + ", {");
     for (int i = 0; i < colors.size(); i++) {
       PrintandWrite(cout, logfile,
                     colors[i].first + ": " + std::to_string(colors[i].second));
