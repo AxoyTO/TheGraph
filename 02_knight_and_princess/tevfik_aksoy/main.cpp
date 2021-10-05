@@ -17,10 +17,8 @@ using std::string;
 using std::vector;
 
 static int st_depth = 0;
-static int st_node_count =
-    0;  // st_node_count is the amount of vertices in the graph.
-static int st_edge_val =
-    0;  // st_edge_val is also the amount of edges in the graph.
+static int st_node_count = 0;
+static int st_edge_val = 0;
 static int st_condition = 0;
 int creator_node = 0;
 int new_node_flag = 0;
