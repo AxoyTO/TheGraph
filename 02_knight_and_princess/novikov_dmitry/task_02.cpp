@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -10,16 +11,11 @@
 using VertexId = int;
 using EdgeId = int;
 
-static VertexId default_ver_id = 0;
-
 class Vertex {
-  using EdgeIdVector = std::vector<EdgeId>;
-
  public:
-  Vertex() {}
-  explicit Vertex(VertexId init_id) : id_(init_id) {}
+  explicit Vertex(const VertexId& init_id = -1) : id_(init_id) {}
 
-  void add_edge_id(EdgeId init_id) { vec_.push_back(init_id); }
+  void add_edge_id(EdgeId init_id) { edge_ids_.push_back(init_id); }
 
   std::string to_str() const {
     std::stringstream ss_out;
@@ -28,8 +24,8 @@ class Vertex {
     ss_out << tab_2 << "{\n";
     ss_out << tab_2 << tab_1 << "\"id\": " << id_ << ",\n";
     ss_out << tab_2 << tab_1 << "\"edge_ids\": [";
-    for (auto it = vec_.begin(); it != vec_.end(); ++it) {
-      if (it != vec_.begin()) {
+    for (auto it = edge_ids_.begin(); it != edge_ids_.end(); ++it) {
+      if (it != edge_ids_.begin()) {
         ss_out << ", ";
       }
       ss_out << *it;
@@ -37,18 +33,13 @@ class Vertex {
     ss_out << "]\n" << tab_2 << "}";
     return ss_out.str();
   }
-  void get_info() const {
-    std::string tab_1 = "    ";
-    std::cout << "Vertex {\n";
-    std::cout << tab_1 << "VertexId id;\n";
-    std::cout << tab_1 << "EdgeIdVector ver;\n";
-    std::cout << "}";
-  }
+
   VertexId get_id() const { return id_; }
 
  private:
+  using EdgeIdVector = std::vector<EdgeId>;
   VertexId id_;
-  EdgeIdVector vec_;
+  EdgeIdVector edge_ids_;
 };
 
 class Edge {
@@ -71,15 +62,6 @@ class Edge {
 
   EdgeId get_id() const { return id_; }
 
-  void get_info() const {
-    std::string str = std::string(4, ' ');
-    std::cout << "Edge {" << std::endl;
-    std::cout << str << "VertexId ver_id1;\n";
-    std::cout << str << "EdgeId id;\n";
-    std::cout << str << "VertexId ver_id2;\n";
-    std::cout << "}";
-  }
-
  private:
   VertexId ver_id1_;
   EdgeId id_;
@@ -94,22 +76,21 @@ class Graph {
   VertexMap vertex_map;
   EdgeMap edge_map;
 
-  Graph() {}
+  Graph() = default;
 
-  void add_vertex(VertexId init_ver_id = default_ver_id) {
-    if (vertex_map.find(init_ver_id) == vertex_map.end()) {
-      if (init_ver_id == default_ver_id) {
-        --default_ver_id;
-      }
-      vertex_map[init_ver_id] = Vertex(init_ver_id);
-    }
+  void add_vertex(VertexId init_ver_id = default_ver_id_--) {
+    assert(vertex_map.find(init_ver_id) == vertex_map.end() &&
+           "Vertex already exists");
+    vertex_map[init_ver_id] = Vertex(init_ver_id);
   }
 
   void add_edge(VertexId init_ver1_id,
                 EdgeId init_edge_id,
                 VertexId init_ver2_id) {
-    this->add_vertex(init_ver1_id);
-    this->add_vertex(init_ver2_id);
+    assert(!(vertex_map.find(init_ver1_id) == vertex_map.end()) &&
+           "Vertex already not exists");
+    assert(!(vertex_map.find(init_ver2_id) == vertex_map.end()) &&
+           "Vertex already not exists");
     edge_map[init_edge_id] = Edge(init_ver1_id, init_edge_id, init_ver2_id);
     vertex_map[init_ver1_id].add_edge_id(init_edge_id);
     vertex_map[init_ver2_id].add_edge_id(init_edge_id);
@@ -140,16 +121,24 @@ class Graph {
     ss_out << "}" << std::endl;
     return ss_out.str();
   }
+
+ private:
+  inline static VertexId default_ver_id_ = -1;
 };
 
 int main() {
-  const std::vector<std::vector<int> > G_vec = {
+  Graph G = Graph();
+  const std::vector<VertexId> verteces = {0, 1, 2, 3,  4,  5,  6,
+                                          7, 8, 9, 10, 11, 12, 13};
+  for (const auto& item : verteces) {
+    G.add_vertex(item);
+  }
+  const std::vector<std::vector<int> > g_vec = {
       {0, 0, 1},    {0, 1, 2},    {0, 2, 3},   {1, 3, 4},   {1, 4, 5},
       {1, 5, 6},    {2, 6, 7},    {2, 7, 8},   {3, 8, 9},   {4, 9, 10},
       {5, 10, 10},  {6, 11, 10},  {7, 12, 11}, {8, 13, 11}, {9, 14, 12},
       {10, 15, 13}, {11, 16, 13}, {12, 17, 13}};
-  Graph G = Graph();
-  for (const auto& item : G_vec) {
+  for (const auto& item : g_vec) {
     G.add_edge(item[0], item[1], item[2]);
   }
 
@@ -158,7 +147,5 @@ int main() {
   file_out << G.to_str();
   file_out.close();
 
-  // std::cout << G.to_str();
-  // std::cout << std::endl;
   return 0;
 }
