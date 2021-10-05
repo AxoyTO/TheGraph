@@ -1,5 +1,6 @@
 # VSCode
 *.code-workspace
+*.vscode
 
 # Xcode
 build/
@@ -35,6 +36,9 @@ Carthage/Build
 
 # Other
 ._*
+CMakeLists.txt
+cmake-build-debug
+.idea/
 
 #Temp Directory
 /02_knight_and_princess/tevfik_aksoy/temp/*
