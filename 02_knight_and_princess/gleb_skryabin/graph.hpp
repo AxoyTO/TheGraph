@@ -40,55 +40,50 @@ class Graph {
     }
   }
 
-  void printJSON(char const* filename) {
-    std::ofstream json(filename);
-    if (json.is_open()) {
-      json << "{\n  \"vertices\": [\n    ";
-      for (auto pVertexPair = vertices.begin();;) {
-        auto v = pVertexPair->second;
-        json << "{\n      \"id\": " << v.id;
-        json << ",\n      \"edge_ids\": [";
+  std::string toJSON() {
+    std::string json;
+    json = "{\n  \"vertices\": [\n    ";
+    for (auto pVertexPair = vertices.begin();;) {
+      auto v = pVertexPair->second;
+      json += "{\n      \"id\": " + std::to_string(v.id);
+      json += ",\n      \"edge_ids\": [";
 
-        for (auto pEdgeId = v.edges.begin();;) {
-          json << *pEdgeId;
-          if (++pEdgeId != v.edges.end()) {
-            json << ", ";
-          } else {
-            break;
-          }
-        }
-        json << "]\n    }";
-        if (++pVertexPair != vertices.end()) {
-          json << ", ";
+      for (auto pEdgeId = v.edges.begin();;) {
+        json += std::to_string(*pEdgeId);
+        if (++pEdgeId != v.edges.end()) {
+          json += ", ";
         } else {
           break;
         }
       }
-
-      // -------------------------------
-
-      json << "\n  ],\n  \"edges\": [\n    ";
-      for (auto pEdgePair = edges.begin();;) {
-        idType edgeId = pEdgePair->first;
-        auto vs = pEdgePair->second.vertices;
-        json << "{\n      \"id\": " << edgeId;
-        json << ",\n      \"vertex_ids\": [";
-        json << vs.first << ", " << vs.second;
-        json << "]\n    }";
-
-        if (++pEdgePair != edges.end()) {
-          json << ", ";
-        } else {
-          break;
-        }
+      json += "]\n    }";
+      if (++pVertexPair != vertices.end()) {
+        json += ", ";
+      } else {
+        break;
       }
-
-      json << "\n  ]\n}\n";
-      json.close();
-      printf("Graph is written to %s\n", filename);
-    } else {
-      printf("Unable to open file\n");
     }
+
+    // -------------------------------
+
+    json += "\n  ],\n  \"edges\": [\n    ";
+    for (auto pEdgePair = edges.begin();;) {
+      idType edgeId = pEdgePair->first;
+      auto vs = pEdgePair->second.vertices;
+      json += "{\n      \"id\": " + std::to_string(edgeId);
+      json += ",\n      \"vertex_ids\": [";
+      json += std::to_string(vs.first) + ", ";
+      json += std::to_string(vs.second) + "]\n    }";
+
+      if (++pEdgePair != edges.end()) {
+        json += ", ";
+      } else {
+        break;
+      }
+    }
+
+    json += "\n  ]\n}\n";
+    return json;
   }
 
  private:
