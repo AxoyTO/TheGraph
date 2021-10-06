@@ -1,41 +1,37 @@
+#include <array>
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
+
+using idType = int;
 
 class Graph {
  public:
   struct Edge {
-    int id;
-    std::pair<int, int> vertices;
+    idType id = -1;
+    std::pair<idType, idType> vertices;
   };
 
   struct Vertex {
-    int id;
-    std::set<int> edges;
+    idType id = -1;
+    std::unordered_set<idType> edges;
   };
 
-  Graph(std::vector<Edge> inpEdges) {
+  template <std::size_t SIZE>
+  explicit Graph(const std::array<Edge, SIZE>& inpEdges) {
     for (auto edge = inpEdges.begin(); edge != inpEdges.end(); edge++) {
-      auto e = edges.find(edge->id);
-      if (e == edges.end()) {
-        // add edge
-        edges.emplace(edge->id, *edge);
-      } else {
-        // edit edge
-        e->second.vertices = edge->vertices;
-      }
+      edges.emplace(edge->id, *edge);
     }
     for (auto edge = edges.begin(); edge != edges.end(); edge++) {
       auto vs = edge->second.vertices;
-      int vsid[] = {vs.first, vs.second};
-      for (int i = 0; i < 2; i++) {
-        auto v = vertices.find(vsid[i]);
+      for (idType vsid : std::array<idType, 2>{vs.first, vs.second}) {
+        auto v = vertices.find(vsid);
         if (v == vertices.end()) {
           // add vertex
-          Vertex newVertex = {vsid[i], {edge->first}};
-          vertices.emplace(vsid[i], newVertex);
+          Vertex newVertex = {.id = vsid, .edges = {edge->first}};
+          vertices.emplace(vsid, newVertex);
         } else {
           // edit vertex
           v->second.edges.insert(edge->first);
@@ -73,7 +69,7 @@ class Graph {
 
       json << "\n  ],\n  \"edges\": [\n    ";
       for (auto pEdgePair = edges.begin();;) {
-        int edgeId = pEdgePair->first;
+        idType edgeId = pEdgePair->first;
         auto vs = pEdgePair->second.vertices;
         json << "{\n      \"id\": " << edgeId;
         json << ",\n      \"vertex_ids\": [";
@@ -96,6 +92,6 @@ class Graph {
   }
 
  private:
-  std::map<int, Edge> edges;
-  std::map<int, Vertex> vertices;
+  std::unordered_map<idType, Edge> edges;
+  std::unordered_map<idType, Vertex> vertices;
 };
