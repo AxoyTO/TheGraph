@@ -43,7 +43,8 @@ public:
     // JS begin
     graph << "{\n\t\"vertices\": [\n";
     for (int i = 0; i < maxDots; i++) {
-      graph << "{\n\t\t\t\"id\":" << netWork[i].maindot << ","<< "\n";
+      graph << "{\n\t\t\t\"id\":" << netWork[i].maindot << ","
+            << "\n";
       graph << "\t\t\t\"edge_ids\":[";
       beginFlag = true;
       for (int k = 0; k < maxDots; k++) {
@@ -92,7 +93,8 @@ public:
               graph << ",";
             }
             graph << "{\n\t\t\t\"id\": " << i << ",\n";
-            graph << "\t\t\t\"vertex_ids\": [" << netWork[j].maindot << ","<< netWork[j].net[k][1] << "]\n\t\t}";
+            graph << "\t\t\t\"vertex_ids\": [" << netWork[j].maindot << ","
+                  << netWork[j].net[k][1] << "]\n\t\t}";
             beginFlag = false;
           }
         }
