@@ -67,7 +67,7 @@ class Graph {
 
   Graph() {}
 
-  std::string to_JSON() const{
+  std::string to_JSON() const {
     vector<int> edge_ids;
     std::string str;
     str += "{\n\"vertices\": [\n";
