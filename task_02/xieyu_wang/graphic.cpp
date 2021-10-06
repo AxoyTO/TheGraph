@@ -13,6 +13,7 @@ struct Stliner {
 class vecSetUp {
 public:
   void setUp() {
+    netWork=new Stliner[maxDots];
     for (int i = 0; i < maxDots; i++) {
       netWork[i].maindot = i;
       for (int j = 0; j < maxVecPerDot; j++) {
@@ -105,9 +106,9 @@ public:
     graph << "\n}\n";
     return true;
   }
-
+  
 private:
-  Stliner netWork[maxDots];
+  Stliner *netWork;
 };
 int main() {
   vecSetUp vec;
