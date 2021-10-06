@@ -59,8 +59,8 @@ public:
       e_ans.push_back(Edge(16, 11, 13));
       e_ans.push_back(Edge(17, 12, 13));
       for (const auto &el : e_ans) {
-        a_ans[el.v1_id].push_back(el.id);
-        a_ans[el.v2_id].push_back(el.id);
+        a_ans[el.vertex1_id].push_back(el.id);
+        a_ans[el.vertex2_id].push_back(el.id);
       }
     }
     vertices_ = v_ans;
@@ -68,50 +68,48 @@ public:
     adjacency_list_ = a_ans;
   }
 
-  void create_json(const std::string &file_name) {
-    std::fstream json_file;
-    json_file.open(file_name, std::ios::out);
-    assert(json_file && "file not created");
-    json_file << "{\n";
+  std::string get_json_string() {
+    std::stringstream json_stringstream;
+    json_stringstream << "{\n";
 
-    json_file << "\t\"vertices\": [\n";
+    json_stringstream << "\t\"vertices\": [\n";
     for (size_t i = 0; i < adjacency_list_.size(); ++i) {
-      json_file << "\t\t{\n";
-      json_file << "\t\t\t\"id\": " << i << ",\n";
-      json_file << "\t\t\t\"edge_ids\": [";
+      json_stringstream << "\t\t{\n";
+      json_stringstream << "\t\t\t\"id\": " << i << ",\n";
+      json_stringstream << "\t\t\t\"edge_ids\": [";
       for (size_t j = 0; j < adjacency_list_[i].size(); ++j) {
-        json_file << adjacency_list_[i][j];
+        json_stringstream << adjacency_list_[i][j];
         if (j != adjacency_list_[i].size() - 1) {
-          json_file << ", ";
+          json_stringstream << ", ";
         }
       }
-      json_file << "]\n";
-      json_file << "\t\t}";
+      json_stringstream << "]\n";
+      json_stringstream << "\t\t}";
       if (i == adjacency_list_.size() - 1) {
-        json_file << "\n";
+        json_stringstream << "\n";
       } else {
-        json_file << ",\n";
+        json_stringstream << ",\n";
       }
     }
-    json_file << "\t],";
+    json_stringstream << "\t],";
 
-    json_file << " \"edges\": [\n";
+    json_stringstream << " \"edges\": [\n";
     for (size_t i = 0; i < edges_.size(); ++i) {
-      json_file << "\t\t{\n";
-      json_file << "\t\t\t\"id\": " << edges_[i].id << ",\n";
-      json_file << "\t\t\t\"vertex_ids\": [" << edges_[i].vertex1_id << ", "
+      json_stringstream << "\t\t{\n";
+      json_stringstream << "\t\t\t\"id\": " << edges_[i].id << ",\n";
+      json_stringstream << "\t\t\t\"vertex_ids\": [" << edges_[i].vertex1_id << ", "
                 << edges_[i].vertex2_id << "]\n";
-      json_file << "\t\t}";
+      json_stringstream << "\t\t}";
       if (i == edges_.size() - 1) {
-        json_file << "\n";
+        json_stringstream << "\n";
       } else {
-        json_file << ",\n";
+        json_stringstream << ",\n";
       }
     }
-    json_file << "\t]\n";
+    json_stringstream << "\t]\n";
 
-    json_file << "}\n";
-    json_file.close();
+    json_stringstream << "}\n";
+    return json_stringstream.str();
   }
 
 private:
@@ -122,5 +120,11 @@ private:
 
 int main() {
   Graph g("task_02");
-  g.create_json("graph.json");
+  std::string json_string = g.get_json_string();
+  
+  std::fstream json_file;
+  json_file.open("graph.json", std::ios::out);
+  assert(json_file && "file not created");
+  json_file << json_string;
+  json_file.close();
 }
