@@ -27,13 +27,13 @@ struct Edge {
 };
 
 class Graph {
-public:
+ public:
   Graph() = default;
-  Graph(const std::vector<Vertex> &vertices, const std::vector<Edge> &edges)
+  Graph(const std::vector<Vertex>& vertices, const std::vector<Edge>& edges)
       : vertices_(vertices), edges_(edges) {
     adjacency_list_ = std::vector<std::vector<VertexId>>(
         vertices.size(), std::vector<VertexId>());
-    for (const auto &edge : edges) {
+    for (const auto& edge : edges) {
       adjacency_list_[edge.vertex1_id].push_back(edge.id);
       adjacency_list_[edge.vertex2_id].push_back(edge.id);
     }
@@ -82,7 +82,7 @@ public:
     return json_stringstream.str();
   }
 
-private:
+ private:
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
   std::vector<std::vector<VertexId>> adjacency_list_;
