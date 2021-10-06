@@ -5,7 +5,6 @@
 #include <tuple>
 #include <vector>
 
-using std::cout;
 using std::endl;
 using std::get;
 using std::to_string;
