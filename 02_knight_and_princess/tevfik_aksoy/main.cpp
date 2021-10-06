@@ -67,7 +67,7 @@ class Graph {
 
   Graph() {}
 
-  std::string to_JSON() {
+  std::string to_JSON() const{
     vector<int> edge_ids;
     std::string str;
     str += "{\n\"vertices\": [\n";
@@ -143,7 +143,7 @@ const Graph generateGraph() {
 }
 
 int main() {
-  auto graph = generateGraph();
+  const auto graph = generateGraph();
   std::ofstream file("graph.json", std::ios::out);
   if (!file.is_open())
     std::cerr << "Error opening the file graph.json!" << endl;
