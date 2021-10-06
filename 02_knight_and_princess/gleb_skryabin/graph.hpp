@@ -1,9 +1,6 @@
 #include <array>
-#include <fstream>
-#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 using idType = int;
 
@@ -63,8 +60,6 @@ class Graph {
         break;
       }
     }
-
-    // -------------------------------
 
     json += "\n  ],\n  \"edges\": [\n    ";
     for (auto pEdgePair = edges.begin();;) {

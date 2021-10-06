@@ -1,9 +1,8 @@
 #include <array>
 #include <fstream>
-#include <vector>
 #include "graph.hpp"
 
-void printGraphJSON(Graph g, char const* filename) {
+void writeGraphJSON(Graph g, char const* filename) {
   std::ofstream json(filename);
   if (json.is_open()) {
     json << g.toJSON();
@@ -35,6 +34,6 @@ int main(void) {
                                               {17, {12, 13}}}};
 
   Graph g(edges);
-  printGraphJSON(g, "graph.json");
+  writeGraphJSON(g, "graph.json");
   return 0;
 }
