@@ -3,15 +3,14 @@
 #include <iostream>
 #include <vector>
 
-using std::cout;
 using std::endl;
 using std::to_string;
 using std::vector;
 
-// using namespace std;
+using EdgeId = int;
 
 struct Edge {
-  int id;
+  EdgeId id;
   std::array<int, 2> nodes;
 
   Edge(int start, int end, int _id) : id(_id) {
@@ -34,10 +33,10 @@ struct Edge {
 
 // TODO check uniqueness of ID field
 struct Vertex {
-  int id;
+  int id = -1;
   std::vector<int> edges_ids;
 
-  Vertex(int _id = -1) : id(_id) {}
+  explicit Vertex(int _id) : id(_id) {}
 
   std::string to_json() const {
     std::string res;
@@ -56,13 +55,8 @@ struct Vertex {
 
 class Graph {
  public:
-  Graph() : size_(0) {}
-
-  Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices) {
-    vertices_ = init_vertices;
-    edges_ = init_edges;
-    size_ = vertices_.size();
-  }
+  Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
+      : vertices_(init_vertices), edges_(init_edges), size_(vertices_.size()) {}
 
   std::string to_json() const {
     std::string res;
@@ -85,24 +79,23 @@ class Graph {
   }
 
  private:
-  int size_;
   vector<Vertex> vertices_;
   vector<Edge> edges_;
+  int size_ = 0;
 };
 
-int write_graph(const std::string json_name, Graph A) {
+void write_graph(const std::string& json_name, const Graph& A) {
   std::ofstream out;
   out.open(json_name, std::ofstream::out | std::ofstream::trunc);
 
   out << A.to_json();
 
   out.close();
-  return 0;
 }
 
 int main() {
   // edge structure: {first vertex, second vertex, edge id}
-  vector<Edge> init_edges = {
+  const vector<Edge> init_edges = {
       {0, 1, 0},    {0, 2, 1},    {0, 3, 2},   {1, 4, 3},   {1, 5, 4},
       {1, 6, 5},    {2, 7, 6},    {2, 8, 7},   {3, 9, 8},   {4, 10, 9},
       {5, 10, 10},  {6, 10, 11},  {7, 11, 12}, {8, 11, 13}, {9, 12, 14},
@@ -114,16 +107,16 @@ int main() {
     // 1. check if verex id is uniq
     bool if_uniq0 = true, if_uniq1 = true;
     for (const auto& v_it : init_vertices) {
-      if_uniq0 *= it.nodes[0] != v_it.id;
-      if_uniq1 *= it.nodes[1] != v_it.id;
+      if_uniq0 &= it.nodes[0] != v_it.id;
+      if_uniq1 &= it.nodes[1] != v_it.id;
     }
 
     // 2. add new vertex, if needed
     if (if_uniq0) {
-      init_vertices.push_back(it.nodes[0]);
+      init_vertices.push_back(Vertex(it.nodes[0]));
     }
     if (if_uniq1) {
-      init_vertices.push_back(it.nodes[1]);
+      init_vertices.push_back(Vertex(it.nodes[1]));
     }
 
     // 3. add info about edge id into connected vetices
@@ -132,7 +125,7 @@ int main() {
   }
 
   Graph A(init_edges, init_vertices);
-  write_graph("test.json", A);
+  write_graph("graph.json", A);
 
   return 0;
 }
