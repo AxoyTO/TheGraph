@@ -100,7 +100,7 @@ public:
     }
     graph << "\n\t]";
     // JS end
-    graph << "\n}";
+    graph << "\n}\n";
     return true;
   }
 
