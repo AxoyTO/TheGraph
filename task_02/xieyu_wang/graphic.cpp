@@ -1,14 +1,14 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-const int maxDots = 14;
-const int maxVecPerDot = 4;
-const int maxEdges = 18;
-// constexpr will be generator a error so cant use maybe completer's problem
-struct liner {
+#define constexpr const
+constexpr int maxDots = 14;
+constexpr int maxVecPerDot = 4;
+constexpr int maxEdges = 18;
+struct Stliner {
   int maindot;
   int net[maxVecPerDot][2];
-} liner;
+};
 
 class vecSetUp {
 public:
@@ -43,8 +43,7 @@ public:
     // JS begin
     graph << "{\n\t\"vertices\": [\n";
     for (int i = 0; i < maxDots; i++) {
-      graph << "{\n\t\t\t\"id\":" << netWork[i].maindot << ","
-            << "\n";
+      graph << "{\n\t\t\t\"id\":" << netWork[i].maindot << ","<< "\n";
       graph << "\t\t\t\"edge_ids\":[";
       beginFlag = true;
       for (int k = 0; k < maxDots; k++) {
@@ -93,8 +92,7 @@ public:
               graph << ",";
             }
             graph << "{\n\t\t\t\"id\": " << i << ",\n";
-            graph << "\t\t\t\"vertex_ids\": [" << netWork[j].maindot << ","
-                  << netWork[j].net[k][1] << "]\n\t\t}";
+            graph << "\t\t\t\"vertex_ids\": [" << netWork[j].maindot << ","<< netWork[j].net[k][1] << "]\n\t\t}";
             beginFlag = false;
           }
         }
@@ -107,7 +105,7 @@ public:
   }
 
 private:
-  struct liner netWork[maxDots];
+  Stliner netWork[maxDots];
 };
 int main() {
   vecSetUp vec;
