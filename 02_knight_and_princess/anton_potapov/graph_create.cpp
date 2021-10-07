@@ -84,12 +84,12 @@ class Graph {
 };
 
 Graph task_02_get_graph() {
-  size_t n = 14;
+  const size_t n = 14;
   std::vector<Vertex> v_ans;
   for (size_t i = 0; i < n; ++i) {
     v_ans.push_back(Vertex(i));
   }
-  std::vector<Edge> e_ans{Edge(0, 0, 1),    Edge(1, 0, 2),    Edge(2, 0, 3),
+  const std::vector<Edge> e_ans{Edge(0, 0, 1),    Edge(1, 0, 2),    Edge(2, 0, 3),
                           Edge(3, 1, 4),    Edge(4, 1, 5),    Edge(5, 1, 6),
                           Edge(6, 2, 7),    Edge(7, 2, 8),    Edge(8, 3, 9),
                           Edge(9, 4, 10),   Edge(10, 5, 10),  Edge(11, 6, 10),
@@ -99,12 +99,13 @@ Graph task_02_get_graph() {
 }
 
 int main() {
-  Graph g = task_02_get_graph();
-  std::string json_string = g.get_json_string();
+  const Graph task_02_graph = task_02_get_graph();
+  std::string json_string = task_02_graph.get_json_string();
 
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
   assert(json_file && "file not created");
   json_file << json_string;
   json_file.close();
+  return 0;
 }
