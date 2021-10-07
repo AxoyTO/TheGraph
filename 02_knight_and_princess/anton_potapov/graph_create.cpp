@@ -34,13 +34,13 @@ class Graph {
   }
   std::string get_json_string() const {
     std::stringstream json_stringstream;
-    json_stringstream << "{\n";
+    json_stringstream << "{" << std::endl;;
 
-    json_stringstream << "\t\"vertices\": [\n";
+    json_stringstream << "\t\"vertices\": [" << std::endl;
     for (auto it = adjacency_list_.begin(); it != adjacency_list_.end(); ++it) {
       const auto& [ith_vertex_id, ith_adjacency_list] = *it;
-      json_stringstream << "\t\t{\n";
-      json_stringstream << "\t\t\t\"id\": " << ith_vertex_id << ",\n";
+      json_stringstream << "\t\t{" << std::endl;
+      json_stringstream << "\t\t\t\"id\": " << ith_vertex_id << "," << std::endl;
       json_stringstream << "\t\t\t\"edge_ids\": [";
       for (size_t j = 0; j < ith_adjacency_list.size(); ++j) {
         json_stringstream << ith_adjacency_list[j];
@@ -48,32 +48,32 @@ class Graph {
           json_stringstream << ", ";
         }
       }
-      json_stringstream << "]\n";
+      json_stringstream << "]" << std::endl;
       json_stringstream << "\t\t}";
       if (std::next(it) == adjacency_list_.end()) {
-        json_stringstream << "\n";
+        json_stringstream << std::endl;
       } else {
-        json_stringstream << ",\n";
+        json_stringstream << "," << std::endl;
       }
     }
     json_stringstream << "\t],";
 
-    json_stringstream << " \"edges\": [\n";
+    json_stringstream << " \"edges\": [" << std::endl;
     for (size_t i = 0; i < edges_.size(); ++i) {
-      json_stringstream << "\t\t{\n";
-      json_stringstream << "\t\t\t\"id\": " << edges_[i].id << ",\n";
+      json_stringstream << "\t\t{" << std::endl;
+      json_stringstream << "\t\t\t\"id\": " << edges_[i].id << "," << std::endl;
       json_stringstream << "\t\t\t\"vertex_ids\": [" << edges_[i].vertex1_id
-                        << ", " << edges_[i].vertex2_id << "]\n";
+                        << ", " << edges_[i].vertex2_id << "]" << std::endl;
       json_stringstream << "\t\t}";
       if (i + 1 == edges_.size()) {
-        json_stringstream << "\n";
+        json_stringstream << std::endl;
       } else {
-        json_stringstream << ",\n";
+        json_stringstream << "," << std::endl;
       }
     }
-    json_stringstream << "\t]\n";
+    json_stringstream << "\t]" << std::endl;
 
-    json_stringstream << "}\n";
+    json_stringstream << "}" << std::endl;
     return json_stringstream.str();
   }
 
