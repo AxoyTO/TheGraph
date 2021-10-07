@@ -13,7 +13,6 @@ struct Stliner {
 class vecSetUp {
 public:
   void setUp() {
-    netWork = new Stliner[maxDots];
     for (int i = 0; i < maxDots; i++) {
       netWork[i].maindot = i;
       for (int j = 0; j < maxVecPerDot; j++) {
@@ -106,12 +105,11 @@ public:
     graph << "\n}\n";
     return true;
   }
-
-private:
   Stliner *netWork;
 };
 int main() {
   vecSetUp vec;
+  vec.netWork = new Stliner[maxDots];
   vec.setUp();
   int vecs[18][3] = {{0, 0, 1},    {0, 1, 2},   {0, 2, 3},   {1, 3, 4},
                      {1, 4, 5},    {1, 5, 6},   {2, 6, 7},   {2, 7, 8},
@@ -126,4 +124,6 @@ int main() {
       std::cerr << "Error in print" << i << std::endl;
     }
   }
+  delete[] vec.netWork;
+  return 0;
 }
