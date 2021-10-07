@@ -18,7 +18,6 @@ using EdgeId = int;
 // Tuple of <int,int> for realization of vector of vectors of <int,int>
 using dest_id_edge_id = std::tuple<int, int>;
 
-// Structure of nodes(vertices)
 struct Vertex {
  public:
   VertexId id = 0;
@@ -26,19 +25,18 @@ struct Vertex {
   explicit Vertex(VertexId _id = 0) : id(_id) {}
 
   std::string to_JSON(const vector<int>& edge_ids) const {
-    std::string str;
+    std::string json_string;
 
-    str += "\t{ \"id\": " + to_string(id) + ", \"edge_ids\": [";
+    json_string += "\t{ \"id\": " + to_string(id) + ", \"edge_ids\": [";
     for (int i = 0; i < edge_ids.size(); i++) {
-      str += to_string(edge_ids[i]);
+      json_string += to_string(edge_ids[i]);
       if (i + 1 != edge_ids.size())
-        str += ", ";
+        json_string += ", ";
     }
-    return str;
+    return json_string;
   }
 };
 
-// Structure of the edge including the source and destination nodes in it
 struct Edge {
  public:
   EdgeId id = 0;
@@ -49,52 +47,49 @@ struct Edge {
       : id(_id), source(src_id), destination(dest_id) {}
 
   std::string to_JSON() const {
-    std::string str;
-    str += "\t{ \"id\": " + to_string(id) + ", \"vertex_ids\": [" +
-           to_string(source) + ", " + to_string(destination) + "] }";
-    return str;
+    std::string json_string;
+    json_string += "\t{ \"id\": " + to_string(id) + ", \"vertex_ids\": [" +
+                   to_string(source) + ", " + to_string(destination) + "] }";
+    return json_string;
   }
 };
 
 class Graph {
  public:
-  // edges carry information about their source and destination vertices
   vector<Edge> edges;
   array<Vertex, 13> vertex;
-  // vertices carry information about edges that connect them with other
-  // vertices
   vector<vector<dest_id_edge_id>> vertices;
 
   Graph() {}
 
   std::string to_JSON() const {
     vector<int> edge_ids;
-    std::string str;
-    str += "{\n\"vertices\": [\n";
+    std::string json_string;
+    json_string += "{\n\"vertices\": [\n";
     for (int i = 0; i < vertices.size(); i++) {
       for (const auto& j : vertices[i]) {
         edge_ids.push_back(get<1>(j));
       }
-      str += vertex[i].to_JSON(edge_ids);
+      json_string += vertex[i].to_JSON(edge_ids);
       if (i + 1 == vertices.size()) {
-        str += "] }\n  ],\n";
+        json_string += "] }\n  ],\n";
       } else {
-        str += "] },\n";
+        json_string += "] },\n";
       }
       edge_ids.clear();
     }
 
-    str += "\"edges\": [\n";
+    json_string += "\"edges\": [\n";
     for (int i = 0; i < edges.size(); i++) {
-      str += edges[i].to_JSON();
+      json_string += edges[i].to_JSON();
       if (i + 1 == edges.size()) {
-        str += "\n";
+        json_string += "\n";
       } else {
-        str += ",\n";
+        json_string += ",\n";
       }
     }
-    str += "  ]\n}\n";
-    return str;
+    json_string += "  ]\n}\n";
+    return json_string;
   }
 };
 
@@ -118,8 +113,6 @@ const Graph generateGraph() {
                                   {10, 13, 15},
                                   {11, 13, 16},
                                   {12, 13, 17}}};
-  // using set to exclude the repeating source nodes(the ones with more than 1
-  // edge connected)
   std::set<int> nodes_set;
   for (const auto& e : edges) {
     nodes_set.insert(e.source);
