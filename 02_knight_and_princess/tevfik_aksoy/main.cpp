@@ -2,16 +2,18 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <set>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-using std::cout;
-using std::endl;
+std::random_device rd;
+std::mt19937 mt(rd());
+std::uniform_int_distribution<int> probability(0, 100);
+
 using std::get;
-using std::rand;
 using std::set;
 using std::string;
 using std::vector;
@@ -156,7 +158,7 @@ class Graph {
   int total_num_nodes() const;
 
   // Returns total number of edges
-  unsigned long total_num_edges() const;
+  [[maybe_unused]] unsigned long total_num_edges() const;
 
   // Returns total number of source nodes
   int total_num_src_nodes();
@@ -192,7 +194,6 @@ class Graph {
   [[maybe_unused]] void displayGraph(const Graph& graph);
 
  private:
-  int probability_ = 0;
   int condition_ = 0;
 };
 
@@ -246,8 +247,7 @@ void Graph::generate_vertices() {
     unsigned long depth_node_count = vertices_in_depth(st_depth);
     for (size_t i = 0; i < depth_node_count; i++) {
       for (size_t j = 0; j < new_vertices_num; j++) {
-        probability_ = rand() % 100;
-        if (probability_ >= st_condition) {
+        if (probability(mt) >= st_condition) {
           Vertex source(creator_vertex, st_depth);
           Vertex destination(st_vertex_count + 1, st_depth + 1);
           insert_edge(source, destination, st_edge_val, "gray");
@@ -293,8 +293,7 @@ void Graph::generate_edges() {
 void Graph::generate_green_edges() {
   condition_ = 90;  //Зеленая: 10% что у вершины будеть грань сама на себя.
   for (int i = 0; i < total_num_nodes(); i++) {
-    probability_ = rand() % 100;
-    if (probability_ >= condition_) {
+    if (probability(mt) >= condition_) {
       insert_edge(Vertex(i, depth_of(i)), Vertex(i, depth_of(i)), st_edge_val,
                   "green");
     }
@@ -306,8 +305,7 @@ void Graph::generate_blue_edges() {
   condition_ = 75;
   for (int i = 0; i < total_num_nodes(); i++) {
     if (depth_of(i) == depth_of(i + 1)) {
-      probability_ = rand() % 100;
-      if (probability_ > condition_) {
+      if (probability(mt) > condition_) {
         insert_edge(Vertex(i, depth_of(i)), Vertex(i + 1, depth_of(i)),
                     st_edge_val, "blue");
       }
@@ -316,33 +314,44 @@ void Graph::generate_blue_edges() {
 }
 
 void Graph::generate_yellow_edges() {
-  condition_ = 0;
-  for (int i = total_num_nodes() - 1; i > 0; i--) {
-    condition_ = (max_depth - depth_of(i) * (100 / max_depth));
-    for (int j = i - 1; j > 0; j--) {
-      if (depth_of(j) == depth_of(i) - 1) {
-        probability_ = rand() % 100;
-        if (probability_ > condition_) {
-          insert_edge(Vertex(j, depth_of(j)), Vertex(i, depth_of(i)),
+  int m = 0, n = 0;
+  for (int i = 0; i < max_depth; i++) {
+    condition_ = 100 - i * (100 / (max_depth - 1));
+    while (m != nodes_with_depth(i).size()) {
+      while (n != nodes_with_depth(i + 1).size()) {
+        if (probability(mt) > condition_) {
+          std::uniform_int_distribution<int> random_vertex(
+              0, vertices_in_depth(i + 1) - 1);
+          insert_edge(nodes_with_depth(i).at(m),
+                      nodes_with_depth(i + 1).at(random_vertex(mt)),
                       st_edge_val, "yellow");
+          break;
         }
-      } else if (depth_of(j) == depth_of(i) - 2)
-        break;
+        n++;
+      }
+      n = 0;
+      m++;
     }
+    m = 0;
   }
 }
 
 void Graph::generate_red_edges() {
   condition_ = 67;  //Красная: 33% что вершина будет соединена с рандомной
-                    //вершиной, находящейся на 2 уровня глубже.
+  //вершиной, находящейся на 2 уровня глубже.
   int m = 0, n = 0;
   for (int i = 0; i < max_depth; i++) {
     while (m != nodes_with_depth(i).size()) {
       while (n != nodes_with_depth(i + 2).size()) {
-        probability_ = rand() % 100;
-        if (probability_ > condition_)
+        if (probability(mt) > condition_) {
+          std::uniform_int_distribution<int> random_vertex(
+              0, vertices_in_depth(i + 2) - 1);
           insert_edge(nodes_with_depth(i).at(m),
-                      nodes_with_depth(i + 2).at(n++), st_edge_val, "red");
+                      nodes_with_depth(i + 2).at(random_vertex(mt)),
+                      st_edge_val, "red");
+          break;
+        }
+        n++;
       }
       n = 0;
       m++;
@@ -417,7 +426,7 @@ int Graph::total_num_nodes() const {
   return total_vertex_count;
 }
 
-unsigned long Graph::total_num_edges() const {
+[[maybe_unused]] unsigned long Graph::total_num_edges() const {
   return edges.size();
 }
 
@@ -444,7 +453,6 @@ unsigned long Graph::vertices_in_depth(int depth) const {
         depth_vertices_set.insert(get<0>(j));
     }
   }
-
   return depth_vertices_set.size();
 }
 
@@ -474,9 +482,7 @@ int Graph::total_edges_of_color(const string& color) const {
     for (int j = 0; j < graph_data[i].size(); j++) {
       if (get<1>(graph_data[i][j]) == edge_val) {
         e.source = i;
-        // e.source.depth = depth_of(i);
         e.destination = get<0>(graph_data[i][j]);
-        // e.destination.depth = get<3>(graph_data[i][j]);
         e.id = get<1>(graph_data[i][j]);
         e.color = get<4>(graph_data[i][j]);
         return e;
@@ -498,35 +504,35 @@ int Graph::total_edges_of_color(const string& color) const {
 }
 
 vector<Vertex> Graph::nodes_with_depth(int n_d) {
-  vector<Vertex> nodes_vec;
-  Vertex node;
+  vector<Vertex> vertices_vec;
   for (int i = 0; i < total_num_nodes(); i++) {
     if (depth_of(i) == n_d) {
-      node.id = i;
-      node.depth = n_d;
-      nodes_vec.push_back(node);
+      vertices_vec.push_back(Vertex(i, n_d));
     }
   }
-  return nodes_vec;
+  return vertices_vec;
 }
 
 [[maybe_unused]] void Graph::displayGraphValues() {
-  cout << "st_condition = " << st_condition << endl;
-  cout << "st_edge_val = " << st_edge_val << endl;
-  cout << "st_vertex_count = " << st_vertex_count << endl;
-  cout << "creator_vertex = " << creator_vertex << endl;
-  cout << "st_depth = " << st_depth << endl;
-  cout << "***************" << endl;
-  cout << "Max Depth = " << max_depth << endl;
-  cout << "New vertices num = " << new_vertices_num << endl;
-  cout << "Total source vertices = " << total_num_src_nodes() << endl;
-  cout << "Total vertices = " << total_num_nodes() << endl;
-  cout << "Total edges = " << graph_data.size() << endl;
-  cout << "Edges of color gray = " << total_edges_of_color("gray") << endl;
-  cout << "Edge of color green = " << total_edges_of_color("green") << endl;
-  cout << "Edge of color blue = " << total_edges_of_color("blue") << endl;
-  cout << "Edge of color yellow = " << total_edges_of_color("yellow") << endl;
-  cout << "Edge of color red = " << total_edges_of_color("red") << endl;
+  std::cout << "st_condition = " << st_condition << "\n";
+  std::cout << "st_edge_val = " << st_edge_val << "\n";
+  std::cout << "st_vertex_count = " << st_vertex_count << "\n";
+  std::cout << "creator_vertex = " << creator_vertex << "\n";
+  std::cout << "st_depth = " << st_depth << "\n";
+  std::cout << "***************"
+            << "\n";
+  std::cout << "Max Depth = " << max_depth << "\n";
+  std::cout << "New vertices num = " << new_vertices_num << "\n";
+  std::cout << "Total source vertices = " << total_num_src_nodes() << "\n";
+  std::cout << "Total vertices = " << total_num_nodes() << "\n";
+  std::cout << "Total edges = " << graph_data.size() << "\n";
+  std::cout << "Edges of color gray = " << total_edges_of_color("gray") << "\n";
+  std::cout << "Edge of color green = " << total_edges_of_color("green")
+            << "\n";
+  std::cout << "Edge of color blue = " << total_edges_of_color("blue") << "\n";
+  std::cout << "Edge of color yellow = " << total_edges_of_color("yellow")
+            << "\n";
+  std::cout << "Edge of color red = " << total_edges_of_color("red") << "\n";
 }
 
 void Graph::clear() {
@@ -541,12 +547,11 @@ void Graph::clear() {
 
 void Graph::to_JSON() {
   static int k = 1;
-  srand(time(nullptr));
   string filename = "./temp/graph";
   filename = filename + std::to_string(k++) + ".json";
   std::ofstream file(filename, std::ios::out);
   if (!file.is_open()) {
-    std::cerr << "Error while opening the file " << filename << endl;
+    std::cerr << "Error while opening the file " << filename << std::endl;
   } else {
     Vertex src;
     vector<int> edge_ids;
@@ -579,13 +584,13 @@ void Graph::to_JSON() {
 [[maybe_unused]] void Graph::displayGraph(const Graph& graph) {
   for (int i = 0; i < graph_data.size(); i++) {
     for (int j = 0; j < graph_data[i].size(); j++) {
-      cout << "(" << i << ", " << get<0>(graph_data[i][j]) << ", "
-           << get<1>(graph.graph_data[i][j]) << ", "
-           << get<2>(graph.graph_data[i][j]) << ", "
-           << get<3>(graph.graph_data[i][j]) << ")";
+      std::cout << "(" << i << ", " << get<0>(graph_data[i][j]) << ", "
+                << get<1>(graph.graph_data[i][j]) << ", "
+                << get<2>(graph.graph_data[i][j]) << ", "
+                << get<3>(graph.graph_data[i][j]) << ")";
     }
     if (!graph_data[i].empty())
-      cout << endl;
+      std::cout << std::endl;
   }
 }
 
@@ -595,16 +600,15 @@ int main() {
     if (!std::filesystem::create_directory(directory)) {
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << endl;
+    std::cerr << e.what() << std::endl;
   }
 
-  cout << "Enter max_depth: ";
+  std::cout << "Enter max_depth: ";
   std::cin >> max_depth;
-  cout << "Enter new_vertices_num: ";
+  std::cout << "Enter new_vertices_num: ";
   std::cin >> new_vertices_num;
-  srand(time(nullptr));
 
-  Graph graphs[10];
+  Graph graphs[1];
   for (auto& graph : graphs) {
     graph.to_JSON();
   }
