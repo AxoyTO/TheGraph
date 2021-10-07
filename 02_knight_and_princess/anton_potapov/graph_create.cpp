@@ -12,14 +12,14 @@ using EdgeId = int;
 
 struct Vertex {
   VertexId id;
-  Vertex(VertexId vertex_id) : id(vertex_id) {}
+  Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 };
 
 struct Edge {
   EdgeId id;
   VertexId vertex1_id, vertex2_id;
-  Edge(EdgeId e_id, VertexId ver1, VertexId ver2)
-      : id(e_id), vertex1_id(ver1), vertex2_id(ver2) {}
+  Edge(const EdgeId& edge_id, const VertexId& vertex1, const VertexId& vertex2)
+      : id(edge_id), vertex1_id(vertex1), vertex2_id(vertex2) {}
 };
 
 class Graph {
@@ -83,7 +83,7 @@ class Graph {
   std::map<VertexId, std::vector<VertexId>> adjacency_list_;
 };
 
-Graph task_02_get_graph(void) {
+Graph task_02_get_graph() {
   size_t n = 14;
   std::vector<Vertex> v_ans;
   for (size_t i = 0; i < n; ++i) {
