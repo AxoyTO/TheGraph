@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -28,6 +27,17 @@ class Graph {
   Graph(const std::vector<Vertex>& vertices, const std::vector<Edge>& edges)
       : vertices_(vertices), edges_(edges) {
     for (const auto& edge : edges) {
+      bool first_vertex_is_found = false, second_vertex_is_found = false;
+      for (const auto& vertex : vertices) {
+        if (vertex.id == edge.vertex1_id) {
+          first_vertex_is_found = true;
+        }
+        if (vertex.id == edge.vertex2_id) {
+          second_vertex_is_found = true;
+        }
+      }
+      assert(first_vertex_is_found && second_vertex_is_found &&
+             "Graph constructor: given graph is invalid");
       adjacency_list_[edge.vertex1_id].push_back(edge.id);
       adjacency_list_[edge.vertex2_id].push_back(edge.id);
     }
