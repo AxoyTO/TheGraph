@@ -15,7 +15,7 @@ struct MapOfVector {
   int to;
 };
 class vectors {
- public:
+public:
   bool SetUp() {
     int i = 0;
     for (auto it = netWork.begin(); it != netWork.end(); it++) {
@@ -76,7 +76,7 @@ class vectors {
     return true;
   }
 
- private:
+private:
   std::array<MapOfVector, MAX_VEC> netWork;
 };
 int main() {
