@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -11,62 +12,65 @@ using std::cout;
 using std::pair;
 using std::vector;
 using EdgeId = int;
+using VertexId = int;
 
 class Graph {
  public:
   struct Edge {
     EdgeId id = 0;
-    pair<EdgeId, EdgeId> vert = {-1, -1};
+    pair<VertexId, VertexId> vertex = {-1, -1};
   };
 
-  struct Vert {
-    int id;
+  struct Vertex {
+    int id = -1;
     vector<EdgeId> edges = {};
   };
 
-  void set_vert(Vert v) { vert_id_.push_back(v); }
+  void add_vertex(const Vertex& v) { vertex_ids_.push_back(v); }
 
-  void set_vert_id(vector<Vert> id) { vert_id_ = id; }
-
-  void set_edge(Edge edge) {
+  void add_edge(Edge edge) {
     edges_.push_back(edge);
-    vert_id_[edge.vert.first].edges.push_back(edge.id);
-    vert_id_[edge.vert.second].edges.push_back(edge.id);
+    try {
+      vertex_ids_[edge.vertex.first].edges.push_back(edge.id);
+      vertex_ids_[edge.vertex.second].edges.push_back(edge.id);
+    } catch (std::out_of_range) {
+      cout << "ERROR: id does'n exist\n";
+    }
   }
 
   void set_params(const vector<Edge>& new_edges = {},
-                  const vector<int>& vert_ids = {}) {
-    for (const auto& id : vert_ids)
-      set_vert({id, {}});
+                  const vector<int>& vertex_ids = {}) {
+    for (const auto& id : vertex_ids)
+      add_vertex({id, {}});
     for (const auto& edge : new_edges)
-      set_edge(edge);
+      add_edge(edge);
   }
 
   std::string to_string() const {
     std::stringstream buffer;
     for (auto edge : edges_)
-      buffer << edge.id << " " << vert_id_[edge.vert.first].id << " "
-             << vert_id_[edge.vert.second].id << "\n";
+      buffer << edge.id << " " << vertex_ids_[edge.vertex.first].id << " "
+             << vertex_ids_[edge.vertex.second].id << "\n";
     return buffer.str();
   }
 
   std::string to_json() const {
     std::stringstream buffer;
     buffer << "{\"vertices\":[";
-    for (int j = 0; j < vert_id_.size(); j++) {
-      Vert v = vert_id_[j];
+    for (int j = 0; j < vertex_ids_.size(); j++) {
+      Vertex v = vertex_ids_[j];
       buffer << "{\"id\":" << v.id << ",\"edge_ids\":[";
       for (int i = 0; i < v.edges.size() - 1; i++)
         buffer << v.edges[i] << ",";
       buffer << v.edges[v.edges.size() - 1] << "]}";
-      if (j != vert_id_.size() - 1)
+      if (j != vertex_ids_.size() - 1)
         buffer << ",";
     }
     buffer << "],\"edges\":[";
     for (int j = 0; j < edges_.size(); j++) {
       Edge e = edges_[j];
-      buffer << "{\"id\":" << e.id << ",\"vertex_ids\":[" << e.vert.first << ","
-             << e.vert.second << "]}";
+      buffer << "{\"id\":" << e.id << ",\"vertex_ids\":[" << e.vertex.first
+             << "," << e.vertex.second << "]}";
       if (j != edges_.size() - 1)
         buffer << ",";
     }
@@ -76,7 +80,9 @@ class Graph {
 
  private:
   vector<Edge> edges_ = {};
-  vector<Vert> vert_id_ = {};
+  vector<Vertex> vertex_ids_ = {};
+
+  void set_vertex_ids(vector<Vertex> ids) { vertex_ids_ = ids; }
 };
 
 int main() {
