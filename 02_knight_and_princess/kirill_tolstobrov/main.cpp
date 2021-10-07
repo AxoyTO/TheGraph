@@ -61,7 +61,6 @@ class Edge {
 
 class Graph {
  public:
-
   int get_vertices_amount() const { return vertices_.size(); }
   int get_edges_amount() const { return edges_.size(); }
 
@@ -108,8 +107,9 @@ class Graph {
   std::map<VertexId, std::map<EdgeId, VertexId>> connections_map_;
 };
 
-Graph generateCustomGraph(int vert_number,
-                         const std::vector<std::pair<VertexId, VertexId>> &connections) {
+Graph generateCustomGraph(
+    int vert_number,
+    const std::vector<std::pair<VertexId, VertexId>>& connections) {
   Graph graph = Graph();
   for (int i = 0; i < vert_number; i++) {
     graph.add_new_vertex();
@@ -121,7 +121,6 @@ Graph generateCustomGraph(int vert_number,
 }
 
 int main() {
-
   const std::vector<std::pair<VertexId, VertexId>> g_connections{
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
