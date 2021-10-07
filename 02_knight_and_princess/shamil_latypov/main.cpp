@@ -1,8 +1,3 @@
-/*
-    bool operator< (const Vertex &other) {      // Оператор для сортировки
-        return id < other.id;
-    }
-*/
 #include <iostream>
 #include <stdlib.h>
 #include <map>
@@ -94,6 +89,6 @@ int main()
 
     output_graph(edge_mas, vert_mas, numedge, numvertex);
 
-    return 0;
     out_json.close();
+    return 0;
 }
