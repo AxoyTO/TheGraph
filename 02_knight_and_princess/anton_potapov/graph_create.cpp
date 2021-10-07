@@ -7,24 +7,19 @@
 #include <string>
 #include <vector>
 
-#include "properties.hpp"
-
 using VertexId = int;
 using EdgeId = int;
 
 struct Vertex {
   VertexId id;
-  Camp camp_info;
-  Vertex(int vertex_id, Camp c_info = Camp())
-      : id(vertex_id), camp_info(c_info) {}
+  Vertex(int vertex_id) : id(vertex_id) {}
 };
 
 struct Edge {
   EdgeId id;
   VertexId vertex1_id, vertex2_id;
-  Boss boss_info;
-  Edge(EdgeId e_id, VertexId ver1, VertexId ver2, Boss b_info = Boss())
-      : id(e_id), vertex1_id(ver1), vertex2_id(ver2), boss_info(b_info) {}
+  Edge(EdgeId e_id, VertexId ver1, VertexId ver2)
+      : id(e_id), vertex1_id(ver1), vertex2_id(ver2) {}
 };
 
 class Graph {
