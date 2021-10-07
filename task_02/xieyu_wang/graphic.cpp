@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#define constexpr const
+//#define constexpr const
 constexpr int maxDots = 14;
 constexpr int maxVecPerDot = 4;
 constexpr int maxEdges = 18;
