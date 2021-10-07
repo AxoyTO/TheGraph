@@ -10,11 +10,16 @@
 using VertexId = int;
 using EdgeId = int;
 
+constexpr int INVALID_ID = -1;
+
 class Vertex {
  public:
-  explicit Vertex(const VertexId& init_id = -1) : id_(init_id) {}
+  explicit Vertex(const VertexId& new_vertex_id = INVALID_ID)
+      : id_(new_vertex_id) {}
 
-  void add_edge_id(const EdgeId& init_id) { edge_ids_.push_back(init_id); }
+  void add_edge_id(const EdgeId& new_edge_id) {
+    edge_ids_.push_back(new_edge_id);
+  }
 
   std::string to_string() const {
     std::stringstream ss_out;
@@ -33,21 +38,18 @@ class Vertex {
     return ss_out.str();
   }
 
-  VertexId get_id() const { return id_; }
-
  private:
   using EdgeIdVector = std::vector<EdgeId>;
-  VertexId id_;
+  VertexId id_ = 0;
   EdgeIdVector edge_ids_;
 };
 
 class Edge {
  public:
-  Edge() = default;
-  Edge(const VertexId& init_ver_id1,
-       const EdgeId& init_id,
-       const VertexId& init_ver_id2)
-      : ver_id1_(init_ver_id1), id_(init_id), ver_id2_(init_ver_id2) {}
+  Edge(const VertexId& from_vertex_id = INVALID_ID,
+       const EdgeId& new_edge_id = INVALID_ID,
+       const VertexId& to_vertex_id = INVALID_ID)
+      : ver_id1_(from_vertex_id), id_(new_edge_id), ver_id2_(to_vertex_id) {}
 
   std::string to_string() const {
     std::stringstream ss_out;
@@ -60,8 +62,6 @@ class Edge {
     ss_out << "]\n" << tab_2 << "}";
     return ss_out.str();
   }
-
-  EdgeId get_id() const { return id_; }
 
  private:
   VertexId ver_id1_;
@@ -78,15 +78,15 @@ class Graph {
     ++default_ver_id_;
   }
 
-  void add_edge(const VertexId& init_ver1_id, const VertexId& init_ver2_id) {
-    assert(vertex_map_.find(init_ver1_id) != vertex_map_.end() &&
+  void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
+    assert(vertex_map_.find(from_vertex_id) != vertex_map_.end() &&
            "Vertex doesn't exists");
-    assert(vertex_map_.find(init_ver2_id) != vertex_map_.end() &&
+    assert(vertex_map_.find(to_vertex_id) != vertex_map_.end() &&
            "Vertex doesn't exists");
     edge_map_[default_edge_id_] =
-        Edge(init_ver1_id, default_edge_id_, init_ver2_id);
-    vertex_map_[init_ver1_id].add_edge_id(default_edge_id_);
-    vertex_map_[init_ver2_id].add_edge_id(default_edge_id_);
+        Edge(from_vertex_id, default_edge_id_, to_vertex_id);
+    vertex_map_[from_vertex_id].add_edge_id(default_edge_id_);
+    vertex_map_[to_vertex_id].add_edge_id(default_edge_id_);
     ++default_edge_id_;
   }
 
@@ -119,17 +119,17 @@ class Graph {
  private:
   VertexId default_ver_id_ = 0;
   EdgeId default_edge_id_ = 0;
-  using VertexMap = std::unordered_map<VertexId, Vertex>;
-  using EdgeMap = std::unordered_map<EdgeId, Edge>;
-  VertexMap vertex_map_;
-  EdgeMap edge_map_;
+
+  std::unordered_map<VertexId, Vertex> vertex_map_;
+  std::unordered_map<EdgeId, Edge> edge_map_;
 };
 
-int main() {
-  Graph graph = Graph();
+constexpr int VERTICES_NUMBER = 14;
 
-  const int verteces_number = 14;
-  for (int i = 0; i < verteces_number; ++i) {
+int main() {
+  auto graph = Graph();
+
+  for (int i = 0; i < VERTICES_NUMBER; ++i) {
     graph.add_vertex();
   }
   const std::vector<std::vector<int> > edge_vec = {
