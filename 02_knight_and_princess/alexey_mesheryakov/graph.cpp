@@ -39,7 +39,6 @@ public:
 		vert_id_[edge.vert.second].edges.push_back(edge.id);
 	}
 	
-	//Graph(){};
 
 	void set_params(const vector<Edge>& new_edges = {}, const vector<int>& vert_ids = {}) {
 		for (const auto& id: vert_ids)
