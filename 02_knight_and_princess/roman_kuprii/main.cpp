@@ -58,7 +58,9 @@ struct Vertex {
 class Graph {
  public:
   Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
-      : vertices_(init_vertices), edges_(init_edges) {}
+      : vertices_(init_vertices), edges_(init_edges) {
+    // TODO check if vertices are connected it the right way
+  }
 
   std::string to_json() const {
     std::string res;
