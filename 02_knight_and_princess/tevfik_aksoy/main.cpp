@@ -794,7 +794,6 @@ int main() {
   srand(time(nullptr));
   Logger log;
 
-
   Graph graphs[10];
   for (auto& graph : graphs) {
     log.start();
