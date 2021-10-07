@@ -29,8 +29,6 @@ class Vertex {
     }
     out_json << "] }";
   }
-
-  bool operator<(const Vertex& other) { return id < other.id; }
 };
 
 class Edge {
@@ -45,8 +43,6 @@ class Edge {
     out_json << "{ \"id\": " << id << ", \"vertex_ids\": [" << v1->id << ", "
              << v2->id << "] }";
   }
-
-  bool operator<(const Edge& other) { return id < other.id; }
 };
 
 template <size_t SIZE>
@@ -58,8 +54,9 @@ void output_graph(std::vector<Edge> edge_mas,
   bool check_first_comma = false;
 
   for (int i = 0; i < numvert; i++) {
-    if (check_first_comma)
+    if (check_first_comma) {
       out_json << ",\n    ";
+    }
     check_first_comma = true;
 
     vert_mas[i].to_string();
@@ -69,8 +66,9 @@ void output_graph(std::vector<Edge> edge_mas,
   check_first_comma = false;
 
   for (int i = 0; i < numedge; i++) {
-    if (check_first_comma)
+    if (check_first_comma) {
       out_json << ",\n    ";
+    }
     check_first_comma = true;
 
     edge_mas[i].to_string();
@@ -82,9 +80,10 @@ int main() {
   const int numedge = 18, numvertex = 14;
   std::array<Vertex, numvertex> vert_mas;
   std::vector<Edge> edge_mas;
-
-  for (int i = 0; i < numvertex; i++)
+  
+  for (int i = 0; i < numvertex; i++) {
     vert_mas[i].id = i;
+  }
 
   std::pair<int, int> graph_data[numedge] = {
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
@@ -95,9 +94,8 @@ int main() {
     vert_mas[graph_data[i].first].edge_ids.push_back(i);
     vert_mas[graph_data[i].second].edge_ids.push_back(i);
 
-    edge_mas.push_back((Edge){
-        i, &vert_mas[graph_data[i].first],
-        &vert_mas[graph_data[i].second]});
+    edge_mas.push_back((Edge){i, &vert_mas[graph_data[i].first],
+                              &vert_mas[graph_data[i].second]});
   }
 
   output_graph(edge_mas, vert_mas, numedge, numvertex);
