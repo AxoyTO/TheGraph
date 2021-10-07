@@ -1,3 +1,4 @@
+
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -8,6 +9,7 @@ using std::to_string;
 using std::vector;
 
 using EdgeId = int;
+using VertexId = int;
 
 struct Edge {
   EdgeId id;
@@ -31,12 +33,14 @@ struct Edge {
   }
 };
 
+// TODO Overload operator[]
 // TODO check uniqueness of ID field
 struct Vertex {
-  int id = -1;
+  VertexId id = -1;
   std::vector<int> edges_ids;
+  int depth = -1;
 
-  explicit Vertex(int _id) : id(_id) {}
+  explicit Vertex(VertexId _id) : id(_id) {}
 
   std::string to_json() const {
     std::string res;
@@ -77,6 +81,23 @@ class Graph {
     res += " ] }\n";
     return res;
   }
+
+  void add_vertex() {
+    Vertex new_vertex(vertices_.size());
+    vertices_.push_back(new_vertex);
+  }
+
+  void connect_vertices(VertexId out_id, VertexId dest_id) {
+    EdgeId id = edges_.size();
+    Edge new_edge(out_id, dest_id, id);
+    edges_.push_back(new_edge);
+
+    // add information into Verex structure
+    vertices_[out_id].edges_ids.push_back(id);
+    vertices_[dest_id].edges_ids.push_back(id);
+  }
+
+  int get_vertices_num() { return vertices_.size(); }
 
  private:
   vector<Vertex> vertices_;
@@ -125,6 +146,10 @@ int main() {
   }
 
   Graph A(init_edges, init_vertices);
+  for (int i = 0; i < 4; i++) {
+    A.add_vertex();
+    A.connect_vertices(0, A.get_vertices_num() - 1);
+  }
   write_graph("graph.json", A);
 
   return 0;
