@@ -11,12 +11,14 @@ using EdgeId = int;
 using VertexId = int;
 
 constexpr int INVALID_ID = -1;
+const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 struct Edge {
   EdgeId id;
   std::array<VertexId, 2> connected_vertices;
 
-  Edge(VertexId start, VertexId end, EdgeId _id) : id(_id), connected_vertices({start, end}) {}
+  Edge(VertexId start, VertexId end, EdgeId _id)
+      : id(_id), connected_vertices({start, end}) {}
 
   std::string to_json() const {
     std::string res;
@@ -56,7 +58,7 @@ struct Vertex {
 class Graph {
  public:
   Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
-      : vertices_(init_vertices), edges_(init_edges), size_(vertices_.size()) {}
+      : vertices_(init_vertices), edges_(init_edges) {}
 
   std::string to_json() const {
     std::string res;
@@ -81,12 +83,11 @@ class Graph {
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
-  int size_ = 0;
 };
 
-void write_graph(const std::string& json_name, const Graph& A) {
+void write_graph(const Graph& A) {
   std::ofstream out;
-  out.open(json_name, std::ofstream::out | std::ofstream::trunc);
+  out.open(JSON_GRAPH_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
   out << A.to_json();
 
@@ -113,7 +114,7 @@ int main() {
 
     // 2. add new vertex, if needed
     if (if_uniq0) {
-//      init_vertices.push_back(Vertex(init_edge.connected_vertices[0]));
+      //      init_vertices.push_back(Vertex(init_edge.connected_vertices[0]));
       init_vertices.emplace_back(init_edge.connected_vertices[0]);
     }
     if (if_uniq1) {
@@ -121,12 +122,14 @@ int main() {
     }
 
     // 3. add info about edge id into connected vetices
-    init_vertices[init_edge.connected_vertices[0]].edges_ids.push_back(init_edge.id);
-    init_vertices[init_edge.connected_vertices[1]].edges_ids.push_back(init_edge.id);
+    init_vertices[init_edge.connected_vertices[0]].edges_ids.push_back(
+        init_edge.id);
+    init_vertices[init_edge.connected_vertices[1]].edges_ids.push_back(
+        init_edge.id);
   }
 
-  Graph A(init_edges, init_vertices);
-  write_graph("graph.json", A);
+  const Graph A(init_edges, init_vertices);
+  write_graph(A);
 
   return 0;
 }
