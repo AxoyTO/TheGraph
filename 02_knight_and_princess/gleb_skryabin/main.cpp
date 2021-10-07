@@ -1,5 +1,6 @@
 #include <array>
 #include <fstream>
+#include <iostream>
 #include "graph.hpp"
 
 void writeGraphJSON(Graph g, char const* filename) {
@@ -7,13 +8,13 @@ void writeGraphJSON(Graph g, char const* filename) {
   if (json.is_open()) {
     json << g.toJSON();
     json.close();
-    printf("Graph is written to %s\n", filename);
+    std::cout << "Graph is written to " << filename << std::endl;
   } else {
-    printf("Unable to open file\n");
+    std::cout << "Unable to open file" << std::endl;
   }
 }
 
-int main(void) {
+int main() {
   const std::array<Graph::Edge, 18> edges = {{{0, {0, 1}},
                                               {1, {0, 2}},
                                               {2, {0, 3}},

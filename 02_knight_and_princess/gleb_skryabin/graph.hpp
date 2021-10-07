@@ -2,36 +2,39 @@
 #include <unordered_map>
 #include <unordered_set>
 
-using idType = int;
+using EdgeId = int;
+using VertexId = int;
+constexpr int INVALID_ID = -1;
 
 class Graph {
  public:
   struct Edge {
-    idType id = -1;
-    std::pair<idType, idType> vertices;
+    EdgeId id = INVALID_ID;
+    std::pair<VertexId, VertexId> verticeIds;
   };
 
   struct Vertex {
-    idType id = -1;
-    std::unordered_set<idType> edges;
+    VertexId id = INVALID_ID;
+    std::unordered_set<EdgeId> edgeIds;
   };
 
   template <std::size_t SIZE>
   explicit Graph(const std::array<Edge, SIZE>& inpEdges) {
-    for (auto edge = inpEdges.begin(); edge != inpEdges.end(); edge++) {
-      edges.emplace(edge->id, *edge);
+    for (auto newEdge : inpEdges) {
+      // изначально edges_ пустой, так что надо добавлять каждый элемент
+      edges_.emplace(newEdge.id, newEdge);
     }
-    for (auto edge = edges.begin(); edge != edges.end(); edge++) {
-      auto vs = edge->second.vertices;
-      for (idType vsid : std::array<idType, 2>{vs.first, vs.second}) {
-        auto v = vertices.find(vsid);
-        if (v == vertices.end()) {
+    for (auto edge : edges_) {
+      auto vs = edge.second.verticeIds;
+      for (VertexId vsid : std::array<VertexId, 2>{vs.first, vs.second}) {
+        auto v = vertices_.find(vsid);
+        if (v == vertices_.end()) {
           // add vertex
-          Vertex newVertex = {.id = vsid, .edges = {edge->first}};
-          vertices.emplace(vsid, newVertex);
+          Vertex newVertex = {.id = vsid, .edgeIds = {edge.first}};
+          vertices_.emplace(vsid, newVertex);
         } else {
           // edit vertex
-          v->second.edges.insert(edge->first);
+          v->second.edgeIds.insert(edge.first);
         }
       }
     }
@@ -40,21 +43,23 @@ class Graph {
   std::string toJSON() {
     std::string json;
     json = "{\n  \"vertices\": [\n    ";
-    for (auto pVertexPair = vertices.begin();;) {
+    // я не использую все возможности for, так как мне
+    // все равно придется сравнивать итератор с vertices_.end()
+    for (auto pVertexPair = vertices_.begin();;) {
       auto v = pVertexPair->second;
       json += "{\n      \"id\": " + std::to_string(v.id);
       json += ",\n      \"edge_ids\": [";
 
-      for (auto pEdgeId = v.edges.begin();;) {
+      for (auto pEdgeId = v.edgeIds.begin();;) {
         json += std::to_string(*pEdgeId);
-        if (++pEdgeId != v.edges.end()) {
+        if (++pEdgeId != v.edgeIds.end()) {
           json += ", ";
         } else {
           break;
         }
       }
       json += "]\n    }";
-      if (++pVertexPair != vertices.end()) {
+      if (++pVertexPair != vertices_.end()) {
         json += ", ";
       } else {
         break;
@@ -62,15 +67,15 @@ class Graph {
     }
 
     json += "\n  ],\n  \"edges\": [\n    ";
-    for (auto pEdgePair = edges.begin();;) {
-      idType edgeId = pEdgePair->first;
-      auto vs = pEdgePair->second.vertices;
+    for (auto pEdgePair = edges_.begin();;) {
+      EdgeId edgeId = pEdgePair->first;
+      auto vs = pEdgePair->second.verticeIds;
       json += "{\n      \"id\": " + std::to_string(edgeId);
       json += ",\n      \"vertex_ids\": [";
       json += std::to_string(vs.first) + ", ";
       json += std::to_string(vs.second) + "]\n    }";
 
-      if (++pEdgePair != edges.end()) {
+      if (++pEdgePair != edges_.end()) {
         json += ", ";
       } else {
         break;
@@ -82,6 +87,6 @@ class Graph {
   }
 
  private:
-  std::unordered_map<idType, Edge> edges;
-  std::unordered_map<idType, Vertex> vertices;
+  std::unordered_map<EdgeId, Edge> edges_;
+  std::unordered_map<VertexId, Vertex> vertices_;
 };
