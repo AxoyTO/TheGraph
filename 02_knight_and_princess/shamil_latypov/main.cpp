@@ -80,7 +80,7 @@ int main() {
   const int numedge = 18, numvertex = 14;
   std::array<Vertex, numvertex> vert_mas;
   std::vector<Edge> edge_mas;
-  
+
   for (int i = 0; i < numvertex; i++) {
     vert_mas[i].id = i;
   }
