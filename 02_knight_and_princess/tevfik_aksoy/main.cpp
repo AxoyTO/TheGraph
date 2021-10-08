@@ -62,7 +62,6 @@ class Graph {
   vector<vector<dest_id_edge_id>> data;
 
   std::string to_JSON() const {
-    // vector<int> edge_ids;
     std::string json_string;
     json_string += "{\n\"vertices\": [\n";
     for (int i = 0; i < vertices.size(); i++) {
@@ -73,6 +72,7 @@ class Graph {
         json_string += "] },\n";
       }
     }
+    
     json_string += "\"edges\": [\n";
     for (int i = 0; i < edges.size(); i++) {
       json_string += edges[i].to_JSON();
