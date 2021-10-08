@@ -7,15 +7,14 @@
 #include <unordered_map>
 #include <vector>
 
+constexpr int VERTICES_NUMBER = 14;
+
 using VertexId = int;
 using EdgeId = int;
 
-constexpr int INVALID_ID = -1;
-
 class Vertex {
  public:
-  explicit Vertex(const VertexId& new_vertex_id = INVALID_ID)
-      : id_(new_vertex_id) {}
+  explicit Vertex(const VertexId& new_vertex_id) : id_(new_vertex_id) {}
 
   void add_edge_id(const EdgeId& new_edge_id) {
     edge_ids_.push_back(new_edge_id);
@@ -39,16 +38,15 @@ class Vertex {
   }
 
  private:
-  using EdgeIdVector = std::vector<EdgeId>;
   VertexId id_ = 0;
-  EdgeIdVector edge_ids_;
+  std::vector<EdgeId> edge_ids_;
 };
 
 class Edge {
  public:
-  Edge(const VertexId& from_vertex_id = INVALID_ID,
-       const EdgeId& new_edge_id = INVALID_ID,
-       const VertexId& to_vertex_id = INVALID_ID)
+  Edge(const VertexId& from_vertex_id,
+       const EdgeId& new_edge_id,
+       const VertexId& to_vertex_id)
       : ver_id1_(from_vertex_id), id_(new_edge_id), ver_id2_(to_vertex_id) {}
 
   std::string to_string() const {
@@ -71,10 +69,8 @@ class Edge {
 
 class Graph {
  public:
-  Graph() = default;
-
   void add_vertex() {
-    vertex_map_[default_ver_id_] = Vertex(default_ver_id_);
+    vertex_map_.emplace(default_ver_id_, Vertex(default_ver_id_));
     ++default_ver_id_;
   }
 
@@ -83,10 +79,10 @@ class Graph {
            "Vertex doesn't exists");
     assert(vertex_map_.find(to_vertex_id) != vertex_map_.end() &&
            "Vertex doesn't exists");
-    edge_map_[default_edge_id_] =
-        Edge(from_vertex_id, default_edge_id_, to_vertex_id);
-    vertex_map_[from_vertex_id].add_edge_id(default_edge_id_);
-    vertex_map_[to_vertex_id].add_edge_id(default_edge_id_);
+    edge_map_.emplace(default_edge_id_,
+                      Edge(from_vertex_id, default_edge_id_, to_vertex_id));
+    vertex_map_.at(from_vertex_id).add_edge_id(default_edge_id_);
+    vertex_map_.at(to_vertex_id).add_edge_id(default_edge_id_);
     ++default_edge_id_;
   }
 
@@ -123,8 +119,6 @@ class Graph {
   std::unordered_map<VertexId, Vertex> vertex_map_;
   std::unordered_map<EdgeId, Edge> edge_map_;
 };
-
-constexpr int VERTICES_NUMBER = 14;
 
 int main() {
   auto graph = Graph();
