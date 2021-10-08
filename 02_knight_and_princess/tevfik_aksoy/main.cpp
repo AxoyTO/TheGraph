@@ -72,7 +72,7 @@ class Graph {
         json_string += "] },\n";
       }
     }
-    
+
     json_string += "\"edges\": [\n";
     for (int i = 0; i < edges.size(); i++) {
       json_string += edges[i].to_JSON();
