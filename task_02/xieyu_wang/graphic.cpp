@@ -4,26 +4,13 @@
 #include <iostream>
 constexpr int MAX_VEC = 18;
 constexpr int MAX_PTS = 13;
-constexpr int pInt[18][3] = {
-    {0, 0, 1},    {0, 1, 2},    {0, 2, 3},   {1, 3, 4},   {1, 4, 5},
-    {1, 5, 6},    {2, 6, 7},    {2, 7, 8},   {3, 8, 9},   {4, 9, 10},
-    {5, 10, 10},  {6, 11, 10},  {7, 12, 11}, {8, 13, 11}, {9, 14, 12},
-    {10, 15, 13}, {11, 16, 13}, {12, 17, 13}};
-struct MapOfVector {
+struct Edge {
   int from;
-  int vector;
+  int edge_id;
   int to;
 };
-class vectors {
+class Vector {
 public:
-  bool SetUp() {
-    int i = 0;
-    for (auto it = netWork.begin(); it != netWork.end(); it++) {
-      *it = {pInt[i][0], pInt[i][1], pInt[i][2]};
-      i++;
-    }
-    return true;
-  }
   bool WriteToFile() {
     std::ofstream graph;
     graph.open("Graphic.json", std::ios::out);
@@ -46,10 +33,10 @@ public:
       for (auto it : netWork) {
         if (it.from == i || it.to == i) {
           if (index != 0) {
-            graph << " ," << it.vector;
+            graph << " ," << it.edge_id;
             index++;
           } else {
-            graph << it.vector;
+            graph << it.edge_id;
             index++;
           }
         }
@@ -60,12 +47,12 @@ public:
     // edges:
     graph << std::endl << "\t\"edges\": [" << std::endl;
     for (auto it : netWork) {
-      if (it.vector != 0) {
+      if (it.edge_id != 0) {
         graph << ",{" << std::endl;
       } else {
         graph << "\t\t{" << std::endl;
       }
-      graph << "\t\t\t\t\"id\":" << it.vector << "," << std::endl;
+      graph << "\t\t\t\t\"id\":" << it.edge_id << "," << std::endl;
       graph << "\t\t\t\t\"vertex_ids\": [" << it.from << ", " << it.to << "]"
             << std::endl;
       graph << "\t\t\t}";
@@ -77,20 +64,32 @@ public:
   }
 
 private:
-  std::array<MapOfVector, MAX_VEC> netWork;
+  static constexpr std::array<Edge, MAX_VEC> netWork = {{{0, 0, 1},
+                                                         {0, 1, 2},
+                                                         {0, 2, 3},
+                                                         {1, 3, 4},
+                                                         {1, 4, 5},
+                                                         {1, 5, 6},
+                                                         {2, 6, 7},
+                                                         {2, 7, 8},
+                                                         {3, 8, 9},
+                                                         {4, 9, 10},
+                                                         {5, 10, 10},
+                                                         {6, 11, 10},
+                                                         {7, 12, 11},
+                                                         {8, 13, 11},
+                                                         {9, 14, 12},
+                                                         {10, 15, 13},
+                                                         {11, 16, 13},
+                                                         {12, 17, 13}}};
 };
 int main() {
-  vectors vecGen;
-  if (vecGen.SetUp()) {
-    std::cout << "Successfully Create arrays...." << std::endl;
-  } else {
-    std::cerr << "error in Create and reform arrays...";
-    return 1;
-  }
+  Vector vecGen;
+  std::cout << "Successfully Create arrays...." << std::endl;
   if (vecGen.WriteToFile()) {
     std::cout << "Successfully create JS file....." << std::endl;
   } else {
     std::cerr << "Error in write to file" << std::endl;
-    return 2;
+    return 1;
   }
 }
