@@ -9,7 +9,7 @@ struct Edge {
   int edge_id;
   int to;
 };
-class Vector {
+class VectorPrint {
 public:
   bool WriteToFile() {
     std::ofstream graph;
@@ -84,7 +84,7 @@ private:
                                                          {12, 17, 13}}};
 };
 int main() {
-  Vector vecGen;
+  VectorPrint vecGen;
   std::cout << "Successfully Create arrays...." << std::endl;
   if (vecGen.WriteToFile()) {
     std::cout << "Successfully create JS file....." << std::endl;
