@@ -21,10 +21,11 @@ constexpr int INVALID_ID = -1;
 struct Vertex {
  public:
   VertexId id = INVALID_ID;
+  vector<EdgeId> edge_ids;
 
   explicit Vertex(VertexId _id) : id(_id) {}
 
-  std::string to_JSON(const vector<int>& edge_ids) const {
+  std::string to_JSON() const {
     std::string json_string;
 
     json_string += "\t{ \"id\": " + to_string(id) + ", \"edge_ids\": [";
@@ -61,22 +62,17 @@ class Graph {
   vector<vector<dest_id_edge_id>> data;
 
   std::string to_JSON() const {
-    vector<int> edge_ids;
+    // vector<int> edge_ids;
     std::string json_string;
     json_string += "{\n\"vertices\": [\n";
     for (int i = 0; i < vertices.size(); i++) {
-      for (const auto& j : data[i]) {
-        edge_ids.push_back(get<1>(j));
-      }
-      json_string += vertices[i].to_JSON(edge_ids);
+      json_string += vertices[i].to_JSON();
       if (i + 1 == vertices.size()) {
         json_string += "] }\n  ],\n";
       } else {
         json_string += "] },\n";
       }
-      edge_ids.clear();
     }
-
     json_string += "\"edges\": [\n";
     for (int i = 0; i < edges.size(); i++) {
       json_string += edges[i].to_JSON();
@@ -126,7 +122,10 @@ const Graph generateGraph() {
         std::make_tuple(edge.destination, edge.id));
     graph.data[edge.destination].push_back(
         std::make_tuple(edge.source, edge.id));
+    graph.vertices[edge.source].edge_ids.push_back(edge.id);
+    graph.vertices[edge.destination].edge_ids.push_back(edge.id);
   }
+
   return graph;
 }
 
