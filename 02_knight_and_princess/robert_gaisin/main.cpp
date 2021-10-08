@@ -16,7 +16,7 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
     if (it != int_vector.end() - 1) {
       out << ", ";
     }
-  }  
+  }
   return out;
 }
 
@@ -43,44 +43,44 @@ struct Edge {
 std::ostream& operator<<(std::ostream& out, const Edge& edge) {
   out << "{" << endl;
   out << "      \"id\": " << edge.id << "," << endl;
-  out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "]" << endl;
+  out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "]"
+      << endl;
   out << "    }";
   return out;
 }
 
 class Graph {
  public:
-
   void resize(int graph_depth) { vertices_.resize(graph_depth); }
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
-  void add_vertex(Vertex& vertex, int layer); 
+  void add_vertex(Vertex& vertex, int layer);
   void add_edge(Edge& edge) { edges_.push_back(edge); }
   void add_edge_in_vertex(int layer, int vertex_in_layer, EdgeId edge_id);
   bool layer_is_empty_or_not_exist(int layer);
   VertexId get_vertex_id(int layer, int vertex_in_layer);
   size_t layer_size(int layer);
-  
+
   const vector<vector<Vertex>> vertices() const { return vertices_; }
-  const vector<Edge> edges() const { return edges_; }  
+  const vector<Edge> edges() const { return edges_; }
 
  private:
   int depth_ = 0;
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
-  vector<vector<Vertex> > vertices_;
+  vector<vector<Vertex>> vertices_;
   vector<Edge> edges_;
 };
 
 void Graph::add_vertex(Vertex& vertex, int layer) {
-    if (layer >= depth_) {
-        depth_ = layer + 1;
-    }
-    vertices_[layer].push_back(vertex);
+  if (layer >= depth_) {
+    depth_ = layer + 1;
+  }
+  vertices_[layer].push_back(vertex);
 }
 
 void Graph::add_edge_in_vertex(int layer, int vertex_in_layer, EdgeId edge_id) {
-    vertices_[layer][vertex_in_layer].edge_ids.push_back(edge_id);
+  vertices_[layer][vertex_in_layer].edge_ids.push_back(edge_id);
 }
 
 bool Graph::layer_is_empty_or_not_exist(int layer) {
@@ -88,21 +88,21 @@ bool Graph::layer_is_empty_or_not_exist(int layer) {
 }
 
 VertexId Graph::get_vertex_id(int layer, int vertex_in_layer) {
-    return vertices_[layer][vertex_in_layer].id;
+  return vertices_[layer][vertex_in_layer].id;
 }
 
 size_t Graph::layer_size(int layer) {
-    if (layer_is_empty_or_not_exist(layer)) {
-        return 0;
-    }
-    return vertices_[layer].size();
+  if (layer_is_empty_or_not_exist(layer)) {
+    return 0;
+  }
+  return vertices_[layer].size();
 }
 
 Graph task_1_graph_generation() {
   Graph returned_graph;
   const VertexId num_of_vertex = 14;
   returned_graph.resize(1);
-  
+
   for (int i = 0; i < num_of_vertex; ++i) {
     Vertex x = {returned_graph.next_vertex_id()};
     returned_graph.add_vertex(x, 0);
@@ -114,8 +114,8 @@ Graph task_1_graph_generation() {
   returned_graph.add_edge_in_vertex(0, 1, 3);
   returned_graph.add_edge_in_vertex(0, 1, 4);
   returned_graph.add_edge_in_vertex(0, 1, 5);
-  returned_graph.add_edge_in_vertex(0, 2, 1);  
-  returned_graph.add_edge_in_vertex(0, 2, 6);  
+  returned_graph.add_edge_in_vertex(0, 2, 1);
+  returned_graph.add_edge_in_vertex(0, 2, 6);
   returned_graph.add_edge_in_vertex(0, 2, 7);
   returned_graph.add_edge_in_vertex(0, 3, 2);
   returned_graph.add_edge_in_vertex(0, 3, 8);
@@ -193,7 +193,8 @@ std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
   return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const vector<vector<Vertex>>& vertices) {
+std::ostream& operator<<(std::ostream& out,
+                         const vector<vector<Vertex>>& vertices) {
   for (auto it = vertices.begin(); it != vertices.end(); ++it) {
     out << *it;
     if (it != vertices.end() - 1) {
