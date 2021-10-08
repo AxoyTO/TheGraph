@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-#include <set>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -13,14 +12,9 @@ using std::vector;
 using VertexId = int;
 using EdgeId = int;
 
-// Tuple of <int,int> for realization of vector of vectors of <int,int>
-using dest_id_edge_id = std::tuple<VertexId, EdgeId>;
-
-constexpr int INVALID_ID = -1;
-
 struct Vertex {
  public:
-  VertexId id = INVALID_ID;
+  const VertexId id;
   vector<EdgeId> edge_ids;
 
   explicit Vertex(VertexId _id) : id(_id) {}
@@ -40,9 +34,9 @@ struct Vertex {
 
 struct Edge {
  public:
-  EdgeId id = INVALID_ID;
-  VertexId source;
-  VertexId destination;
+  const EdgeId id;
+  const VertexId source;
+  const VertexId destination;
 
   Edge(VertexId src_id, VertexId dest_id, EdgeId _id)
       : id(_id), source(src_id), destination(dest_id) {}
@@ -57,9 +51,37 @@ struct Edge {
 
 class Graph {
  public:
-  vector<Edge> edges;
-  vector<Vertex> vertices;
-  vector<vector<dest_id_edge_id>> data;
+  void insert_node(VertexId source) { vertices.push_back(Vertex(source)); }
+  void insert_edge(VertexId source, VertexId destination, EdgeId id) {
+    if (!edge_already_exists(id)) {
+      if (is_vertex_valid(source) && is_vertex_valid(destination)) {
+        edges.push_back(Edge(source, destination, id));
+        vertices[source].edge_ids.push_back(id);
+        vertices[destination].edge_ids.push_back(id);
+      }
+    }
+  }
+
+  //Проверка существует ли edge у графа, чтобы запретить добавление дубликатов
+  bool edge_already_exists(EdgeId id) {
+    for (const auto& edge : edges)
+      if (edge.id == id) {
+        std::cerr << "There already exists edge: " << id << "\n";
+        return true;
+      }
+    return false;
+  }
+
+  //Проверка существует ли vertex у графа, чтобы предотвратить попытку на доступ
+  //невыделенной памяти
+  bool is_vertex_valid(VertexId id) {
+    for (const auto& vertex : vertices)
+      if (vertex.id == id) {
+        return true;
+      }
+    std::cerr << "Vertex: " << id << " is not valid!\n";
+    return false;
+  }
 
   std::string to_JSON() const {
     std::string json_string;
@@ -85,47 +107,39 @@ class Graph {
     json_string += "  ]\n}\n";
     return json_string;
   }
+
+ private:
+  vector<Edge> edges;
+  vector<Vertex> vertices;
 };
 
 const Graph generateGraph() {
   Graph graph;
-  const vector<Edge> edges = {{{0, 1, 0},
-                               {0, 2, 1},
-                               {0, 3, 2},
-                               {1, 4, 3},
-                               {1, 5, 4},
-                               {1, 6, 5},
-                               {2, 7, 6},
-                               {2, 8, 7},
-                               {3, 9, 8},
-                               {4, 10, 9},
-                               {5, 10, 10},
-                               {6, 10, 11},
-                               {7, 11, 12},
-                               {8, 11, 13},
-                               {9, 12, 14},
-                               {10, 13, 15},
-                               {11, 13, 16},
-                               {12, 13, 17}}};
-  std::set<int> nodes_set;
-  for (const auto& e : edges) {
-    nodes_set.insert(e.source);
-    nodes_set.insert(e.destination);
+  for (int i = 0; i < 14; i++) {
+    graph.insert_node(i);
   }
-  for (int i = 0; i < nodes_set.size(); i++)
-    graph.vertices.push_back(Vertex(i));
-
-  graph.data.resize(nodes_set.size() + 1);
-  for (const auto& edge : edges) {
-    graph.edges.emplace_back(edge.source, edge.destination, edge.id);
-    graph.data[edge.source].push_back(
-        std::make_tuple(edge.destination, edge.id));
-    graph.data[edge.destination].push_back(
-        std::make_tuple(edge.source, edge.id));
-    graph.vertices[edge.source].edge_ids.push_back(edge.id);
-    graph.vertices[edge.destination].edge_ids.push_back(edge.id);
-  }
-
+  graph.insert_edge(0, 1, 0);
+  graph.insert_edge(0, 2, 1);
+  graph.insert_edge(0, 3, 2);
+  graph.insert_edge(1, 4, 3);
+  graph.insert_edge(1, 5, 4);
+  graph.insert_edge(1, 6, 5);
+  graph.insert_edge(2, 7, 6);
+  graph.insert_edge(2, 8, 7);
+  graph.insert_edge(3, 9, 8);
+  graph.insert_edge(4, 10, 9);
+  graph.insert_edge(5, 10, 10);
+  graph.insert_edge(6, 10, 11);
+  graph.insert_edge(7, 11, 12);
+  graph.insert_edge(8, 11, 13);
+  graph.insert_edge(9, 12, 14);
+  graph.insert_edge(10, 13, 15);
+  graph.insert_edge(11, 13, 16);
+  graph.insert_edge(12, 13, 17);
+  //Это не будет добавлено, т.к. такой edge уже существует
+  graph.insert_edge(13, 13, 17);
+  //Это тоже не будет добавлено, т.к. Vertex 14 не существует
+  graph.insert_edge(13, 14, 18);
   return graph;
 }
 
