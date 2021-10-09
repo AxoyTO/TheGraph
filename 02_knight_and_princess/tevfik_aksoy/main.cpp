@@ -1,3 +1,4 @@
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@ struct Vertex {
   const VertexId id;
   vector<EdgeId> edge_ids;
 
-  explicit Vertex(VertexId _id) : id(_id) {}
+  explicit Vertex(const VertexId& _id) : id(_id) {}
 
   std::string to_JSON() const {
     std::string json_string;
@@ -51,20 +52,20 @@ struct Edge {
 
 class Graph {
  public:
-  void insert_node(VertexId source) { vertices.push_back(Vertex(source)); }
+  void insert_node(VertexId source) { vertices_.emplace_back(Vertex(source)); }
   void insert_edge(VertexId source, VertexId destination, EdgeId id) {
-    if (!edge_already_exists(id)) {
-      if (is_vertex_valid(source) && is_vertex_valid(destination)) {
-        edges.push_back(Edge(source, destination, id));
-        vertices[source].edge_ids.push_back(id);
-        vertices[destination].edge_ids.push_back(id);
-      }
-    }
+    assert(!edge_already_exists(id) && "Edge already exists");
+    assert(is_vertex_valid(source) && "Source vertex id doesn't exist");
+    assert(is_vertex_valid(destination) &&
+           "Destination vertex id doesn't exist");
+    edges_.push_back(Edge(source, destination, id));
+    vertices_[source].edge_ids.push_back(id);
+    vertices_[destination].edge_ids.push_back(id);
   }
 
   //Проверка существует ли edge у графа, чтобы запретить добавление дубликатов
   bool edge_already_exists(EdgeId id) {
-    for (const auto& edge : edges)
+    for (const auto& edge : edges_)
       if (edge.id == id) {
         std::cerr << "There already exists edge: " << id << "\n";
         return true;
@@ -75,7 +76,7 @@ class Graph {
   //Проверка существует ли vertex у графа, чтобы предотвратить попытку на доступ
   //невыделенной памяти
   bool is_vertex_valid(VertexId id) {
-    for (const auto& vertex : vertices)
+    for (const auto& vertex : vertices_)
       if (vertex.id == id) {
         return true;
       }
@@ -86,9 +87,9 @@ class Graph {
   std::string to_JSON() const {
     std::string json_string;
     json_string += "{\n\"vertices\": [\n";
-    for (int i = 0; i < vertices.size(); i++) {
-      json_string += vertices[i].to_JSON();
-      if (i + 1 == vertices.size()) {
+    for (int i = 0; i < vertices_.size(); i++) {
+      json_string += vertices_[i].to_JSON();
+      if (i + 1 == vertices_.size()) {
         json_string += "] }\n  ],\n";
       } else {
         json_string += "] },\n";
@@ -96,9 +97,9 @@ class Graph {
     }
 
     json_string += "\"edges\": [\n";
-    for (int i = 0; i < edges.size(); i++) {
-      json_string += edges[i].to_JSON();
-      if (i + 1 == edges.size()) {
+    for (int i = 0; i < edges_.size(); i++) {
+      json_string += edges_[i].to_JSON();
+      if (i + 1 == edges_.size()) {
         json_string += "\n";
       } else {
         json_string += ",\n";
@@ -109,8 +110,8 @@ class Graph {
   }
 
  private:
-  vector<Edge> edges;
-  vector<Vertex> vertices;
+  vector<Edge> edges_;
+  vector<Vertex> vertices_;
 };
 
 const Graph generateGraph() {
@@ -136,10 +137,6 @@ const Graph generateGraph() {
   graph.insert_edge(10, 13, 15);
   graph.insert_edge(11, 13, 16);
   graph.insert_edge(12, 13, 17);
-  //Это не будет добавлено, т.к. такой edge уже существует
-  graph.insert_edge(13, 13, 17);
-  //Это тоже не будет добавлено, т.к. Vertex 14 не существует
-  graph.insert_edge(13, 14, 18);
   return graph;
 }
 
