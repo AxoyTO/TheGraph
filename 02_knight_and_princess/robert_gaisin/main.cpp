@@ -18,7 +18,7 @@ const int Yellow = 3;
 const int Red = 4;
 
 //Перегрузка вывода вектора из int
-std::ostream &operator<<(std::ostream &out, const vector<int> &c) {
+std::ostream& operator<<(std::ostream& out, const vector<int>& c) {
   if (c.size() > 0) {
     out << c[0];
     for (auto i = begin(c) + 1; i != end(c); ++i)
@@ -33,7 +33,7 @@ struct Vertex {
   vector<EdgeId> edge_ids;
 };
 //Перегрузка вывода для вектора из вершин
-std::ostream &operator<<(std::ostream &out, const Vertex &vertex) {
+std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "{" << endl;
   out << "      \"id\": " << vertex.id << "," << endl;
   out << "      \"edge_ids\": [" << vertex.edge_ids << "]," << endl;
@@ -49,28 +49,28 @@ struct Edge {
   int color = 0;
 };
 //Перегрузка вывода для вектора из ребер
-std::ostream &operator<<(std::ostream &out, const Edge &edge) {
+std::ostream& operator<<(std::ostream& out, const Edge& edge) {
   out << "{" << endl;
   out << "      \"id\": " << edge.id << "," << endl;
   out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "],"
       << endl;
   out << "      \"color\": ";
   switch (edge.color) {
-  case Grey:
-    out << "\"grey\"";
-    break;
-  case Green:
-    out << "\"green\"";
-    break;
-  case Blue:
-    out << "\"blue\"";
-    break;
-  case Yellow:
-    out << "\"yellow\"";
-    break;
-  case Red:
-    out << "\"red\"";
-    break;
+    case Grey:
+      out << "\"grey\"";
+      break;
+    case Green:
+      out << "\"green\"";
+      break;
+    case Blue:
+      out << "\"blue\"";
+      break;
+    case Yellow:
+      out << "\"yellow\"";
+      break;
+    case Red:
+      out << "\"red\"";
+      break;
   }
   out << endl;
   out << "    }";
@@ -78,7 +78,7 @@ std::ostream &operator<<(std::ostream &out, const Edge &edge) {
 }
 //Класс для описания графа
 class Graph {
-public:
+ public:
   //Изменение размера атрибута класса, в котором хранятся все вершины графа
   void resize(int graph_depth) { vertices_.resize(graph_depth); }
   //Методы для получения следующего идентификатора для вершин и ребер
@@ -86,16 +86,16 @@ public:
   EdgeId next_edge_id() { return num_of_edg_++; }
   //Следующие методы добавляют:
   //новую вершину в граф
-  void add_vertex(Vertex &vertex, int layer);
+  void add_vertex(Vertex& vertex, int layer);
   //новое ребро в граф
-  void add_edge(Edge &edge) { edges_.push_back(edge); }
+  void add_edge(Edge& edge) { edges_.push_back(edge); }
   //идентификатор ребра к существующей вершине графа
   void add_edge_in_vertex(int layer, int vertex_in_layer, EdgeId edge_id);
   //Метод проверяет слой графа на существование или на отсутствие в нем вершин
   bool layer_is_empty_or_not_exist(int layer);
   //Метод возвращает идентификатор для вершины слоя layer находящейся на позиции
   //в этом слое vertex_in_layer
-  VertexId get_vertex_id(const int &layer, const int &vertex_in_layer) const;
+  VertexId get_vertex_id(const int& layer, const int& vertex_in_layer) const;
   //Метод возвращает число вершин на глубине layer графа
   size_t layer_size(int layer);
   //Константные методы:
@@ -106,7 +106,7 @@ public:
   //возвращает контейнер с ребрами
   const vector<Edge> edges() const { return edges_; }
 
-private:
+ private:
   int depth_ = 0;
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
@@ -114,7 +114,7 @@ private:
   vector<Edge> edges_;
 };
 
-void Graph::add_vertex(Vertex &vertex, int layer) {
+void Graph::add_vertex(Vertex& vertex, int layer) {
   if (layer >= depth_) {
     depth_ = layer + 1;
   }
@@ -129,8 +129,8 @@ bool Graph::layer_is_empty_or_not_exist(int layer) {
   return (layer >= depth_) || vertices_[layer].empty();
 }
 
-VertexId Graph::get_vertex_id(const int &layer,
-                              const int &vertex_in_layer) const {
+VertexId Graph::get_vertex_id(const int& layer,
+                              const int& vertex_in_layer) const {
   return vertices_[layer][vertex_in_layer].id;
 }
 
@@ -142,7 +142,7 @@ size_t Graph::layer_size(int layer) {
 }
 //Перегрузка вывода для вектора из вершин (используется для вывод отдельного
 //слоя)
-std::ostream &operator<<(std::ostream &out, const vector<Vertex> &c) {
+std::ostream& operator<<(std::ostream& out, const vector<Vertex>& c) {
   if (c.size() > 0) {
     out << c[0];
     for (auto i = begin(c) + 1; i != end(c); ++i)
@@ -151,7 +151,7 @@ std::ostream &operator<<(std::ostream &out, const vector<Vertex> &c) {
   return out;
 }
 //Перегрузка вывода для вектора векторов из вершин (вывод всех имеющихся вершин)
-std::ostream &operator<<(std::ostream &out, const vector<vector<Vertex>> &c) {
+std::ostream& operator<<(std::ostream& out, const vector<vector<Vertex>>& c) {
   if (c.size() > 0) {
     out << c[0];
     for (auto i = begin(c) + 1; i != end(c); ++i)
@@ -163,18 +163,19 @@ std::ostream &operator<<(std::ostream &out, const vector<vector<Vertex>> &c) {
 //соединиться ребром
 int neighbour_choice(int rule, size_t k, size_t sub) {
   switch (rule) {
-  case 1: //есть только сосед на расстоянии sub с меньшим индексом
-    return k - sub;
-  case 2: //есть только сосед на расстоянии sub с большим индексом
-    return k + sub;
-  case 3: //есть оба соседа, подкидывем монетку, к кому кидать ребро
-    const int coin = rand() % 2;
-    return coin * (k - sub) + (1 - coin) * (k + sub);
+    case 1:  //есть только сосед на расстоянии sub с меньшим индексом
+      return k - sub;
+    case 2:  //есть только сосед на расстоянии sub с большим индексом
+      return k + sub;
+    case 3:  //есть оба соседа, подкидывем монетку, к кому кидать ребро
+      const int coin = rand() % 2;
+      return coin * (k - sub) + (1 - coin) * (k + sub);
   }
   return -1;
 }
 //Функция генератор графов для задачи 3
-Graph graph_generator(int graph_depth, int vrtx_on_first_lvl,
+Graph graph_generator(int graph_depth,
+                      int vrtx_on_first_lvl,
                       int new_vertices_num) {
   Graph returned_graph;
   returned_graph.resize(graph_depth);
@@ -205,8 +206,8 @@ Graph graph_generator(int graph_depth, int vrtx_on_first_lvl,
         }
       }
     }
-    p -= sub_p; //Уменьшили вероятность для следующего слоя
-  } //Граф сгенерирован, все ребра в нем серые
+    p -= sub_p;  //Уменьшили вероятность для следующего слоя
+  }  //Граф сгенерирован, все ребра в нем серые
   //Значения вероятостей возникновения ребер соответствующих цветов:
   const int p_green = 10;
   const int p_blue = 25;
@@ -244,7 +245,7 @@ Graph graph_generator(int graph_depth, int vrtx_on_first_lvl,
         }
       }
       if (i == returned_graph.depth() - 1)
-        p_yellow = 100; //Дабы ошибки округления не сильно влияли на результат
+        p_yellow = 100;  //Дабы ошибки округления не сильно влияли на результат
       if (rand() % 100 + 1 <= p_yellow) {
         //По аналогии с предыдущим случаем, только работает не для вершин, а для
         //слоев:
@@ -284,13 +285,13 @@ Graph graph_generator(int graph_depth, int vrtx_on_first_lvl,
         }
       }
     }
-    p_yellow += add_p_yellow; //Увеличили вероятность появления желтых ребер
-                              //для следующего слоя
+    p_yellow += add_p_yellow;  //Увеличили вероятность появления желтых ребер
+                               //для следующего слоя
   }
   return returned_graph;
 }
 //Перегрузка вывода для вектора из ребер
-std::ostream &operator<<(std::ostream &out, const vector<Edge> &c) {
+std::ostream& operator<<(std::ostream& out, const vector<Edge>& c) {
   if (c.size() > 0) {
     out << c[0];
     for (auto i = begin(c) + 1; i != end(c); ++i)
@@ -299,7 +300,7 @@ std::ostream &operator<<(std::ostream &out, const vector<Edge> &c) {
   return out;
 }
 //Перегрузка вывода для графа
-std::ostream &operator<<(std::ostream &out, const Graph &graph) {
+std::ostream& operator<<(std::ostream& out, const Graph& graph) {
   out << "{" << endl;
   out << "  \"depth\": " << graph.depth() << "," << endl;
   out << "  \"vertices\": [" << endl
