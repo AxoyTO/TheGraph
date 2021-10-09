@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <map>
 #include <utility>
@@ -9,12 +10,11 @@ using EdgeId = int;
 
 class Vertex {
  public:
-  explicit Vertex(VertexId init_id = 0) : ID_(init_id) {}
-  VertexId get_id() const { return ID_; }
-  void add_edge(EdgeId edge_id) { connected_edges_.push_back(edge_id); }
+  explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
+  void add_edge(const EdgeId& edge_id) { connected_edges_.push_back(edge_id); }
   operator std::string() {
     std::string result = "";
-    result += "    {\n      \"id\": " + std::to_string(ID_);
+    result += "    {\n      \"id\": " + std::to_string(id);
     result += ",\n      \"edge_ids\": [";
 
     for (int i = 0; i < connected_edges_.size(); i++) {
@@ -29,34 +29,31 @@ class Vertex {
     return result;
   }
 
+  const VertexId id;
+
  private:
-  const VertexId ID_;
   std::vector<EdgeId> connected_edges_;
 };
 
 class Edge {
  public:
-  Edge(EdgeId init_id, VertexId v1_init, VertexId v2_init)
-      : ID_(init_id), vertex1_id_(v1_init), vertex2_id_(v2_init){};
-  EdgeId get_id() const { return ID_; }
-  VertexId get_v1_id() const { return vertex1_id_; }
-  VertexId get_v2_id() const { return vertex2_id_; }
+  Edge(const EdgeId& init_id, const VertexId& v1_init, const VertexId& v2_init)
+      : id(init_id), vertex1_id(v1_init), vertex2_id(v2_init){};
   operator std::string() {
     std::string result = "";
-    result += "    {\n      \"id\": " + std::to_string(ID_);
+    result += "    {\n      \"id\": " + std::to_string(id);
     result += ",\n      \"vertex_ids\": ";
 
-    result += "[" + std::to_string(vertex1_id_);
-    result += ", " + std::to_string(vertex2_id_);
+    result += "[" + std::to_string(vertex1_id);
+    result += ", " + std::to_string(vertex2_id);
     result += "]\n    }";
 
     return result;
   }
 
- private:
-  const EdgeId ID_;
-  VertexId vertex1_id_;
-  VertexId vertex2_id_;
+  const EdgeId id;
+  const VertexId vertex1_id;
+  const VertexId vertex2_id;
 };
 
 class Graph {
@@ -66,19 +63,27 @@ class Graph {
 
   void add_new_vertex() { vertices_.push_back(Vertex(vertices_.size())); }
 
-  void bind_vertices(VertexId id1, VertexId id2) {
+  void bind_vertices(const VertexId& id1, const VertexId& id2) {
+    const auto& vertex1_connections = connections_map_[id1];
+    for (const auto& connection : vertex1_connections) {
+      if (connection.second == id2) {
+        std::cout << "Attemptig to connect connected vertices: Error."
+                  << std::endl;
+        return;
+      }
+    }
     const auto& edge = edges_.emplace_back(edges_.size(), id1, id2);
-    connections_map_[id1][edge.get_id()] = id2;
-    connections_map_[id2][edge.get_id()] = id1;
-    vertices_[id1].add_edge(edge.get_id());
-    vertices_[id2].add_edge(edge.get_id());
+    connections_map_[id1][edge.id] = id2;
+    connections_map_[id2][edge.id] = id1;
+    vertices_[id1].add_edge(edge.id);
+    vertices_[id2].add_edge(edge.id);
   }
 
   operator std::string() {
     std::string result = "{\n  \"vertices\": [\n";
 
     for (int i = 0; i < vertices_.size(); i++) {
-      std::string vertex_string = (std::string)vertices_[i];
+      std::string vertex_string = std::string(vertices_[i]);
 
       result += vertex_string;
       if (i != vertices_.size() - 1)
@@ -88,7 +93,7 @@ class Graph {
     result += "\n  ],\n  \"edges\": [\n";
 
     for (int i = 0; i < edges_.size(); i++) {
-      std::string edge_string = (std::string)edges_[i];
+      std::string edge_string = std::string(edges_[i]);
 
       result += edge_string;
       if (i != edges_.size() - 1)
@@ -132,7 +137,7 @@ int main() {
   file.open("graph.json");
 
   if (file.is_open()) {
-    file << (std::string)graph << std::endl;
+    file << std::string(graph) << std::endl;
     file.close();
   }
 
