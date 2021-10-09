@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <string>
 
 using std::endl;
 using std::to_string;
@@ -14,10 +15,10 @@ constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 struct Edge {
-  EdgeId id;
-  std::array<VertexId, 2> connected_vertices;
+  EdgeId id = INVALID_ID;
+  const std::array<VertexId, 2> connected_vertices;
 
-  Edge(VertexId start, VertexId end, EdgeId _id)
+  Edge(const VertexId &start, const VertexId &end, const EdgeId &_id)
       : id(_id), connected_vertices({start, end}) {}
 
   std::string to_json() const {
@@ -87,11 +88,11 @@ class Graph {
   vector<Edge> edges_;
 };
 
-void write_graph(const Graph& A) {
+void write_graph(const Graph& graph) {
   std::ofstream out;
   out.open(JSON_GRAPH_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
-  out << A.to_json();
+  out << graph.to_json();
 
   out.close();
 }
@@ -116,7 +117,6 @@ int main() {
 
     // 2. add new vertex, if needed
     if (if_uniq0) {
-      //      init_vertices.push_back(Vertex(init_edge.connected_vertices[0]));
       init_vertices.emplace_back(init_edge.connected_vertices[0]);
     }
     if (if_uniq1) {
