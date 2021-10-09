@@ -1,8 +1,8 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 using std::endl;
 using std::to_string;
@@ -18,7 +18,7 @@ struct Edge {
   EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
 
-  Edge(const VertexId &start, const VertexId &end, const EdgeId &_id)
+  Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
 
   std::string to_json() const {
