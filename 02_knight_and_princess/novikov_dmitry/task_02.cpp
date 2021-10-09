@@ -45,9 +45,9 @@ class Vertex {
 class Edge {
  public:
   Edge(const VertexId& from_vertex_id,
-       const EdgeId& new_edge_id,
-       const VertexId& to_vertex_id)
-      : ver_id1_(from_vertex_id), id_(new_edge_id), ver_id2_(to_vertex_id) {}
+       const VertexId& to_vertex_id,
+       const EdgeId& new_edge_id)
+      : ver_id1_(from_vertex_id), ver_id2_(to_vertex_id), id_(new_edge_id) {}
 
   std::string to_string() const {
     std::stringstream ss_out;
@@ -61,16 +61,20 @@ class Edge {
     return ss_out.str();
   }
 
+  std::pair<VertexId, VertexId> get_binded_vertices() const {
+    return {ver_id1_, ver_id2_};
+  }
+
  private:
-  VertexId ver_id1_;
-  EdgeId id_;
-  VertexId ver_id2_;
+  VertexId ver_id1_ = 0;
+  VertexId ver_id2_ = 0;
+  EdgeId id_ = 0;
 };
 
 class Graph {
  public:
   void add_vertex() {
-    vertex_map_.emplace(default_ver_id_, Vertex(default_ver_id_));
+    vertex_map_.insert({default_ver_id_, Vertex(default_ver_id_)});
     ++default_ver_id_;
   }
 
@@ -79,11 +83,26 @@ class Graph {
            "Vertex doesn't exists");
     assert(vertex_map_.find(to_vertex_id) != vertex_map_.end() &&
            "Vertex doesn't exists");
-    edge_map_.emplace(default_edge_id_,
-                      Edge(from_vertex_id, default_edge_id_, to_vertex_id));
-    vertex_map_.at(from_vertex_id).add_edge_id(default_edge_id_);
-    vertex_map_.at(to_vertex_id).add_edge_id(default_edge_id_);
+    if (check_binding(from_vertex_id, to_vertex_id)) {
+      return;
+    }
+    const auto new_edge =
+        edge_map_.insert({default_edge_id_, Edge(from_vertex_id, to_vertex_id,
+                                                 default_edge_id_)});
+    vertex_map_.at(from_vertex_id).add_edge_id(new_edge.first->first);
+    vertex_map_.at(to_vertex_id).add_edge_id(new_edge.first->first);
     ++default_edge_id_;
+  }
+
+  bool check_binding(const VertexId& from_vertex_id,
+                     const VertexId& to_vertex_id) const {
+    for (const auto& item : edge_map_) {
+      if (item.second.get_binded_vertices() ==
+          std::pair(from_vertex_id, to_vertex_id)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   std::string to_string() const {
