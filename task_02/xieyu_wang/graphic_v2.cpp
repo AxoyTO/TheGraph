@@ -21,7 +21,7 @@ class VecToString{
             vectors="";
             int maxIndex= getMaxVecIndex(data);
             for(int i=0;i<=maxIndex;i++){
-                vectors+="{\"id\": "+std::to_string(i)+",";
+                vectors+="\t\t{\"id\":"+std::to_string(i)+",";
                 vectors+="\"edge_ids\": [";
                 for(const auto it:data){
                     if (it.from==i||it.to==i){
@@ -38,8 +38,8 @@ class VecToString{
         void setEdges(std::array<Data,MAX_ELEMENT>data){
             edges="";
             for(const auto it:data){
-                edges+="\"id\": "+std::to_string(it.edge);
-                edges+=",\"vertex_idx\": ["+std::to_string(it.from)+","+std::to_string(it.to)+"]},\n";
+                edges+="\t\t{\"id\": "+std::to_string(it.edge);
+                edges+=",\"vertex_ids\": ["+std::to_string(it.from)+","+std::to_string(it.to)+"]},\n";
             }
             edges.pop_back();
             edges.pop_back();
@@ -69,16 +69,18 @@ public:
             }
         }catch (std::string e){
             std::cerr<<e<<std::endl;
+            std::exit(1);
         }
     }
     void write(std::string vectors,std::string edges){
         openFile();
-        graph<<"{\n<<\t\"vertices\": ["<<std::endl;
+        graph<<"{\n\t\"vertices\": ["<<std::endl;
         graph<<vectors;
-        graph<<"\n\t],";
-        graph<<"\"edges\": ["<<std::endl;
+        graph<<"\t],\n";
+        graph<<"\t\"edges\": ["<<std::endl;
         graph<<edges;
-        graph<<"\n\t]\n}";
+        graph<<"\t]\n}\n";
+        graph.close();
     }
 private:
     std::ofstream graph;
