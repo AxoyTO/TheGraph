@@ -112,7 +112,7 @@ Graph task_02_get_graph() {
 
 int main() {
   const Graph task_02_graph = task_02_get_graph();
-  std::string json_string = task_02_graph.get_json_string();
+  const std::string json_string = task_02_graph.get_json_string();
 
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
