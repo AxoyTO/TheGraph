@@ -11,7 +11,7 @@ using EdgeId = int;
 
 struct Vertex {
   VertexId id;
-  Vertex(const VertexId& vertex_id) : id(vertex_id) {}
+  explicit Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 };
 
 struct Edge {
