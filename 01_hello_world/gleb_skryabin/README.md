@@ -1,3 +1,3 @@
-# gleb skryabin 323 task 01
+# gleb skryabin task 01
 
-![alt text](ggsdg.png "скрин сборки и версий")
+![alt text](screenshot.png "скрин сборки и версий")
