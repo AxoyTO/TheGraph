@@ -2,88 +2,113 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-constexpr int MAX_VEC = 18;
-constexpr int MAX_PTS = 13;
-struct Edge {
+#include <string>
+constexpr int MAX_ELEMENT = 18;
+struct Data {
   int from;
-  int edge_id;
+  int edge;
   int to;
 };
-static constexpr std::array<Edge, MAX_VEC> netWork = {{{0, 0, 1},
-                                                       {0, 1, 2},
-                                                       {0, 2, 3},
-                                                       {1, 3, 4},
-                                                       {1, 4, 5},
-                                                       {1, 5, 6},
-                                                       {2, 6, 7},
-                                                       {2, 7, 8},
-                                                       {3, 8, 9},
-                                                       {4, 9, 10},
-                                                       {5, 10, 10},
-                                                       {6, 11, 10},
-                                                       {7, 12, 11},
-                                                       {8, 13, 11},
-                                                       {9, 14, 12},
-                                                       {10, 15, 13},
-                                                       {11, 16, 13},
-                                                       {12, 17, 13}}};
-bool WriteToFile() {
-  std::ofstream graph;
-  graph.open("Graphic.json", std::ios::out);
-  if (!graph.is_open()) {
-    return false;
-  }
-  // graph:
-  graph << "{" << std::endl << "\t\"vertices\": [" << std::endl;
-  int index = 0;
-  // graph loop:
-  for (int i = 0; i <= MAX_PTS; ++i) {
-    index = 0;
-    if (i == 0) {
-      graph << "\t\t{" << std::endl;
-    } else {
-      graph << ",{" << std::endl;
-    }
-    graph << "\t\t\t\"id\": " << i << ", " << std::endl
-          << "\t\t\t\"edge_ids\": [";
-    for (auto it : netWork) {
-      if (it.from == i || it.to == i) {
-        if (index != 0) {
-          graph << " ," << it.edge_id;
-          index++;
-        } else {
-          graph << it.edge_id;
-          index++;
+class VecToString {
+public:
+  std::string getVectors() { return vectors; }
+  std::string getEdges() { return edges; }
+  void setVectors(std::array<Data, MAX_ELEMENT> data) {
+    vectors = "";
+    int maxIndex = getMaxVecIndex(data);
+    for (int i = 0; i <= maxIndex; i++) {
+      vectors += "\t\t{\"id\":" + std::to_string(i) + ",";
+      vectors += "\"edge_ids\": [";
+      for (const auto it : data) {
+        if (it.from == i || it.to == i) {
+          vectors += std::to_string(it.edge) + ",";
         }
       }
+      vectors.pop_back();
+      vectors += "]},\n";
     }
-    graph << "]" << std::endl << "\t\t\t}";
+    vectors.pop_back();
+    vectors.pop_back();
+    vectors += "\n";
   }
-  graph << "\n]," << std::endl;
-  // edges:
-  graph << std::endl << "\t\"edges\": [" << std::endl;
-  for (auto it : netWork) {
-    if (it.edge_id != 0) {
-      graph << ",{" << std::endl;
-    } else {
-      graph << "\t\t{" << std::endl;
+  void setEdges(std::array<Data, MAX_ELEMENT> data) {
+    edges = "";
+    for (const auto it : data) {
+      edges += "\t\t{\"id\": " + std::to_string(it.edge);
+      edges += ",\"vertex_ids\": [" + std::to_string(it.from) + "," +
+               std::to_string(it.to) + "]},\n";
     }
-    graph << "\t\t\t\t\"id\":" << it.edge_id << "," << std::endl;
-    graph << "\t\t\t\t\"vertex_ids\": [" << it.from << ", " << it.to << "]"
-          << std::endl;
-    graph << "\t\t\t}";
+    edges.pop_back();
+    edges.pop_back();
+    edges += "\n";
   }
-  graph << "\n\t]" << std::endl;
-  graph << "}" << std::endl;
-  graph.close();
-  return true;
-}
+  int getMaxVecIndex(std::array<Data, MAX_ELEMENT> data) {
+    int maxIndex = 0;
+    for (const auto it : data) {
+      if (it.from > maxIndex)
+        maxIndex = it.from;
+      if (it.to > maxIndex)
+        maxIndex = it.to;
+    }
+    return maxIndex;
+  }
+
+private:
+  std::string vectors;
+  std::string edges;
+};
+class WriteTOFile {
+public:
+  void openFile() {
+    try {
+      graph.open("Graphic.json", std::ios::out);
+      if (!graph.is_open()) {
+        throw "can not open file";
+      }
+    } catch (std::string e) {
+      std::cerr << e << std::endl;
+      std::exit(1);
+    }
+  }
+  void write(std::string vectors, std::string edges) {
+    openFile();
+    graph << "{\n\t\"vertices\": [" << std::endl;
+    graph << vectors;
+    graph << "\t],\n";
+    graph << "\t\"edges\": [" << std::endl;
+    graph << edges;
+    graph << "\t]\n}\n";
+    graph.close();
+  }
+
+private:
+  std::ofstream graph;
+};
 int main() {
-  std::cout << "Successfully Create arrays...." << std::endl;
-  if (WriteToFile()) {
-    std::cout << "Successfully create JS file....." << std::endl;
-  } else {
-    std::cerr << "Error in write to file" << std::endl;
-    return 1;
-  }
+  constexpr std::array<Data, MAX_ELEMENT> netWork = {{{0, 0, 1},
+                                                      {0, 1, 2},
+                                                      {0, 2, 3},
+                                                      {1, 3, 4},
+                                                      {1, 4, 5},
+                                                      {1, 5, 6},
+                                                      {2, 6, 7},
+                                                      {2, 7, 8},
+                                                      {3, 8, 9},
+                                                      {4, 9, 10},
+                                                      {5, 10, 10},
+                                                      {6, 11, 10},
+                                                      {7, 12, 11},
+                                                      {8, 13, 11},
+                                                      {9, 14, 12},
+                                                      {10, 15, 13},
+                                                      {11, 16, 13},
+                                                      {12, 17, 13}}};
+  VecToString vec;
+  vec.setEdges(netWork);
+  vec.setVectors(netWork);
+  std::cout << "String generated..." << std::endl;
+  WriteTOFile writeToFile;
+  writeToFile.write(vec.getVectors(), vec.getEdges());
+  std::cout << "successfully write to json" << std::endl;
+  return 0;
 }
