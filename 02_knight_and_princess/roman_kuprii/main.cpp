@@ -2,6 +2,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
 using std::endl;
@@ -11,23 +12,24 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
-struct Edge {
-  EdgeId id;
-  std::array<int, 2> nodes;
+constexpr int INVALID_ID = -1;
+const std::string JSON_GRAPH_FILENAME = "graph.json";
 
-  Edge(int start, int end, int _id) : id(_id) {
-    nodes[0] = start;
-    nodes[1] = end;
-  }
+struct Edge {
+  EdgeId id = INVALID_ID;
+  const std::array<VertexId, 2> connected_vertices;
+
+  Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
+      : id(_id), connected_vertices({start, end}) {}
 
   std::string to_json() const {
     std::string res;
     res = "{ \"id\": ";
     res += to_string(id);
     res += ", \"vertex_ids\": [";
-    res += to_string(nodes[0]);
+    res += to_string(connected_vertices[0]);
     res += ", ";
-    res += to_string(nodes[1]);
+    res += to_string(connected_vertices[1]);
     res += "] }";
     return res;
   }
@@ -36,8 +38,8 @@ struct Edge {
 // TODO Overload operator[]
 // TODO check uniqueness of ID field
 struct Vertex {
-  VertexId id = -1;
-  std::vector<int> edges_ids;
+  VertexId id = INVALID_ID;
+  std::vector<EdgeId> edges_ids;
   int depth = -1;
 
   explicit Vertex(VertexId _id) : id(_id) {}
@@ -60,7 +62,9 @@ struct Vertex {
 class Graph {
  public:
   Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
-      : vertices_(init_vertices), edges_(init_edges), size_(vertices_.size()) {}
+      : vertices_(init_vertices), edges_(init_edges) {
+    // TODO check if vertices are connected it the right way
+  }
 
   std::string to_json() const {
     std::string res;
@@ -102,14 +106,13 @@ class Graph {
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
-  int size_ = 0;
 };
 
-void write_graph(const std::string& json_name, const Graph& A) {
+void write_graph(const Graph& graph) {
   std::ofstream out;
-  out.open(json_name, std::ofstream::out | std::ofstream::trunc);
+  out.open(JSON_GRAPH_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
-  out << A.to_json();
+  out << graph.to_json();
 
   out.close();
 }
@@ -124,33 +127,35 @@ int main() {
 
   vector<Vertex> init_vertices;
 
-  for (const auto& it : init_edges) {
+  for (const auto& init_edge : init_edges) {
     // 1. check if verex id is uniq
     bool if_uniq0 = true, if_uniq1 = true;
     for (const auto& v_it : init_vertices) {
-      if_uniq0 &= it.nodes[0] != v_it.id;
-      if_uniq1 &= it.nodes[1] != v_it.id;
+      if_uniq0 &= init_edge.connected_vertices[0] != v_it.id;
+      if_uniq1 &= init_edge.connected_vertices[1] != v_it.id;
     }
 
     // 2. add new vertex, if needed
     if (if_uniq0) {
-      init_vertices.push_back(Vertex(it.nodes[0]));
+      init_vertices.emplace_back(init_edge.connected_vertices[0]);
     }
     if (if_uniq1) {
-      init_vertices.push_back(Vertex(it.nodes[1]));
+      init_vertices.emplace_back(init_edge.connected_vertices[1]);
     }
 
     // 3. add info about edge id into connected vetices
-    init_vertices[it.nodes[0]].edges_ids.push_back(it.id);
-    init_vertices[it.nodes[1]].edges_ids.push_back(it.id);
+    init_vertices[init_edge.connected_vertices[0]].edges_ids.push_back(
+        init_edge.id);
+    init_vertices[init_edge.connected_vertices[1]].edges_ids.push_back(
+        init_edge.id);
   }
 
-  Graph A(init_edges, init_vertices);
+  const Graph A(init_edges, init_vertices);
   for (int i = 0; i < 4; i++) {
     A.add_vertex();
     A.connect_vertices(0, A.get_vertices_num() - 1);
   }
-  write_graph("graph.json", A);
+  write_graph(A);
 
   return 0;
 }
