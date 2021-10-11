@@ -17,9 +17,12 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
+enum Colors {GRAY, GREEN, BLUE, YELLOW, RED};
+
 struct Edge {
   EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
+    Colors color = GRAY;
 
   Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
@@ -32,7 +35,38 @@ struct Edge {
     res += to_string(connected_vertices[0]);
     res += ", ";
     res += to_string(connected_vertices[1]);
-    res += "] }";
+    res += "], \"color\": ";
+    switch (color)
+    {
+        case GRAY:
+        {
+            res += "\"gray\" }";
+            break;
+        }
+        case GREEN:
+        {
+            res += "\"green\" }";
+            break;
+        }
+        case BLUE:
+        {
+            res += "\"blue\" }";
+            break;
+        }
+        case YELLOW:
+        {
+            res += "\"yellow\" }";
+            break;
+        }
+        case RED:
+        {
+            res += "\"red\" }";
+            break;
+        }
+        default:
+            break;
+    }
+
     return res;
   }
 };
@@ -74,7 +108,9 @@ class Graph {
 
   std::string to_json() const {
     std::string res;
-    res = "{ \"vertices\": [ ";
+    res = "{ \"depth\": ";
+    res += to_string(depth);
+    res += ", \"vertices\": [ ";
     for (const auto& v_it : vertices_) {
       res += v_it.to_json();
       res += ", ";
@@ -115,6 +151,19 @@ class Graph {
     }
     vertices_[dest_id].depth = min_depth + 1;
 
+    if (depth < min_depth+1) depth = min_depth+1;
+
+    int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
+
+    if (out_id == dest_id) {
+        edges_[id].color = GREEN;
+    } else if (diff == 0) {
+        edges_[id].color = BLUE;
+    } else if (diff == 1) {
+        edges_[id].color = YELLOW;
+    } else if (diff == 2) {
+        edges_[id].color = RED;
+    }
 
   }
 
@@ -123,6 +172,7 @@ class Graph {
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
+  int depth = 0;
 };
 
 void write_graph(const Graph& graph) {
@@ -136,11 +186,12 @@ void write_graph(const Graph& graph) {
 
 int main() {
     Graph A;
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 3; i++) {
         A.add_vertex();
     }
     A.connect_vertices(0, 1);
     A.connect_vertices(0, 2);
+/*
     A.connect_vertices(0, 3);
     A.connect_vertices(1, 4);
     A.connect_vertices(1, 5);
@@ -163,7 +214,7 @@ int main() {
     A.add_vertex();
     A.connect_vertices(0, A.get_vertices_num() - 1);
   }
-
+*/
     int graph_depth;
     std::cout << "Enter graph depth" << endl;
     std::cin >> graph_depth;
