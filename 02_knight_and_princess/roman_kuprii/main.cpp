@@ -1,4 +1,4 @@
-
+#include <cassert>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -14,8 +14,6 @@ using VertexId = int;
 
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 struct Edge {
   const EdgeId id = INVALID_ID;
@@ -83,11 +81,28 @@ class Graph {
   }
 
   void add_vertex() {
-    Vertex new_vertex(vertices_.size());
+    const Vertex new_vertex(vertices_.size());
     vertices_.emplace_back(new_vertex);
   }
 
   void connect_vertices(VertexId out_id, VertexId dest_id) {
+//check if vertices exist
+    bool check_out_vertex, check_dest_vertex = 0;
+    for (const auto& vert : vertices_) {
+        if(out_id == vert.id) check_out_vertex = 1;
+        if(dest_id == vert.id) check_dest_vertex = 1;
+    }
+    assert(check_out_vertex == 1);
+    assert(check_dest_vertex == 1);
+
+//check if they are not connected
+    bool check_edge = 0;
+    for (const auto& edge : edges_) {
+        if (edge.connected_vertices[0] == out_id && edge.connected_vertices[1] == dest_id)
+            check_edge = 1;
+    }
+    assert(check_edge == 0);
+
     EdgeId id = edges_.size();
     Edge new_edge(out_id, dest_id, id);
     edges_.push_back(new_edge);
