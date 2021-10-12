@@ -127,30 +127,30 @@ void write_graph(const Graph& graph) {
 }
 
 int main() {
-  Graph A;
+  Graph new_graph;
   for (int i = 0; i < 14; i++) {
-    A.add_vertex();
+    new_graph.add_vertex();
   }
-  A.connect_vertices(0, 1);
-  A.connect_vertices(0, 2);
-  A.connect_vertices(0, 3);
-  A.connect_vertices(1, 4);
-  A.connect_vertices(1, 5);
-  A.connect_vertices(1, 6);
-  A.connect_vertices(2, 7);
-  A.connect_vertices(2, 8);
-  A.connect_vertices(3, 9);
-  A.connect_vertices(4, 10);
-  A.connect_vertices(5, 10);
-  A.connect_vertices(6, 10);
-  A.connect_vertices(7, 11);
-  A.connect_vertices(8, 11);
-  A.connect_vertices(9, 12);
-  A.connect_vertices(10, 13);
-  A.connect_vertices(11, 13);
-  A.connect_vertices(12, 13);
+  new_graph.connect_vertices(0, 1);
+  new_graph.connect_vertices(0, 2);
+  new_graph.connect_vertices(0, 3);
+  new_graph.connect_vertices(1, 4);
+  new_graph.connect_vertices(1, 5);
+  new_graph.connect_vertices(1, 6);
+  new_graph.connect_vertices(2, 7);
+  new_graph.connect_vertices(2, 8);
+  new_graph.connect_vertices(3, 9);
+  new_graph.connect_vertices(4, 10);
+  new_graph.connect_vertices(5, 10);
+  new_graph.connect_vertices(6, 10);
+  new_graph.connect_vertices(7, 11);
+  new_graph.connect_vertices(8, 11);
+  new_graph.connect_vertices(9, 12);
+  new_graph.connect_vertices(10, 13);
+  new_graph.connect_vertices(11, 13);
+  new_graph.connect_vertices(12, 13);
 
-  write_graph(A);
+  write_graph(new_graph);
 
   return 0;
 }
