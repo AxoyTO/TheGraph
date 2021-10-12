@@ -128,6 +128,7 @@ Graph task_1_graph_generation() {
   for (int i = 0; i < num_of_vertex; ++i) {
     returned_graph.add_vertex();
   }
+
   returned_graph.add_edge_in_vertex(0, 0);
   returned_graph.add_edge_in_vertex(0, 1);
   returned_graph.add_edge_in_vertex(0, 2);
