@@ -36,10 +36,10 @@ struct Edge {
 };
 
 struct Vertex {
+public:
   const VertexId id = INVALID_ID;
-  std::array<EdgeId, 2> edges_ids;
 
-  explicit Vertex(VertexId _id) : id(_id) {}
+  explicit Vertex(const VertexId& _id) : id(_id) {}
 
   std::string to_json() const {
     std::string res;
@@ -54,6 +54,14 @@ struct Vertex {
     res += "] }";
     return res;
   }
+
+    void add_edge_id(const EdgeId& _id) {
+        edges_ids.push_back(_id);
+    }
+
+private:
+  std::vector<EdgeId> edges_ids;
+
 };
 
 class Graph {
@@ -104,12 +112,12 @@ class Graph {
     assert(check_edge == 0);
 
     EdgeId id = edges_.size();
-    Edge new_edge(out_id, dest_id, id);
-    edges_.push_back(new_edge);
+    const Edge new_edge(out_id, dest_id, id);
+    edges_.emplace_back(new_edge);
 
     // add information into Verex structure
-    vertices_[out_id].edges_ids[0] = id;
-    vertices_[dest_id].edges_ids[1] = id;
+    vertices_[out_id].add_edge_id(id);
+    vertices_[dest_id].add_edge_id(id);
   }
 
  private:
