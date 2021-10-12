@@ -15,7 +15,7 @@ constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 struct Edge {
-  EdgeId id = INVALID_ID;
+  const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
 
   Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
