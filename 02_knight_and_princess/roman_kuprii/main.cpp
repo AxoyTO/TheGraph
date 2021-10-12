@@ -1,4 +1,5 @@
-
+#include <random>
+#include <cassert>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -57,6 +58,7 @@ struct Edge {
         }
         case YELLOW:
         {
+//FIXME
             res += "\"gray\" }";
             break;
         }
@@ -73,11 +75,9 @@ struct Edge {
   }
 };
 
-// TODO Overload operator[]
-// TODO check uniqueness of ID field
 struct Vertex {
+public:
   const VertexId id = INVALID_ID;
-  std::vector<EdgeId> edges_ids;
   int depth = 0;
 
   explicit Vertex(VertexId _id) : id(_id) {}
@@ -97,16 +97,21 @@ struct Vertex {
     res += " }";
     return res;
   }
+
+  void add_edge_id(const EdgeId& _id) { edges_ids.push_back(_id); }
+
+    std::vector<EdgeId> get_edges_ids() const {
+        return edges_ids;
+    }
+
+private:
+  std::vector<EdgeId> edges_ids;
+
 };
 
 class Graph {
  public:
     Graph() {}
-
-  Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
-      : vertices_(init_vertices), edges_(init_edges) {
-    // TODO check if vertices are connected it the right way
-  }
 
   std::string to_json() const {
     std::string res;
@@ -143,20 +148,21 @@ class Graph {
     edges_.push_back(new_edge);
 
     // add information into Verex structure
-    vertices_[out_id].edges_ids.push_back(id);
-    vertices_[dest_id].edges_ids.push_back(id);
+    vertices_[out_id].add_edge_id(id);
+    vertices_[dest_id].add_edge_id(id);
 
     int min_depth = vertices_[out_id].depth;
-    for (const auto& edge_idx : vertices_[dest_id].edges_ids) {
+    for (const auto& edge_idx : vertices_[dest_id].get_edges_ids()) {
         VertexId vert = edges_[edge_idx].connected_vertices[0];
         min_depth = MIN(min_depth, vertices_[vert].depth);
     }
     vertices_[dest_id].depth = min_depth + 1;
 
+// graph depth
     if (depth < min_depth+1) depth = min_depth+1;
 
+//TODO make edge method - "add color"
     int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
-
     if (out_id == dest_id) {
         edges_[id].color = GREEN;
     } else if (diff == 0) {
@@ -169,7 +175,10 @@ class Graph {
 
   }
 
-  int get_vertices_num() { return vertices_.size(); }
+    vector<Vertex> get_vertices () const {return vertices_; }
+
+  int get_graph_depth() const { return depth; }
+  int get_vertices_num() const { return vertices_.size(); }
 
  private:
   vector<Vertex> vertices_;
@@ -187,48 +196,71 @@ void write_graph(const Graph& graph) {
 }
 
 int main() {
-    Graph A;
+    Graph my_graph;
     for (int i = 0; i < 14; i++) {
-        A.add_vertex();
+        my_graph.add_vertex();
     }
-    A.connect_vertices(0, 1);
-    A.connect_vertices(0, 2);
+    my_graph.connect_vertices(0, 1);
+    my_graph.connect_vertices(0, 2);
 
-    A.connect_vertices(0, 3);
-    A.connect_vertices(1, 4);
-    A.connect_vertices(1, 5);
-    A.connect_vertices(1, 6);
-    A.connect_vertices(2, 7);
-    A.connect_vertices(2, 8);
-    A.connect_vertices(3, 9);
-    A.connect_vertices(4, 10);
-    A.connect_vertices(5, 10);
-    A.connect_vertices(6, 10);
-    A.connect_vertices(7, 11);
-    A.connect_vertices(8, 11);
-    A.connect_vertices(9, 12);
-    A.connect_vertices(10, 13);
-    A.connect_vertices(11, 13);
-    A.connect_vertices(12, 13);
+    my_graph.connect_vertices(0, 3);
+    my_graph.connect_vertices(1, 4);
+    my_graph.connect_vertices(1, 5);
+    my_graph.connect_vertices(1, 6);
+    my_graph.connect_vertices(2, 7);
+    my_graph.connect_vertices(2, 8);
+    my_graph.connect_vertices(3, 9);
+    my_graph.connect_vertices(4, 10);
+    my_graph.connect_vertices(5, 10);
+    my_graph.connect_vertices(6, 10);
+    my_graph.connect_vertices(7, 11);
+    my_graph.connect_vertices(8, 11);
+    my_graph.connect_vertices(9, 12);
+    my_graph.connect_vertices(10, 13);
+    my_graph.connect_vertices(11, 13);
+    my_graph.connect_vertices(12, 13);
 
 //TEST
   for (int i = 0; i < 4; i++) {
-    A.add_vertex();
-    A.connect_vertices(0, A.get_vertices_num() - 1);
+    my_graph.add_vertex();
+    my_graph.connect_vertices(0, my_graph.get_vertices_num() - 1);
   }
 
-    int graph_depth;
+    int depth;
     std::cout << "Enter graph depth" << endl;
-    std::cin >> graph_depth;
-//    assert(graph_depth >= 0);
+    std::cin >> depth;
+    assert(depth >= 0);
     int new_vertices_num;
     std::cout << "Enter new_vertices_num" << endl;
     std::cin >> new_vertices_num;
 
-//    graph_depth = MIN(A.depth, graph_depth);
-    
+    depth = MIN(my_graph.get_graph_depth(), depth);
 
-  write_graph(A);
+    std::cout << "Graph depth: " << my_graph.get_graph_depth() << endl;
+    std::cout << "min depth: " << depth << endl;
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(0, 1);
+
+    for (int i = 0; i <= depth; i++) {
+        double probability = (double)i / (double)my_graph.get_graph_depth();
+        std::cout << probability << endl;
+        if (dis(gen) > probability) {
+
+//      FOR EVERY VERTEX ON THIS LVL
+            for (const auto& vertex : my_graph.get_vertices()) {
+                if (vertex.depth == i) {
+                    for (int j = 0; j < new_vertices_num; j++) {
+                        my_graph.add_vertex();
+                        my_graph.connect_vertices(vertex.id, my_graph.get_vertices_num()-1);
+                    }
+                }
+            }
+        }
+    }
+
+  write_graph(my_graph);
 
   return 0;
 }
