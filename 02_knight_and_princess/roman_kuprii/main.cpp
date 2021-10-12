@@ -39,8 +39,7 @@ struct Edge {
 
 struct Vertex {
   const VertexId id = INVALID_ID;
-  std::vector<EdgeId> edges_ids;
-  int depth = 0;
+  std::array<EdgeId, 2> edges_ids;
 
   explicit Vertex(VertexId _id) : id(_id) {}
 
@@ -54,9 +53,7 @@ struct Vertex {
     }
     res.pop_back();
     res.pop_back();
-    res += "], \"depth\": ";
-    res += to_string(depth);
-    res += " }";
+    res += "] }";
     return res;
   }
 };
@@ -64,9 +61,6 @@ struct Vertex {
 class Graph {
  public:
   Graph() {}
-
-  Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
-      : vertices_(init_vertices), edges_(init_edges) {}
 
   std::string to_json() const {
     std::string res;
@@ -90,7 +84,7 @@ class Graph {
 
   void add_vertex() {
     Vertex new_vertex(vertices_.size());
-    vertices_.push_back(new_vertex);
+    vertices_.emplace_back(new_vertex);
   }
 
   void connect_vertices(VertexId out_id, VertexId dest_id) {
@@ -99,18 +93,9 @@ class Graph {
     edges_.push_back(new_edge);
 
     // add information into Verex structure
-    vertices_[out_id].edges_ids.push_back(id);
-    vertices_[dest_id].edges_ids.push_back(id);
-
-    int min_depth = vertices_[out_id].depth;
-    for (const auto& edge_idx : vertices_[dest_id].edges_ids) {
-      VertexId vert = edges_[edge_idx].connected_vertices[0];
-      min_depth = MIN(min_depth, vertices_[vert].depth);
-    }
-    vertices_[dest_id].depth = min_depth + 1;
+    vertices_[out_id].edges_ids[0] = id;
+    vertices_[dest_id].edges_ids[1] = id;
   }
-
-  int get_vertices_num() { return vertices_.size(); }
 
  private:
   vector<Vertex> vertices_;
