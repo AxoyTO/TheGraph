@@ -55,12 +55,32 @@ constexpr int MAX_ELEMENT = 18;
 constexpr int MAX_VECTOR = 13;
 class Graph {
 public:
-  void setVectors(std::array<std::array<int, 3>, MAX_ELEMENT> data) {
+  void Generater() {
+    netWork = {{{0, 0, 1},
+                {0, 1, 2},
+                {0, 2, 3},
+                {1, 3, 4},
+                {1, 4, 5},
+                {1, 5, 6},
+                {2, 6, 7},
+                {2, 7, 8},
+                {3, 8, 9},
+                {4, 9, 10},
+                {5, 10, 10},
+                {6, 11, 10},
+                {7, 12, 11},
+                {8, 13, 11},
+                {9, 14, 12},
+                {10, 15, 13},
+                {11, 16, 13},
+                {12, 17, 13}}};
+  }
+  void setVectors() {
     vectors = "";
     for (int i = 0; i <= MAX_VECTOR; i++) {
       vectors += "\t\t{\"id\":" + std::to_string(i) + ",";
       vectors += "\"edge_ids\": [";
-      for (const auto it : data) {
+      for (const auto it : netWork) {
         if (it.at(0) == i || it.at(2) == i) {
           vectors += std::to_string(it.at(1)) + ",";
         }
@@ -72,9 +92,9 @@ public:
     vectors.pop_back();
     vectors += "\n";
   }
-  void setEdges(std::array<std::array<int, 3>, MAX_ELEMENT> data) {
+  void setEdges() {
     edges = "";
-    for (const auto it : data) {
+    for (const auto it : netWork) {
       edges += "\t\t{\"id\": " + std::to_string(it.at(1));
       edges += ",\"vertex_ids\": [" + std::to_string(it.at(0)) + "," +
                std::to_string(it.at(2)) + "]},\n";
@@ -96,31 +116,15 @@ public:
   }
 
 private:
+  std::array<std::array<int, 3>, MAX_ELEMENT> netWork;
   std::string vectors;
   std::string edges;
 };
 int main() {
-  const std::array<std::array<int, 3>, MAX_ELEMENT> netWork = {{{0, 0, 1},
-                                                                {0, 1, 2},
-                                                                {0, 2, 3},
-                                                                {1, 3, 4},
-                                                                {1, 4, 5},
-                                                                {1, 5, 6},
-                                                                {2, 6, 7},
-                                                                {2, 7, 8},
-                                                                {3, 8, 9},
-                                                                {4, 9, 10},
-                                                                {5, 10, 10},
-                                                                {6, 11, 10},
-                                                                {7, 12, 11},
-                                                                {8, 13, 11},
-                                                                {9, 14, 12},
-                                                                {10, 15, 13},
-                                                                {11, 16, 13},
-                                                                {12, 17, 13}}};
   Graph vec;
-  vec.setEdges(netWork);
-  vec.setVectors(netWork);
+  vec.Generater();
+  vec.setEdges();
+  vec.setVectors();
   std::cout << "String generated..." << std::endl;
   vec.write();
   std::cout << "successfully write to json" << std::endl;
