@@ -15,7 +15,9 @@ using VertexId = int;
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
+int MIN(const int& a, const int& b) {
+    return (a < b) ? a : b;
+}
 
 enum Colors {GRAY, GREEN, BLUE, YELLOW, RED};
 
