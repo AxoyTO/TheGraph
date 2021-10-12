@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -6,7 +7,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <algorithm>
 
 constexpr int DEFAULT_DEPTH = 0;
 
@@ -17,14 +17,16 @@ using EdgeColor = std::string;
 
 class Vertex {
  public:
-  Vertex(const VertexId& new_vertex_id, const Depth& new_vertex_depth) : id_(new_vertex_id), depth_(new_vertex_depth) {}
+  Vertex(const VertexId& new_vertex_id, const Depth& new_vertex_depth)
+      : id_(new_vertex_id), depth_(new_vertex_depth) {}
 
   void add_edge_id(const EdgeId& new_edge_id) {
-    if (std::find(edge_ids_.begin(), edge_ids_.end(), new_edge_id) != edge_ids_.end()) {
+    if (std::find(edge_ids_.begin(), edge_ids_.end(), new_edge_id) !=
+        edge_ids_.end()) {
       return;
     }
     edge_ids_.push_back(new_edge_id);
-}
+  }
 
   std::string to_string() const {
     std::stringstream ss_out;
@@ -57,7 +59,10 @@ class Edge {
        const VertexId& to_vertex_id,
        const EdgeId& new_edge_id,
        const EdgeColor& new_edge_color)
-      : ver_id1_(from_vertex_id), ver_id2_(to_vertex_id), id_(new_edge_id), color_(new_edge_color){}
+      : ver_id1_(from_vertex_id),
+        ver_id2_(to_vertex_id),
+        id_(new_edge_id),
+        color_(new_edge_color) {}
 
   std::pair<VertexId, VertexId> get_binded_vertices() const {
     return {ver_id1_, ver_id2_};
@@ -72,7 +77,9 @@ class Edge {
     ss_out << tab_2 << tab_1 << "\"vertex_ids\": [";
     ss_out << ver_id1_ << ", " << ver_id2_;
     ss_out << "],\n";
-    ss_out << tab_2 << tab_1 << "\"color\": " <<  "\"" << color_ << "\"" << "\n";
+    ss_out << tab_2 << tab_1 << "\"color\": "
+           << "\"" << color_ << "\""
+           << "\n";
     ss_out << tab_2 << "}";
     return ss_out.str();
   }
@@ -91,11 +98,14 @@ class Graph {
   }
 
   void add_vertex(const Depth& new_vertex_depth = DEFAULT_DEPTH) {
-    vertex_map_.insert({default_ver_id_, Vertex(default_ver_id_, new_vertex_depth)});
+    vertex_map_.insert(
+        {default_ver_id_, Vertex(default_ver_id_, new_vertex_depth)});
     ++default_ver_id_;
   }
 
-  void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id, const EdgeColor& new_edge_color = "gray") {
+  void add_edge(const VertexId& from_vertex_id,
+                const VertexId& to_vertex_id,
+                const EdgeColor& new_edge_color = "gray") {
     assert(vertex_map_.find(from_vertex_id) != vertex_map_.end() &&
            "Vertex doesn't exists");
     assert(vertex_map_.find(to_vertex_id) != vertex_map_.end() &&
@@ -103,9 +113,9 @@ class Graph {
     if (check_binding(from_vertex_id, to_vertex_id)) {
       return;
     }
-    const auto new_edge =
-        edge_map_.insert({default_edge_id_, Edge(from_vertex_id, to_vertex_id,
-                                                 default_edge_id_, new_edge_color)});
+    const auto new_edge = edge_map_.insert(
+        {default_edge_id_,
+         Edge(from_vertex_id, to_vertex_id, default_edge_id_, new_edge_color)});
     vertex_map_.at(from_vertex_id).add_edge_id(new_edge.first->first);
     vertex_map_.at(to_vertex_id).add_edge_id(new_edge.first->first);
     ++default_edge_id_;
@@ -122,13 +132,9 @@ class Graph {
     return false;
   }
 
-  int get_vertices_count() const {
-    return default_ver_id_;
-  }
+  int get_vertices_count() const { return default_ver_id_; }
 
-  Depth get_depth() const {
-    return depth_;
-  }
+  Depth get_depth() const { return depth_; }
 
   std::string to_string() const {
     std::stringstream ss_out;
