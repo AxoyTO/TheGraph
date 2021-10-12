@@ -55,7 +55,7 @@ struct Edge {
         }
         case YELLOW:
         {
-            res += "\"yellow\" }";
+            res += "\"gray\" }";
             break;
         }
         case RED:
@@ -186,12 +186,12 @@ void write_graph(const Graph& graph) {
 
 int main() {
     Graph A;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 14; i++) {
         A.add_vertex();
     }
     A.connect_vertices(0, 1);
     A.connect_vertices(0, 2);
-/*
+
     A.connect_vertices(0, 3);
     A.connect_vertices(1, 4);
     A.connect_vertices(1, 5);
@@ -214,14 +214,17 @@ int main() {
     A.add_vertex();
     A.connect_vertices(0, A.get_vertices_num() - 1);
   }
-*/
+
     int graph_depth;
     std::cout << "Enter graph depth" << endl;
     std::cin >> graph_depth;
-
+//    assert(graph_depth >= 0);
     int new_vertices_num;
     std::cout << "Enter new_vertices_num" << endl;
     std::cin >> new_vertices_num;
+
+//    graph_depth = MIN(A.depth, graph_depth);
+    
 
   write_graph(A);
 
