@@ -27,7 +27,14 @@ class Vertex {
     json_stringstream << "]}";
     return json_stringstream.str();
   }
-  void add_edge(const EdgeId& edge_id) { adjacted_edges_.insert(edge_id); }
+  bool is_edge_adjacted(const EdgeId& edge_id) const {
+    return adjacted_edges_.find(edge_id) != adjacted_edges_.end();
+  }
+  void add_edge(const EdgeId& edge_id) {
+    assert(!is_edge_adjacted(edge_id) &&
+           "edge that is to be added already exists");
+    adjacted_edges_.insert(edge_id);
+  }
 
  private:
   const VertexId id_;
@@ -55,11 +62,11 @@ class Edge {
 
 class Graph {
  public:
-  bool is_vertex_exists(const VertexId& vertex) {
+  bool is_vertex_exists(const VertexId& vertex) const {
     return vertices_.find(vertex) != vertices_.end();
   }
 
-  bool is_connected(const VertexId& vertex1, const VertexId& vertex2) {
+  bool is_connected(const VertexId& vertex1, const VertexId& vertex2) const {
     for (const auto& edge : edges_) {
       if ((edge.second.get_first_vertex() == vertex1 &&
            edge.second.get_second_vertex() == vertex2) ||
@@ -80,7 +87,7 @@ class Graph {
 
   EdgeId add_edge(const VertexId& vertex1, const VertexId& vertex2) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
-    assert(is_vertex_exists(vertex2) && "Vertex 1 doesn't exist");
+    assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
 
     EdgeId new_edge_id = next_edge_id_;
