@@ -38,6 +38,8 @@ class Edge {
  public:
   Edge(const EdgeId& edge_id, const VertexId& vertex1, const VertexId& vertex2)
       : id_(edge_id), vertex1_id_(vertex1), vertex2_id_(vertex2) {}
+  VertexId get_first_vertex() const { return vertex1_id_; }
+  VertexId get_second_vertex() const { return vertex2_id_; }
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
@@ -53,6 +55,22 @@ class Edge {
 
 class Graph {
  public:
+  bool is_vertex_exists(const VertexId& vertex) {
+    return vertices_.find(vertex) != vertices_.end();
+  }
+
+  bool is_connected(const VertexId& vertex1, const VertexId& vertex2) {
+    for (const auto& edge : edges_) {
+      if ((edge.second.get_first_vertex() == vertex1 &&
+           edge.second.get_second_vertex() == vertex2) ||
+          (edge.second.get_first_vertex() == vertex2 &&
+           edge.second.get_second_vertex() == vertex1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   VertexId add_vertex() {
     VertexId new_vertex_id = next_vertex_id_;
     update_next_vertex_id_();
@@ -61,22 +79,19 @@ class Graph {
   }
 
   EdgeId add_edge(const VertexId& vertex1, const VertexId& vertex2) {
+    assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
+    assert(is_vertex_exists(vertex2) && "Vertex 1 doesn't exist");
+    assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
+
     EdgeId new_edge_id = next_edge_id_;
     update_next_edge_id_();
-    if (vertices_.find(vertex1) == vertices_.end()) {
-      throw std::invalid_argument(
-          "first vertex does not occur in current state of the graph");
-    } else {
-      auto it = vertices_.find(vertex1);
-      it->second.add_edge(new_edge_id);
-    }
-    if (vertices_.find(vertex2) == vertices_.end()) {
-      throw std::invalid_argument(
-          "second vertex does not occur in current state of the graph");
-    } else {
-      auto it = vertices_.find(vertex2);
-      it->second.add_edge(new_edge_id);
-    }
+
+    auto it_vertex1 = vertices_.find(vertex1);
+    it_vertex1->second.add_edge(new_edge_id);
+
+    auto it_vertex2 = vertices_.find(vertex2);
+    it_vertex2->second.add_edge(new_edge_id);
+
     edges_.emplace(new_edge_id, Edge(new_edge_id, vertex1, vertex2));
     return new_edge_id;
   }
