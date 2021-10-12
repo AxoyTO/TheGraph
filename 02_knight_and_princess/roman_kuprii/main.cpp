@@ -20,7 +20,7 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 enum Colors {GRAY, GREEN, BLUE, YELLOW, RED};
 
 struct Edge {
-  EdgeId id = INVALID_ID;
+  const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
     Colors color = GRAY;
 
@@ -74,7 +74,7 @@ struct Edge {
 // TODO Overload operator[]
 // TODO check uniqueness of ID field
 struct Vertex {
-  VertexId id = INVALID_ID;
+  const VertexId id = INVALID_ID;
   std::vector<EdgeId> edges_ids;
   int depth = 0;
 
