@@ -1,3 +1,4 @@
+
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -14,9 +15,14 @@ using VertexId = int;
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+enum Colors {GRAY, GREEN, BLUE, YELLOW, RED};
+
 struct Edge {
   const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
+    Colors color = GRAY;
 
   Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
@@ -29,15 +35,48 @@ struct Edge {
     res += to_string(connected_vertices[0]);
     res += ", ";
     res += to_string(connected_vertices[1]);
-    res += "] }";
+    res += "], \"color\": ";
+    switch (color)
+    {
+        case GRAY:
+        {
+            res += "\"gray\" }";
+            break;
+        }
+        case GREEN:
+        {
+            res += "\"green\" }";
+            break;
+        }
+        case BLUE:
+        {
+            res += "\"blue\" }";
+            break;
+        }
+        case YELLOW:
+        {
+            res += "\"gray\" }";
+            break;
+        }
+        case RED:
+        {
+            res += "\"red\" }";
+            break;
+        }
+        default:
+            break;
+    }
+
     return res;
   }
 };
 
+// TODO Overload operator[]
 // TODO check uniqueness of ID field
 struct Vertex {
   VertexId id = INVALID_ID;
   std::vector<EdgeId> edges_ids;
+  int depth = 0;
 
   explicit Vertex(VertexId _id) : id(_id) {}
 
@@ -51,13 +90,17 @@ struct Vertex {
     }
     res.pop_back();
     res.pop_back();
-    res += "] }";
+    res += "], \"depth\": ";
+    res += to_string(depth);
+    res += " }";
     return res;
   }
 };
 
 class Graph {
  public:
+    Graph() {}
+
   Graph(const vector<Edge>& init_edges, const vector<Vertex>& init_vertices)
       : vertices_(init_vertices), edges_(init_edges) {
     // TODO check if vertices are connected it the right way
@@ -65,7 +108,9 @@ class Graph {
 
   std::string to_json() const {
     std::string res;
-    res = "{ \"vertices\": [ ";
+    res = "{ \"depth\": ";
+    res += to_string(depth);
+    res += ", \"vertices\": [ ";
     for (const auto& v_it : vertices_) {
       res += v_it.to_json();
       res += ", ";
@@ -83,9 +128,51 @@ class Graph {
     return res;
   }
 
+  void add_vertex() {
+//it is okey, until function remove vertex is added
+    Vertex new_vertex(vertices_.size());
+    vertices_.push_back(new_vertex);
+  }
+
+  void connect_vertices(VertexId out_id, VertexId dest_id) {
+//it is okey, until function remove edge is added
+    EdgeId id = edges_.size();
+    Edge new_edge(out_id, dest_id, id);
+    edges_.push_back(new_edge);
+
+    // add information into Verex structure
+    vertices_[out_id].edges_ids.push_back(id);
+    vertices_[dest_id].edges_ids.push_back(id);
+
+    int min_depth = vertices_[out_id].depth;
+    for (const auto& edge_idx : vertices_[dest_id].edges_ids) {
+        VertexId vert = edges_[edge_idx].connected_vertices[0];
+        min_depth = MIN(min_depth, vertices_[vert].depth);
+    }
+    vertices_[dest_id].depth = min_depth + 1;
+
+    if (depth < min_depth+1) depth = min_depth+1;
+
+    int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
+
+    if (out_id == dest_id) {
+        edges_[id].color = GREEN;
+    } else if (diff == 0) {
+        edges_[id].color = BLUE;
+    } else if (diff == 1) {
+        edges_[id].color = YELLOW;
+    } else if (diff == 2) {
+        edges_[id].color = RED;
+    }
+
+  }
+
+  int get_vertices_num() { return vertices_.size(); }
+
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
+  int depth = 0;
 };
 
 void write_graph(const Graph& graph) {
@@ -98,39 +185,47 @@ void write_graph(const Graph& graph) {
 }
 
 int main() {
-  // edge structure: {first vertex, second vertex, edge id}
-  const vector<Edge> init_edges = {
-      {0, 1, 0},    {0, 2, 1},    {0, 3, 2},   {1, 4, 3},   {1, 5, 4},
-      {1, 6, 5},    {2, 7, 6},    {2, 8, 7},   {3, 9, 8},   {4, 10, 9},
-      {5, 10, 10},  {6, 10, 11},  {7, 11, 12}, {8, 11, 13}, {9, 12, 14},
-      {10, 13, 15}, {11, 13, 16}, {12, 13, 17}};
-
-  vector<Vertex> init_vertices;
-
-  for (const auto& init_edge : init_edges) {
-    // 1. check if verex id is uniq
-    bool if_uniq0 = true, if_uniq1 = true;
-    for (const auto& v_it : init_vertices) {
-      if_uniq0 &= init_edge.connected_vertices[0] != v_it.id;
-      if_uniq1 &= init_edge.connected_vertices[1] != v_it.id;
+    Graph A;
+    for (int i = 0; i < 14; i++) {
+        A.add_vertex();
     }
+    A.connect_vertices(0, 1);
+    A.connect_vertices(0, 2);
 
-    // 2. add new vertex, if needed
-    if (if_uniq0) {
-      init_vertices.emplace_back(init_edge.connected_vertices[0]);
-    }
-    if (if_uniq1) {
-      init_vertices.emplace_back(init_edge.connected_vertices[1]);
-    }
+    A.connect_vertices(0, 3);
+    A.connect_vertices(1, 4);
+    A.connect_vertices(1, 5);
+    A.connect_vertices(1, 6);
+    A.connect_vertices(2, 7);
+    A.connect_vertices(2, 8);
+    A.connect_vertices(3, 9);
+    A.connect_vertices(4, 10);
+    A.connect_vertices(5, 10);
+    A.connect_vertices(6, 10);
+    A.connect_vertices(7, 11);
+    A.connect_vertices(8, 11);
+    A.connect_vertices(9, 12);
+    A.connect_vertices(10, 13);
+    A.connect_vertices(11, 13);
+    A.connect_vertices(12, 13);
 
-    // 3. add info about edge id into connected vetices
-    init_vertices[init_edge.connected_vertices[0]].edges_ids.push_back(
-        init_edge.id);
-    init_vertices[init_edge.connected_vertices[1]].edges_ids.push_back(
-        init_edge.id);
+//TEST
+  for (int i = 0; i < 4; i++) {
+    A.add_vertex();
+    A.connect_vertices(0, A.get_vertices_num() - 1);
   }
 
-  const Graph A(init_edges, init_vertices);
+    int graph_depth;
+    std::cout << "Enter graph depth" << endl;
+    std::cin >> graph_depth;
+//    assert(graph_depth >= 0);
+    int new_vertices_num;
+    std::cout << "Enter new_vertices_num" << endl;
+    std::cin >> new_vertices_num;
+
+//    graph_depth = MIN(A.depth, graph_depth);
+    
+
   write_graph(A);
 
   return 0;
