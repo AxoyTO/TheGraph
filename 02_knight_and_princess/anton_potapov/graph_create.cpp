@@ -79,7 +79,7 @@ class Graph {
   }
 
   VertexId add_vertex() {
-    VertexId new_vertex_id = next_vertex_id_;
+    const VertexId new_vertex_id = next_vertex_id_;
     update_next_vertex_id_();
     vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
@@ -90,7 +90,7 @@ class Graph {
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
 
-    EdgeId new_edge_id = next_edge_id_;
+    const EdgeId new_edge_id = next_edge_id_;
     update_next_edge_id_();
 
     auto it_vertex1 = vertices_.find(vertex1);
