@@ -61,7 +61,6 @@ class Graph {
   const vector<Edge>& edges() const { return edges_; }
 
  private:
-  int depth_ = 0;
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
 
