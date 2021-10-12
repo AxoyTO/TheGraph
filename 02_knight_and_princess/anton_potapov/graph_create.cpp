@@ -53,8 +53,6 @@ class Edge {
 
 class Graph {
  public:
-  Graph() = default;
-
   VertexId add_vertex() {
     VertexId new_vertex_id = next_vertex_id_;
     update_next_vertex_id_();
