@@ -1,5 +1,5 @@
-#include <cassert>
 #include <array>
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -36,7 +36,7 @@ struct Edge {
 };
 
 struct Vertex {
-public:
+ public:
   const VertexId id = INVALID_ID;
 
   explicit Vertex(const VertexId& _id) : id(_id) {}
@@ -55,13 +55,10 @@ public:
     return res;
   }
 
-    void add_edge_id(const EdgeId& _id) {
-        edges_ids.push_back(_id);
-    }
+  void add_edge_id(const EdgeId& _id) { edges_ids.push_back(_id); }
 
-private:
+ private:
   std::vector<EdgeId> edges_ids;
-
 };
 
 class Graph {
@@ -94,20 +91,23 @@ class Graph {
   }
 
   void connect_vertices(VertexId out_id, VertexId dest_id) {
-//check if vertices exist
+    // check if vertices exist
     bool check_out_vertex, check_dest_vertex = 0;
     for (const auto& vert : vertices_) {
-        if(out_id == vert.id) check_out_vertex = 1;
-        if(dest_id == vert.id) check_dest_vertex = 1;
+      if (out_id == vert.id)
+        check_out_vertex = 1;
+      if (dest_id == vert.id)
+        check_dest_vertex = 1;
     }
     assert(check_out_vertex == 1);
     assert(check_dest_vertex == 1);
 
-//check if they are not connected
+    // check if they are not connected
     bool check_edge = 0;
     for (const auto& edge : edges_) {
-        if (edge.connected_vertices[0] == out_id && edge.connected_vertices[1] == dest_id)
-            check_edge = 1;
+      if (edge.connected_vertices[0] == out_id &&
+          edge.connected_vertices[1] == dest_id)
+        check_edge = 1;
     }
     assert(check_edge == 0);
 
