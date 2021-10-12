@@ -1,3 +1,4 @@
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -11,8 +12,20 @@ using EdgeId = int;
 class Vertex {
  public:
   explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
-  void add_edge(const EdgeId& edge_id) { connected_edges_.push_back(edge_id); }
-  operator std::string() {
+  int check_edge_presence(const EdgeId& edge_id) {
+    for (const auto& id : connected_edges_) {
+      if (edge_id == id) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+  void add_edge(const EdgeId& edge_id) {
+    assert(!check_edge_presence(edge_id) &&
+           "Attemptig to add added edge to vertex: Error.");
+    connected_edges_.push_back(edge_id);
+  }
+  operator std::string() const {
     std::string result = "";
     result += "    {\n      \"id\": " + std::to_string(id);
     result += ",\n      \"edge_ids\": [";
@@ -39,7 +52,7 @@ class Edge {
  public:
   Edge(const EdgeId& init_id, const VertexId& v1_init, const VertexId& v2_init)
       : id(init_id), vertex1_id(v1_init), vertex2_id(v2_init){};
-  operator std::string() {
+  operator std::string() const {
     std::string result = "";
     result += "    {\n      \"id\": " + std::to_string(id);
     result += ",\n      \"vertex_ids\": ";
@@ -63,15 +76,20 @@ class Graph {
 
   void add_new_vertex() { vertices_.push_back(Vertex(vertices_.size())); }
 
-  void bind_vertices(const VertexId& id1, const VertexId& id2) {
-    const auto& vertex1_connections = connections_map_[id1];
-    for (const auto& connection : vertex1_connections) {
+  int are_vertices_connected(const VertexId& id1, const VertexId& id2) {
+    for (const auto& connection : connections_map_[id1]) {
       if (connection.second == id2) {
-        std::cout << "Attemptig to connect connected vertices: Error."
-                  << std::endl;
-        return;
+        return 1;
       }
     }
+    return 0;
+  }
+
+  void bind_vertices(const VertexId& id1, const VertexId& id2) {
+    assert(!are_vertices_connected(id1, id2) &&
+           "Attemptig to connect connected vertices: Error.");
+    assert(id1 < vertices_.size() && id2 < vertices_.size() &&
+           "Attemptig to connect nonexistent vertex: Error.");
     const auto& edge = edges_.emplace_back(edges_.size(), id1, id2);
     connections_map_[id1][edge.id] = id2;
     connections_map_[id2][edge.id] = id1;
@@ -79,7 +97,7 @@ class Graph {
     vertices_[id2].add_edge(edge.id);
   }
 
-  operator std::string() {
+  operator std::string() const {
     std::string result = "{\n  \"vertices\": [\n";
 
     for (int i = 0; i < vertices_.size(); i++) {
@@ -131,7 +149,7 @@ int main() {
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
 
-  Graph graph = generateCustomGraph(14, g_connections);
+  const Graph graph = generateCustomGraph(14, g_connections);
 
   std::ofstream file;
   file.open("graph.json");
