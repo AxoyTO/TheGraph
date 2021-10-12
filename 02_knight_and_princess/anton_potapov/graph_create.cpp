@@ -60,7 +60,7 @@ class Graph {
     return new_vertex_id;
   }
 
-  EdgeId add_edge(VertexId vertex1, VertexId vertex2) {
+  EdgeId add_edge(const VertexId& vertex1, const VertexId& vertex2) {
     EdgeId new_edge_id = next_edge_id_;
     update_next_edge_id_();
     if (vertices_.find(vertex1) == vertices_.end()) {
