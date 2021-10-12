@@ -13,24 +13,39 @@ using std::vector;
 using VertexId = int;
 using EdgeId = int;
 
+struct Edge;
+struct Vertex;
+bool is_vertex_valid(const VertexId& id, const vector<Vertex>& vertices);
+bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges);
+bool edge_exists_in_vertex(const EdgeId& id,
+                           const vector<EdgeId>& edges_of_vertex);
+
 struct Vertex {
  public:
   const VertexId id;
-  vector<EdgeId> edge_ids;
 
   explicit Vertex(const VertexId& _id) : id(_id) {}
+
+  void add_edge_id(const EdgeId& _id) {
+    assert(!edge_exists_in_vertex(_id, edge_ids_) &&
+           "Edge already exists in vertex!");
+    edge_ids_.push_back(_id);
+  }
 
   std::string to_JSON() const {
     std::string json_string;
 
     json_string += "\t{ \"id\": " + to_string(id) + ", \"edge_ids\": [";
-    for (int i = 0; i < edge_ids.size(); i++) {
-      json_string += to_string(edge_ids[i]);
-      if (i + 1 != edge_ids.size())
+    for (int i = 0; i < edge_ids_.size(); i++) {
+      json_string += to_string(edge_ids_[i]);
+      if (i + 1 != edge_ids_.size())
         json_string += ", ";
     }
     return json_string;
   }
+
+ private:
+  vector<EdgeId> edge_ids_;
 };
 
 struct Edge {
@@ -52,36 +67,19 @@ struct Edge {
 
 class Graph {
  public:
-  void insert_node(VertexId source) { vertices_.emplace_back(Vertex(source)); }
-  void insert_edge(VertexId source, VertexId destination, EdgeId id) {
-    assert(!edge_already_exists(id) && "Edge already exists");
-    assert(is_vertex_valid(source) && "Source vertex id doesn't exist");
-    assert(is_vertex_valid(destination) &&
+  void insert_node(const VertexId& source) { vertices_.emplace_back(source); }
+  void insert_edge(const VertexId& source,
+                   const VertexId& destination,
+                   const EdgeId& id) {
+    assert(!edge_exists_in_graph(id, edges_) && "Edge already exists");
+    assert(is_vertex_valid(source, vertices_) &&
+           "Source vertex id doesn't exist");
+    assert(is_vertex_valid(destination, vertices_) &&
            "Destination vertex id doesn't exist");
-    edges_.push_back(Edge(source, destination, id));
-    vertices_[source].edge_ids.push_back(id);
-    vertices_[destination].edge_ids.push_back(id);
-  }
 
-  //Проверка существует ли edge у графа, чтобы запретить добавление дубликатов
-  bool edge_already_exists(EdgeId id) {
-    for (const auto& edge : edges_)
-      if (edge.id == id) {
-        std::cerr << "There already exists edge: " << id << "\n";
-        return true;
-      }
-    return false;
-  }
-
-  //Проверка существует ли vertex у графа, чтобы предотвратить попытку на доступ
-  //невыделенной памяти
-  bool is_vertex_valid(VertexId id) {
-    for (const auto& vertex : vertices_)
-      if (vertex.id == id) {
-        return true;
-      }
-    std::cerr << "Vertex: " << id << " is not valid!\n";
-    return false;
+    edges_.emplace_back(source, destination, id);
+    vertices_[source].add_edge_id(id);
+    vertices_[destination].add_edge_id(id);
   }
 
   std::string to_JSON() const {
@@ -140,6 +138,34 @@ const Graph generateGraph() {
   return graph;
 }
 
+bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges) {
+  for (const auto& edge : edges)
+    if (edge.id == id) {
+      std::cerr << "There already exists edge: " << id << "\n";
+      return true;
+    }
+  return false;
+}
+bool is_vertex_valid(const VertexId& id, const vector<Vertex>& vertices) {
+  for (const auto& vertex : vertices)
+    if (vertex.id == id) {
+      return true;
+    }
+  std::cerr << "Vertex: " << id << " is not valid!\n";
+  return false;
+}
+
+bool edge_exists_in_vertex(const EdgeId& id,
+                           const vector<EdgeId>& edges_of_vertex) {
+  for (const auto& edge : edges_of_vertex) {
+    if (id == edge) {
+      std::cerr << "There already exists edge: " << id << " in this Vertex!\n";
+      return true;
+    }
+  }
+  return false;
+}
+
 int main() {
   const auto graph = generateGraph();
   std::ofstream file("graph.json", std::ios::out);
@@ -147,6 +173,7 @@ int main() {
     std::cerr << "Error opening the file graph.json!" << endl;
   else {
     file << graph.to_JSON();
+    file.close();
   }
   return 0;
 }
