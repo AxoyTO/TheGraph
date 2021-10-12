@@ -143,7 +143,7 @@ int main() {
   if (!json_file) {
     throw std::runtime_error("file not created");
   }
-  json_file << json_string;
+  json_file << json_string << std::endl;
   json_file.close();
   return 0;
 }
