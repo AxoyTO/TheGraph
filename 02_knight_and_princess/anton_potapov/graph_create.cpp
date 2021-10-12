@@ -56,15 +56,13 @@ class Graph {
   VertexId add_vertex() {
     VertexId new_vertex_id = next_vertex_id_;
     update_next_vertex_id_();
-    Vertex new_vertex(new_vertex_id);
-    vertices_.insert({new_vertex_id, new_vertex});
+    vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
   }
 
   EdgeId add_edge(VertexId vertex1, VertexId vertex2) {
     EdgeId new_edge_id = next_edge_id_;
     update_next_edge_id_();
-    Edge new_edge(new_edge_id, vertex1, vertex2);
     if (vertices_.find(vertex1) == vertices_.end()) {
       throw std::invalid_argument(
           "first vertex does not occur in current state of the graph");
@@ -79,7 +77,7 @@ class Graph {
       auto it = vertices_.find(vertex2);
       it->second.add_edge(new_edge_id);
     }
-    edges_.insert({new_edge_id, new_edge});
+    edges_.emplace(new_edge_id, Edge(new_edge_id, vertex1, vertex2));
     return new_edge_id;
   }
 
