@@ -58,8 +58,7 @@ struct Edge {
         }
         case YELLOW:
         {
-//FIXME
-            res += "\"gray\" }";
+            res += "\"yellow\" }";
             break;
         }
         case RED:
@@ -70,9 +69,14 @@ struct Edge {
         default:
             break;
     }
-
     return res;
   }
+
+    void paint(const Colors& _color) {
+        color = _color;
+    }
+
+
 };
 
 struct Vertex {
@@ -141,7 +145,7 @@ class Graph {
     vertices_.push_back(new_vertex);
   }
 
-  void connect_vertices(VertexId out_id, VertexId dest_id) {
+  void connect_vertices(VertexId out_id, VertexId dest_id, bool paint) {
 //it is okey, until function remove edge is added
     EdgeId id = edges_.size();
     Edge new_edge(out_id, dest_id, id);
@@ -160,19 +164,18 @@ class Graph {
 
 // graph depth
     if (depth < min_depth+1) depth = min_depth+1;
-
-//TODO make edge method - "add color"
-    int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
-    if (out_id == dest_id) {
-        edges_[id].color = GREEN;
-    } else if (diff == 0) {
-        edges_[id].color = BLUE;
-    } else if (diff == 1) {
-        edges_[id].color = YELLOW;
-    } else if (diff == 2) {
-        edges_[id].color = RED;
+    if (paint) {
+        int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
+        if (out_id == dest_id) {
+            edges_[id].color = GREEN;
+        } else if (diff == 0) {
+            edges_[id].color = BLUE;
+        } else if (diff == 1) {
+            edges_[id].color = YELLOW;
+        } else if (diff == 2) {
+            edges_[id].color = RED;
+        }
     }
-
   }
 
     vector<Vertex> get_vertices () const {return vertices_; }
@@ -200,31 +203,25 @@ int main() {
     for (int i = 0; i < 14; i++) {
         my_graph.add_vertex();
     }
-    my_graph.connect_vertices(0, 1);
-    my_graph.connect_vertices(0, 2);
+    my_graph.connect_vertices(0, 1, false);
+    my_graph.connect_vertices(0, 2, false);
 
-    my_graph.connect_vertices(0, 3);
-    my_graph.connect_vertices(1, 4);
-    my_graph.connect_vertices(1, 5);
-    my_graph.connect_vertices(1, 6);
-    my_graph.connect_vertices(2, 7);
-    my_graph.connect_vertices(2, 8);
-    my_graph.connect_vertices(3, 9);
-    my_graph.connect_vertices(4, 10);
-    my_graph.connect_vertices(5, 10);
-    my_graph.connect_vertices(6, 10);
-    my_graph.connect_vertices(7, 11);
-    my_graph.connect_vertices(8, 11);
-    my_graph.connect_vertices(9, 12);
-    my_graph.connect_vertices(10, 13);
-    my_graph.connect_vertices(11, 13);
-    my_graph.connect_vertices(12, 13);
-
-//TEST
-  for (int i = 0; i < 4; i++) {
-    my_graph.add_vertex();
-    my_graph.connect_vertices(0, my_graph.get_vertices_num() - 1);
-  }
+    my_graph.connect_vertices(0, 3, false);
+    my_graph.connect_vertices(1, 4, false);
+    my_graph.connect_vertices(1, 5, false);
+    my_graph.connect_vertices(1, 6, false);
+    my_graph.connect_vertices(2, 7, false);
+    my_graph.connect_vertices(2, 8,false);
+    my_graph.connect_vertices(3, 9,false);
+    my_graph.connect_vertices(4, 10, false);
+    my_graph.connect_vertices(5, 10, false);
+    my_graph.connect_vertices(6, 10, false);
+    my_graph.connect_vertices(7, 11,false);
+    my_graph.connect_vertices(8, 11,false);
+    my_graph.connect_vertices(9, 12,false);
+    my_graph.connect_vertices(10, 13,false);
+    my_graph.connect_vertices(11, 13,false);
+    my_graph.connect_vertices(12, 13,false);
 
     int depth;
     std::cout << "Enter graph depth" << endl;
@@ -244,16 +241,25 @@ std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);
 
     for (int i = 0; i <= depth; i++) {
-        double probability = (double)i / (double)my_graph.get_graph_depth();
+        double probability = (double)i / (double)depth;
         std::cout << probability << endl;
-        if (dis(gen) > probability) {
-
-//      FOR EVERY VERTEX ON THIS LVL
-            for (const auto& vertex : my_graph.get_vertices()) {
-                if (vertex.depth == i) {
-                    for (int j = 0; j < new_vertices_num; j++) {
+        for (const auto& vertex : my_graph.get_vertices()) {
+            if (vertex.depth == i) {
+                for (int j = 0; j < new_vertices_num; j++) {
+                    if(dis(gen) > probability) {
                         my_graph.add_vertex();
-                        my_graph.connect_vertices(vertex.id, my_graph.get_vertices_num()-1);
+                        my_graph.connect_vertices(vertex.id, my_graph.get_vertices_num()-1, false);
+
+                    }
+                    //ADD EXTRA COLORED EDGES
+                    if (dis(gen) < 0.1) {
+                        my_graph.connect_vertices(vertex.id, vertex.id, true);
+                    } else if (dis(gen) < 0.25) {
+                        //connect two adjacent vertices
+                    } else if (dis(gen) < 0.33) {
+                        //connect with random vertex on the next layer
+                    } else {
+                        //randomly connect with random vertex on the next layer
                     }
                 }
             }
