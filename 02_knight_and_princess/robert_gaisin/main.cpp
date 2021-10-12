@@ -73,12 +73,12 @@ class Graph {
 };
 
 void Graph::add_vertex() {
-  Vertex vertex = {.id = next_vertex_id()};
+  Vertex vertex = {next_vertex_id()};
   vertices_.push_back(vertex);
 }
 
 void Graph::add_edge(VertexId begin, VertexId end) {
-  Edge edge = {.id = next_edge_id(), begin, end};
+  Edge edge = {next_edge_id(), begin, end};
   edges_.push_back(edge);
 }
 
