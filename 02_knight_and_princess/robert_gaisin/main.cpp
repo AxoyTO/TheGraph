@@ -116,7 +116,6 @@ bool Graph::connection(const VertexId& begin, const VertexId& end) {
   return ret;
 }
 
-
 void Graph::add_vertex(size_t depth) {
   Vertex vertex = {next_vertex_id(), depth};
   vertices_.push_back(vertex);
