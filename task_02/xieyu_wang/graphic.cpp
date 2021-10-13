@@ -1,128 +1,126 @@
-// Tow Idea of mine IDK which one is IPO so need your help....
-/**
- * solution image 1 :
- * class graph:
- *      func 1. read arrays and Classification
- *      func 2. make it to string
- *          possible trouble:
- *              different string "edge_ids" and "vertex_ids"
- *                  give it param when called it ?
- *      func 3. write it to file
- */
-//----------------------------------------------------------
-/**
- * solution image 2:(my Present code)
- * class Graph:
- *     func 1. read and trans vectors to string
- *     func 2. read and trans edges to string
- *     func 3. write to file
- */
-//--------------------------------------------------------
-/**
- * questions in comment:
- * 1)why vector func is 1d?
- * 2)what the main idea of the two func?(I means IO)
- */
-// class Vertex {
-// public:
-//     const int id = 0;
-//
-//     Vertex(int _id) : id(_id) {}
-//
-//     void add_edge_id(int id) {
-//         // validation that id has not been added already
-//         edge_ids_.push_back(id);
-//     }
-//
-// private:
-//     std::vector<int> edge_ids_;
-// };
-// class Edge {
-// public:
-//    const int id = 0;
-//    const int from_vertex_id = 0;
-//    const int from_edge_id = 0;
-//
-//    Edge(int _id, int _from_vertex_id, int _to_vertex_id) : id(_id),
-//    from_vertex_id(_from_vertex_id), to_vertex_id(_to_vertex_id) {}
-//};
-
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <string>
-constexpr int MAX_ELEMENT = 18;
-constexpr int MAX_VECTOR = 13;
-class Graph {
+#include <vector>
+constexpr std::array<std::array<int, 3>, 18> netWork = {{{0, 0, 1},
+                                                     {0, 1, 2},
+                                                     {0, 2, 3},
+                                                     {1, 3, 4},
+                                                     {1, 4, 5},
+                                                     {1, 5, 6},
+                                                     {2, 6, 7},
+                                                     {2, 7, 8},
+                                                     {3, 8, 9},
+                                                     {4, 9, 10},
+                                                     {5, 10, 10},
+                                                     {6, 11, 10},
+                                                     {7, 12, 11},
+                                                     {8, 13, 11},
+                                                     {9, 14, 12},
+                                                     {10, 15, 13},
+                                                     {11, 16, 13},
+                                                     {12, 17, 13}}};
+
+class Vertex {
 public:
-  void setVectors(std::array<std::array<int, 3>, MAX_ELEMENT> data) {
-    vectors = "";
-    for (int i = 0; i <= MAX_VECTOR; i++) {
-      vectors += "\t\t{\"id\":" + std::to_string(i) + ",";
-      vectors += "\"edge_ids\": [";
-      for (const auto it : data) {
-        if (it.at(0) == i || it.at(2) == i) {
-          vectors += std::to_string(it.at(1)) + ",";
+    const int id = 0;
+    Vertex(int _id) : id(_id) {}
+    void add_edge_id(int eId) {
+            edge_ids.push_back(eId);
+    }
+    std::string toString(){
+        std::string strVec="";
+        strVec+="\t\t{\"id\":" +std::to_string(id)+",";
+        strVec+="\"edge_ids\": [";
+        for(const auto edgeId:edge_ids){
+            strVec+=std::to_string(edgeId)+",";
         }
-      }
-      vectors.pop_back();
-      vectors += "]},\n";
+        strVec.pop_back();
+        strVec+="]}";
+        return strVec;
     }
-    vectors.pop_back();
-    vectors.pop_back();
-    vectors += "\n";
-  }
-  void setEdges(std::array<std::array<int, 3>, MAX_ELEMENT> data) {
-    edges = "";
-    for (const auto it : data) {
-      edges += "\t\t{\"id\": " + std::to_string(it.at(1));
-      edges += ",\"vertex_ids\": [" + std::to_string(it.at(0)) + "," +
-               std::to_string(it.at(2)) + "]},\n";
+private:
+    std::vector<int> edge_ids;
+};
+
+class Edge {
+public:
+    const int id = 0;
+    const int fromVertexId = 0;
+    const int toVertexId = 0;
+    Edge(const int _id,const  int _fromVertexId,const int _to_vertex_id) : id(_id), fromVertexId(_fromVertexId), toVertexId(_to_vertex_id) {}
+    std::string toString(){
+        std::string strEdge="";
+        strEdge+="\t\t{\"id\": " +std::to_string(id)+",";
+        strEdge+= "\"vertex_ids\": ["+std::to_string(fromVertexId)+","+std::to_string(toVertexId)+"]}";
+        return strEdge;
     }
-    edges.pop_back();
-    edges.pop_back();
-    edges += "\n";
-  }
-  void write() {
+};
+class Graph{
+public:
+    //toSting
+    void addVertx(int from ,int edge,int to){
+        if (!idIsInVertex(from)){
+            vertex.emplace_back(from);
+        }
+        for(auto &vertexId:vertex){
+            if (vertexId.id==from){
+                vertexId.add_edge_id(edge);
+            }
+        }
+        if (!idIsInVertex(to)){
+            vertex.emplace_back(to);
+        }
+        for(auto &vertexId:vertex){
+            if (vertexId.id==to){
+                vertexId.add_edge_id(edge);
+            }
+        }
+    }
+    void addEdge(int from, int _edge,int to){
+        edge.emplace_back(_edge,from,to);
+    }
+    std::string toString(){
+        //vertex
+        std::string strGraph="";
+        strGraph+="{\n\t\"vertices\": [\n";
+        for(auto vertexId:vertex){
+            strGraph+=vertexId.toString()+",\n";
+        }
+        strGraph.pop_back();
+        strGraph.pop_back();
+        strGraph+="\n\t],\n";
+        //edges
+        strGraph+="\t\"edges\": [\n";
+        for(auto edgeId:edge){
+            strGraph+=edgeId.toString()+",\n";
+        }
+        strGraph.pop_back();
+        strGraph.pop_back();
+        strGraph+="\n\t]\n}\n";
+        return strGraph;
+    }
+private:
+    bool idIsInVertex(int _id){
+        for(const auto vertexId:vertex){
+            if (vertexId.id==_id){
+                return true;
+            }
+        }
+        return false;
+    }
+    std::vector<Vertex> vertex;
+    std::vector<Edge> edge;
+};
+int main(){
+    Graph graph;
+    for(const auto netId:netWork){
+        graph.addVertx(netId.at(0),netId.at(1),netId.at(2));
+        graph.addEdge(netId.at(0),netId.at(1),netId.at(2));
+    }
     std::ofstream writePT;
     writePT.open("Graphic.json", std::ios::out);
-    writePT << "{\n\t\"vertices\": [" << std::endl;
-    writePT << vectors;
-    writePT << "\t],\n";
-    writePT << "\t\"edges\": [" << std::endl;
-    writePT << edges;
-    writePT << "\t]\n}\n";
+    writePT<<graph.toString()<<std::endl;
     writePT.close();
-  }
-
-private:
-  std::string vectors;
-  std::string edges;
-};
-int main() {
-  const std::array<std::array<int, 3>, MAX_ELEMENT> netWork = {{{0, 0, 1},
-                                                                {0, 1, 2},
-                                                                {0, 2, 3},
-                                                                {1, 3, 4},
-                                                                {1, 4, 5},
-                                                                {1, 5, 6},
-                                                                {2, 6, 7},
-                                                                {2, 7, 8},
-                                                                {3, 8, 9},
-                                                                {4, 9, 10},
-                                                                {5, 10, 10},
-                                                                {6, 11, 10},
-                                                                {7, 12, 11},
-                                                                {8, 13, 11},
-                                                                {9, 14, 12},
-                                                                {10, 15, 13},
-                                                                {11, 16, 13},
-                                                                {12, 17, 13}}};
-  Graph vec;
-  vec.setEdges(netWork);
-  vec.setVectors(netWork);
-  std::cout << "String generated..." << std::endl;
-  vec.write();
-  std::cout << "successfully write to json" << std::endl;
-  return 0;
+    return 0;
 }
