@@ -45,7 +45,7 @@ struct Vertex {
     std::string res;
     res = "{ \"id\": ";
     res += to_string(id) + ", \"edge_ids\": [";
-    for (int n : edges_ids) {
+    for (int n : edges_ids_) {
       res += to_string(n);
       res += ", ";
     }
@@ -55,10 +55,10 @@ struct Vertex {
     return res;
   }
 
-  void add_edge_id(const EdgeId& _id) { edges_ids.push_back(_id); }
+  void add_edge_id(const EdgeId& _id) { edges_ids_.push_back(_id); }
 
  private:
-  std::vector<EdgeId> edges_ids;
+  std::vector<EdgeId> edges_ids_;
 };
 
 bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
