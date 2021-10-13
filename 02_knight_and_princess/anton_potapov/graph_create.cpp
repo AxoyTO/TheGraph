@@ -31,8 +31,7 @@ class Vertex {
     return adjacted_edges_.find(edge_id) != adjacted_edges_.end();
   }
   void add_edge(const EdgeId& edge_id) {
-    assert(!has_edge_id(edge_id) &&
-           "edge that is to be added already exists");
+    assert(!has_edge_id(edge_id) && "edge that is to be added already exists");
     adjacted_edges_.insert(edge_id);
   }
 
@@ -43,21 +42,19 @@ class Vertex {
 
 class Edge {
  public:
+  const VertexId vertex1_id, vertex2_id;
   Edge(const EdgeId& edge_id, const VertexId& vertex1, const VertexId& vertex2)
-      : id_(edge_id), vertex1_id_(vertex1), vertex2_id_(vertex2) {}
-  VertexId get_first_vertex() const { return vertex1_id_; }
-  VertexId get_second_vertex() const { return vertex2_id_; }
+      : vertex1_id(vertex1), vertex2_id(vertex2), id_(edge_id) {}
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
-                      << "\"vertex_ids\":[" << vertex1_id_ << "," << vertex2_id_
+                      << "\"vertex_ids\":[" << vertex1_id << "," << vertex2_id
                       << "]}";
     return json_stringstream.str();
   }
 
  private:
   const EdgeId id_;
-  const VertexId vertex1_id_, vertex2_id_;
 };
 
 class Graph {
@@ -68,10 +65,10 @@ class Graph {
 
   bool is_connected(const VertexId& vertex1, const VertexId& vertex2) const {
     for (const auto& edge : edges_) {
-      if ((edge.second.get_first_vertex() == vertex1 &&
-           edge.second.get_second_vertex() == vertex2) ||
-          (edge.second.get_first_vertex() == vertex2 &&
-           edge.second.get_second_vertex() == vertex1)) {
+      if ((edge.second.vertex1_id == vertex1 &&
+           edge.second.vertex2_id == vertex2) ||
+          (edge.second.vertex1_id == vertex2 &&
+           edge.second.vertex2_id == vertex1)) {
         return true;
       }
     }
