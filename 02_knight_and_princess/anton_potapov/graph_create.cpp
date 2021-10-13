@@ -27,11 +27,11 @@ class Vertex {
     json_stringstream << "]}";
     return json_stringstream.str();
   }
-  bool is_edge_adjacted(const EdgeId& edge_id) const {
+  bool has_edge_id(const EdgeId& edge_id) const {
     return adjacted_edges_.find(edge_id) != adjacted_edges_.end();
   }
   void add_edge(const EdgeId& edge_id) {
-    assert(!is_edge_adjacted(edge_id) &&
+    assert(!has_edge_id(edge_id) &&
            "edge that is to be added already exists");
     adjacted_edges_.insert(edge_id);
   }
