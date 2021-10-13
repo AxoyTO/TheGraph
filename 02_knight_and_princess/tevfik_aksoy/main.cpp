@@ -16,6 +16,7 @@ bool vertex_exists_in_graph(const VertexId& id, const vector<Vertex>& vertices);
 bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges);
 bool edge_id_exists_in_vertex(const EdgeId& id, const vector<EdgeId>& edge_ids);
 bool is_vertex_id_valid(const VertexId& id);
+bool is_edge_id_valid(const EdgeId& id);
 
 struct Vertex {
  public:
@@ -75,6 +76,7 @@ class Graph {
   void insert_edge(const VertexId& source,
                    const VertexId& destination,
                    const EdgeId& id) {
+    assert(is_edge_id_valid(id) && "Edge id is not valid!");
     assert(!edge_exists_in_graph(id, edges_) && "Edge already exists!");
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
@@ -190,6 +192,13 @@ bool edge_id_exists_in_vertex(const EdgeId& edge_id,
 }
 
 bool is_vertex_id_valid(const VertexId& id) {
+  if (id < 0) {
+    return false;
+  }
+  return true;
+}
+
+bool is_edge_id_valid(const EdgeId& id) {
   if (id < 0) {
     return false;
   }
