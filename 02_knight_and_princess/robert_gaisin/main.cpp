@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "      \"id\": " << vertex.id << "," << endl;
   out << "      \"edge_ids\": [" << vertex.edge_ids << "]," << endl;
   out << "      \"depth\": " << vertex.depth << endl;
-  out << "    }";
+  out << "}";
   return out;
 }
 
@@ -75,7 +75,7 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
       break;
   }
   out << endl;
-  out << "    }";
+  out << "}";
   return out;
 }
 
@@ -83,7 +83,7 @@ class Graph {
  public:
   void add_vertex(size_t depth);
 
-  void add_edge(VertexId begin, VertexId end, int color);
+  void add_edge(const VertexId& begin, const VertexId& end);
 
   int depth() const { return depth_sizes_.size(); }
   int depth_size(int depth) { return depth_sizes_[depth]; }
@@ -97,6 +97,7 @@ class Graph {
 
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
+  bool connection(const VertexId& begin, const VertexId& end);
   //вершины
   vector<Vertex> vertices_;
   //ребра
@@ -104,6 +105,17 @@ class Graph {
   //размеры слоев
   vector<int> depth_sizes_;
 };
+
+bool Graph::connection(const VertexId& begin, const VertexId& end) {
+  bool ret = false;
+  for (const EdgeId& edge_num : vertices_[begin].edge_ids) {
+    if ((ret = edges_[edge_num].begin == end || edges_[edge_num].end == end)) {
+      break;
+    }
+  }
+  return ret;
+}
+
 
 void Graph::add_vertex(size_t depth) {
   Vertex vertex = {next_vertex_id(), depth};
@@ -114,11 +126,13 @@ void Graph::add_vertex(size_t depth) {
   ++depth_sizes_[depth];
 }
 
-void Graph::add_edge(VertexId begin, VertexId end, int color) {
-  Edge edge = {next_edge_id(), begin, end, color};
-  vertices_[begin].edge_ids.push_back(edge.id);
-  vertices_[end].edge_ids.push_back(edge.id);
-  edges_.push_back(edge);
+void Graph::add_edge(const VertexId& begin, const VertexId& end, int color) {
+  if ((begin < num_of_vrt_) && (end < num_of_vrt_) && !connection(begin, end)) {
+    Edge edge = {next_edge_id(), begin, end, color};
+    vertices_[begin].edge_ids.push_back(edge.id);
+    vertices_[end].edge_ids.push_back(edge.id);
+    edges_.push_back(edge);
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& vertices) {
