@@ -1,5 +1,5 @@
-#include <fstream>
 #include <assert.h>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
