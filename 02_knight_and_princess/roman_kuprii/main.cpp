@@ -61,25 +61,28 @@ struct Vertex {
   std::vector<EdgeId> edges_ids;
 };
 
-bool vertex_check (const std::vector<Vertex> &vertices, VertexId id) {
-    bool check = 0;
-    for (const auto& vert: vertices)
-        if (vert.id == id) check = 1;
-    return check;
+bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
+  bool check = 0;
+  for (const auto& vert : vertices)
+    if (vert.id == id)
+      check = 1;
+  return check;
 }
 
-bool edge_connection_check (const std::vector<Edge> &edges, VertexId out_id, VertexId dest_id) {
-    bool check = 0;
-    for (const auto& edge: edges) {
-        if (edge.connected_vertices[0] == out_id && edge.connected_vertices[1] == dest_id)
-            check = 1;
-    }
-    return check;
+bool edge_connection_check(const std::vector<Edge>& edges,
+                           VertexId out_id,
+                           VertexId dest_id) {
+  bool check = 0;
+  for (const auto& edge : edges) {
+    if (edge.connected_vertices[0] == out_id &&
+        edge.connected_vertices[1] == dest_id)
+      check = 1;
+  }
+  return check;
 }
 
 class Graph {
  public:
-
   std::string to_json() const {
     std::string res;
     res = "{ \"vertices\": [ ";
@@ -100,9 +103,7 @@ class Graph {
     return res;
   }
 
-  void add_vertex() {
-    vertices_.emplace_back(vertices_.size() );
-  }
+  void add_vertex() { vertices_.emplace_back(vertices_.size()); }
 
   void connect_vertices(const VertexId& out_id, const VertexId& dest_id) {
     // check if vertices exist
