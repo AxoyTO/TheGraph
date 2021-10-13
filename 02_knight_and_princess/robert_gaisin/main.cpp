@@ -83,7 +83,7 @@ class Graph {
  public:
   void add_vertex(size_t depth);
 
-  void add_edge(const VertexId& begin, const VertexId& end);
+  void add_edge(const VertexId& begin, const VertexId& end, int color);
 
   int depth() const { return depth_sizes_.size(); }
   int depth_size(int depth) { return depth_sizes_[depth]; }
