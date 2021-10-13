@@ -1,6 +1,6 @@
 # VSCode
 *.code-workspace
-/.vscode
+.vscode/
 
 # Xcode
 build/
