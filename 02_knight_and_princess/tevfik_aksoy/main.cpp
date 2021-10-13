@@ -2,11 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <tuple>
 #include <vector>
 
-using std::endl;
-using std::get;
 using std::to_string;
 using std::vector;
 
@@ -18,9 +15,7 @@ struct Vertex;
 bool vertex_exists_in_graph(const VertexId& id, const vector<Vertex>& vertices);
 bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges);
 bool edge_id_exists_in_vertex(const EdgeId& id, const vector<EdgeId>& edge_ids);
-bool are_vertices_connected(const VertexId& source_vertex,
-                            const VertexId& destination_vertex,
-                            const vector<Edge>& edges);
+bool is_vertex_id_valid(const VertexId& id);
 
 struct Vertex {
  public:
@@ -46,6 +41,8 @@ struct Vertex {
     return json_string;
   }
 
+  const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+
  private:
   vector<EdgeId> edge_ids_;
 };
@@ -56,7 +53,7 @@ struct Edge {
   const VertexId source;
   const VertexId destination;
 
-  Edge(VertexId src_id, VertexId dest_id, EdgeId _id)
+  Edge(const VertexId& src_id, const VertexId& dest_id, const EdgeId& _id)
       : id(_id), source(src_id), destination(dest_id) {}
 
   std::string to_JSON() const {
@@ -69,21 +66,42 @@ struct Edge {
 
 class Graph {
  public:
-  void insert_node(const VertexId& source) { vertices_.emplace_back(source); }
+  void insert_node(const VertexId& vertex) {
+    assert(!vertex_exists_in_graph(vertex, vertices_) &&
+           "Vertex already exists!");
+    assert(is_vertex_id_valid(vertex) && "Vertex id is not valid!");
+    vertices_.emplace_back(vertex);
+  }
   void insert_edge(const VertexId& source,
                    const VertexId& destination,
                    const EdgeId& id) {
-    assert(!edge_exists_in_graph(id, edges_) && "Edge already exists");
-    assert(!are_vertices_connected(source, destination, edges_) &&
+    assert(!edge_exists_in_graph(id, edges_) && "Edge already exists!");
+    assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
     assert(vertex_exists_in_graph(source, vertices_) &&
-           "Source vertex id doesn't exist");
+           "Source vertex id doesn't exist!");
     assert(vertex_exists_in_graph(destination, vertices_) &&
-           "Destination vertex id doesn't exist");
+           "Destination vertex id doesn't exist!");
 
     edges_.emplace_back(source, destination, id);
     vertices_[source].add_edge_id(id);
     vertices_[destination].add_edge_id(id);
+  }
+
+  bool are_vertices_connected(const VertexId& source_vertex,
+                              const VertexId& destination_vertex) {
+    for (const auto& source : vertices_[source_vertex].get_edge_ids()) {
+      for (const auto& destination :
+           vertices_[destination_vertex].get_edge_ids()) {
+        if (source == destination) {
+          std::cerr << "Vertices: " << source_vertex << " and "
+                    << destination_vertex
+                    << " are already connected with edge: " << source << "\n";
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   std::string to_JSON() const {
@@ -139,7 +157,6 @@ const Graph generateGraph() {
   graph.insert_edge(10, 13, 15);
   graph.insert_edge(11, 13, 16);
   graph.insert_edge(12, 13, 17);
-
   return graph;
 }
 
@@ -157,7 +174,6 @@ bool vertex_exists_in_graph(const VertexId& id,
     if (vertex.id == id) {
       return true;
     }
-  std::cerr << "Vertex: " << id << " is not valid!\n";
   return false;
 }
 
@@ -173,26 +189,18 @@ bool edge_id_exists_in_vertex(const EdgeId& edge_id,
   return false;
 }
 
-bool are_vertices_connected(const VertexId& source_vertex,
-                            const VertexId& destination_vertex,
-                            const vector<Edge>& edges) {
-  for (const auto& edge : edges) {
-    if ((edge.source == source_vertex) &&
-        (edge.destination == destination_vertex)) {
-      std::cerr << "Vertices: " << source_vertex << " and "
-                << destination_vertex
-                << " are already connected with edge: " << edge.id << "\n";
-      return true;
-    }
+bool is_vertex_id_valid(const VertexId& id) {
+  if (id < 0) {
+    return false;
   }
-  return false;
+  return true;
 }
 
 int main() {
   const auto graph = generateGraph();
   std::ofstream file("graph.json", std::ios::out);
   if (!file.is_open())
-    std::cerr << "Error opening the file graph.json!" << endl;
+    std::cerr << "Error opening the file graph.json!\n";
   else {
     file << graph.to_JSON();
     file.close();
