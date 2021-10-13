@@ -77,8 +77,7 @@ class Graph {
   }
 
   VertexId add_vertex() {
-    const VertexId new_vertex_id = next_vertex_id_;
-    update_next_vertex_id_();
+    const VertexId new_vertex_id = get_next_vertex_id_();
     vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
   }
@@ -88,8 +87,7 @@ class Graph {
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
 
-    const EdgeId new_edge_id = next_edge_id_;
-    update_next_edge_id_();
+    const EdgeId new_edge_id = get_next_edge_id_();
 
     auto it_vertex1 = vertices_.find(vertex1);
     it_vertex1->second.add_edge(new_edge_id);
@@ -126,8 +124,16 @@ class Graph {
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
-  void update_next_vertex_id_() { ++next_vertex_id_; }
-  void update_next_edge_id_() { ++next_edge_id_; }
+  VertexId get_next_vertex_id_() {
+    VertexId new_vertex_id = next_vertex_id_;
+    ++next_vertex_id_;
+    return new_vertex_id;
+  }
+  EdgeId get_next_edge_id_() {
+    EdgeId new_edge_id = next_edge_id_;
+    ++next_edge_id_;
+    return new_edge_id;
+  }
 };
 
 Graph task_02_get_graph() {
