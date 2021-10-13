@@ -15,10 +15,12 @@ using EdgeId = int;
 
 struct Edge;
 struct Vertex;
-bool is_vertex_valid(const VertexId& id, const vector<Vertex>& vertices);
+bool vertex_exists_in_graph(const VertexId& id, const vector<Vertex>& vertices);
 bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges);
-bool edge_exists_in_vertex(const EdgeId& id,
-                           const vector<EdgeId>& edges_of_vertex);
+bool edge_id_exists_in_vertex(const EdgeId& id, const vector<EdgeId>& edge_ids);
+bool are_vertices_connected(const VertexId& source_vertex,
+                            const VertexId& destination_vertex,
+                            const vector<Edge>& edges);
 
 struct Vertex {
  public:
@@ -27,7 +29,7 @@ struct Vertex {
   explicit Vertex(const VertexId& _id) : id(_id) {}
 
   void add_edge_id(const EdgeId& _id) {
-    assert(!edge_exists_in_vertex(_id, edge_ids_) &&
+    assert(!edge_id_exists_in_vertex(_id, edge_ids_) &&
            "Edge already exists in vertex!");
     edge_ids_.push_back(_id);
   }
@@ -72,9 +74,11 @@ class Graph {
                    const VertexId& destination,
                    const EdgeId& id) {
     assert(!edge_exists_in_graph(id, edges_) && "Edge already exists");
-    assert(is_vertex_valid(source, vertices_) &&
+    assert(!are_vertices_connected(source, destination, edges_) &&
+           "Vertices are already connected!");
+    assert(vertex_exists_in_graph(source, vertices_) &&
            "Source vertex id doesn't exist");
-    assert(is_vertex_valid(destination, vertices_) &&
+    assert(vertex_exists_in_graph(destination, vertices_) &&
            "Destination vertex id doesn't exist");
 
     edges_.emplace_back(source, destination, id);
@@ -135,6 +139,7 @@ const Graph generateGraph() {
   graph.insert_edge(10, 13, 15);
   graph.insert_edge(11, 13, 16);
   graph.insert_edge(12, 13, 17);
+
   return graph;
 }
 
@@ -146,7 +151,8 @@ bool edge_exists_in_graph(const EdgeId& id, const vector<Edge>& edges) {
     }
   return false;
 }
-bool is_vertex_valid(const VertexId& id, const vector<Vertex>& vertices) {
+bool vertex_exists_in_graph(const VertexId& id,
+                            const vector<Vertex>& vertices) {
   for (const auto& vertex : vertices)
     if (vertex.id == id) {
       return true;
@@ -155,11 +161,27 @@ bool is_vertex_valid(const VertexId& id, const vector<Vertex>& vertices) {
   return false;
 }
 
-bool edge_exists_in_vertex(const EdgeId& id,
-                           const vector<EdgeId>& edges_of_vertex) {
-  for (const auto& edge : edges_of_vertex) {
-    if (id == edge) {
-      std::cerr << "There already exists edge: " << id << " in this Vertex!\n";
+bool edge_id_exists_in_vertex(const EdgeId& edge_id,
+                              const vector<EdgeId>& edge_ids) {
+  for (const auto& edge : edge_ids) {
+    if (edge_id == edge) {
+      std::cerr << "There already exists edge: " << edge_id
+                << " in this Vertex!\n";
+      return true;
+    }
+  }
+  return false;
+}
+
+bool are_vertices_connected(const VertexId& source_vertex,
+                            const VertexId& destination_vertex,
+                            const vector<Edge>& edges) {
+  for (const auto& edge : edges) {
+    if ((edge.source == source_vertex) &&
+        (edge.destination == destination_vertex)) {
+      std::cerr << "Vertices: " << source_vertex << " and "
+                << destination_vertex
+                << " are already connected with edge: " << edge.id << "\n";
       return true;
     }
   }
