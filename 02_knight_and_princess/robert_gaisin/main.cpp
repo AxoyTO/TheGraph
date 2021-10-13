@@ -151,7 +151,6 @@ Graph task_1_graph_generation() {
   returned_graph.add_edge(10, 13);
   returned_graph.add_edge(11, 13);
   returned_graph.add_edge(12, 13);
-  returned_graph.add_edge(12, 13);
 
   return returned_graph;
 }
