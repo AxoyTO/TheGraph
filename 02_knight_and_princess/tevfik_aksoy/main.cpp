@@ -68,9 +68,9 @@ struct Edge {
 class Graph {
  public:
   void insert_node(const VertexId& vertex) {
+    assert(is_vertex_id_valid(vertex) && "Vertex id is not valid!");
     assert(!vertex_exists_in_graph(vertex, vertices_) &&
            "Vertex already exists!");
-    assert(is_vertex_id_valid(vertex) && "Vertex id is not valid!");
     vertices_.emplace_back(vertex);
   }
   void insert_edge(const VertexId& source,
