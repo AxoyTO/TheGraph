@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "{" << endl;
   out << "      \"id\": " << vertex.id << "," << endl;
   out << "      \"edge_ids\": [" << vertex.edge_ids << "]" << endl;
-  out << "    }";
+  out << "}";
   return out;
 }
 
@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
   out << "      \"id\": " << edge.id << "," << endl;
   out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "]"
       << endl;
-  out << "    }";
+  out << "}";
   return out;
 }
 
