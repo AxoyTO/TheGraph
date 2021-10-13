@@ -80,7 +80,7 @@ struct Vertex {
     std::string res;
     res = "{ \"id\": ";
     res += to_string(id) + ", \"edge_ids\": [";
-    for (int n : edges_ids) {
+    for (int n : edges_ids_) {
       res += to_string(n);
       res += ", ";
     }
@@ -92,13 +92,33 @@ struct Vertex {
     return res;
   }
 
-  void add_edge_id(const EdgeId& _id) { edges_ids.push_back(_id); }
+  void add_edge_id(const EdgeId& _id) { edges_ids_.push_back(_id); }
 
-  std::vector<EdgeId> get_edges_ids() const { return edges_ids; }
+  std::vector<EdgeId> get_edges_ids() const { return edges_ids_; }
 
  private:
-  std::vector<EdgeId> edges_ids;
+  std::vector<EdgeId> edges_ids_;
 };
+
+bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
+  bool check = 0;
+  for (const auto& vert : vertices)
+    if (vert.id == id)
+      check = 1;
+  return check;
+}
+
+bool edge_connection_check(const std::vector<Edge>& edges,
+                           VertexId out_id,
+                           VertexId dest_id) {
+  bool check = 0;
+  for (const auto& edge : edges) {
+    if (edge.connected_vertices[0] == out_id &&
+        edge.connected_vertices[1] == dest_id)
+      check = 1;
+  }
+  return check;
+}
 
 class Graph {
  public:
@@ -107,7 +127,7 @@ class Graph {
   std::string to_json() const {
     std::string res;
     res = "{ \"depth\": ";
-    res += to_string(depth);
+    res += to_string(depth_);
     res += ", \"vertices\": [ ";
     for (const auto& v_it : vertices_) {
       res += v_it.to_json();
@@ -126,14 +146,17 @@ class Graph {
     return res;
   }
 
-  void add_vertex() {
-    // it is okey, until function remove vertex is added
-    Vertex new_vertex(vertices_.size());
-    vertices_.push_back(new_vertex);
-  }
+  void add_vertex() { vertices_.emplace_back(vertices_.size()); }
 
-  void connect_vertices(VertexId out_id, VertexId dest_id, bool paint) {
-    // TODO CHECKS!!!
+  void connect_vertices(const VertexId& out_id,
+                        const VertexId& dest_id,
+                        bool paint) {
+    // check if vertices exist
+    assert(vertex_check(vertices_, out_id) == 1);
+    assert(vertex_check(vertices_, dest_id) == 1);
+
+    // check if they are not connected
+    assert(edge_connection_check(edges_, out_id, dest_id) == 0);
 
     EdgeId id = edges_.size();
     Edge new_edge(out_id, dest_id, id);
@@ -143,15 +166,18 @@ class Graph {
     vertices_[out_id].add_edge_id(id);
     vertices_[dest_id].add_edge_id(id);
 
-    int min_depth = vertices_[out_id].depth;
-    for (const auto& edge_idx : vertices_[dest_id].get_edges_ids()) {
-      VertexId vert = edges_[edge_idx].connected_vertices[0];
-      min_depth = MIN(min_depth, vertices_[vert].depth);
-    }
-    vertices_[dest_id].depth = min_depth + 1;
+    if (!paint) {
+      int min_depth = vertices_[out_id].depth;
+      for (const auto& edge_idx : vertices_[dest_id].get_edges_ids()) {
+        VertexId vert = edges_[edge_idx].connected_vertices[0];
+        min_depth = MIN(min_depth, vertices_[vert].depth);
+      }
+      vertices_[dest_id].depth = (min_depth + 1);
 
-    if (depth < min_depth + 1)
-      depth = min_depth + 1;
+      if (depth_ < (min_depth + 1))
+        depth_ = min_depth + 1;
+    }
+
     if (paint) {
       int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
       if (out_id == dest_id) {
@@ -166,15 +192,16 @@ class Graph {
     }
   }
 
+  vector<Edge> get_edges() const { return edges_; }
   vector<Vertex> get_vertices() const { return vertices_; }
 
-  int get_graph_depth() const { return depth; }
+  int get_graph_depth() const { return depth_; }
   int get_vertices_num() const { return vertices_.size(); }
 
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
-  int depth = 0;
+  int depth_ = 0;
 };
 
 void write_graph(const Graph& graph) {
@@ -184,6 +211,42 @@ void write_graph(const Graph& graph) {
   out << graph.to_json();
 
   out.close();
+}
+
+void new_vertex_generation(Graph* work_graph) {
+  int depth;
+  std::cout << "Enter generate graph depth" << endl;
+  std::cin >> depth;
+  assert(depth >= 0);
+  int new_vertices_num;
+  std::cout << "Enter new_vertices_num" << endl;
+  std::cin >> new_vertices_num;
+
+  int graph_depth = work_graph->get_graph_depth();
+  depth = MIN(graph_depth, depth);
+
+  std::cout << "Graph depth: " << graph_depth << endl;
+  std::cout << "min depth: " << depth << endl;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+
+  for (int i = 0; i <= depth; i++) {
+    double probability = (double)i / (double)depth;
+    std::cout << probability << endl;
+    for (const auto& vertex : work_graph->get_vertices()) {
+      if (vertex.depth == i) {
+        for (int j = 0; j < new_vertices_num; j++) {
+          if (dis(gen) > probability) {
+            work_graph->add_vertex();
+            work_graph->connect_vertices(
+                vertex.id, work_graph->get_vertices_num() - 1, false);
+          }
+        }
+      }
+    }
+  }
 }
 
 int main() {
@@ -211,46 +274,77 @@ int main() {
   my_graph.connect_vertices(11, 13, false);
   my_graph.connect_vertices(12, 13, false);
 
-  int depth;
-  std::cout << "Enter graph depth" << endl;
-  std::cin >> depth;
-  assert(depth >= 0);
-  int new_vertices_num;
-  std::cout << "Enter new_vertices_num" << endl;
-  std::cin >> new_vertices_num;
+  new_vertex_generation(&my_graph);
 
-  depth = MIN(my_graph.get_graph_depth(), depth);
-
-  std::cout << "Graph depth: " << my_graph.get_graph_depth() << endl;
-  std::cout << "min depth: " << depth << endl;
+  int graph_depth = my_graph.get_graph_depth();
+  std::cout << "Graph depth: " << graph_depth << std::endl;
 
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
 
-  for (int i = 0; i <= depth; i++) {
-    double probability = (double)i / (double)depth;
-    std::cout << probability << endl;
+
+//BLUE
+//TODO: RECURSIVE!!!!!!!!!!!!!!!!!!!!!!!
+    std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
     for (const auto& vertex : my_graph.get_vertices()) {
-      if (vertex.depth == i) {
-        for (int j = 0; j < new_vertices_num; j++) {
-          if (dis(gen) > probability) {
-            my_graph.add_vertex();
-            my_graph.connect_vertices(vertex.id,
-                                      my_graph.get_vertices_num() - 1, false);
-          }
-          // ADD EXTRA COLORED EDGES
-          if (dis(gen) < 0.1) {
-            my_graph.connect_vertices(vertex.id, vertex.id, true);
-          } else if (dis(gen) < 0.25) {
-            // connect two adjacent vertices
-          } else if (dis(gen) < 0.33) {
-            // connect with random vertex on the next layer
-          } else {
-            // randomly connect with random vertex on the next layer
+
+        for (const auto& edge : vertex.get_edges_ids()) {
+
+            if (edge.connected_vertices[0] = vertex.id) {
+                if (adjacent_vertices[0] == INVALID_ID) {
+                    adjacent_vertices[0] = edge.connected_vertices[1];
+                } else if (adjacent_vertices[1] == INVALID_ID) {
+                    adjacent_vertices[1] = edge.connected_vertices[1];
+                    my_graph.connect_vertices(adjacent_vertices[0], adjacent_vertices[1]);
+                } else {
+                    adjacent_vertices
+
+
+
+
+
+
+
+
+  for (const auto& vertex : my_graph.get_vertices()) {
+    if (dis(gen) < 0.1) {
+      my_graph.connect_vertices(vertex.id, vertex.id, true);
+    }
+    if (dis(gen) < 0.25) {
+      // connect two adjacent vertices
+      // todo: find adjacent vertex
+      VertexId adjacent_vertex = INVALID_ID;
+      for (const auto& tmp_vertex : my_graph.get_vertices()) {
+        if (tmp_vertex.depth == vertex.depth) {
+          if (edge_connection_check(my_graph.get_edges(), vertex.id,
+                                    tmp_vertex.id) == 0) {
+            adjacent_vertex = tmp_vertex.id;
+            break;
           }
         }
       }
+      my_graph.connect_vertices(vertex.id, adjacent_vertex, true);
+    }
+    if (dis(gen) < 0.33) {
+      if ((vertex.depth + 2) <= graph_depth) {
+        std::vector<VertexId> red_vertices_ids;
+        for (const auto& tmp_vertex : my_graph.get_vertices()) {
+          if (tmp_vertex.depth == (vertex.depth + 2))
+            red_vertices_ids.emplace_back(tmp_vertex.id);
+        }
+        if (red_vertices_ids.size() > 0) {
+          std::random_device rd;
+          std::mt19937 eng(rd());
+          std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
+          my_graph.connect_vertices(vertex.id, red_vertices_ids[distr(eng)],
+                                    true);
+        }
+      }
+    }
+
+    if (dis(gen) < 0.22) {
+      // randomly connect with random vertex on the next layer (YELLOW)
     }
   }
 
