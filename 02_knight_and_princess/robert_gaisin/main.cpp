@@ -21,7 +21,7 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
-  const VertexId id;
+  const VertexId id = 0;
   int depth = 0;
   vector<EdgeId> edge_ids;
 };
@@ -35,9 +35,9 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
 }
 
 struct Edge {
-  const EdgeId id;
-  VertexId begin = 0;
-  VertexId end = 0;
+  const EdgeId id = 0;
+  const VertexId begin = 0;
+  const VertexId end = 0;
 };
 
 std::ostream& operator<<(std::ostream& out, const Edge& edge) {
@@ -53,9 +53,7 @@ class Graph {
  public:
   void add_vertex();
 
-  void add_edge(VertexId begin, VertexId end);
-
-  void add_edge_in_vertex(VertexId vertex_id, EdgeId edge_id);
+  void add_edge(const VertexId& begin, const VertexId& end);
 
   const vector<Vertex>& vertices() const { return vertices_; }
   const vector<Edge>& edges() const { return edges_; }
@@ -67,25 +65,33 @@ class Graph {
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
+  bool connection(const VertexId& begin, const VertexId& end);
   vector<Vertex> vertices_;
   vector<Edge> edges_;
 };
+
+bool Graph::connection(const VertexId& begin, const VertexId& end) {
+  bool ret = false;
+  for (const EdgeId& edge_num : vertices_[begin].edge_ids) {
+    if ((ret = edges_[edge_num].begin == end || edges_[edge_num].end == end)) {
+      break;
+    }
+  }
+  return ret;
+}
 
 void Graph::add_vertex() {
   Vertex vertex = {next_vertex_id()};
   vertices_.push_back(vertex);
 }
 
-void Graph::add_edge(VertexId begin, VertexId end) {
-  Edge edge = {next_edge_id(), begin, end};
-  edges_.push_back(edge);
-}
-
-void Graph::add_edge_in_vertex(VertexId vertex_id, EdgeId edge_id) {
-  if (vertex_id <= num_of_vrt_)
-    vertices_[vertex_id].edge_ids.push_back(edge_id);
-  else
-    cout << "Аttempt to create an edge with a non-existent vertex" << endl;
+void Graph::add_edge(const VertexId& begin, const VertexId& end) {
+  if ((begin < num_of_vrt_) && (end < num_of_vrt_) && !connection(begin, end)) {
+    Edge edge = {next_edge_id(), begin, end};
+    vertices_[begin].edge_ids.push_back(edge.id);
+    vertices_[end].edge_ids.push_back(edge.id);
+    edges_.push_back(edge);
+  }
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
@@ -128,43 +134,6 @@ Graph task_1_graph_generation() {
     returned_graph.add_vertex();
   }
 
-  returned_graph.add_edge_in_vertex(0, 0);
-  returned_graph.add_edge_in_vertex(0, 1);
-  returned_graph.add_edge_in_vertex(0, 2);
-  returned_graph.add_edge_in_vertex(1, 0);
-  returned_graph.add_edge_in_vertex(1, 3);
-  returned_graph.add_edge_in_vertex(1, 4);
-  returned_graph.add_edge_in_vertex(1, 5);
-  returned_graph.add_edge_in_vertex(2, 1);
-  returned_graph.add_edge_in_vertex(2, 6);
-  returned_graph.add_edge_in_vertex(2, 7);
-  returned_graph.add_edge_in_vertex(3, 2);
-  returned_graph.add_edge_in_vertex(3, 8);
-  returned_graph.add_edge_in_vertex(4, 3);
-  returned_graph.add_edge_in_vertex(4, 9);
-  returned_graph.add_edge_in_vertex(5, 4);
-  returned_graph.add_edge_in_vertex(5, 10);
-  returned_graph.add_edge_in_vertex(6, 5);
-  returned_graph.add_edge_in_vertex(6, 11);
-  returned_graph.add_edge_in_vertex(7, 6);
-  returned_graph.add_edge_in_vertex(7, 12);
-  returned_graph.add_edge_in_vertex(8, 7);
-  returned_graph.add_edge_in_vertex(8, 13);
-  returned_graph.add_edge_in_vertex(9, 8);
-  returned_graph.add_edge_in_vertex(9, 14);
-  returned_graph.add_edge_in_vertex(10, 9);
-  returned_graph.add_edge_in_vertex(10, 10);
-  returned_graph.add_edge_in_vertex(10, 11);
-  returned_graph.add_edge_in_vertex(10, 15);
-  returned_graph.add_edge_in_vertex(11, 12);
-  returned_graph.add_edge_in_vertex(11, 13);
-  returned_graph.add_edge_in_vertex(11, 16);
-  returned_graph.add_edge_in_vertex(12, 14);
-  returned_graph.add_edge_in_vertex(12, 17);
-  returned_graph.add_edge_in_vertex(13, 15);
-  returned_graph.add_edge_in_vertex(13, 16);
-  returned_graph.add_edge_in_vertex(13, 17);
-
   returned_graph.add_edge(0, 1);
   returned_graph.add_edge(0, 2);
   returned_graph.add_edge(0, 3);
@@ -182,6 +151,7 @@ Graph task_1_graph_generation() {
   returned_graph.add_edge(9, 12);
   returned_graph.add_edge(10, 13);
   returned_graph.add_edge(11, 13);
+  returned_graph.add_edge(12, 13);
   returned_graph.add_edge(12, 13);
 
   return returned_graph;
