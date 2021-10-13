@@ -87,9 +87,9 @@ class Graph {
 
   bool are_vertices_connected(const VertexId& id1, const VertexId& id2) {
     assert(check_vertex_existence(id1) &&
-           "Attemptig to access to nonexistent vertex: Error."); 
+           "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
-           "Attemptig to access to nonexistent vertex: Error.");       
+           "Attemptig to access to nonexistent vertex: Error.");
     for (const auto& edge : connections_map_[id1]) {
       if (edge->vertex1_id == id2 || edge->vertex2_id == id2) {
         return 1;
