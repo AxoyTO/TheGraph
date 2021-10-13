@@ -12,7 +12,7 @@ using EdgeId = int;
 class Vertex {
  public:
   explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
-  int check_edge_presence(const EdgeId& edge_id) {
+  bool check_edge_presence(const EdgeId& edge_id) {
     for (const auto& id : connected_edges_) {
       if (edge_id == id) {
         return 1;
@@ -27,8 +27,8 @@ class Vertex {
   }
   operator std::string() const {
     std::string result = "";
-    result += "    {\n      \"id\": " + std::to_string(id);
-    result += ",\n      \"edge_ids\": [";
+    result += "{\n\"id\": " + std::to_string(id);
+    result += ",\n\"edge_ids\": [";
 
     for (int i = 0; i < connected_edges_.size(); i++) {
       result += std::to_string(connected_edges_[i]);
@@ -38,7 +38,7 @@ class Vertex {
         result += ", ";
       }
     }
-    result += "\n    }";
+    result += "}";
     return result;
   }
 
@@ -54,12 +54,12 @@ class Edge {
       : id(init_id), vertex1_id(v1_init), vertex2_id(v2_init){};
   operator std::string() const {
     std::string result = "";
-    result += "    {\n      \"id\": " + std::to_string(id);
-    result += ",\n      \"vertex_ids\": ";
+    result += "{\n\"id\": " + std::to_string(id);
+    result += ",\n\"vertex_ids\": ";
 
     result += "[" + std::to_string(vertex1_id);
     result += ", " + std::to_string(vertex2_id);
-    result += "]\n    }";
+    result += "]\n}";
 
     return result;
   }
@@ -74,11 +74,24 @@ class Graph {
   int get_vertices_amount() const { return vertices_.size(); }
   int get_edges_amount() const { return edges_.size(); }
 
-  void add_new_vertex() { vertices_.push_back(Vertex(vertices_.size())); }
+  void add_new_vertex() { vertices_.emplace_back(vertices_.size()); }
 
-  int are_vertices_connected(const VertexId& id1, const VertexId& id2) {
-    for (const auto& connection : connections_map_[id1]) {
-      if (connection.second == id2) {
+  bool check_vertex_existence(const VertexId& vertex_id) {
+    for (const auto& vertex : vertices_) {
+      if (vertex_id == vertex.id) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  bool are_vertices_connected(const VertexId& id1, const VertexId& id2) {
+    assert(check_vertex_existence(id1) &&
+           "Attemptig to access to nonexistent vertex: Error."); 
+    assert(check_vertex_existence(id2) &&
+           "Attemptig to access to nonexistent vertex: Error.");       
+    for (const auto& edge : connections_map_[id1]) {
+      if (edge->vertex1_id == id2 || edge->vertex2_id == id2) {
         return 1;
       }
     }
@@ -88,11 +101,9 @@ class Graph {
   void bind_vertices(const VertexId& id1, const VertexId& id2) {
     assert(!are_vertices_connected(id1, id2) &&
            "Attemptig to connect connected vertices: Error.");
-    assert(id1 < vertices_.size() && id2 < vertices_.size() &&
-           "Attemptig to connect nonexistent vertex: Error.");
-    const auto& edge = edges_.emplace_back(edges_.size(), id1, id2);
-    connections_map_[id1][edge.id] = id2;
-    connections_map_[id2][edge.id] = id1;
+    auto& edge = edges_.emplace_back(edges_.size(), id1, id2);
+    connections_map_[id1].push_back(&edge);
+    connections_map_[id2].push_back(&edge);
     vertices_[id1].add_edge(edge.id);
     vertices_[id2].add_edge(edge.id);
   }
@@ -127,7 +138,7 @@ class Graph {
   std::vector<Vertex> vertices_;
 
   // connections_map: vertex1 -> edge -> vertex2
-  std::map<VertexId, std::map<EdgeId, VertexId>> connections_map_;
+  std::map<VertexId, std::vector<Edge*>> connections_map_;
 };
 
 Graph generateCustomGraph(
