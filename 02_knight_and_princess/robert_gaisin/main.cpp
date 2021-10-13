@@ -22,7 +22,6 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 
 struct Vertex {
   const VertexId id = 0;
-  int depth = 0;
   vector<EdgeId> edge_ids;
 };
 
