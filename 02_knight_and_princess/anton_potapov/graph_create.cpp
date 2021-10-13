@@ -155,7 +155,7 @@ int main() {
 
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
-  if (!json_file) {
+  if (!json_file.is_open()) {
     throw std::runtime_error("file not created");
   }
   json_file << json_string << std::endl;
