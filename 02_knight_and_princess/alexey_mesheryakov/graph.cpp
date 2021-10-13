@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-constexpr int VERTEX_CNT = 14;
+constexpr int VERTEX_COUNT = 14;
+constexpr int INVALID_ID = -1;
 
 using std::pair;
 using std::vector;
@@ -24,15 +25,15 @@ class Graph {
              << "," << vertex_ids_.second << "]}";
       return buffer.str();
     }
+    pair<VertexId, VertexId> get_vertex_ids() const { return vertex_ids_; }
 
    private:
-    EdgeId id_ = 0;
-    pair<VertexId, VertexId> vertex_ids_ = {-1, -1};
+    const EdgeId id_ = INVALID_ID;
+    const pair<VertexId, VertexId> vertex_ids_ = {};
   };
-
   class Vertex {
    public:
-    Vertex(const VertexId& id) : id_(id) {}
+    explicit Vertex(const VertexId& id) : id_(id) {}
 
     std::string to_string() const {
       std::stringstream buffer;
@@ -46,24 +47,37 @@ class Graph {
     void add_edge(const EdgeId& edge_id) { edges_.push_back(edge_id); }
 
    private:
-    VertexId id_ = -1;
+    const VertexId id_ = INVALID_ID;
     vector<EdgeId> edges_ = {};
   };
 
-  bool vertex_exist(const VertexId& id) {
+  const bool vertex_exist(const VertexId& id) {
     return (0 <= id) && (id < vertex_id_counter_);
   }
 
-  void add_vertex() { vertices_.push_back(Vertex(vertex_id_counter_++)); }
+  const bool edge_exist(const EdgeId& id) {
+    return (0 <= id) && (id < edge_id_counter_);
+  }
 
-  void add_edge(const pair<VertexId, VertexId>& vertices) {
-    assert(vertex_exist(vertices.first) && "Source vertex id doesn't exist");
-    assert(vertex_exist(vertices.second) &&
-           "Destination vertex id doesn't exist");
+  const bool edge_exist(const VertexId& first, const VertexId& second) {
+    bool exist = false;
+    for (const auto& edge : edges_) {
+      auto vertices = edge.get_vertex_ids();
+      exist = exist || (vertices.first == first && vertices.second == second) ||
+              (vertices.second == first && vertices.first == second);
+    }
+    return exist;
+  }
 
-    edges_.push_back(Edge(vertices, edge_id_counter_));
-    vertices_[vertices.first].add_edge(edge_id_counter_);
-    vertices_[vertices.second].add_edge(edge_id_counter_);
+  void add_vertex() { vertices_.emplace_back(vertex_id_counter_++); }
+
+  void add_edge(const VertexId& first, const VertexId& second) {
+    assert(vertex_exist(first) && "Source vertex id doesn't exist");
+    assert(vertex_exist(second) && "Destination vertex id doesn't exist");
+    assert(edge_exist(first, second) && "Such edge already exist");
+    edges_.push_back(Edge({first, second}, edge_id_counter_));
+    vertices_[first].add_edge(edge_id_counter_);
+    vertices_[second].add_edge(edge_id_counter_);
     edge_id_counter_++;
   }
 
@@ -71,14 +85,14 @@ class Graph {
     std::stringstream buffer;
     buffer << "{\"vertices\":[";
     for (int j = 0; j < vertices_.size(); j++) {
-      Vertex vertex = vertices_[j];
+      const Vertex vertex = vertices_[j];
       buffer << vertex.to_string();
       if (j != vertices_.size() - 1)
         buffer << ",";
     }
     buffer << "],\"edges\":[";
     for (int j = 0; j < edges_.size(); j++) {
-      Edge edge = edges_[j];
+      const Edge edge = edges_[j];
       buffer << edge.to_string();
       if (j != edges_.size() - 1)
         buffer << ",";
@@ -100,11 +114,11 @@ int main() {
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
-  for (int i = 0; i < VERTEX_CNT; i++) {
+  for (int i = 0; i < VERTEX_COUNT; i++) {
     graph.add_vertex();
   }
   for (const auto& edge : edges) {
-    graph.add_edge(edge);
+    graph.add_edge(edge.first, edge.second);
   }
   std::ofstream file;
   file.open("graph.json", std::fstream::out | std::fstream::trunc);
