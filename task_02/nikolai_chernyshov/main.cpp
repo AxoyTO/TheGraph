@@ -1,175 +1,167 @@
-#include <memory>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <vector>
 
-struct edge {
-    static int edge_id_max;
-    int edge_id;
-    int to_vertice;
-    std::shared_ptr<struct vertice> ptr;
+using VertexId = int;
+using EdgeId = int;
 
-    edge() {}
+struct Edge {
+  inline static EdgeId id_max;
+  EdgeId id;
+  VertexId vertex1, vertex2 = -1; // -1 if doesn't exist
 
-    edge(int to_vertice_, bool again) {
-        if (again) {
-            edge_id = edge_id_max - 1;
-        }
-        else {
-            edge_id = edge_id_max;
-            edge_id_max++;
-        }
-        to_vertice = to_vertice_;
-    }
+  Edge(VertexId vertex1_, VertexId vertex2_ = -1)
+      : id(id_max), vertex1(vertex1_), vertex2(vertex2_) {
+    id_max++;
+  }
 };
 
-int edge::edge_id_max = 0;
+struct Vertex {
+  inline static VertexId id_max;
+  VertexId id;
+  std::vector<EdgeId> edges;
 
-struct vertice {
-    static int vertice_id_max;
-    int id;
-    int depth;
-    std::unique_ptr<struct edge[]> edges_from_ptr;
-    std::unique_ptr<struct edge> parent_edge_ptr;
-    int edges_from_num;
-
-    //How many new edges to generate from current vertice? 0..3
-    int num_generate() {
-        int res;
-        if (this->depth == 1) return 3;
-        int x = std::rand()/((RAND_MAX + 1u)/10);
-        if ((this->depth == 2) && (x < 2)) return x + 2;
-        if (x <= this->depth) return 0;
-        int y = std::rand()/((RAND_MAX + 1u)/3);
-        if (y == 2) res = 3;
-        else if (y == 1) res = 2;
-        else res = 1;
-        return res;
+  Vertex(EdgeId parent_edge_id, std::vector<EdgeId> edges_ids) : id(id_max) {
+    id_max++;
+    if (parent_edge_id != -1) { // -1 if root vertex -> no parent
+      edges.push_back(parent_edge_id);
     }
-    
-    vertice(int depth_, int parent_id) {
-        id = vertice_id_max;
-        vertice_id_max++;
-        depth = depth_;
-
-        if (depth == 1) {
-            parent_edge_ptr.reset(nullptr);
-        }
-        else {
-            parent_edge_ptr.reset(new struct edge(parent_id, true));
-        }
-        edges_from_num = num_generate();
-
-        if (edges_from_num == 0) {
-            edges_from_ptr.reset(nullptr);
-        }
-        else {
-            edges_from_ptr.reset(new struct edge[edges_from_num]);
-            for (int i=0; i < edges_from_num; i++) {
-                edges_from_ptr[i] = edge(vertice_id_max, false);
-                std::shared_ptr<struct vertice> new_vertice(
-                        new struct vertice(depth + 1, id)
-                    );
-                edges_from_ptr[i].ptr = new_vertice;
-            }
-        }
+    if (!(edges_ids.empty())) {
+      edges.insert(edges.end(), edges_ids.begin(), edges_ids.end());
     }
-
-    void to_json_vert(std::ofstream& file) {
-        file <<  "{\n\t\t\t\"id\": " << this->id << ",\n\t\t\t\"edge_ids\": [";
-        if (this->edges_from_num > 1) {
-            for (int i=0; i < this->edges_from_num - 1; i++) {
-                file << this->edges_from_ptr[i].edge_id << ", ";
-            }
-            file << this->edges_from_ptr[this->edges_from_num - 1].edge_id;
-        }
-        else if (this->edges_from_num == 1) {
-            file << this->edges_from_ptr[0].edge_id;
-        }
-        file << "]\n\t\t}";
-
-        if (this->edges_from_num > 0) {
-            file << ", ";
-            if (this->edges_from_num > 1) {
-                for (int i=0; i < this->edges_from_num - 1; i++) {
-                    (*this->edges_from_ptr[i].ptr).to_json_vert(file);
-                    file << ", ";
-                }
-                (*this->edges_from_ptr[this->edges_from_num - 1].ptr).to_json_vert(file);
-            }
-            else (*this->edges_from_ptr[0].ptr).to_json_vert(file);
-        }
-    }
-
-    void to_json_edge(std::ofstream& file) {
-        if (this->edges_from_num > 0) {
-            if (this->edges_from_num > 1) {
-                for (int i=0; i < this->edges_from_num - 1; i++) {
-                    file << "{\n\t\t\t\"id\": " << this->edges_from_ptr[i].edge_id;
-                    file << ",\n\t\t\t\"vertex_ids\": [" << this->id << ", ";
-                    file << this->edges_from_ptr[i].to_vertice << "]\n\t\t}, ";
-                }
-            }
-            file << "{\n\t\t\t\"id\": " << this->edges_from_ptr[this->edges_from_num - 1].edge_id;
-            file << ",\n\t\t\t\"vertex_ids\": [" << this->id << ", ";
-            file << this->edges_from_ptr[this->edges_from_num - 1].to_vertice << "]\n\t\t}";
-
-            if (this->edges_from_num > 0) {
-                bool has_grandkids = false;
-                for (int i=0; i < this->edges_from_num; i++) {
-                    if ((*this->edges_from_ptr[i].ptr).edges_from_num > 0) {
-                        has_grandkids = true;
-                    }
-                }
-                if (has_grandkids) {
-                    file << ", ";
-                }
-            }
-
-            if (this->edges_from_num > 1) {
-                for (int i=0; i < this->edges_from_num - 1; i++) {
-    
-                    if ((*this->edges_from_ptr[i].ptr).edges_from_num > 0) {
-                        (*this->edges_from_ptr[i].ptr).to_json_edge(file);
-                        bool other_has_grandkids = false;
-                        for (int j=i+1; j < this->edges_from_num; j++) {
-                            if ((*this->edges_from_ptr[j].ptr).edges_from_num > 0) {
-                                other_has_grandkids = true;
-                            }
-                        }
-                        if (other_has_grandkids) {
-                            file << ", ";
-                        }
-                    }
-                }
-                if ((*this->edges_from_ptr[this->edges_from_num - 1].ptr).edges_from_num > 0) {
-                    (*this->edges_from_ptr[this->edges_from_num - 1].ptr).to_json_edge(file);
-                }
-            }
-            else if ((*this->edges_from_ptr[0].ptr).edges_from_num > 0) {
-                (*this->edges_from_ptr[0].ptr).to_json_edge(file);
-            }
-        }
-    }
-
-    void to_json(std::ofstream& file) {        
-        file << "{\n\t \"vertices\": [\n\t\t";
-        this->to_json_vert(file);
-        file << "\n\t],\n\t\"edges\": [\n\t\t";
-        this->to_json_edge(file);
-        file << "\n\t]\n}";
-    }
+  }
 };
 
-int vertice::vertice_id_max = 0;
+class Graph {
+public:
+  std::vector<Edge> edges;
+  std::vector<Vertex> vertices;
+
+  Graph() // build required graph
+  {
+    Vertex::id_max = 0;
+    Edge::id_max = 0;
+
+    std::vector<EdgeId> vect;
+
+    vect = {0, 1, 2};
+    vertices.push_back(Vertex(-1, vect));
+    vect = {3, 4, 5};
+    vertices.push_back(Vertex(0, vect));
+    vect = {6, 7};
+    vertices.push_back(Vertex(1, vect));
+    vect = {8};
+    vertices.push_back(Vertex(2, vect));
+    vect = {9};
+    vertices.push_back(Vertex(3, vect));
+    vect = {10};
+    vertices.push_back(Vertex(4, vect));
+    vect = {11};
+    vertices.push_back(Vertex(5, vect));
+    vect = {12};
+    vertices.push_back(Vertex(6, vect));
+    vect = {13};
+    vertices.push_back(Vertex(7, vect));
+    vect = {14};
+    vertices.push_back(Vertex(8, vect));
+    vect = {10, 11, 15};
+    vertices.push_back(Vertex(9, vect));
+    vect = {13, 16};
+    vertices.push_back(Vertex(12, vect));
+    vect = {17};
+    vertices.push_back(Vertex(14, vect));
+    vect = {16, 17};
+    vertices.push_back(Vertex(15, vect));
+
+    edges.push_back(Edge(0, 1));
+    edges.push_back(Edge(0, 2));
+    edges.push_back(Edge(0, 3));
+    edges.push_back(Edge(1, 4));
+    edges.push_back(Edge(1, 5));
+    edges.push_back(Edge(1, 6));
+    edges.push_back(Edge(2, 7));
+    edges.push_back(Edge(2, 8));
+    edges.push_back(Edge(3, 9));
+    edges.push_back(Edge(4, 10));
+    edges.push_back(Edge(5, 10));
+    edges.push_back(Edge(6, 10));
+    edges.push_back(Edge(7, 11));
+    edges.push_back(Edge(8, 11));
+    edges.push_back(Edge(9, 12));
+    edges.push_back(Edge(10, 13));
+    edges.push_back(Edge(11, 13));
+    edges.push_back(Edge(12, 13));
+  }
+};
+
+class GraphPrinter {
+public:
+  std::string vertex_to_json(const Vertex &vertex) const {
+    std::string res;
+    res += "{\n\t\t\t\"id\": ";
+    res += std::to_string(vertex.id);
+    res += ",\n\t\t\t\"edge_ids\": [";
+
+    // for (auto it1 = it.edges.begin(); it1 != it.edges.end(); it1++) {
+    for (const auto &it1 : vertex.edges) {
+      res += std::to_string(it1);
+      res += ", ";
+    }
+    res.pop_back();
+    res.pop_back();
+    res += "]\n\t\t}, ";
+
+    return res;
+  }
+
+  std::string edge_to_json(const Edge &edge) const {
+    std::string res;
+    res += "{\n\t\t\t\"id\": ";
+    res += std::to_string(edge.id);
+    res += ",\n\t\t\t\"vertex_ids\": [";
+    res += std::to_string(edge.vertex1);
+    if (edge.vertex2 != -1) {
+      res += ", ";
+      res += std::to_string(edge.vertex2);
+    }
+    res += "]\n\t\t}, ";
+
+    return res;
+  }
+
+  std::string to_json(const Graph &graph) const {
+    std::string res;
+    res += "{\n\t \"vertices\": [\n\t\t";
+
+    // for (auto it = vertices.begin(); it != vertices.end(); it++) {
+    for (const auto &it : graph.vertices) {
+      res += vertex_to_json(it);
+    }
+    res.pop_back();
+    res.pop_back();
+    res += "\n\t],\n\t\"edges\": [\n\t\t";
+
+    // for (auto it = edges.begin(); it != edges.end(); it++) {
+    for (const auto &it : graph.edges) {
+      res += edge_to_json(it);
+    }
+    res.pop_back();
+    res.pop_back();
+    res += "\n\t]\n}\n";
+
+    return res;
+  }
+};
 
 int main() {
-    std::shared_ptr<struct vertice> graph_root_ptr(new struct vertice(1, -1));
-
-    std::ofstream myfile;
-    myfile.open("graph.json");
-    (*graph_root_ptr).to_json(myfile);
-    myfile.close();
-
-    return 0;
+  Graph graph;
+  GraphPrinter printer;
+  std::ofstream myfile;
+  myfile.open("graph.json");
+  myfile << printer.to_json(graph);
+  myfile.close();
+  return 0;
 }
