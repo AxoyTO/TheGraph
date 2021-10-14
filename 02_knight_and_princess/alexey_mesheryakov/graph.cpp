@@ -45,8 +45,8 @@ class Graph {
     }
 
     void add_edge(const EdgeId& edge_id) {
+      assert(edge_id_not_exist(edge_id) && "Edge id already exist"); 
       edge_ids_.push_back(edge_id);
-      assert(edge_id_not_exist(edge_id) && "Edge id already exist");
     }
 
    private:
@@ -83,7 +83,7 @@ class Graph {
   void add_edge(const VertexId& first, const VertexId& second) {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
-    assert(edge_exist(first, second) && "Such edge already exist");
+    assert(!edge_exist(first, second) && "Such edge already exist");
     edges_.push_back(Edge({first, second}, edge_id_counter_));
     vertices_[first].add_edge(edge_id_counter_);
     vertices_[second].add_edge(edge_id_counter_);
