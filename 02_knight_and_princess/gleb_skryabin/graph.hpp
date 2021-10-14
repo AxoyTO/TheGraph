@@ -10,40 +10,44 @@ constexpr int INVALID_ID = -1;
 class Edge {
  public:
   Edge(int inpId, std::pair<VertexId, VertexId> inpVertexIds) {
-    id = inpId;
-    vertexIds.first = inpVertexIds.first;
-    vertexIds.second = inpVertexIds.second;
+    id_ = inpId;
+    vertexIds_.first = inpVertexIds.first;
+    vertexIds_.second = inpVertexIds.second;
   }
+
+  std::pair<VertexId, VertexId> getVertexIds() { return vertexIds_; }
 
   std::string toJSON() {
     std::string json;
-    json += "{\n      \"id\": " + std::to_string(id);
+    json += "{\n      \"id\": " + std::to_string(id_);
     json += ",\n      \"vertex_ids\": [";
-    json += std::to_string(vertexIds.first) + ", ";
-    json += std::to_string(vertexIds.second) + "]\n    }";
+    json += std::to_string(vertexIds_.first) + ", ";
+    json += std::to_string(vertexIds_.second) + "]\n    }";
     return json;
   }
 
-  EdgeId id = INVALID_ID;
-  std::pair<VertexId, VertexId> vertexIds = {INVALID_ID, INVALID_ID};
+ private:
+  EdgeId id_ = INVALID_ID;
+  std::pair<VertexId, VertexId> vertexIds_ = {INVALID_ID, INVALID_ID};
 };
 
 class Vertex {
  public:
   Vertex(int inpId, EdgeId inpEdgeId) {
-    id = inpId;
+    id_ = inpId;
     addEdge(inpEdgeId);
   }
 
-  void addEdge(EdgeId inpEdgeId) { edgeIds.insert(inpEdgeId); }
+  void addEdge(EdgeId inpEdgeId) { edgeIds_.insert(inpEdgeId); }
 
   std::string toJSON() {
     std::string json;
-    json += "{\n      \"id\": " + std::to_string(id);
+    json += "{\n      \"id\": " + std::to_string(id_);
     json += ",\n      \"edge_ids\": [";
 
-    for (auto pEdgeId = edgeIds.begin(); pEdgeId != edgeIds.end(); pEdgeId++) {
-      json += pEdgeId != edgeIds.begin() ? ", " : "";
+    for (auto pEdgeId = edgeIds_.begin(); pEdgeId != edgeIds_.end();
+         pEdgeId++) {
+      json += pEdgeId != edgeIds_.begin() ? ", " : "";
       json += std::to_string(*pEdgeId);
     }
 
@@ -51,8 +55,9 @@ class Vertex {
     return json;
   }
 
-  EdgeId id = INVALID_ID;
-  std::unordered_set<EdgeId> edgeIds = {};
+ private:
+  EdgeId id_ = INVALID_ID;
+  std::unordered_set<EdgeId> edgeIds_ = {};
 };
 
 class Graph {
@@ -76,7 +81,7 @@ class Graph {
       addEdge(inpEdge);
     }
     for (auto [edgeId, edge] : edges_) {
-      auto vs = edge.vertexIds;
+      auto vs = edge.getVertexIds();
       for (VertexId vsid : std::array<VertexId, 2>{vs.first, vs.second}) {
         compliteVertex(vsid, edgeId);
       }
@@ -91,6 +96,7 @@ class Graph {
     } else {
       // edit edge
       // edge->second.vertexIds = newEdge.vertexIds;
+      // редактирование ребра пока что не предусматривается
       std::cout << "warning: edge with id " << newEdge.id
                 << " is already in the graph.\n";
     }
