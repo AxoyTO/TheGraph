@@ -3,17 +3,23 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <random>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+const double EPS = 1e-9;
+
 using VertexId = int;
 using EdgeId = int;
 
-bool is_lucky(const double chance) {
-  return true;
+bool is_lucky(const double probability) {
+  assert(probability + EPS < 1 && "given probability is incorrect");
+  std::knuth_b rand_engine;
+  std::uniform_real_distribution<> uniform_zero_to_one(0.0, 1.0);
+  return uniform_zero_to_one(rand_engine) >= probability;
 }
 
 class Vertex {
@@ -33,7 +39,8 @@ class Vertex {
         json_stringstream << ",";
       }
     }
-    json_stringstream << "]," << "\"depth\":" << depth << "}";
+    json_stringstream << "],"
+                      << "\"depth\":" << depth << "}";
     return json_stringstream.str();
   }
 
