@@ -156,9 +156,30 @@ Graph task_02_get_graph() {
   return task_02_graph;
 }
 
+Graph task_03_get_graph(size_t depth, size_t new_vertices_num) {
+  Graph working_graph = task_02_get_graph();
+  return working_graph;
+}
+
 int main() {
-  const Graph task_02_graph = task_02_get_graph();
-  const std::string json_string = task_02_graph.get_json_string();
+  Graph task_03_graph;
+  size_t depth;
+  size_t new_vertices_num;
+  while (true) {
+    std::cout << "Input the depth parameter: " << std::flush;
+    std::cin >> depth;
+    std::cout << "Input the amount of new vertices: " << std::flush;
+    std::cin >> new_vertices_num;
+    try {
+      task_03_graph = task_03_get_graph(depth, new_vertices_num);
+      break;
+    } catch (const std::invalid_argument& error) {
+      std::cout << error.what() << std::endl
+                << "Please, redo the input:" << std::endl;
+    }
+  }
+
+  const std::string json_string = task_03_graph.get_json_string();
 
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
