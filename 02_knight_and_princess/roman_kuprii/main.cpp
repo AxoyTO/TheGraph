@@ -283,28 +283,25 @@ int main() {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
 
-/*
-//BLUE
-    std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
-    for (const auto& vertex : my_graph.get_vertices()) {
+  /*
+  //BLUE
+      std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
+      for (const auto& vertex : my_graph.get_vertices()) {
 
-        for (const auto& edge : vertex.get_edges_ids()) {
+          for (const auto& edge : vertex.get_edges_ids()) {
 
-            if (edge.connected_vertices[0] = vertex.id) {
-                if (adjacent_vertices[0] == INVALID_ID) {
-                    adjacent_vertices[0] = edge.connected_vertices[1];
-                } else if (adjacent_vertices[1] == INVALID_ID) {
-                    adjacent_vertices[1] = edge.connected_vertices[1];
-                    my_graph.connect_vertices(adjacent_vertices[0], adjacent_vertices[1]);
-                } else {
-                    adjacent_vertices
+              if (edge.connected_vertices[0] = vertex.id) {
+                  if (adjacent_vertices[0] == INVALID_ID) {
+                      adjacent_vertices[0] = edge.connected_vertices[1];
+                  } else if (adjacent_vertices[1] == INVALID_ID) {
+                      adjacent_vertices[1] = edge.connected_vertices[1];
+                      my_graph.connect_vertices(adjacent_vertices[0],
+  adjacent_vertices[1]); } else { adjacent_vertices
 
-                ????
-
-
-*/
+                  ????
 
 
+  */
 
   for (const auto& vertex : my_graph.get_vertices()) {
     if (dis(gen) < 0.1) {
