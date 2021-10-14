@@ -100,30 +100,28 @@ struct Vertex {
   vector<EdgeId> edges_ids_;
 };
 
-bool vertex_check(const vector<Vertex>& vertices, VertexId id) {
-  bool check = 0;
+bool vertex_check(const vector<Vertex>& vertices, const VertexId& id) {
+  bool check = false;
   for (const auto& vert : vertices)
     if (vert.id == id)
-      check = 1;
+      check = true;
   return check;
 }
 
 bool edge_connection_check(const vector<Edge>& edges,
-                           VertexId out_id,
-                           VertexId dest_id) {
-  bool check = 0;
+                           const VertexId& out_id,
+                           const VertexId& dest_id) {
+  bool check = false;
   for (const auto& edge : edges) {
     if (edge.connected_vertices[0] == out_id &&
         edge.connected_vertices[1] == dest_id)
-      check = 1;
+      check = true;
   }
   return check;
 }
 
 class Graph {
  public:
-  Graph() {}
-
   std::string to_json() const {
     std::string res;
     res = "{ \"depth\": ";
@@ -150,7 +148,7 @@ class Graph {
 
   void connect_vertices(const VertexId& out_id,
                         const VertexId& dest_id,
-                        bool paint) {
+                        const bool& paint) {
     // check if vertices exist
     assert(vertex_check(vertices_, out_id) == 1);
     assert(vertex_check(vertices_, dest_id) == 1);
@@ -191,17 +189,6 @@ class Graph {
       }
     }
   }
-
-  /*
-      void reorder_or_sort() {
-          for(const auto& edge_id : vertex.edges_ids_) {
-              VertexId dest_vert = edges_[edge_id].connected_vertices[1];
-
-
-      VertexId get_dest_vertex_id(EdgeId edge_id) {
-          for (const auto& edges : edges_) {
-              if (edges.connected_vertices[1]
-  */
 
   vector<Edge> get_edges() const { return edges_; }
   vector<Vertex> get_vertices() const { return vertices_; }
@@ -244,7 +231,7 @@ void new_vertices_generation(Graph* work_graph) {
   std::uniform_real_distribution<> dis(0, 1);
 
   for (int i = 0; i <= depth; i++) {
-    double probability = (double)i / (double)depth;
+    double probability = static_cast<double>(i) / static_cast<double>(depth);
     for (const auto& vertex : work_graph->get_vertices()) {
       if (vertex.depth == i) {
         for (int j = 0; j < new_vertices_num; j++) {
@@ -312,7 +299,8 @@ void paint_edges(Graph* work_graph) {
       }
     }
     // YELLOW
-    double probability = (double)vertex.depth / (double)graph_depth;
+    double probability =
+        static_cast<double>(vertex.depth) / static_cast<double>(graph_depth);
     if (dis(gen) < probability) {
       vector<VertexId> yellow_vertices_ids;
       for (const auto& tmp_vertex : work_graph->get_vertices()) {
