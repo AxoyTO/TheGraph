@@ -16,10 +16,11 @@ using VertexId = int;
 using EdgeId = int;
 
 bool is_lucky(const double probability) {
-  assert(probability + EPS < 1 && "given probability is incorrect");
-  std::knuth_b rand_engine;
-  std::uniform_real_distribution<> uniform_zero_to_one(0.0, 1.0);
-  return uniform_zero_to_one(rand_engine) >= probability;
+  assert(probability + EPS > 0 && probability - EPS < 1 &&
+         "given probability is incorrect");
+  static std::knuth_b rand_engine;
+  std::bernoulli_distribution bernoullu_distribution_var(probability);
+  return bernoullu_distribution_var(rand_engine);
 }
 
 class Vertex {
@@ -78,6 +79,12 @@ class Edge {
 class Graph {
  public:
   size_t max_depth;
+
+  std::set<VertexId> get_vertices_at_depth(size_t depth) {
+    update_vertices_depth_();
+    return vertices_at_depth_[depth];
+  }
+
   bool is_vertex_exists(const VertexId& vertex) const {
     return vertices_.find(vertex) != vertices_.end();
   }
@@ -145,6 +152,7 @@ class Graph {
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
+  std::map<size_t, std::set<VertexId>> vertices_at_depth_;
 
   VertexId get_next_vertex_id_() {
     VertexId new_vertex_id = next_vertex_id_;
@@ -195,6 +203,9 @@ class Graph {
       }
     }
     max_depth = new_max_depth;
+    for (const auto& [vertex_id, depth] : depths) {
+      vertices_at_depth_[depth].insert(vertex_id);
+    }
   }
 };
 
@@ -225,9 +236,20 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
   if (new_vertices_num < 0) {
     throw std::invalid_argument("invalid new_vertices_num argument");
   }
-  Graph working_graph = task_02_get_graph();
-  for (int i = 0; i < new_vertices_num; ++i) {
+  Graph working_graph;
+  working_graph.add_vertex();
+  for (int i = 0; i <= depth; ++i) {
+    auto same_depth_vertices = working_graph.get_vertices_at_depth(i);
+    for (const auto& current_vertex_id : same_depth_vertices) {
+      for (int j = 0; j < new_vertices_num; ++j) {
+        if (is_lucky(1.0 - (double)i / depth)) {
+          VertexId new_vertex = working_graph.add_vertex();
+          working_graph.add_edge(current_vertex_id, new_vertex);
+        }
+      }
+    }
   }
+  // TODO: implement additional edges generation
   return working_graph;
 }
 
