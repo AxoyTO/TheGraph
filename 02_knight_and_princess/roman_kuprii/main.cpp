@@ -61,7 +61,7 @@ struct Vertex {
   std::vector<EdgeId> edges_ids_;
 };
 
-bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
+bool vertex_check(const std::vector<Vertex>& vertices, const VertexId& id) {
   bool check = 0;
   for (const auto& vert : vertices)
     if (vert.id == id)
@@ -70,8 +70,8 @@ bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
 }
 
 bool edge_connection_check(const std::vector<Edge>& edges,
-                           VertexId out_id,
-                           VertexId dest_id) {
+                           const VertexId& out_id,
+                           const VertexId& dest_id) {
   bool check = 0;
   for (const auto& edge : edges) {
     if (edge.connected_vertices[0] == out_id &&
