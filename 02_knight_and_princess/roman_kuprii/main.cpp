@@ -16,7 +16,7 @@ using VertexId = int;
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
-int MIN(const int& a, const int& b) {
+int min(const int& a, const int& b) {
   return (a < b) ? a : b;
 }
 
@@ -94,13 +94,13 @@ struct Vertex {
 
   void add_edge_id(const EdgeId& _id) { edges_ids_.push_back(_id); }
 
-  std::vector<EdgeId> get_edges_ids() const { return edges_ids_; }
+  vector<EdgeId> get_edges_ids() const { return edges_ids_; }
 
  private:
-  std::vector<EdgeId> edges_ids_;
+  vector<EdgeId> edges_ids_;
 };
 
-bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
+bool vertex_check(const vector<Vertex>& vertices, VertexId id) {
   bool check = 0;
   for (const auto& vert : vertices)
     if (vert.id == id)
@@ -108,7 +108,7 @@ bool vertex_check(const std::vector<Vertex>& vertices, VertexId id) {
   return check;
 }
 
-bool edge_connection_check(const std::vector<Edge>& edges,
+bool edge_connection_check(const vector<Edge>& edges,
                            VertexId out_id,
                            VertexId dest_id) {
   bool check = 0;
@@ -170,7 +170,7 @@ class Graph {
       int min_depth = vertices_[out_id].depth;
       for (const auto& edge_idx : vertices_[dest_id].get_edges_ids()) {
         VertexId vert = edges_[edge_idx].connected_vertices[0];
-        min_depth = MIN(min_depth, vertices_[vert].depth);
+        min_depth = min(min_depth, vertices_[vert].depth);
       }
       vertices_[dest_id].depth = (min_depth + 1);
 
@@ -234,7 +234,7 @@ void new_vertices_generation(Graph* work_graph) {
   std::cin >> new_vertices_num;
 
   int graph_depth = work_graph->get_depth();
-  depth = MIN(graph_depth, depth);
+  depth = min(graph_depth, depth);
 
   std::cout << "Graph depth: " << graph_depth << endl;
   std::cout << "min depth: " << depth << endl;
@@ -299,7 +299,7 @@ void paint_edges(Graph* work_graph) {
     // RED
     if (dis(gen) < 0.33) {
       if ((vertex.depth + 2) <= graph_depth) {
-        std::vector<VertexId> red_vertices_ids;
+        vector<VertexId> red_vertices_ids;
         for (const auto& tmp_vertex : work_graph->get_vertices()) {
           if (tmp_vertex.depth == (vertex.depth + 2))
             red_vertices_ids.emplace_back(tmp_vertex.id);
@@ -314,10 +314,10 @@ void paint_edges(Graph* work_graph) {
     // YELLOW
     double probability = (double)vertex.depth / (double)graph_depth;
     if (dis(gen) < probability) {
-      std::vector<VertexId> yellow_vertices_ids;
+      vector<VertexId> yellow_vertices_ids;
       for (const auto& tmp_vertex : work_graph->get_vertices()) {
         if (tmp_vertex.depth == (vertex.depth + 1)) {
-          std::vector<Edge> edges = work_graph->get_edges();
+          vector<Edge> edges = work_graph->get_edges();
           bool check = true;
           for (const auto& edge_ids : vertex.get_edges_ids())
             if (edges[edge_ids].connected_vertices[1] == tmp_vertex.id) {
