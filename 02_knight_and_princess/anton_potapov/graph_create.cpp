@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -11,10 +12,17 @@
 using VertexId = int;
 using EdgeId = int;
 
+bool is_lucky(const double chance) {
+  return true;
+}
+
 class Vertex {
  public:
+  size_t depth;
   std::set<EdgeId> connected_edges;
+
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
+
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
@@ -25,12 +33,14 @@ class Vertex {
         json_stringstream << ",";
       }
     }
-    json_stringstream << "]}";
+    json_stringstream << "]," << "\"depth\":" << depth << "}";
     return json_stringstream.str();
   }
+
   bool has_edge_id(const EdgeId& edge_id) const {
     return connected_edges.find(edge_id) != connected_edges.end();
   }
+
   void add_edge(const EdgeId& edge_id) {
     assert(!has_edge_id(edge_id) && "edge that is to be added already exists");
     connected_edges.insert(edge_id);
@@ -45,6 +55,7 @@ class Edge {
   const VertexId vertex1_id, vertex2_id;
   Edge(const EdgeId& edge_id, const VertexId& vertex1, const VertexId& vertex2)
       : vertex1_id(vertex1), vertex2_id(vertex2), id_(edge_id) {}
+
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
@@ -59,6 +70,7 @@ class Edge {
 
 class Graph {
  public:
+  size_t max_depth;
   bool is_vertex_exists(const VertexId& vertex) const {
     return vertices_.find(vertex) != vertices_.end();
   }
@@ -99,9 +111,11 @@ class Graph {
     return new_edge_id;
   }
 
-  std::string get_json_string() const {
+  std::string get_json_string() {
+    update_vertices_depth_();
     std::stringstream json_stringstream;
-    json_stringstream << "{\"vertices\":[";
+    json_stringstream << "{\"depth\":" << max_depth << ",";
+    json_stringstream << "\"vertices\":[";
     for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
       json_stringstream << it->second.get_json_string();
       if (std::next(it) != vertices_.end()) {
@@ -124,15 +138,56 @@ class Graph {
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
+
   VertexId get_next_vertex_id_() {
     VertexId new_vertex_id = next_vertex_id_;
     ++next_vertex_id_;
     return new_vertex_id;
   }
+
   EdgeId get_next_edge_id_() {
     EdgeId new_edge_id = next_edge_id_;
     ++next_edge_id_;
     return new_edge_id;
+  }
+
+  void update_vertices_depth_() {
+    const VertexId first_vertex_id = vertices_.begin()->first;
+
+    std::map<VertexId, size_t> depths;
+    depths.emplace(first_vertex_id, 0);
+
+    std::queue<VertexId> bfs_queue;
+    bfs_queue.push(first_vertex_id);
+
+    std::set<VertexId> used;
+    used.insert(first_vertex_id);
+
+    while (!bfs_queue.empty()) {
+      const VertexId current_vertex_id = bfs_queue.front();
+      bfs_queue.pop();
+      for (const auto& connected_edge_id :
+           vertices_.find(current_vertex_id)->second.connected_edges) {
+        const Edge connected_edge = edges_.find(connected_edge_id)->second;
+        const VertexId vertex1_id = connected_edge.vertex1_id;
+        const VertexId vertex2_id = connected_edge.vertex2_id;
+        const VertexId connected_vertex_id =
+            (current_vertex_id == vertex1_id ? vertex2_id : vertex2_id);
+        if (used.find(connected_vertex_id) == used.end()) {
+          used.insert(connected_vertex_id);
+          depths[connected_vertex_id] = depths[current_vertex_id] + 1;
+          bfs_queue.push(connected_vertex_id);
+        }
+      }
+    }
+    size_t new_max_depth = 0;
+    for (const auto& [vertex_id, depth] : depths) {
+      vertices_.find(vertex_id)->second.depth = depth;
+      if (depth > new_max_depth) {
+        new_max_depth = depth;
+      }
+    }
+    max_depth = new_max_depth;
   }
 };
 
@@ -156,15 +211,23 @@ Graph task_02_get_graph() {
   return task_02_graph;
 }
 
-Graph task_03_get_graph(size_t depth, size_t new_vertices_num) {
+Graph task_03_get_graph(int depth, int new_vertices_num) {
+  if (depth < 0) {
+    throw std::invalid_argument("invalid depth argument");
+  }
+  if (new_vertices_num < 0) {
+    throw std::invalid_argument("invalid new_vertices_num argument");
+  }
   Graph working_graph = task_02_get_graph();
+  for (int i = 0; i < new_vertices_num; ++i) {
+  }
   return working_graph;
 }
 
 int main() {
   Graph task_03_graph;
-  size_t depth;
-  size_t new_vertices_num;
+  int depth;
+  int new_vertices_num;
   while (true) {
     std::cout << "Input the depth parameter: " << std::flush;
     std::cin >> depth;
@@ -180,7 +243,6 @@ int main() {
   }
 
   const std::string json_string = task_03_graph.get_json_string();
-
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
   if (!json_file.is_open()) {
