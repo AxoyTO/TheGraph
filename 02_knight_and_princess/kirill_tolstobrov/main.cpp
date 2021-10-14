@@ -12,7 +12,7 @@ using EdgeId = int;
 class Vertex {
  public:
   explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
-  bool check_edge_presence(const EdgeId& edge_id) {
+  bool check_edge_presence(const EdgeId& edge_id) const {
     for (const auto& id : connected_edges_) {
       if (edge_id == id) {
         return 1;
@@ -76,7 +76,7 @@ class Graph {
 
   void add_new_vertex() { vertices_.emplace_back(vertices_.size()); }
 
-  bool check_vertex_existence(const VertexId& vertex_id) {
+  bool check_vertex_existence(const VertexId& vertex_id) const {
     for (const auto& vertex : vertices_) {
       if (vertex_id == vertex.id) {
         return 1;
@@ -99,6 +99,10 @@ class Graph {
   }
 
   void bind_vertices(const VertexId& id1, const VertexId& id2) {
+    assert(check_vertex_existence(id1) &&
+           "Attemptig to access to nonexistent vertex: Error.");
+    assert(check_vertex_existence(id2) &&
+           "Attemptig to access to nonexistent vertex: Error.");
     assert(!are_vertices_connected(id1, id2) &&
            "Attemptig to connect connected vertices: Error.");
     auto& edge = edges_.emplace_back(edges_.size(), id1, id2);
