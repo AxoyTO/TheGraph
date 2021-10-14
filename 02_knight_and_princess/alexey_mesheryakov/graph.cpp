@@ -38,17 +38,26 @@ class Graph {
     std::string to_string() const {
       std::stringstream buffer;
       buffer << "{\"id\":" << id_ << ",\"edge_ids\":[";
-      for (int i = 0; i < edges_.size() - 1; i++)
-        buffer << edges_[i] << ",";
-      buffer << edges_[edges_.size() - 1] << "]}";
+      for (int i = 0; i < edge_ids_.size() - 1; i++)
+        buffer << edge_ids_[i] << ",";
+      buffer << edge_ids_[edge_ids_.size() - 1] << "]}";
       return buffer.str();
     }
 
-    void add_edge(const EdgeId& edge_id) { edges_.push_back(edge_id); }
+    void add_edge(const EdgeId& edge_id) {
+      edge_ids_.push_back(edge_id);
+      assert(edge_id_not_exist(edge_id) && "Edge id already exist");
+    }
 
    private:
+    bool edge_id_not_exist(const EdgeId& new_edge_id) {
+      bool exist = false;
+      for (const auto& edge_id : edge_ids_)
+        exist = exist || (edge_id == new_edge_id);
+      return !exist;
+    }
     const VertexId id_ = INVALID_ID;
-    vector<EdgeId> edges_ = {};
+    vector<EdgeId> edge_ids_ = {};
   };
 
   const bool vertex_exist(const VertexId& id) {
