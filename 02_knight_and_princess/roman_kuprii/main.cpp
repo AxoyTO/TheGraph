@@ -283,9 +283,8 @@ int main() {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
 
-
+/*
 //BLUE
-//TODO: RECURSIVE!!!!!!!!!!!!!!!!!!!!!!!
     std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
     for (const auto& vertex : my_graph.get_vertices()) {
 
@@ -300,10 +299,10 @@ int main() {
                 } else {
                     adjacent_vertices
 
+                ????
 
 
-
-
+*/
 
 
 
@@ -343,7 +342,7 @@ int main() {
       }
     }
 
-    if (dis(gen) < 0.22) {
+    if (false) {
       // randomly connect with random vertex on the next layer (YELLOW)
     }
   }
