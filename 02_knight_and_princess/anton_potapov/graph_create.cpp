@@ -25,18 +25,20 @@ bool is_lucky(const double probability) {
 
 class Vertex {
  public:
-  size_t depth;
-  std::set<EdgeId> connected_edges;
+  const std::set<EdgeId>& connected_edges() const { return connected_edges_; }
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
+
+  void init_depth(size_t new_depth) { depth = new_depth; }
 
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
                       << "\"edge_ids\":[";
-    for (auto it = connected_edges.begin(); it != connected_edges.end(); ++it) {
+    for (auto it = connected_edges_.begin(); it != connected_edges_.end();
+         ++it) {
       json_stringstream << *it;
-      if (std::next(it) != connected_edges.end()) {
+      if (std::next(it) != connected_edges_.end()) {
         json_stringstream << ",";
       }
     }
@@ -46,16 +48,18 @@ class Vertex {
   }
 
   bool has_edge_id(const EdgeId& edge_id) const {
-    return connected_edges.find(edge_id) != connected_edges.end();
+    return connected_edges_.find(edge_id) != connected_edges_.end();
   }
 
   void add_edge(const EdgeId& edge_id) {
     assert(!has_edge_id(edge_id) && "edge that is to be added already exists");
-    connected_edges.insert(edge_id);
+    connected_edges_.insert(edge_id);
   }
 
  private:
   const VertexId id_;
+  std::set<EdgeId> connected_edges_;
+  size_t depth;
 };
 
 class Edge {
@@ -93,7 +97,7 @@ class Graph {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     auto it_vertex1 = vertices_.find(vertex1);
-    for (const auto& vertex1_edge : it_vertex1->second.connected_edges) {
+    for (const auto& vertex1_edge : it_vertex1->second.connected_edges()) {
       auto it_vertex2 = vertices_.find(vertex2);
       if (it_vertex2->second.has_edge_id(vertex1_edge)) {
         return true;
@@ -182,7 +186,7 @@ class Graph {
       const VertexId current_vertex_id = bfs_queue.front();
       bfs_queue.pop();
       for (const auto& connected_edge_id :
-           vertices_.find(current_vertex_id)->second.connected_edges) {
+           vertices_.find(current_vertex_id)->second.connected_edges()) {
         const Edge connected_edge = edges_.find(connected_edge_id)->second;
         const VertexId vertex1_id = connected_edge.vertex1_id;
         const VertexId vertex2_id = connected_edge.vertex2_id;
@@ -197,7 +201,7 @@ class Graph {
     }
     size_t new_max_depth = 0;
     for (const auto& [vertex_id, depth] : depths) {
-      vertices_.find(vertex_id)->second.depth = depth;
+      vertices_.find(vertex_id)->second.init_depth(depth);
       if (depth > new_max_depth) {
         new_max_depth = depth;
       }
@@ -250,8 +254,6 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
     }
   }
   // TODO: implement additional edges generation
-  
-  // END of TODO
   return working_graph;
 }
 
