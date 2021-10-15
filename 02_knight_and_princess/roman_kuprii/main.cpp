@@ -35,6 +35,13 @@ struct Edge {
   }
 };
 
+bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
+  for (const auto& edge_id : edge_ids)
+    if (id == edge_id)
+      return true;
+  return false;
+}
+
 struct Vertex {
  public:
   const VertexId id = INVALID_ID;
@@ -55,7 +62,10 @@ struct Vertex {
     return res;
   }
 
-  void add_edge_id(const EdgeId& _id) { edges_ids_.push_back(_id); }
+  void add_edge_id(const EdgeId& _id) {
+    assert(is_edge_id_included(_id, edges_ids_) == false);
+    edges_ids_.push_back(_id);
+  }
 
  private:
   std::vector<EdgeId> edges_ids_;
