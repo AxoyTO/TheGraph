@@ -165,12 +165,12 @@ class Graph {
     assert(edge_connection_check(edges_, out_id, dest_id) == 0);
 
     EdgeId id = edges_.size();
-    Edge new_edge(out_id, dest_id, id);
-    edges_.push_back(new_edge);
+    edges_.emplace_back(out_id, dest_id, id);
 
     // add information into Verex structure
     vertices_[out_id].add_edge_id(id);
-    vertices_[dest_id].add_edge_id(id);
+    if (out_id != dest_id)
+      vertices_[dest_id].add_edge_id(id);
 
     if (!paint) {
       int min_depth = vertices_[out_id].depth;
@@ -360,6 +360,7 @@ int main() {
   my_graph.connect_vertices(12, 13, false);
 
   new_vertices_generation(&my_graph);
+
   paint_edges(&my_graph);
 
   write_graph(my_graph);
