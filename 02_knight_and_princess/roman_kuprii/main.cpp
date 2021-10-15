@@ -69,6 +69,13 @@ struct Edge {
   void paint(const Colors& _color) { color = _color; }
 };
 
+bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
+  for (const auto& edge_id : edge_ids)
+    if (id == edge_id)
+      return true;
+  return false;
+}
+
 struct Vertex {
  public:
   const VertexId id = INVALID_ID;
@@ -92,7 +99,10 @@ struct Vertex {
     return res;
   }
 
-  void add_edge_id(const EdgeId& _id) { edges_ids_.push_back(_id); }
+  void add_edge_id(const EdgeId& _id) {
+    assert(is_edge_id_included(_id, edges_ids_) == false);
+    edges_ids_.push_back(_id);
+  }
 
   vector<EdgeId> get_edges_ids() const { return edges_ids_; }
 
@@ -100,24 +110,22 @@ struct Vertex {
   vector<EdgeId> edges_ids_;
 };
 
-bool vertex_check(const vector<Vertex>& vertices, const VertexId& id) {
-  bool check = false;
+bool is_vertex_id_included(const vector<Vertex>& vertices, const VertexId& id) {
   for (const auto& vert : vertices)
     if (vert.id == id)
-      check = true;
-  return check;
+      return true;
+  return false;
 }
 
 bool edge_connection_check(const vector<Edge>& edges,
                            const VertexId& out_id,
                            const VertexId& dest_id) {
-  bool check = false;
   for (const auto& edge : edges) {
     if (edge.connected_vertices[0] == out_id &&
         edge.connected_vertices[1] == dest_id)
-      check = true;
+      return true;
   }
-  return check;
+  return false;
 }
 
 class Graph {
@@ -150,8 +158,8 @@ class Graph {
                         const VertexId& dest_id,
                         const bool& paint) {
     // check if vertices exist
-    assert(vertex_check(vertices_, out_id) == 1);
-    assert(vertex_check(vertices_, dest_id) == 1);
+    assert(is_vertex_id_included(vertices_, out_id));
+    assert(is_vertex_id_included(vertices_, dest_id));
 
     // check if they are not connected
     assert(edge_connection_check(edges_, out_id, dest_id) == 0);
