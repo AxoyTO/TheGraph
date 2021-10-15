@@ -89,16 +89,18 @@ class Graph {
   }
 
   void addEdge(InputEdge newEdge) {
-    auto edge = edges_.find(newEdge.id);
-    if (edge == edges_.end()) {
-      // add new edge
-      edges_.emplace(newEdge.id, Edge(newEdge.id, newEdge.vertexIds));
-    } else {
-      // edit edge
-      // edge->second.vertexIds = newEdge.vertexIds;
-      // редактирование ребра пока что не предусматривается
-      std::cout << "warning: edge with id " << newEdge.id
-                << " is already in the graph.\n";
+    if (newEdge.id != INVALID_ID) {
+      auto edge = edges_.find(newEdge.id);
+      if (edge == edges_.end()) {
+        // add new edge
+        edges_.emplace(newEdge.id, Edge(newEdge.id, newEdge.vertexIds));
+      } else {
+        // edit edge
+        // edge->second.vertexIds = newEdge.vertexIds;
+        // редактирование ребра пока что не предусматривается
+        std::cout << "warning: edge with id " << newEdge.id
+                  << " is already in the graph.\n";
+      }
     }
   }
 
