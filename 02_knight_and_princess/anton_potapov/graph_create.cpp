@@ -13,15 +13,18 @@ using EdgeId = int;
 
 class Vertex {
  public:
-  std::set<EdgeId> connected_edges;
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
+
+  const std::set<EdgeId>& connected_edges() const { return connected_edges_; }
+
   std::string get_json_string() const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << id_ << ","
                       << "\"edge_ids\":[";
-    for (auto it = connected_edges.begin(); it != connected_edges.end(); ++it) {
+    for (auto it = connected_edges_.begin(); it != connected_edges_.end();
+         ++it) {
       json_stringstream << *it;
-      if (std::next(it) != connected_edges.end()) {
+      if (std::next(it) != connected_edges_.end()) {
         json_stringstream << ",";
       }
     }
@@ -29,15 +32,16 @@ class Vertex {
     return json_stringstream.str();
   }
   bool has_edge_id(const EdgeId& edge_id) const {
-    return connected_edges.find(edge_id) != connected_edges.end();
+    return connected_edges_.find(edge_id) != connected_edges_.end();
   }
   void add_edge(const EdgeId& edge_id) {
     assert(!has_edge_id(edge_id) && "edge that is to be added already exists");
-    connected_edges.insert(edge_id);
+    connected_edges_.insert(edge_id);
   }
 
  private:
   const VertexId id_;
+  std::set<EdgeId> connected_edges_;
 };
 
 class Edge {
@@ -67,7 +71,7 @@ class Graph {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     auto it_vertex1 = vertices_.find(vertex1);
-    for (const auto& vertex1_edge : it_vertex1->second.connected_edges) {
+    for (const auto& vertex1_edge : it_vertex1->second.connected_edges()) {
       auto it_vertex2 = vertices_.find(vertex2);
       if (it_vertex2->second.has_edge_id(vertex1_edge)) {
         return true;
