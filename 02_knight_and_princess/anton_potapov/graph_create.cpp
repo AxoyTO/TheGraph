@@ -250,6 +250,8 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
     }
   }
   // TODO: implement additional edges generation
+  
+  // END of TODO
   return working_graph;
 }
 
