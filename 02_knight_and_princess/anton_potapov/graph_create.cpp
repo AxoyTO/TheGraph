@@ -12,6 +12,8 @@
 
 const double EPS = 1e-9;
 
+enum class Color { GREY, GREEN, BLUE, YELLOW, RED };
+
 using VertexId = int;
 using EdgeId = int;
 
@@ -65,19 +67,35 @@ class Vertex {
 class Edge {
  public:
   const VertexId vertex1_id, vertex2_id;
-  Edge(const EdgeId& edge_id, const VertexId& vertex1, const VertexId& vertex2)
-      : vertex1_id(vertex1), vertex2_id(vertex2), id_(edge_id) {}
+  Edge(const EdgeId& edge_id,
+       const VertexId& vertex1,
+       const VertexId& vertex2,
+       Color edge_color = Color::GREY)
+      : vertex1_id(vertex1),
+        vertex2_id(vertex2),
+        color_(edge_color),
+        id_(edge_id) {}
 
   std::string get_json_string() const {
+    static const std::map<Color, std::string> color_string_map = {
+        {Color::GREY, "grey"},
+        {Color::GREEN, "green"},
+        {Color::BLUE, "blue"},
+        {Color::YELLOW, "yellow"},
+        {Color::RED, "red"}};
     std::stringstream json_stringstream;
+    std::string color_string = color_string_map.find(color_)->second;
     json_stringstream << "{\"id\":" << id_ << ","
                       << "\"vertex_ids\":[" << vertex1_id << "," << vertex2_id
-                      << "]}";
+                      << "],\"color\":\"" << color_string << "\""
+                      << "}";
     return json_stringstream.str();
   }
 
  private:
+  const Color color_;
   const EdgeId id_;
+  const std::string color;
 };
 
 class Graph {
