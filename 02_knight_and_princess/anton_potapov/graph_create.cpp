@@ -21,9 +21,10 @@ using EdgeId = int;
 bool is_lucky(const double probability) {
   assert(probability + EPS > 0 && probability - EPS < 1 &&
          "given probability is incorrect");
-  static std::knuth_b rand_engine;
+  static std::knuth_b rand_engine{};
+  std::mt19937 rng{rand_engine()};
   std::bernoulli_distribution bernoullu_distribution_var(probability);
-  return bernoullu_distribution_var(rand_engine);
+  return bernoullu_distribution_var(rng);
 }
 
 class Vertex {
@@ -329,7 +330,7 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
     const auto& next_depth_vertices =
         working_graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
-      if (depth > 1 && is_lucky(cur_depth / (depth - 1))) {
+      if (depth > 1 && is_lucky((double)cur_depth / (depth - 1))) {
         std::set<VertexId> not_connected_vertices;
         for (const auto& next_vertex_id : next_depth_vertices) {
           if (!working_graph.is_connected(cur_vertex_id, next_vertex_id)) {
