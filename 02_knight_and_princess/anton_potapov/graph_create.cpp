@@ -322,7 +322,7 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
     }
   }
   // yellow edges:
-  for (size_t cur_depth = 0; cur_depth < working_graph.max_depth();
+  for (size_t cur_depth = 0; cur_depth + 1 <= working_graph.max_depth();
        ++cur_depth) {
     const auto& cur_depth_vertices =
         working_graph.get_vertices_at_depth(cur_depth);
@@ -336,14 +336,35 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
             not_connected_vertices.insert(next_vertex_id);
           }
         }
-        size_t rand_id = std::rand() % not_connected_vertices.size();
-        auto rand_it = not_connected_vertices.begin();
-        std::advance(rand_it, rand_id);
-        working_graph.add_edge(cur_vertex_id, *rand_it, Color::YELLOW);
+        if (!not_connected_vertices.empty()) {
+          size_t rand_id = std::rand() % not_connected_vertices.size();
+          auto rand_it = not_connected_vertices.begin();
+          std::advance(rand_it, rand_id);
+          working_graph.add_edge(cur_vertex_id, *rand_it, Color::YELLOW);
+        }
       }
     }
   }
   // red edges:
+  for (size_t cur_depth = 0; cur_depth + 2 <= working_graph.max_depth();
+       ++cur_depth) {
+    const auto& cur_depth_vertices =
+        working_graph.get_vertices_at_depth(cur_depth);
+    const auto& next_depth_vertices =
+        working_graph.get_vertices_at_depth(cur_depth + 2);
+    for (const auto& cur_vertex_id : cur_depth_vertices) {
+      if (is_lucky(0.33) && !next_depth_vertices.empty()) {
+        size_t rand_id = std::rand() % next_depth_vertices.size();
+        auto rand_it = next_depth_vertices.begin();
+        std::advance(rand_it, rand_id);
+        working_graph.add_edge(cur_vertex_id, *rand_it, Color::RED);
+      }
+    }
+  }
+  if (working_graph.max_depth() < depth) {
+    std::cerr << "generated graph's depth=" << working_graph.max_depth()
+              << " is less than specified one =" << depth << std::endl;
+  }
   return working_graph;
 }
 
