@@ -117,6 +117,11 @@ class Graph {
     return vertices_at_depth_[depth];
   }
 
+  const std::map<size_t, std::set<VertexId>>& depth_distribution() {
+    update_vertices_depth_();
+    return vertices_at_depth_;
+  }
+
   bool is_vertex_exists(const VertexId& vertex) const {
     return vertices_.find(vertex) != vertices_.end();
   }
@@ -322,13 +327,15 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
       }
     }
   }
+  // used for both yellow and red edges to save current depth's distribution
+  // info before addition of new edges will mess it up:
+  const auto& depth_distribution = working_graph.depth_distribution();
   // yellow edges:
   for (size_t cur_depth = 0; cur_depth + 1 <= working_graph.max_depth();
        ++cur_depth) {
-    const auto& cur_depth_vertices =
-        working_graph.get_vertices_at_depth(cur_depth);
+    const auto& cur_depth_vertices = depth_distribution.find(cur_depth)->second;
     const auto& next_depth_vertices =
-        working_graph.get_vertices_at_depth(cur_depth + 1);
+        depth_distribution.find(cur_depth + 1)->second;
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (depth > 1 && is_lucky((double)cur_depth / (depth - 1))) {
         std::set<VertexId> not_connected_vertices;
@@ -349,10 +356,9 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
   // red edges:
   for (size_t cur_depth = 0; cur_depth + 2 <= working_graph.max_depth();
        ++cur_depth) {
-    const auto& cur_depth_vertices =
-        working_graph.get_vertices_at_depth(cur_depth);
+    const auto& cur_depth_vertices = depth_distribution.find(cur_depth)->second;
     const auto& next_depth_vertices =
-        working_graph.get_vertices_at_depth(cur_depth + 2);
+        depth_distribution.find(cur_depth + 2)->second;
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (is_lucky(0.33) && !next_depth_vertices.empty()) {
         size_t rand_id = std::rand() % next_depth_vertices.size();
