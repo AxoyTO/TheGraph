@@ -361,7 +361,7 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
       }
     }
   }
-  if (working_graph.max_depth() < (size_t) depth) {
+  if (working_graph.max_depth() < (size_t)depth) {
     std::cerr << "generated graph's depth=" << working_graph.max_depth()
               << " is less than specified one =" << depth << std::endl;
   }
