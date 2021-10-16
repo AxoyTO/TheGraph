@@ -293,7 +293,7 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
     auto same_depth_vertices = working_graph.get_vertices_at_depth(i);
     for (const auto& current_vertex_id : same_depth_vertices) {
       for (int j = 0; j < new_vertices_num; ++j) {
-        if (is_lucky(1.0 - (double)i / depth)) {
+        if (depth > 0 && is_lucky(1.0 - (double)i / depth)) {
           VertexId new_vertex = working_graph.add_vertex();
           working_graph.add_edge(current_vertex_id, new_vertex);
         }
@@ -361,7 +361,7 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
       }
     }
   }
-  if (working_graph.max_depth() < depth) {
+  if (working_graph.max_depth() < (size_t) depth) {
     std::cerr << "generated graph's depth=" << working_graph.max_depth()
               << " is less than specified one =" << depth << std::endl;
   }
