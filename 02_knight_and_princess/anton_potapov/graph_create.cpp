@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -70,7 +71,7 @@ class Edge {
   Edge(const EdgeId& edge_id,
        const VertexId& vertex1,
        const VertexId& vertex2,
-       Color edge_color = Color::GREY)
+       Color edge_color)
       : vertex1_id(vertex1),
         vertex2_id(vertex2),
         color_(edge_color),
@@ -102,7 +103,15 @@ class Graph {
  public:
   size_t max_depth;
 
-  std::set<VertexId> get_vertices_at_depth(size_t depth) {
+  std::set<VertexId> vertex_ids() const {
+    std::set<VertexId> vertex_ids;
+    std::transform(vertices_.begin(), vertices_.end(),
+                   std::inserter(vertex_ids, vertex_ids.end()),
+                   [](auto pair) { return pair.first; });
+    return vertex_ids;
+  }
+
+  const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
     update_vertices_depth_();
     return vertices_at_depth_[depth];
   }
@@ -114,14 +123,25 @@ class Graph {
   bool is_connected(const VertexId& vertex1, const VertexId& vertex2) const {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
-    auto it_vertex1 = vertices_.find(vertex1);
-    for (const auto& vertex1_edge : it_vertex1->second.connected_edges()) {
-      auto it_vertex2 = vertices_.find(vertex2);
-      if (it_vertex2->second.has_edge_id(vertex1_edge)) {
-        return true;
+    if (vertex1 == vertex2) {
+      auto it_vertex = vertices_.find(vertex1);
+      for (const auto& vertex_edge_id : it_vertex->second.connected_edges()) {
+        const auto& vertex_edge = edges_.find(vertex_edge_id)->second;
+        if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
+          return true;
+        }
       }
+      return false;
+    } else {
+      auto it_vertex1 = vertices_.find(vertex1);
+      for (const auto& vertex1_edge : it_vertex1->second.connected_edges()) {
+        auto it_vertex2 = vertices_.find(vertex2);
+        if (it_vertex2->second.has_edge_id(vertex1_edge)) {
+          return true;
+        }
+      }
+      return false;
     }
-    return false;
   }
 
   VertexId add_vertex() {
@@ -130,7 +150,9 @@ class Graph {
     return new_vertex_id;
   }
 
-  EdgeId add_edge(const VertexId& vertex1, const VertexId& vertex2) {
+  EdgeId add_edge(const VertexId& vertex1,
+                  const VertexId& vertex2,
+                  Color edge_color = Color::GREY) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
@@ -139,11 +161,13 @@ class Graph {
 
     auto it_vertex1 = vertices_.find(vertex1);
     it_vertex1->second.add_edge(new_edge_id);
-
     auto it_vertex2 = vertices_.find(vertex2);
-    it_vertex2->second.add_edge(new_edge_id);
+    if (it_vertex1 != it_vertex2) {
+      it_vertex2->second.add_edge(new_edge_id);
+    }
 
-    edges_.emplace(new_edge_id, Edge(new_edge_id, vertex1, vertex2));
+    edges_.emplace(new_edge_id,
+                   Edge(new_edge_id, vertex1, vertex2, edge_color));
     return new_edge_id;
   }
 
@@ -271,7 +295,18 @@ Graph task_03_get_graph(int depth, int new_vertices_num) {
       }
     }
   }
-  // TODO: implement additional edges generation
+  // green edges:
+  for (auto vertex_id : working_graph.vertex_ids()) {
+    if (is_lucky(0.1)) {
+      working_graph.add_edge(vertex_id, vertex_id, Color::GREEN);
+    }
+  }
+  // blue edges:
+
+  // yellow edges:
+
+  // red edges:
+
   return working_graph;
 }
 
