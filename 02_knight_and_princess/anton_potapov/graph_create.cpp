@@ -13,7 +13,7 @@
 
 const double EPS = 1e-9;
 
-enum class Color { GREY, GREEN, BLUE, YELLOW, RED };
+enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
 
 using VertexId = int;
 using EdgeId = int;
@@ -79,7 +79,7 @@ class Edge {
 
   std::string get_json_string() const {
     static const std::map<Color, std::string> color_string_map = {
-        {Color::GREY, "grey"},
+        {Color::GRAY, "gray"},
         {Color::GREEN, "green"},
         {Color::BLUE, "blue"},
         {Color::YELLOW, "yellow"},
@@ -156,7 +156,7 @@ class Graph {
 
   EdgeId add_edge(const VertexId& vertex1,
                   const VertexId& vertex2,
-                  Color edge_color = Color::GREY) {
+                  Color edge_color = Color::GRAY) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
