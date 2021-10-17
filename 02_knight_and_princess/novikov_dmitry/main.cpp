@@ -4,9 +4,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Graph_generator.hpp"
+#include "generate_graph.hpp"
 
-void graphs_generation() {
+void generate_graphs() {
   const std::string DEFAULT_FILENAME = "Graph";
   const std::string DEFAULT_FILEFORMAT = ".json";
 
@@ -22,18 +22,18 @@ void graphs_generation() {
   std::cin >> graph_num;  //количество графов для генерации
 
   for (int i = 0; i < graph_num; ++i) {
-    Graph g = Graph();
-    graph_generation(g, depth, new_vertices_num);
+    Graph graph = Graph();
+    generation::generate_graph(graph, depth, new_vertices_num);
     std::stringstream ss_filename;
     ss_filename << DEFAULT_FILENAME << '_' << i << DEFAULT_FILEFORMAT;
     std::ofstream file_out;
     file_out.open(ss_filename.str(), std::fstream::out | std::fstream::trunc);
-    file_out << g.to_string();
+    file_out << graph.to_string();
     file_out.close();
   }
 }
 
 int main() {
-  graphs_generation();
+  generate_graphs();
   return 0;
 }
