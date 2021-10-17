@@ -21,14 +21,19 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
+  Vertex(VertexId new_id) : id(new_id) {}
   const VertexId id = 0;
-  vector<EdgeId> edge_ids;
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  const vector<EdgeId>& edge_ids() const { return edge_ids_; }
+
+ private:
+  vector<EdgeId> edge_ids_;
 };
 
 std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "{" << endl;
   out << "      \"id\": " << vertex.id << "," << endl;
-  out << "      \"edge_ids\": [" << vertex.edge_ids << "]" << endl;
+  out << "      \"edge_ids\": [" << vertex.edge_ids() << "]" << endl;
   out << "}";
   return out;
 }
@@ -64,33 +69,40 @@ class Graph {
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
-  bool connection(const VertexId& begin, const VertexId& end);
+  bool is_vertex(const VertexId& vertex_id) const;
+  bool is_connected(const VertexId& begin, const VertexId& end) const;
   vector<Vertex> vertices_;
   vector<Edge> edges_;
 };
 
-bool Graph::connection(const VertexId& begin, const VertexId& end) {
-  bool ret = false;
-  for (const EdgeId& edge_num : vertices_[begin].edge_ids) {
-    if ((ret = edges_[edge_num].begin == end || edges_[edge_num].end == end)) {
-      break;
+bool Graph::is_vertex(const VertexId& vertex_id) const {
+  for (const auto& vertex : vertices_) {
+    if (vertex_id == vertex.id)
+      return true;
+  }
+  return false;
+}
+
+bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
+  for (const EdgeId& edge_num : vertices_[begin].edge_ids()) {
+    if (edges_[edge_num].begin == end || edges_[edge_num].end == end) {
+      return false;
     }
   }
-  return ret;
+  return true;
 }
 
 void Graph::add_vertex() {
-  Vertex vertex = {next_vertex_id()};
-  vertices_.push_back(vertex);
+  vertices_.emplace_back(next_vertex_id());
 }
 
 void Graph::add_edge(const VertexId& begin, const VertexId& end) {
-  if ((begin < num_of_vrt_) && (end < num_of_vrt_) && !connection(begin, end)) {
-    Edge edge = {next_edge_id(), begin, end};
-    vertices_[begin].edge_ids.push_back(edge.id);
-    vertices_[end].edge_ids.push_back(edge.id);
-    edges_.push_back(edge);
-  }
+  if (!is_vertex(begin) || !is_vertex(end) || !is_connected(begin, end))
+    return;
+  Edge edge = {next_edge_id(), begin, end};
+  vertices_[begin].add_edge_id(edge.id);
+  vertices_[end].add_edge_id(edge.id);
+  edges_.push_back(edge);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
