@@ -67,6 +67,8 @@ struct Vertex {
     edges_ids_.push_back(_id);
   }
 
+  vector<EdgeId> get_edges_ids() const { return edges_ids_; }
+
  private:
   std::vector<EdgeId> edges_ids_;
 };
@@ -76,17 +78,6 @@ bool is_vertex_id_included(const std::vector<Vertex>& vertices,
   for (const auto& vert : vertices)
     if (vert.id == id)
       return (true);
-  return false;
-}
-
-bool edge_connection_check(const std::vector<Edge>& edges,
-                           const VertexId& out_id,
-                           const VertexId& dest_id) {
-  for (const auto& edge : edges) {
-    if (edge.connected_vertices[0] == out_id &&
-        edge.connected_vertices[1] == dest_id)
-      return true;
-  }
   return false;
 }
 
@@ -114,13 +105,24 @@ class Graph {
 
   void add_vertex() { vertices_.emplace_back(vertices_.size()); }
 
+bool is_connected(const VertexId& from_vertex_id, const VertexId& to_vertex_id) const {
+    vector<EdgeId> from_vertex_edges_ids = vertices_[from_vertex_id].get_edges_ids();
+    vector<EdgeId> to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
+    for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
+        for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
+            if (from_vertex_edge_id == to_vertex_edge_id) return true;
+        }
+    }
+    return false;
+}
+
   void connect_vertices(const VertexId& out_id, const VertexId& dest_id) {
     // check if vertices exist
     assert(is_vertex_id_included(vertices_, out_id));
     assert(is_vertex_id_included(vertices_, dest_id));
 
     // check if they are not connected
-    assert(!edge_connection_check(edges_, out_id, dest_id));
+    assert(!is_connected(out_id, dest_id));
 
     const EdgeId id = edges_.size();
     edges_.emplace_back(out_id, dest_id, edges_.size());
