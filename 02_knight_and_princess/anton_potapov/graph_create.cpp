@@ -287,7 +287,7 @@ Graph task_02_get_graph() {
   return task_02_graph;
 }
 
-Graph task_03_get_graph(int depth, int new_vertices_num) {
+Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   if (depth < 0) {
     throw std::invalid_argument("invalid depth argument");
   }
