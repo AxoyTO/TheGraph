@@ -63,7 +63,7 @@ struct Vertex {
   }
 
   void add_edge_id(const EdgeId& _id) {
-    assert(is_edge_id_included(_id, edges_ids_) == false);
+    assert(!is_edge_id_included(_id, edges_ids_));
     edges_ids_.push_back(_id);
   }
 
@@ -120,10 +120,10 @@ class Graph {
     assert(is_vertex_id_included(vertices_, dest_id));
 
     // check if they are not connected
-    assert(edge_connection_check(edges_, out_id, dest_id) == 0);
+    assert(!edge_connection_check(edges_, out_id, dest_id));
 
-    EdgeId id = edges_.size();
-    edges_.emplace_back(out_id, dest_id, id);
+    const EdgeId id = edges_.size();
+    edges_.emplace_back(out_id, dest_id, edges_.size());
 
     // add information into Verex structure
     vertices_[out_id].add_edge_id(id);
