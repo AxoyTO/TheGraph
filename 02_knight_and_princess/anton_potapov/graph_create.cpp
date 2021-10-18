@@ -143,10 +143,9 @@ class Graph {
       }
       return false;
     } else {
-      auto it_vertex1 = vertices_.find(vertex1);
-      for (const auto& vertex1_edge : it_vertex1->second.connected_edges()) {
-        auto it_vertex2 = vertices_.find(vertex2);
-        if (it_vertex2->second.has_edge_id(vertex1_edge)) {
+      for (const auto& vertex1_edge :
+           vertices_.find(vertex1)->second.connected_edges()) {
+        if (vertices_.find(vertex2)->second.has_edge_id(vertex1_edge)) {
           return true;
         }
       }
@@ -271,8 +270,7 @@ Graph task_02_get_graph() {
   const size_t n = 14;
   std::vector<VertexId> added_vertices;
   for (size_t i = 0; i < n; ++i) {
-    auto new_vertex = task_02_graph.add_vertex();
-    added_vertices.push_back(new_vertex);
+    added_vertices.push_back(task_02_graph.add_vertex());
   }
   const std::vector<std::pair<size_t, size_t>> edge_vertices_indexes{
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
