@@ -212,13 +212,13 @@ class Graph {
   size_t max_depth_;
 
   VertexId get_next_vertex_id() {
-    VertexId new_vertex_id = next_vertex_id_;
+    const VertexId new_vertex_id = next_vertex_id_;
     ++next_vertex_id_;
     return new_vertex_id;
   }
 
   EdgeId get_next_edge_id() {
-    EdgeId new_edge_id = next_edge_id_;
+    const EdgeId new_edge_id = next_edge_id_;
     ++next_edge_id_;
     return new_edge_id;
   }
@@ -279,8 +279,8 @@ Graph task_02_get_graph() {
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
   for (const auto& edge : edge_vertices_indexes) {
-    VertexId vertex1 = added_vertices[edge.first];
-    VertexId vertex2 = added_vertices[edge.second];
+    const VertexId vertex1 = added_vertices[edge.first];
+    const VertexId vertex2 = added_vertices[edge.second];
     task_02_graph.add_edge(vertex1, vertex2);
   }
   return task_02_graph;
