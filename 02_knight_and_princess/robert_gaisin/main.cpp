@@ -139,9 +139,9 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
 
 Graph task_1_graph_generation() {
   auto returned_graph = Graph();
-  const VertexId num_of_vertex = 14;
+  const VertexId num_of_vertices = 14;
 
-  for (int i = 0; i < num_of_vertex; ++i) {
+  for (int i = 0; i < num_of_vertices; ++i) {
     returned_graph.add_vertex();
   }
 
