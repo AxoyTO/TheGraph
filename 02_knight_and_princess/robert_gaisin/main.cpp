@@ -28,23 +28,28 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
-  const VertexId id;
-  size_t depth;
-  vector<EdgeId> edge_ids;
+  Vertex(VertexId new_id, size_t depth_n) : id(new_id), depth(depth_n) {}
+  const VertexId id = 0;
+  size_t depth = 0;
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  const vector<EdgeId>& edge_ids() const { return edge_ids_; }
+
+ private:
+  vector<EdgeId> edge_ids_;
 };
 
 //Перегрузка вывода для вектора из вершин
 std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "{" << endl;
   out << "      \"id\": " << vertex.id << "," << endl;
-  out << "      \"edge_ids\": [" << vertex.edge_ids << "]," << endl;
+  out << "      \"edge_ids\": [" << vertex.edge_ids() << "]," << endl;
   out << "      \"depth\": " << vertex.depth << endl;
   out << "}";
   return out;
 }
 
 struct Edge {
-  const EdgeId id;
+  const EdgeId id = 0;
   VertexId begin = 0;
   VertexId end = 0;
   int color = 0;
@@ -83,7 +88,7 @@ class Graph {
  public:
   void add_vertex(size_t depth);
 
-  void add_edge(const VertexId& begin, const VertexId& end, int color);
+  void add_edge(const VertexId& begin, const VertexId& end, const int color);
 
   int depth() const { return depth_sizes_.size(); }
   int depth_size(int depth) { return depth_sizes_[depth]; }
@@ -97,7 +102,9 @@ class Graph {
 
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
-  bool connection(const VertexId& begin, const VertexId& end);
+
+  bool is_vertex(const VertexId& vertex_id) const;
+  bool is_connected(const VertexId& begin, const VertexId& end) const;
   //вершины
   vector<Vertex> vertices_;
   //ребра
@@ -106,32 +113,42 @@ class Graph {
   vector<int> depth_sizes_;
 };
 
-bool Graph::connection(const VertexId& begin, const VertexId& end) {
-  bool ret = false;
-  for (const EdgeId& edge_num : vertices_[begin].edge_ids) {
-    if ((ret = edges_[edge_num].begin == end || edges_[edge_num].end == end)) {
-      break;
+bool Graph::is_vertex(const VertexId& vertex_id) const {
+  for (const auto& vertex : vertices_) {
+    if (vertex_id == vertex.id)
+      return true;
+  }
+  return false;
+}
+
+bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
+  for (const EdgeId& edge_num : vertices_[begin].edge_ids()) {
+    if (edges_[edge_num].begin == end || edges_[edge_num].end == end) {
+      return false;
     }
   }
-  return ret;
+  return true;
 }
 
 void Graph::add_vertex(size_t depth) {
-  Vertex vertex = {next_vertex_id(), depth};
-  vertices_.push_back(vertex);
+  // Vertex vertex = {next_vertex_id(), depth};
+  //  vertices_.push_back(vertex);
+  vertices_.emplace_back(next_vertex_id(), depth);
   if (depth >= depth_sizes_.size())
     for (size_t i = depth_sizes_.size(); i <= depth; ++i)
       depth_sizes_.push_back(0);
   ++depth_sizes_[depth];
 }
 
-void Graph::add_edge(const VertexId& begin, const VertexId& end, int color) {
-  if ((begin < num_of_vrt_) && (end < num_of_vrt_) && !connection(begin, end)) {
-    Edge edge = {next_edge_id(), begin, end, color};
-    vertices_[begin].edge_ids.push_back(edge.id);
-    vertices_[end].edge_ids.push_back(edge.id);
-    edges_.push_back(edge);
-  }
+void Graph::add_edge(const VertexId& begin,
+                     const VertexId& end,
+                     const int color) {
+  if (!is_vertex(begin) || !is_vertex(end) || !is_connected(begin, end))
+    return;
+  Edge edge = {next_edge_id(), begin, end, color};
+  vertices_[begin].add_edge_id(edge.id);
+  vertices_[end].add_edge_id(edge.id);
+  edges_.push_back(edge);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& vertices) {
