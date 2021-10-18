@@ -100,7 +100,7 @@ struct Vertex {
   }
 
   void add_edge_id(const EdgeId& _id) {
-    assert(is_edge_id_included(_id, edges_ids_) == false);
+    assert(!is_edge_id_included(_id, edges_ids_));
     edges_ids_.push_back(_id);
   }
 
@@ -114,17 +114,6 @@ bool is_vertex_id_included(const vector<Vertex>& vertices, const VertexId& id) {
   for (const auto& vert : vertices)
     if (vert.id == id)
       return true;
-  return false;
-}
-
-bool edge_connection_check(const vector<Edge>& edges,
-                           const VertexId& out_id,
-                           const VertexId& dest_id) {
-  for (const auto& edge : edges) {
-    if (edge.connected_vertices[0] == out_id &&
-        edge.connected_vertices[1] == dest_id)
-      return true;
-  }
   return false;
 }
 
@@ -152,41 +141,70 @@ class Graph {
     return res;
   }
 
-  void add_vertex() { vertices_.emplace_back(vertices_.size()); }
+  void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
-  void connect_vertices(const VertexId& out_id,
-                        const VertexId& dest_id,
+  bool is_connected(const VertexId& from_vertex_id,
+                    const VertexId& to_vertex_id) const {
+    vector<EdgeId> from_vertex_edges_ids =
+        vertices_[from_vertex_id].get_edges_ids();
+    vector<EdgeId> to_vertex_edges_ids =
+        vertices_[to_vertex_id].get_edges_ids();
+    for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
+      for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
+        if (from_vertex_edge_id == to_vertex_edge_id)
+          return true;
+      }
+    }
+    return false;
+  }
+
+  bool is_looped(const VertexId& vertex_id) const {
+    vector<EdgeId> vertex_edges_ids = vertices_[vertex_id].get_edges_ids();
+    for (const auto& edge_id : vertex_edges_ids) {
+      const auto& connected_vertices = edges_[edge_id].connected_vertices;
+      if (connected_vertices[0] == connected_vertices[1])
+        return true;
+    }
+    return false;
+  }
+
+  void connect_vertices(const VertexId& from_vertex_id,
+                        const VertexId& to_vertex_id,
                         const bool& paint) {
     // check if vertices exist
-    assert(is_vertex_id_included(vertices_, out_id));
-    assert(is_vertex_id_included(vertices_, dest_id));
+    assert(is_vertex_id_included(vertices_, from_vertex_id));
+    assert(is_vertex_id_included(vertices_, to_vertex_id));
 
     // check if they are not connected
-    assert(edge_connection_check(edges_, out_id, dest_id) == 0);
+    if (from_vertex_id != to_vertex_id)
+      assert(!is_connected(from_vertex_id, to_vertex_id));
+    else
+      assert(!is_looped(from_vertex_id));
 
-    EdgeId id = edges_.size();
-    edges_.emplace_back(out_id, dest_id, id);
+    EdgeId id = get_next_edge_id();
+    edges_.emplace_back(from_vertex_id, to_vertex_id, id);
 
     // add information into Verex structure
-    vertices_[out_id].add_edge_id(id);
-    if (out_id != dest_id)
-      vertices_[dest_id].add_edge_id(id);
+    vertices_[from_vertex_id].add_edge_id(id);
+    if (from_vertex_id != to_vertex_id)
+      vertices_[to_vertex_id].add_edge_id(id);
 
     if (!paint) {
-      int min_depth = vertices_[out_id].depth;
-      for (const auto& edge_idx : vertices_[dest_id].get_edges_ids()) {
+      int min_depth = vertices_[from_vertex_id].depth;
+      for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
         VertexId vert = edges_[edge_idx].connected_vertices[0];
         min_depth = min(min_depth, vertices_[vert].depth);
       }
-      vertices_[dest_id].depth = (min_depth + 1);
+      vertices_[to_vertex_id].depth = (min_depth + 1);
 
       if (depth_ < (min_depth + 1))
         depth_ = min_depth + 1;
     }
 
     if (paint) {
-      int diff = vertices_[dest_id].depth - vertices_[out_id].depth;
-      if (out_id == dest_id) {
+      int diff =
+          vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
+      if (from_vertex_id == to_vertex_id) {
         edges_[id].color = GREEN;
       } else if (diff == 0) {
         edges_[id].color = BLUE;
@@ -208,6 +226,11 @@ class Graph {
   vector<Vertex> vertices_;
   vector<Edge> edges_;
   int depth_ = 0;
+  VertexId vertex_id_counter_ = 0;
+  EdgeId edge_id_counter_ = 0;
+
+  VertexId get_next_vertex_id() { return vertex_id_counter_++; }
+  VertexId get_next_edge_id() { return edge_id_counter_++; }
 };
 
 void write_graph(const Graph& graph) {
