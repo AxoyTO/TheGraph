@@ -103,7 +103,7 @@ class Graph {
     return res;
   }
 
-  void add_vertex() { vertices_.emplace_back(vertices_.size()); }
+  void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
@@ -129,8 +129,8 @@ class Graph {
     // check if they are not connected
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
-    const EdgeId id = edges_.size();
-    edges_.emplace_back(from_vertex_id, to_vertex_id, edges_.size());
+    const EdgeId id = get_next_edge_id();
+    edges_.emplace_back(from_vertex_id, to_vertex_id, id);
 
     // add information into Verex structure
     vertices_[from_vertex_id].add_edge_id(id);
@@ -140,6 +140,12 @@ class Graph {
  private:
   vector<Vertex> vertices_;
   vector<Edge> edges_;
+  VertexId vertex_id_counter_ = 0;
+  EdgeId edge_id_counter_ = 0;
+
+  VertexId get_next_vertex_id() { return vertex_id_counter_++; }
+
+  VertexId get_next_edge_id() { return edge_id_counter_++; }
 };
 
 void write_graph(const Graph& graph) {
