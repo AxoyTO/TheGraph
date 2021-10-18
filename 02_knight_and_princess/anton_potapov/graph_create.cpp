@@ -113,12 +113,12 @@ class Graph {
   }
 
   const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
-    update_vertices_depth_();
+    update_vertices_depth();
     return vertices_at_depth_[depth];
   }
 
   const std::map<size_t, std::set<VertexId>>& depth_distribution() {
-    update_vertices_depth_();
+    update_vertices_depth();
     return vertices_at_depth_;
   }
 
@@ -155,7 +155,7 @@ class Graph {
   }
 
   VertexId add_vertex() {
-    const VertexId new_vertex_id = get_next_vertex_id_();
+    const VertexId new_vertex_id = get_next_vertex_id();
     vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
   }
@@ -167,7 +167,7 @@ class Graph {
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
 
-    const EdgeId new_edge_id = get_next_edge_id_();
+    const EdgeId new_edge_id = get_next_edge_id();
 
     auto it_vertex1 = vertices_.find(vertex1);
     it_vertex1->second.add_edge(new_edge_id);
@@ -182,7 +182,7 @@ class Graph {
   }
 
   std::string get_json_string() {
-    update_vertices_depth_();
+    update_vertices_depth();
     std::stringstream json_stringstream;
     json_stringstream << "{\"depth\":" << max_depth_ << ",";
     json_stringstream << "\"vertices\":[";
@@ -211,19 +211,19 @@ class Graph {
   std::map<size_t, std::set<VertexId>> vertices_at_depth_;
   size_t max_depth_;
 
-  VertexId get_next_vertex_id_() {
+  VertexId get_next_vertex_id() {
     VertexId new_vertex_id = next_vertex_id_;
     ++next_vertex_id_;
     return new_vertex_id;
   }
 
-  EdgeId get_next_edge_id_() {
+  EdgeId get_next_edge_id() {
     EdgeId new_edge_id = next_edge_id_;
     ++next_edge_id_;
     return new_edge_id;
   }
 
-  void update_vertices_depth_() {
+  void update_vertices_depth() {
     const VertexId first_vertex_id = vertices_.begin()->first;
 
     std::map<VertexId, size_t> depths;
