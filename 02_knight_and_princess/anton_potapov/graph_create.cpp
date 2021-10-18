@@ -122,20 +122,23 @@ class Graph {
     return vertices_at_depth_;
   }
 
-  bool is_vertex_exists(const VertexId& vertex) const {
-    return vertices_.find(vertex) != vertices_.end();
+  bool is_vertex_exists(const VertexId& vertex_id) const {
+    return vertices_.find(vertex_id) != vertices_.end();
   }
 
-  bool is_adjacent(const VertexId& vertex1, const VertexId& vertex2) const {
-    return vertex1 + 1 == vertex2 || vertex2 + 1 == vertex1;
+  bool is_adjacent(const VertexId& vertex1_id,
+                   const VertexId& vertex2_id) const {
+    return vertex1_id + 1 == vertex2_id || vertex2_id + 1 == vertex1_id;
   }
 
-  bool is_connected(const VertexId& vertex1, const VertexId& vertex2) const {
-    assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
-    assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
-    if (vertex1 == vertex2) {
-      auto it_vertex = vertices_.find(vertex1);
-      for (const auto& vertex_edge_id : it_vertex->second.connected_edges()) {
+  bool is_connected(const VertexId& vertex1_id,
+                    const VertexId& vertex2_id) const {
+    assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
+    assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
+    if (vertex1_id == vertex2_id) {
+      auto vertex_pair_iterator = vertices_.find(vertex1_id);
+      for (const auto& vertex_edge_id :
+           vertex_pair_iterator->second.connected_edges()) {
         const auto& vertex_edge = edges_.find(vertex_edge_id)->second;
         if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
           return true;
@@ -143,9 +146,9 @@ class Graph {
       }
       return false;
     } else {
-      for (const auto& vertex1_edge :
-           vertices_.find(vertex1)->second.connected_edges()) {
-        if (vertices_.find(vertex2)->second.has_edge_id(vertex1_edge)) {
+      for (const auto& vertex1_edge_id :
+           vertices_.find(vertex1_id)->second.connected_edges()) {
+        if (vertices_.find(vertex2_id)->second.has_edge_id(vertex1_edge_id)) {
           return true;
         }
       }
