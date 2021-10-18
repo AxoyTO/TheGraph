@@ -105,31 +105,36 @@ class Graph {
 
   void add_vertex() { vertices_.emplace_back(vertices_.size()); }
 
-bool is_connected(const VertexId& from_vertex_id, const VertexId& to_vertex_id) const {
-    vector<EdgeId> from_vertex_edges_ids = vertices_[from_vertex_id].get_edges_ids();
-    vector<EdgeId> to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
+  bool is_connected(const VertexId& from_vertex_id,
+                    const VertexId& to_vertex_id) const {
+    vector<EdgeId> from_vertex_edges_ids =
+        vertices_[from_vertex_id].get_edges_ids();
+    vector<EdgeId> to_vertex_edges_ids =
+        vertices_[to_vertex_id].get_edges_ids();
     for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
-        for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
-            if (from_vertex_edge_id == to_vertex_edge_id) return true;
-        }
+      for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
+        if (from_vertex_edge_id == to_vertex_edge_id)
+          return true;
+      }
     }
     return false;
-}
+  }
 
-  void connect_vertices(const VertexId& out_id, const VertexId& dest_id) {
+  void connect_vertices(const VertexId& from_vertex_id,
+                        const VertexId& to_vertex_id) {
     // check if vertices exist
-    assert(is_vertex_id_included(vertices_, out_id));
-    assert(is_vertex_id_included(vertices_, dest_id));
+    assert(is_vertex_id_included(vertices_, from_vertex_id));
+    assert(is_vertex_id_included(vertices_, to_vertex_id));
 
     // check if they are not connected
-    assert(!is_connected(out_id, dest_id));
+    assert(!is_connected(from_vertex_id, to_vertex_id));
 
     const EdgeId id = edges_.size();
-    edges_.emplace_back(out_id, dest_id, edges_.size());
+    edges_.emplace_back(from_vertex_id, to_vertex_id, edges_.size());
 
     // add information into Verex structure
-    vertices_[out_id].add_edge_id(id);
-    vertices_[dest_id].add_edge_id(id);
+    vertices_[from_vertex_id].add_edge_id(id);
+    vertices_[to_vertex_id].add_edge_id(id);
   }
 
  private:
