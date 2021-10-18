@@ -71,7 +71,7 @@ class Edge {
 
 class Graph {
  public:
-  Graph(): vertex_id_counter(0), edge_id_counter(0) {}
+  Graph() : vertex_id_counter(0), edge_id_counter(0) {}
   int get_vertices_amount() const { return vertices_.size(); }
   int get_edges_amount() const { return edges_.size(); }
 
@@ -120,7 +120,6 @@ class Graph {
     std::string result = "{\n  \"vertices\": [\n";
 
     for (int i = 0; i < vertices_.size(); i++) {
-
       result += std::string(vertices_[i]);
       if (i != vertices_.size() - 1)
         result += ",\n";
@@ -129,7 +128,6 @@ class Graph {
     result += "\n  ],\n  \"edges\": [\n";
 
     for (int i = 0; i < edges_.size(); i++) {
-
       result += std::string(edges_[i]);
       if (i != edges_.size() - 1)
         result += ",\n";
