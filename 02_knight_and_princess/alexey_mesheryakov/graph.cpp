@@ -16,25 +16,25 @@ class Graph {
  public:
   class Edge {
    public:
-    Edge(const pair<VertexId, VertexId>& vertex_ids, const EdgeId& edge_id)
-        : vertex_ids_(vertex_ids), id_(edge_id) {}
+    Edge(const pair<VertexId, VertexId>& new_vertex_ids, const EdgeId& edge_id)
+        : vertex_ids(new_vertex_ids), id(edge_id) {}
 
     std::string to_string() const {
       std::stringstream buffer;
-      buffer << "{\"id\":" << id_ << ",\"vertex_ids\":[" << vertex_ids_.first
-             << "," << vertex_ids_.second << "]}";
+      buffer << "{\"id\":" << id << ",\"vertex_ids\":[" << vertex_ids.first
+             << "," << vertex_ids.second << "]}";
       return buffer.str();
     }
-    const pair<VertexId, VertexId> vertex_ids_ = {};
-    const EdgeId id_ = INVALID_ID;
+    const pair<VertexId, VertexId> vertex_ids = {};
+    const EdgeId id = INVALID_ID;
   };
   class Vertex {
    public:
-    explicit Vertex(const VertexId& id) : id_(id) {}
+    explicit Vertex(const VertexId& new_id) : id(new_id) {}
 
     std::string to_string() const {
       std::stringstream buffer;
-      buffer << "{\"id\":" << id_ << ",\"edge_ids\":[";
+      buffer << "{\"id\":" << id << ",\"edge_ids\":[";
       for (int i = 0; i < edge_ids_.size() - 1; i++)
         buffer << edge_ids_[i] << ",";
       buffer << edge_ids_[edge_ids_.size() - 1] << "]}";
@@ -53,8 +53,8 @@ class Graph {
         }
       return false;
     }
-    const vector<EdgeId> get_edge_ids() const { return edge_ids_; }
-    const VertexId id_ = INVALID_ID;
+    const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+    const VertexId id = INVALID_ID;
 
    private:
     vector<EdgeId> edge_ids_ = {};
@@ -62,19 +62,19 @@ class Graph {
 
   bool vertex_exist(const VertexId& id) const {
     for (const auto& vertex : vertices_)
-      if (vertex.id_ == id)
+      if (vertex.id == id)
         return true;
     return false;
   }
 
   bool edge_exist(const EdgeId& id) const {
     for (const auto& edge : edges_)
-      if (edge.id_ == id)
+      if (edge.id == id)
         return true;
     return false;
   }
 
-  const bool edge_exist(const VertexId& first, const VertexId& second) {
+  bool edge_exist(const VertexId& first, const VertexId& second) const {
     for (const auto& first_vertex : vertices_[first].get_edge_ids())
       for (const auto& second_vertex : vertices_[second].get_edge_ids())
         if (first_vertex == second_vertex)
