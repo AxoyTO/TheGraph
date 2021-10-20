@@ -1,3 +1,4 @@
+#include <cassert>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -21,14 +22,28 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
-  Vertex(VertexId new_id) : id(new_id) {}
+  explicit Vertex(const VertexId& new_id) : id(new_id) {}
   const VertexId id = 0;
-  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  void add_edge_id(const EdgeId& id);
   const vector<EdgeId>& edge_ids() const { return edge_ids_; }
 
  private:
+  bool has_edge_id(const EdgeId& id);
   vector<EdgeId> edge_ids_;
 };
+
+bool Vertex::has_edge_id(const EdgeId& id) {
+  for (const auto& edge_id : edge_ids_)
+    if (id == edge_id)
+      return true;
+  return false;
+}
+
+void Vertex::add_edge_id(const EdgeId& id) {
+  if (has_edge_id(id))
+    return;
+  edge_ids_.push_back(id);
+}
 
 std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
   out << "{" << endl;
@@ -69,13 +84,14 @@ class Graph {
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
-  bool is_vertex(const VertexId& vertex_id) const;
+  bool has_vertex(const VertexId& vertex_id) const;
+  bool has_edge_id(const EdgeId& edge_id);
   bool is_connected(const VertexId& begin, const VertexId& end) const;
   vector<Vertex> vertices_;
   vector<Edge> edges_;
 };
 
-bool Graph::is_vertex(const VertexId& vertex_id) const {
+bool Graph::has_vertex(const VertexId& vertex_id) const {
   for (const auto& vertex : vertices_) {
     if (vertex_id == vertex.id)
       return true;
@@ -84,12 +100,21 @@ bool Graph::is_vertex(const VertexId& vertex_id) const {
 }
 
 bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
+  assert(has_vertex(begin) && "Vertex doesn't exist");
+  assert(has_vertex(end) && "Vertex doesn't exist");
   for (const EdgeId& edge_num : vertices_[begin].edge_ids()) {
     if (edges_[edge_num].begin == end || edges_[edge_num].end == end) {
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
+}
+
+bool Graph::has_edge_id(const EdgeId& edge_id) {
+  for (const auto& edge : edges_)
+    if (edge_id == edge.id)
+      return true;
+  return false;
 }
 
 void Graph::add_vertex() {
@@ -97,9 +122,13 @@ void Graph::add_vertex() {
 }
 
 void Graph::add_edge(const VertexId& begin, const VertexId& end) {
-  if (!is_vertex(begin) || !is_vertex(end) || !is_connected(begin, end))
-    return;
+  assert(has_vertex(begin) && "Vertex doesn't exist");
+  assert(has_vertex(end) && "Vertex doesn't exist");
+  assert(!is_connected(begin, end) && "Vertices already connected");
+
   Edge edge = {next_edge_id(), begin, end};
+  if (has_edge_id(edge.id))
+    return;
   vertices_[begin].add_edge_id(edge.id);
   vertices_[end].add_edge_id(edge.id);
   edges_.push_back(edge);
