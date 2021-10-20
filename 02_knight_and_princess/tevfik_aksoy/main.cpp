@@ -58,16 +58,12 @@ bool probability(float condition) {
 
 struct Vertex {
  public:
-  const VertexId source_id;
   const VertexId id;
   const VertexDepth depth;
 
-  Vertex(const VertexId& source_id,
-         const VertexId& id,
-         const VertexDepth& depth)
-      : source_id(source_id), id(id), depth(depth) {}
+  Vertex(const VertexId& id, const VertexDepth& depth) : id(id), depth(depth) {}
 
-  void add_edge(const EdgeId& _id) {
+  void add_edge_id(const EdgeId& _id) {
     assert(!validation::edge_id_exists_in_vertex(_id, edge_ids_) &&
            "Edge already exists in vertex!");
     edge_ids_.push_back(_id);
@@ -92,16 +88,19 @@ struct Vertex {
 
 struct Edge {
  public:
-  enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
+  enum class Color { Gray, Green, Blue, Yellow, Red };
   const EdgeId id;
   const Color color;
   const VertexId source;
   const VertexId destination;
 
-  Edge(VertexId _source, VertexId _destination, VertexId _id, Color _color)
+  Edge(const VertexId& _source,
+       const VertexId& _destination,
+       const VertexId& _id,
+       const Color& _color)
       : id(_id), color(_color), source(_source), destination(_destination) {}
 
-  std::string color_to_string(const Edge::Color& color) const;
+  std::string color_to_string(const Edge::Color& _color) const;
 
   std::string to_JSON() const {
     std::string json_string;
@@ -114,15 +113,15 @@ struct Edge {
 
 std::string Edge::color_to_string(const Edge::Color& _color) const {
   switch (_color) {
-    case Edge::Color::GRAY:
+    case Edge::Color::Gray:
       return "gray";
-    case Edge::Color::GREEN:
+    case Edge::Color::Green:
       return "green";
-    case Edge::Color::BLUE:
+    case Edge::Color::Blue:
       return "blue";
-    case Edge::Color::YELLOW:
+    case Edge::Color::Yellow:
       return "yellow";
-    case Edge::Color::RED:
+    case Edge::Color::Red:
       return "red";
   }
 }
@@ -143,91 +142,80 @@ bool validation::edge_exists_in_graph(const EdgeId& id,
     }
   return false;
 }
+
 class Graph {
  public:
-  Graph(VertexDepth max_depth, int new_vertices_num)
-      : max_depth_(max_depth), new_vertices_num_(new_vertices_num) {}
-
-  VertexId source_of_vertex(const VertexId& vertex) {
-    return vertices_[vertex].source_id;
-  }
-
-  void insert_vertex(const VertexId& source_vertex,
-                     const VertexId& vertex,
-                     const VertexDepth& depth) {
+  void insert_vertex(const VertexId& vertex, const VertexDepth& depth) {
     assert(validation::is_vertex_id_valid(vertex) && "Vertex id is not valid!");
     assert(!validation::vertex_exists_in_graph(vertex, vertices_) &&
            "Vertex already exists!");
-    vertices_.emplace_back(source_vertex, vertex, depth);
+    vertices_.emplace_back(vertex, depth);
   }
   void insert_edge(const VertexId& source,
                    const VertexId& destination,
                    const EdgeId& id,
-                   const Edge::Color& color) {
+                   const Edge::Color& color = Edge::Color::Gray) {
     assert(validation::is_edge_id_valid(id) && "Edge id is not valid!");
     assert(!validation::edge_exists_in_graph(id, edges_) &&
-           "Edge already exists!");  // OK
+           "Edge already exists!");
+    assert(validation::is_vertex_id_valid(source) &&
+           "Source Vertex id is not valid!");
+    assert(validation::is_vertex_id_valid(destination) &&
+           "Destination Vertex id is not valid!");
     assert(validation::vertex_exists_in_graph(source, vertices_) &&
            "Source vertex id doesn't exist!");
     assert(validation::vertex_exists_in_graph(destination, vertices_) &&
            "Destination vertex id doesn't exist!");
+    assert(!are_vertices_connected(source, destination) &&
+           "Vertices are already connected!");
 
     edges_.emplace_back(source, destination, id, color);
-    if (color != Edge::Color::GREEN) {
-      assert(!are_vertices_connected(source, destination) &&
-             "Vertices are already connected!");
-      vertices_[source].add_edge(id);
-      vertices_[destination].add_edge(id);
+    if (color != Edge::Color::Green) {
+      vertices_[source].add_edge_id(id);
+      vertices_[destination].add_edge_id(id);
     } else {
-      vertices_[source].add_edge(id);
+      vertices_[source].add_edge_id(id);
     }
   }
 
   bool are_vertices_connected(const VertexId& source_vertex,
                               const VertexId& destination_vertex) {
-    for (const auto& source : vertices_[source_vertex].get_edge_ids()) {
-      for (const auto& destination :
-           vertices_[destination_vertex].get_edge_ids()) {
-        if (source == destination) {
-          std::cerr << "Vertices: " << source_vertex << " and "
-                    << destination_vertex
-                    << " are already connected with edge: " << source << "\n";
-          return true;
+    if (source_vertex != destination_vertex) {
+      for (const auto& source : vertices_[source_vertex].get_edge_ids()) {
+        for (const auto& destination :
+             vertices_[destination_vertex].get_edge_ids()) {
+          if (source == destination) {
+            std::cerr << "Vertices: " << source_vertex << " and "
+                      << destination_vertex
+                      << " are already connected with edge: " << source << "\n";
+            return true;
+          }
         }
       }
     }
     return false;
   }
 
-  VertexDepth get_max_depth() { return max_depth_; }
-  void set_max_depth(VertexDepth max_depth) { max_depth_ = max_depth; }
-  int get_new_vertices_num() { return new_vertices_num_; }
+  VertexId source_of_vertex(const VertexId& vertex) const {
+    for (const auto& vertex_edge : vertices_[vertex].get_edge_ids()) {
+      if (edges_[vertex_edge].color == Edge::Color::Gray)
+        return edges_[vertex_edge].source;
+    }
+    return -1;
+  }
 
   // Returns depth of vertex in the graph
   const VertexDepth depth_of(const VertexId& id) const {
     return vertices_[id].depth;
   }
 
-  // Returns the number of vertices created by vertex in the graph
-  const int created_by_vertex(const VertexId& id) const {
-    if (id == 0)
-      return new_vertices_num_;
-    int count = 0;
-    for (const auto& vertex : vertices_) {
-      if (vertex.source_id == id)
-        count++;
-    }
-    return count;
-  }
-
-  vector<Vertex> get_vertices() const { return vertices_; }
-  vector<Edge> get_edges() const { return edges_; }
-
+  const vector<Vertex>& get_vertices() const { return vertices_; }
+  const vector<Edge>& get_edges() const { return edges_; }
+  
   // Returns total number of vertices in the depth
   int vertices_count_in_depth(const VertexDepth& depth) const {
     if (depth == 0)
       return 1;
-
     int count = 0;
     for (const auto& vertex : vertices_) {
       if (depth == vertex.depth)
@@ -275,23 +263,27 @@ class Graph {
  private:
   vector<Edge> edges_;
   vector<Vertex> vertices_;
-  int max_depth_;
-  int new_vertices_num_;
 };
 
-void generate_vertices_and_gray_edges(Graph& graph);
+void generate_vertices_and_gray_edges(Graph& graph,
+                                      VertexDepth& max_depth,
+                                      const int& new_vertices_num);
 void generate_green_edges(Graph& graph);
 void generate_blue_edges(Graph& graph);
-void generate_yellow_edges(Graph& graph);
-void generate_red_edges(Graph& graph);
 
-const Graph generateGraph(VertexDepth max_depth, int new_vertices_num) {
-  Graph graph(max_depth, new_vertices_num);
+void generate_yellow_edges(Graph& graph,
+                           const VertexDepth& max_depth,
+                           const int& new_vertices_num);
+
+void generate_red_edges(Graph& graph, const VertexDepth& max_depth);
+
+const Graph generateGraph(VertexDepth& max_depth, const int& new_vertices_num) {
+  Graph graph;
   clock_t begin, end;
   double elapsed_time;
   begin = clock();
   std::cout << "Generating vertices and gray edges...   ";
-  generate_vertices_and_gray_edges(graph);
+  generate_vertices_and_gray_edges(graph, max_depth, new_vertices_num);
   end = clock();
   elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Generated vertices and gray edges. Elapsed Time: "
@@ -310,9 +302,10 @@ const Graph generateGraph(VertexDepth max_depth, int new_vertices_num) {
   elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Generated blue edges. Elapsed Time: " << elapsed_time
             << " s.\n";
+
   std::cout << "Generating yellow edges...   ";
   begin = clock();
-  generate_yellow_edges(graph);
+  generate_yellow_edges(graph, max_depth, new_vertices_num);
   end = clock();
   elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Generated yellow edges. Elapsed Time: " << elapsed_time
@@ -320,7 +313,7 @@ const Graph generateGraph(VertexDepth max_depth, int new_vertices_num) {
 
   std::cout << "Generating red edges...   ";
   begin = clock();
-  generate_red_edges(graph);
+  generate_red_edges(graph, max_depth);
   end = clock();
   elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Generated red edges. Elapsed Time: " << elapsed_time
@@ -329,30 +322,31 @@ const Graph generateGraph(VertexDepth max_depth, int new_vertices_num) {
   return graph;
 }
 
-void generate_vertices_and_gray_edges(Graph& graph) {
-  graph.insert_vertex(0, 0, 0);
+void generate_vertices_and_gray_edges(Graph& graph,
+                                      VertexDepth& max_depth,
+                                      const int& new_vertices_num) {
+  graph.insert_vertex(0, 0);
   float condition = 0;
   VertexId source_vertex = 0;
   VertexId vertex = 1;
-
-  for (VertexDepth depth = 0; depth < graph.get_max_depth(); depth++) {
+  for (VertexDepth depth = 0; depth < max_depth; depth++) {
     for (int i = 0; i < graph.vertices_count_in_depth(depth); i++) {
-      for (int j = 0; j < graph.get_new_vertices_num(); j++) {
+      for (int j = 0; j < new_vertices_num; j++) {
         if (probability(condition)) {
-          graph.insert_vertex(source_vertex, vertex, depth + 1);
+          graph.insert_vertex(vertex, depth + 1);
           EdgeId edge_id = graph.get_edges().size();
-          graph.insert_edge(source_vertex, vertex, edge_id, Edge::Color::GRAY);
+          graph.insert_edge(source_vertex, vertex, edge_id, Edge::Color::Gray);
           vertex++;
         }
       }
       source_vertex++;
     }
-    condition += 100 / (float)(graph.get_max_depth());
+    condition += 100 / (float)max_depth;
   }
-  if (graph.get_max_depth() != graph.depth_of(vertex - 1)) {
+  if (max_depth != graph.depth_of(vertex - 1)) {
     std::cout << "\nMax depth couldn't be reached. Depth of final vertex: "
               << graph.depth_of(vertex - 1) << "\n";
-    graph.set_max_depth(graph.depth_of(vertex - 1));
+    max_depth = graph.depth_of(vertex - 1);
   }
 }
 
@@ -361,8 +355,7 @@ void generate_green_edges(Graph& graph) {
   for (const auto& vertex : graph.get_vertices()) {
     if (probability(condition)) {
       EdgeId edge_id = graph.get_edges().size();
-      graph.insert_edge(vertex.source_id, vertex.source_id, edge_id,
-                        Edge::Color::GREEN);
+      graph.insert_edge(vertex.id, vertex.id, edge_id, Edge::Color::Green);
     }
   }
 }
@@ -373,15 +366,21 @@ void generate_blue_edges(Graph& graph) {
     if (graph.depth_of(i) == graph.depth_of(i + 1))
       if (probability(condition)) {
         EdgeId edge_id = graph.get_edges().size();
-        graph.insert_edge(i, i + 1, edge_id, Edge::Color::BLUE);
+        graph.insert_edge(i, i + 1, edge_id, Edge::Color::Blue);
       }
   }
 }
 
-void generate_yellow_edges(Graph& graph) {
+const int created_by_vertex(const Graph& graph,
+                            const VertexId& id,
+                            const int& new_vertices_num);
+
+void generate_yellow_edges(Graph& graph,
+                           const VertexDepth& max_depth,
+                           const int& new_vertices_num) {
   int m = 0, n = 0;
-  for (VertexDepth i = 1; i < graph.get_max_depth(); i++) {
-    float condition = 100 - i * (100 / (float)(graph.get_max_depth() - 1));
+  for (VertexDepth i = 1; i < max_depth; i++) {
+    float condition = 100 - i * (100 / (float)(max_depth - 1));
     while (m < graph.vertices_in_depth(i).size()) {
       while (n < graph.vertices_in_depth(i + 1).size()) {
         if (probability(condition)) {
@@ -394,7 +393,7 @@ void generate_yellow_edges(Graph& graph) {
 
           bool break_flag = false;
           do {
-            if (graph.created_by_vertex(source) ==
+            if (created_by_vertex(graph, source, new_vertices_num) ==
                 graph.vertices_count_in_depth(i + 1)) {
               break_flag = true;
               break;
@@ -408,7 +407,7 @@ void generate_yellow_edges(Graph& graph) {
           if (break_flag)
             break;
           EdgeId edge_id = graph.get_edges().size();
-          graph.insert_edge(source, destination, edge_id, Edge::Color::YELLOW);
+          graph.insert_edge(source, destination, edge_id, Edge::Color::Yellow);
           break;
         }
         n++;
@@ -420,10 +419,10 @@ void generate_yellow_edges(Graph& graph) {
   }
 }
 
-void generate_red_edges(Graph& graph) {
+void generate_red_edges(Graph& graph, const VertexDepth& max_depth) {
   float condition = 67;
   int m = 0, n = 0;
-  for (VertexDepth i = 0; i < graph.get_max_depth(); i++) {
+  for (VertexDepth i = 0; i < max_depth; i++) {
     while (m != graph.vertices_in_depth(i).size()) {
       while (n != graph.vertices_in_depth(i + 2).size()) {
         if (probability(condition)) {
@@ -436,7 +435,7 @@ void generate_red_edges(Graph& graph) {
           VertexId destination =
               graph.vertices_in_depth(i + 2).at(random_vertex);
           EdgeId edge_id = graph.get_edges().size();
-          graph.insert_edge(source, destination, edge_id, Edge::Color::RED);
+          graph.insert_edge(source, destination, edge_id, Edge::Color::Red);
           break;
         }
         n++;
@@ -448,17 +447,22 @@ void generate_red_edges(Graph& graph) {
   }
 }
 
-int main() {
-  string directory = "./temp";
-  try {
-    if (!std::filesystem::create_directory(directory)) {
-    }
-  } catch (const std::exception& ex) {
-    std::cerr << ex.what() << "\n";
+const int created_by_vertex(const Graph& graph,
+                            const VertexId& id,
+                            const int& new_vertices_num) {
+  if (id == 0)
+    return new_vertices_num;
+  int count = 0;
+  for (const auto& vertex : graph.get_vertices()) {
+    if (graph.source_of_vertex(vertex.id) == id)
+      count++;
   }
+  return count;
+}
 
-  int max_depth;
-  int new_vertices_num;
+int main() {
+  int max_depth = -1;
+  int new_vertices_num = -1;
 
   std::cout << "Enter max_depth: ";
   do {
@@ -477,8 +481,7 @@ int main() {
 
   std::cout << "\n";
 
-  string filename = "./temp/graph";
-  filename = filename + std::to_string(1) + ".json";
+  string filename = "./temp/graph1.json";
   std::ofstream file(filename, std::ios::out);
   if (!file.is_open())
     std::cerr << "Error opening the file graph.json!\n";
