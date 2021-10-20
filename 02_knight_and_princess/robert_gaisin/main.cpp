@@ -53,7 +53,10 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
 }
 
 struct Edge {
-  explicit Edge(const EdgeId& new_id, const VertexId& begin_vertex, const VertexId& end_vertex) : id(new_id), begin(begin_vertex), end(end_vertex) {} 
+  explicit Edge(const EdgeId& new_id,
+                const VertexId& begin_vertex,
+                const VertexId& end_vertex)
+      : id(new_id), begin(begin_vertex), end(end_vertex) {}
   const EdgeId id = 0;
   const VertexId begin = 0;
   const VertexId end = 0;
@@ -121,7 +124,7 @@ void Graph::add_edge(const VertexId& begin, const VertexId& end) {
   const auto& edge = edges_.emplace_back(next_edge_id(), begin, end);
   vertices_[begin].add_edge_id(edge.id);
   vertices_[end].add_edge_id(edge.id);
- // edges_.push_back(edge);
+  // edges_.push_back(edge);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
