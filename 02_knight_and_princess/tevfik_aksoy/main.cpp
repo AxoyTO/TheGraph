@@ -211,7 +211,7 @@ class Graph {
 
   const vector<Vertex>& get_vertices() const { return vertices_; }
   const vector<Edge>& get_edges() const { return edges_; }
-  
+
   // Returns total number of vertices in the depth
   int vertices_count_in_depth(const VertexDepth& depth) const {
     if (depth == 0)
