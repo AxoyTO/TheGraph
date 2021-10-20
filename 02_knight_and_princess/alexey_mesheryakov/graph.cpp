@@ -25,11 +25,8 @@ class Graph {
              << "," << vertex_ids_.second << "]}";
       return buffer.str();
     }
-    pair<VertexId, VertexId> get_vertex_ids() const { return vertex_ids_; }
-
-   private:
-    const EdgeId id_ = INVALID_ID;
     const pair<VertexId, VertexId> vertex_ids_ = {};
+    const EdgeId id_ = INVALID_ID;
   };
   class Vertex {
    public:
@@ -45,49 +42,56 @@ class Graph {
     }
 
     void add_edge(const EdgeId& edge_id) {
-      assert(edge_id_not_exist(edge_id) && "Edge id already exist");
+      assert(!has_edge_id(edge_id) && "Edge id already exist");
       edge_ids_.push_back(edge_id);
     }
 
-   private:
-    bool edge_id_not_exist(const EdgeId& new_edge_id) {
-      bool exist = false;
+    bool has_edge_id(const EdgeId& new_edge_id) const {
       for (const auto& edge_id : edge_ids_)
-        exist = exist || (edge_id == new_edge_id);
-      return !exist;
+        if (edge_id == new_edge_id) {
+          return true;
+        }
+      return false;
     }
+    const vector<EdgeId> get_edge_ids() const { return edge_ids_; }
     const VertexId id_ = INVALID_ID;
+
+   private:
     vector<EdgeId> edge_ids_ = {};
   };
 
-  const bool vertex_exist(const VertexId& id) {
-    return (0 <= id) && (id < vertex_id_counter_);
+  bool vertex_exist(const VertexId& id) const {
+    for (const auto& vertex : vertices_)
+      if (vertex.id_ == id)
+        return true;
+    return false;
   }
 
-  const bool edge_exist(const EdgeId& id) {
-    return (0 <= id) && (id < edge_id_counter_);
+  bool edge_exist(const EdgeId& id) const {
+    for (const auto& edge : edges_)
+      if (edge.id_ == id)
+        return true;
+    return false;
   }
 
   const bool edge_exist(const VertexId& first, const VertexId& second) {
-    bool exist = false;
-    for (const auto& edge : edges_) {
-      auto vertices = edge.get_vertex_ids();
-      exist = exist || (vertices.first == first && vertices.second == second) ||
-              (vertices.second == first && vertices.first == second);
-    }
-    return exist;
+    for (const auto& first_vertex : vertices_[first].get_edge_ids())
+      for (const auto& second_vertex : vertices_[second].get_edge_ids())
+        if (first_vertex == second_vertex)
+          return true;
+    return false;
   }
 
-  void add_vertex() { vertices_.emplace_back(vertex_id_counter_++); }
+  void add_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
 
   void add_edge(const VertexId& first, const VertexId& second) {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
     assert(!edge_exist(first, second) && "Such edge already exist");
-    edges_.push_back(Edge({first, second}, edge_id_counter_));
-    vertices_[first].add_edge(edge_id_counter_);
-    vertices_[second].add_edge(edge_id_counter_);
-    edge_id_counter_++;
+    const auto new_id = get_new_edge_id();
+    edges_.emplace_back(pair<VertexId, VertexId>{first, second}, new_id);
+    vertices_[first].add_edge(new_id);
+    vertices_[second].add_edge(new_id);
   }
 
   std::string to_json() const {
@@ -115,6 +119,10 @@ class Graph {
   vector<Vertex> vertices_ = {};
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
+
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
+
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
 };
 
 int main() {
