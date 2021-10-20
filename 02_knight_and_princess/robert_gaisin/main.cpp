@@ -124,7 +124,6 @@ void Graph::add_edge(const VertexId& begin, const VertexId& end) {
   const auto& edge = edges_.emplace_back(next_edge_id(), begin, end);
   vertices_[begin].add_edge_id(edge.id);
   vertices_[end].add_edge_id(edge.id);
-  // edges_.push_back(edge);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
