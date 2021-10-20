@@ -23,7 +23,7 @@ class Vertex {
     return str;
   }
   bool hasEdgeId(int id) const {
-    for (const auto eId : edgeIds) {
+    for (const auto& eId : edgeIds) {
       if (id == eId) {
         return true;
       }
@@ -52,28 +52,19 @@ class Edge {
 };
 class Graph {
  public:
-  void addNode(std::array<int, 3> node) {
-    addVertx();
-    addEdgeToVer(node.at(0), node.at(1));
-    addVertx();
-    addEdgeToVer(node.at(2), node.at(1));
-    addEdge(node.at(0), node.at(2));
-  }
-  void addVertx() {
-    int vec = getVertex();
-    assert(!hasVertex(vec) && "Vertex already exits");
-    vertices.emplace_back(vec);
-  }
-  void addEdgeToVer(int verId, int edgeId) {
+  void addVertx() { vertices.emplace_back(getNextVertexId()); }
+  void addEdge(int fromVertexId, int toVertexId) {
+    assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
+    assert(hasVertex(toVertexId) && "Vertex doesn't exist");
+    assert(!isConnected(fromVertexId, toVertexId) &&
+           "Vertices already connected");
+    int eId = getNextEdgeId();
+    edges.emplace_back(eId, fromVertexId, toVertexId);
     for (auto& vertexId : vertices) {
-      if (vertexId.id == verId) {
-        vertexId.addEdgeId(edgeId);
+      if (fromVertexId == vertexId.id || toVertexId == vertexId.id) {
+        vertexId.addEdgeId(eId);
       }
     }
-  }
-  void addEdge(int from, int to) {
-    int eId = getEdge();
-    edges.emplace_back(eId, from, to);
   }
   std::string toString() {
     // vertex
@@ -103,46 +94,65 @@ class Graph {
     }
     return false;
   }
+  bool isConnected(int fromVertexId, int toVertexId) {
+    for (const auto eId : edges) {
+      if (eId.fromVertexId == fromVertexId && eId.toVertexId == toVertexId) {
+        for (const auto vId : vertices) {
+          if (fromVertexId == vId.id || toVertexId == vId.id) {
+            if (vId.hasEdgeId(eId.id)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
 
  private:
-  int getEdge() {
-    edgeCount++;
-    return edgeCount - 1;
+  int getNextEdgeId() {
+    vertexIdCounter++;
+    return vertexIdCounter - 1;
   }
-  int getVertex() {
-    verCount++;
-    return verCount - 1;
+  int getNextVertexId() {
+    edgeIdCounter++;
+    return edgeIdCounter - 1;
   }
-  int verCount = 0;
-  int edgeCount = 0;
+  int vertexIdCounter = 0;
+  int edgeIdCounter = 0;
   std::vector<Vertex> vertices;
   std::vector<Edge> edges;
 };
 int main() {
-  const std::array<std::array<int, 3>, 18> netWork = {{{0, 0, 1},
-                                                       {0, 1, 2},
-                                                       {0, 2, 3},
-                                                       {1, 3, 4},
-                                                       {1, 4, 5},
-                                                       {1, 5, 6},
-                                                       {2, 6, 7},
-                                                       {2, 7, 8},
-                                                       {3, 8, 9},
-                                                       {4, 9, 10},
-                                                       {5, 10, 10},
-                                                       {6, 11, 10},
-                                                       {7, 12, 11},
-                                                       {8, 13, 11},
-                                                       {9, 14, 12},
-                                                       {10, 15, 13},
-                                                       {11, 16, 13},
-                                                       {12, 17, 13}}};
+  const int number_of_vertices = 18;
+  const std::array<std::pair<int, int>, number_of_vertices> connections = {
+      {{0, 1},
+       {0, 2},
+       {0, 3},
+       {1, 4},
+       {1, 5},
+       {1, 6},
+       {2, 7},
+       {2, 8},
+       {3, 9},
+       {4, 10},
+       {5, 10},
+       {6, 10},
+       {7, 11},
+       {8, 11},
+       {9, 12},
+       {10, 13},
+       {11, 13},
+       {12, 13}}};
   Graph graph;
-  for (const auto netId : netWork) {
-    graph.addNode(netId);
+  for (int i = 0; i < number_of_vertices; i++) {
+    graph.addVertx();
+  }
+  for (const auto& connection : connections) {
+    graph.addEdge(connection.first, connection.second);
   }
   std::ofstream writePT;
-  writePT.open("Graphic.json", std::ios::out);
+  writePT.open("Graph.json", std::ios::out);
   writePT << graph.toString() << std::endl;
   writePT.close();
   return 0;
