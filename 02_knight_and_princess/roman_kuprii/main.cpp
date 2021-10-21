@@ -143,12 +143,19 @@ class Graph {
 
   void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
+  bool is_exist(const VertexId& vertex_id) const {
+    for (const auto& vertex : vertices_) {
+      if (vertex_id == vertex.id)
+        return true;
+    }
+    return false;
+  }
+
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
-    vector<EdgeId> from_vertex_edges_ids =
+    const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
-    vector<EdgeId> to_vertex_edges_ids =
-        vertices_[to_vertex_id].get_edges_ids();
+    const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
     for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
       for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
         if (from_vertex_edge_id == to_vertex_edge_id)
@@ -181,13 +188,13 @@ class Graph {
     else
       assert(!is_looped(from_vertex_id));
 
-    EdgeId id = get_next_edge_id();
-    edges_.emplace_back(from_vertex_id, to_vertex_id, id);
+    const auto& new_edge =
+        edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
 
     // add information into Verex structure
-    vertices_[from_vertex_id].add_edge_id(id);
+    vertices_[from_vertex_id].add_edge_id(new_edge.id);
     if (from_vertex_id != to_vertex_id)
-      vertices_[to_vertex_id].add_edge_id(id);
+      vertices_[to_vertex_id].add_edge_id(new_edge.id);
 
     if (!paint) {
       int min_depth = vertices_[from_vertex_id].depth;
@@ -205,13 +212,13 @@ class Graph {
       int diff =
           vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
       if (from_vertex_id == to_vertex_id) {
-        edges_[id].color = GREEN;
+        edges_[new_edge.id].color = GREEN;
       } else if (diff == 0) {
-        edges_[id].color = BLUE;
+        edges_[new_edge.id].color = BLUE;
       } else if (diff == 1) {
-        edges_[id].color = YELLOW;
+        edges_[new_edge.id].color = YELLOW;
       } else if (diff == 2) {
-        edges_[id].color = RED;
+        edges_[new_edge.id].color = RED;
       }
     }
   }
