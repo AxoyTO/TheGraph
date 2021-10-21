@@ -9,6 +9,7 @@
 #include <vector>
 
 using std::string;
+using std::to_string;
 using std::unordered_map;
 using std::vector;
 
@@ -74,13 +75,13 @@ struct Vertex {
 
   std::string to_JSON() const {
     std::string json_string;
-    json_string += "\t{ \"id\": " + std::to_string(id) + ", \"edge_ids\": [";
+    json_string += "\t{ \"id\": " + to_string(id) + ", \"edge_ids\": [";
     for (int i = 0; i < edge_ids_.size(); i++) {
-      json_string += std::to_string(edge_ids_[i]);
+      json_string += to_string(edge_ids_[i]);
       if (i + 1 != edge_ids_.size())
         json_string += ", ";
     }
-    json_string += "], \"depth\": " + std::to_string(depth) + "}";
+    json_string += "], \"depth\": " + to_string(depth) + "}";
     return json_string;
   }
 
@@ -122,8 +123,8 @@ std::string color_to_string(const Edge::Color& _color) {
 
 std::string Edge::to_JSON() const {
   std::string json_string;
-  json_string += "\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
-                 std::to_string(source) + ", " + std::to_string(destination) +
+  json_string += "\t{ \"id\": " + to_string(id) + ", \"vertex_ids\": [" +
+                 to_string(source) + ", " + to_string(destination) +
                  "], \"color\": \"" + color_to_string(color) + "\" }";
   return json_string;
 }
@@ -220,12 +221,10 @@ class Graph {
   const vector<Vertex>& get_vertices() const { return vertices_; }
   const vector<Edge>& get_edges() const { return edges_; }
 
-  // Returns total number of vertices in the depth
   int vertices_count_in_depth(const VertexDepth& depth) {
     return depth_vertices_map_[depth].size();
   }
 
-  // Returns all the vertices in depth(x)
   vector<VertexId> vertices_in_depth(const VertexDepth& depth) {
     return depth_vertices_map_[depth];
   }
