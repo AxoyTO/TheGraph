@@ -5,9 +5,11 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 using std::string;
+using std::unordered_map;
 using std::vector;
 
 using VertexId = int;
@@ -58,10 +60,10 @@ bool probability(float condition) {
 
 struct Vertex {
  public:
-  const VertexId id;
-  const VertexDepth depth;
+  const VertexId id{};
+  VertexDepth depth = 0;
 
-  Vertex(const VertexId& id, const VertexDepth& depth) : id(id), depth(depth) {}
+  Vertex(const VertexId& id) : id(id) {}
 
   void add_edge_id(const EdgeId& _id) {
     assert(!validation::edge_id_exists_in_vertex(_id, edge_ids_) &&
@@ -69,9 +71,9 @@ struct Vertex {
     edge_ids_.push_back(_id);
   }
   const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+
   std::string to_JSON() const {
     std::string json_string;
-
     json_string += "\t{ \"id\": " + std::to_string(id) + ", \"edge_ids\": [";
     for (int i = 0; i < edge_ids_.size(); i++) {
       json_string += std::to_string(edge_ids_[i]);
@@ -89,10 +91,10 @@ struct Vertex {
 struct Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };
-  const EdgeId id;
-  const Color color;
-  const VertexId source;
-  const VertexId destination;
+  const EdgeId id{};
+  const Color color{};
+  const VertexId source{};
+  const VertexId destination{};
 
   Edge(const VertexId& _source,
        const VertexId& _destination,
@@ -100,18 +102,10 @@ struct Edge {
        const Color& _color)
       : id(_id), color(_color), source(_source), destination(_destination) {}
 
-  std::string color_to_string(const Edge::Color& _color) const;
-
-  std::string to_JSON() const {
-    std::string json_string;
-    json_string += "\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
-                   std::to_string(source) + ", " + std::to_string(destination) +
-                   "], \"color\": \"" + color_to_string(color) + "\" }";
-    return json_string;
-  }
+  std::string to_JSON() const;
 };
 
-std::string Edge::color_to_string(const Edge::Color& _color) const {
+std::string color_to_string(const Edge::Color& _color) {
   switch (_color) {
     case Edge::Color::Gray:
       return "gray";
@@ -124,6 +118,14 @@ std::string Edge::color_to_string(const Edge::Color& _color) const {
     case Edge::Color::Red:
       return "red";
   }
+}
+
+std::string Edge::to_JSON() const {
+  std::string json_string;
+  json_string += "\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
+                 std::to_string(source) + ", " + std::to_string(destination) +
+                 "], \"color\": \"" + color_to_string(color) + "\" }";
+  return json_string;
 }
 
 bool validation::vertex_exists_in_graph(const VertexId& id,
@@ -145,11 +147,11 @@ bool validation::edge_exists_in_graph(const EdgeId& id,
 
 class Graph {
  public:
-  void insert_vertex(const VertexId& vertex, const VertexDepth& depth) {
+  void insert_vertex(const VertexId& vertex) {
     assert(validation::is_vertex_id_valid(vertex) && "Vertex id is not valid!");
     assert(!validation::vertex_exists_in_graph(vertex, vertices_) &&
            "Vertex already exists!");
-    vertices_.emplace_back(vertex, depth);
+    vertices_.emplace_back(vertex);
   }
   void insert_edge(const VertexId& source,
                    const VertexId& destination,
@@ -168,16 +170,22 @@ class Graph {
            "Destination vertex id doesn't exist!");
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
-
     edges_.emplace_back(source, destination, id, color);
     if (color != Edge::Color::Green) {
       vertices_[source].add_edge_id(id);
       vertices_[destination].add_edge_id(id);
+
+      if (color == Edge::Color::Gray) {
+        vertices_[destination].depth = vertices_[source].depth + 1;
+      }
     } else {
       vertices_[source].add_edge_id(id);
     }
   }
-
+  void insert_to_depth_map(const vector<VertexId>& vertices_ids,
+                           VertexDepth depth) {
+    depth_vertices_map_[depth] = vertices_ids;
+  }
   bool are_vertices_connected(const VertexId& source_vertex,
                               const VertexId& destination_vertex) {
     if (source_vertex != destination_vertex) {
@@ -213,26 +221,13 @@ class Graph {
   const vector<Edge>& get_edges() const { return edges_; }
 
   // Returns total number of vertices in the depth
-  int vertices_count_in_depth(const VertexDepth& depth) const {
-    if (depth == 0)
-      return 1;
-    int count = 0;
-    for (const auto& vertex : vertices_) {
-      if (depth == vertex.depth)
-        count++;
-    }
-    return count;
+  int vertices_count_in_depth(const VertexDepth& depth) {
+    return depth_vertices_map_[depth].size();
   }
 
   // Returns all the vertices in depth(x)
   vector<VertexId> vertices_in_depth(const VertexDepth& depth) {
-    vector<VertexId> vertices;
-    for (const auto& vertex : vertices_) {
-      if (vertex.depth == depth) {
-        vertices.push_back(vertex.id);
-      }
-    }
-    return vertices;
+    return depth_vertices_map_[depth];
   }
 
   std::string to_JSON() const {
@@ -263,6 +258,7 @@ class Graph {
  private:
   vector<Edge> edges_;
   vector<Vertex> vertices_;
+  unordered_map<VertexDepth, vector<VertexId>> depth_vertices_map_;
 };
 
 void generate_vertices_and_gray_edges(Graph& graph,
@@ -318,27 +314,32 @@ const Graph generateGraph(VertexDepth& max_depth, const int& new_vertices_num) {
   elapsed_time = (double)(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Generated red edges. Elapsed Time: " << elapsed_time
             << " s.\n\n";
-
   return graph;
 }
 
 void generate_vertices_and_gray_edges(Graph& graph,
                                       VertexDepth& max_depth,
                                       const int& new_vertices_num) {
-  graph.insert_vertex(0, 0);
   float condition = 0;
   VertexId source_vertex = 0;
+  graph.insert_vertex(0);
+  vector<VertexId> vertices_ids;
+  vertices_ids.push_back(source_vertex);
+  graph.insert_to_depth_map(vertices_ids, 0);
+  vertices_ids.clear();
   VertexId vertex = 1;
   for (VertexDepth depth = 0; depth < max_depth; depth++) {
+    vertices_ids.clear();
     for (int i = 0; i < graph.vertices_count_in_depth(depth); i++) {
       for (int j = 0; j < new_vertices_num; j++) {
         if (probability(condition)) {
-          graph.insert_vertex(vertex, depth + 1);
+          graph.insert_vertex(vertex);
           EdgeId edge_id = graph.get_edges().size();
           graph.insert_edge(source_vertex, vertex, edge_id, Edge::Color::Gray);
-          vertex++;
+          vertices_ids.push_back(vertex++);
         }
       }
+      graph.insert_to_depth_map(vertices_ids, depth + 1);
       source_vertex++;
     }
     condition += 100 / (float)max_depth;
@@ -379,29 +380,29 @@ void generate_yellow_edges(Graph& graph,
                            const VertexDepth& max_depth,
                            const int& new_vertices_num) {
   int m = 0, n = 0;
-  for (VertexDepth i = 1; i < max_depth; i++) {
-    float condition = 100 - i * (100 / (float)(max_depth - 1));
-    while (m < graph.vertices_in_depth(i).size()) {
-      while (n < graph.vertices_in_depth(i + 1).size()) {
+  for (VertexDepth depth = 1; depth < max_depth; depth++) {
+    float condition = 100 - depth * (100 / (float)(max_depth - 1));
+    while (m < graph.vertices_count_in_depth(depth)) {
+      while (n < graph.vertices_count_in_depth(depth + 1)) {
         if (probability(condition)) {
           std::uniform_int_distribution<int> random_vertex_distribution(
-              0, graph.vertices_count_in_depth(i + 1) - 1);
+              0, graph.vertices_count_in_depth(depth + 1) - 1);
 
-          VertexId source = graph.vertices_in_depth(i).at(m);
+          VertexId source = graph.vertices_in_depth(depth).at(m);
           VertexId destination;
           VertexId random_vertex;
 
           bool break_flag = false;
           do {
             if (created_by_vertex(graph, source, new_vertices_num) ==
-                graph.vertices_count_in_depth(i + 1)) {
+                graph.vertices_count_in_depth(depth + 1)) {
               break_flag = true;
               break;
             }
             std::random_device rd;
             std::mt19937 mt(rd());
             random_vertex = random_vertex_distribution(mt);
-            destination = graph.vertices_in_depth(i + 1).at(random_vertex);
+            destination = graph.vertices_in_depth(depth + 1).at(random_vertex);
           } while (source == graph.source_of_vertex(destination));
 
           if (break_flag)
