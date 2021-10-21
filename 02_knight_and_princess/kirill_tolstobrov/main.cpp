@@ -94,7 +94,8 @@ class Graph {
     assert(check_vertex_existence(id2) &&
            "Attemptig to access to nonexistent vertex: Error.");
     for (const auto& edge_id : connections_map_[id1]) {
-      if (edges_[edge_id].vertex1_id == id2 || edges_[edge_id].vertex2_id == id2) {
+      if (edges_[edge_id].vertex1_id == id2 ||
+          edges_[edge_id].vertex2_id == id2) {
         return true;
       }
     }
