@@ -25,13 +25,13 @@ struct Vertex {
   const VertexId id = 0;
   void add_edge_id(const EdgeId& id);
   const vector<EdgeId>& edge_ids() const { return edge_ids_; }
-  bool has_edge(const EdgeId& id) const;
+  bool has_edge_id(const EdgeId& id) const;
 
  private:
   vector<EdgeId> edge_ids_;
 };
 
-bool Vertex::has_edge(const EdgeId& id) const {
+bool Vertex::has_edge_id(const EdgeId& id) const {
   for (const auto& edge_id : edge_ids_)
     if (id == edge_id)
       return true;
@@ -39,8 +39,7 @@ bool Vertex::has_edge(const EdgeId& id) const {
 }
 
 void Vertex::add_edge_id(const EdgeId& id) {
-  if (has_edge(id))
-    return;
+  assert(!has_edge_id(id) && "Edge doesn't exist");
   edge_ids_.push_back(id);
 }
 
@@ -53,7 +52,7 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
 }
 
 struct Edge {
-  explicit Edge(const EdgeId& new_id,
+  Edge(const EdgeId& new_id,
                 const VertexId& begin_vertex,
                 const VertexId& end_vertex)
       : id(new_id), begin(begin_vertex), end(end_vertex) {}
@@ -79,7 +78,10 @@ class Graph {
 
   const vector<Vertex>& vertices() const { return vertices_; }
   const vector<Edge>& edges() const { return edges_; }
-
+  
+  bool has_vertex(const VertexId& vertex_id) const;
+  bool is_connected(const VertexId& begin, const VertexId& end) const;  
+  
  private:
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
@@ -87,8 +89,6 @@ class Graph {
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
-  bool has_vertex(const VertexId& vertex_id) const;
-  bool is_connected(const VertexId& begin, const VertexId& end) const;
   vector<Vertex> vertices_;
   vector<Edge> edges_;
 };

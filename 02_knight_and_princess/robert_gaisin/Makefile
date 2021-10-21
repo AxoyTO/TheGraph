@@ -13,4 +13,4 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 clean:
-	rm -rf grf *.o *.json
+	rm -rf *.o
