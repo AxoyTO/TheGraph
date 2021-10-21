@@ -52,7 +52,7 @@ class Edge {
 };
 class Graph {
  public:
-  void addVertx() { vertices.emplace_back(getNextVertexId()); }
+  void addVertex() { vertices.emplace_back(getNextVertexId()); }
   void addEdge(int fromVertexId, int toVertexId) {
     assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
     assert(hasVertex(toVertexId) && "Vertex doesn't exist");
@@ -95,15 +95,9 @@ class Graph {
     return false;
   }
   bool isConnected(int fromVertexId, int toVertexId) {
-    for (const auto eId : edges) {
-      if (eId.fromVertexId == fromVertexId && eId.toVertexId == toVertexId) {
-        for (const auto vId : vertices) {
-          if (fromVertexId == vId.id || toVertexId == vId.id) {
-            if (vId.hasEdgeId(eId.id)) {
-              return true;
-            }
-          }
-        }
+    for (const auto edge : edges) {
+      if (edge.fromVertexId == fromVertexId && edge.toVertexId == toVertexId) {
+        return true;
       }
     }
     return false;
@@ -146,7 +140,7 @@ int main() {
        {12, 13}}};
   Graph graph;
   for (int i = 0; i < number_of_vertices; i++) {
-    graph.addVertx();
+    graph.addVertex();
   }
   for (const auto& connection : connections) {
     graph.addEdge(connection.first, connection.second);
