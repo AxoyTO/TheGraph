@@ -105,12 +105,22 @@ class Graph {
 
   void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
+  bool is_exist(const VertexId& vertex_id) const {
+    for (const auto& vertex : vertices_) {
+      if (vertex_id == vertex.id)
+        return true;
+    }
+    return false;
+  }
+
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
+    assert(is_exist(from_vertex_id));
+    assert(is_exist(to_vertex_id));
+
     const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
-    const auto& to_vertex_edges_ids =
-        vertices_[to_vertex_id].get_edges_ids();
+    const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
     for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
       for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
         if (from_vertex_edge_id == to_vertex_edge_id)
@@ -129,7 +139,8 @@ class Graph {
     // check if they are not connected
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
-    const auto&  new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
+    const auto& new_edge =
+        edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
 
     // add information into Vertex structure
     vertices_[from_vertex_id].add_edge_id(new_edge.id);
