@@ -53,8 +53,8 @@ std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
 
 struct Edge {
   Edge(const EdgeId& new_id,
-                const VertexId& begin_vertex,
-                const VertexId& end_vertex)
+       const VertexId& begin_vertex,
+       const VertexId& end_vertex)
       : id(new_id), begin(begin_vertex), end(end_vertex) {}
   const EdgeId id = 0;
   const VertexId begin = 0;
@@ -78,10 +78,10 @@ class Graph {
 
   const vector<Vertex>& vertices() const { return vertices_; }
   const vector<Edge>& edges() const { return edges_; }
-  
+
   bool has_vertex(const VertexId& vertex_id) const;
-  bool is_connected(const VertexId& begin, const VertexId& end) const;  
-  
+  bool is_connected(const VertexId& begin, const VertexId& end) const;
+
  private:
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
