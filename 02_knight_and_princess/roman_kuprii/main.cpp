@@ -129,12 +129,11 @@ class Graph {
     // check if they are not connected
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
-    const EdgeId id = get_next_edge_id();
-    edges_.emplace_back(from_vertex_id, to_vertex_id, id);
+    const auto&  new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
 
-    // add information into Verex structure
-    vertices_[from_vertex_id].add_edge_id(id);
-    vertices_[to_vertex_id].add_edge_id(id);
+    // add information into Vertex structure
+    vertices_[from_vertex_id].add_edge_id(new_edge.id);
+    vertices_[to_vertex_id].add_edge_id(new_edge.id);
   }
 
  private:
