@@ -71,12 +71,11 @@ class Edge {
 
 class Graph {
  public:
-  Graph() : vertex_id_counter(0), edge_id_counter(0) {}
   int get_vertices_amount() const { return vertices_.size(); }
   int get_edges_amount() const { return edges_.size(); }
 
-  VertexId get_new_vertex_id() { return vertex_id_counter++; }
-  EdgeId get_new_edge_id() { return edge_id_counter++; }
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
 
   void add_new_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
 
@@ -94,8 +93,8 @@ class Graph {
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
            "Attemptig to access to nonexistent vertex: Error.");
-    for (const auto& edge : connections_map_[id1]) {
-      if (edge->vertex1_id == id2 || edge->vertex2_id == id2) {
+    for (const auto& edge_id : connections_map_[id1]) {
+      if (edges_[edge_id].vertex1_id == id2 || edges_[edge_id].vertex2_id == id2) {
         return true;
       }
     }
@@ -110,8 +109,8 @@ class Graph {
     assert(!are_vertices_connected(id1, id2) &&
            "Attemptig to connect connected vertices: Error.");
     const auto& edge = edges_.emplace_back(get_new_edge_id(), id1, id2);
-    connections_map_[id1].push_back(&edge);
-    connections_map_[id2].push_back(&edge);
+    connections_map_[id1].push_back(edge.id);
+    connections_map_[id2].push_back(edge.id);
     vertices_[id1].add_edge(edge.id);
     vertices_[id2].add_edge(edge.id);
   }
@@ -141,11 +140,11 @@ class Graph {
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
 
-  VertexId vertex_id_counter;
-  EdgeId edge_id_counter;
+  VertexId vertex_id_counter_ = 0;
+  EdgeId edge_id_counter_ = 0;
 
   // connections_map: vertex1 -> edge -> vertex2
-  std::map<VertexId, std::vector<const Edge*>> connections_map_;
+  std::map<VertexId, std::vector<EdgeId>> connections_map_;
 };
 
 Graph generateCustomGraph(
