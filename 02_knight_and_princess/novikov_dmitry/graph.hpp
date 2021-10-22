@@ -1,5 +1,4 @@
-#ifndef GRAPH_HPP
-#define GRAPH_HPP
+#pragma once
 
 #include <assert.h>
 #include <algorithm>
@@ -17,13 +16,10 @@ using VertexId = int;
 using EdgeId = int;
 using Depth = int;
 
-enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
-
 class Vertex {
  public:
-  Vertex(const VertexId& new_vertex_id) : id_(new_vertex_id) {}
-
-  void set_depth(const Depth& new_vertex_depth) { depth_ = new_vertex_depth; }
+  Vertex(const VertexId& new_vertex_id, const Depth& new_vertex_depth)
+      : id_(new_vertex_id), depth_(new_vertex_depth) {}
 
   void add_edge_id(const EdgeId& new_edge_id) {
     assert(!has_edge_id(new_edge_id) && "Edge id already exists");
@@ -61,16 +57,18 @@ class Vertex {
 
  private:
   const VertexId id_ = 0;
-  Depth depth_ = 0;
+  const Depth depth_ = 0;
   std::vector<EdgeId> edge_ids_;
 };
 
 class Edge {
  public:
+  enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
+
   Edge(const VertexId& from_vertex_id,
        const VertexId& to_vertex_id,
        const EdgeId& new_edge_id,
-       Color new_edge_color)
+       const Color& new_edge_color)
       : ver_id1_(from_vertex_id),
         ver_id2_(to_vertex_id),
         id_(new_edge_id),
@@ -80,13 +78,17 @@ class Edge {
     return {ver_id1_, ver_id2_};
   }
 
-  std::string to_string() const {
+  std::string color_to_string(const Color& color) const {
     static const std::unordered_map<Color, std::string> color_map = {
         {Color::GRAY, "gray"},
         {Color::GREEN, "green"},
         {Color::BLUE, "blue"},
         {Color::YELLOW, "yellow"},
         {Color::RED, "red"}};
+    return color_map.at(color);
+  }
+
+  std::string to_string() const {
     std::stringstream ss_out;
     std::string tab_1 = "    ";
     std::string tab_2 = tab_1 + tab_1;
@@ -96,7 +98,7 @@ class Edge {
     ss_out << ver_id1_ << ", " << ver_id2_;
     ss_out << "],\n";
     ss_out << tab_2 << tab_1 << "\"color\": "
-           << "\"" << color_map.at(color_) << "\""
+           << "\"" << color_to_string(color_) << "\""
            << "\n";
     ss_out << tab_2 << "}";
     return ss_out.str();
@@ -106,19 +108,18 @@ class Edge {
   const VertexId ver_id1_ = 0;
   const VertexId ver_id2_ = 0;
   const EdgeId id_ = 0;
-  Color color_;
+  const Color color_;
 };
 
 class Graph {
  public:
   const VertexId& add_vertex(const Depth& new_vertex_depth = DEFAULT_DEPTH) {
-    auto new_vertex =
-        vertex_map_.insert({default_ver_id_, Vertex(default_ver_id_)});
-    new_vertex.first->second.set_depth(new_vertex_depth);
-    try {
-      depth_map_.at(new_vertex_depth).push_back(new_vertex.first->first);
-    } catch (std::out_of_range const& exc) {
+    auto new_vertex = vertex_map_.insert(
+        {default_ver_id_, Vertex(default_ver_id_, new_vertex_depth)});
+    if (depth_map_.size() <= new_vertex_depth) {
       depth_map_.push_back(std::vector<VertexId>({new_vertex.first->first}));
+    } else {
+      depth_map_.at(new_vertex_depth).push_back(new_vertex.first->first);
     }
     ++default_ver_id_;
     return new_vertex.first->first;
@@ -126,7 +127,7 @@ class Graph {
 
   void add_edge(const VertexId& from_vertex_id,
                 const VertexId& to_vertex_id,
-                Color new_edge_color = Color::GRAY) {
+                const Edge::Color& new_edge_color = Edge::Color::GRAY) {
     assert(!check_binding(from_vertex_id, to_vertex_id) &&
            "Vertices already binded");
 
@@ -167,7 +168,7 @@ class Graph {
     }
   }
 
-  const int get_vertices_count() const { return vertex_map_.size(); }
+  int get_vertices_count() const { return vertex_map_.size(); }
 
   const Depth get_depth() const {
     return (depth_map_.size() - 1) > 0 ? (depth_map_.size() - 1) : 0;
@@ -211,5 +212,3 @@ class Graph {
   std::unordered_map<EdgeId, Edge> edge_map_;
   std::vector<std::vector<VertexId>> depth_map_;
 };
-
-#endif  // GRAPH_HPP
