@@ -12,48 +12,44 @@ struct Edge {
   const EdgeId id;
   const VertexId vertex1, vertex2;
 
-  Edge(VertexId _vertex1, VertexId _vertex2, EdgeId id_max):
-  id(id_max), vertex1(_vertex1), vertex2(_vertex2) {}
+  Edge(VertexId _vertex1, VertexId _vertex2, EdgeId id_max)
+      : id(id_max), vertex1(_vertex1), vertex2(_vertex2) {}
 };
 
 struct Vertex {
   const VertexId id;
   const std::vector<EdgeId> edges;
 
-  Vertex(const std::vector<EdgeId>& _edges, VertexId id_max):
-  id(id_max), edges(_edges) {}
+  Vertex(const std::vector<EdgeId>& _edges, VertexId id_max)
+      : id(id_max), edges(_edges) {}
 };
 
 class Graph {
-private:
+ private:
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
-public:
-  void add_edge(VertexId vertex1, VertexId vertex2){
+
+ public:
+  void add_edge(VertexId vertex1, VertexId vertex2) {
     edges_.emplace_back(vertex1, vertex2, edge_id_max_);
     edge_id_max_++;
   }
 
-  void add_vertex(const std::vector<EdgeId>& edges){
+  void add_vertex(const std::vector<EdgeId>& edges) {
     vertices_.emplace_back(edges, vertex_id_max_);
     vertex_id_max_++;
   }
 
-  const std::vector<Edge>& get_edges() {
-    return edges_;
-  }
+  const std::vector<Edge>& get_edges() { return edges_; }
 
-  const std::vector<Vertex>& get_vertices() {
-    return vertices_;
-  }
+  const std::vector<Vertex>& get_vertices() { return vertices_; }
 };
 
-
 class GraphGenerator {
-public:
-  void required_graph(Graph& graph) // build required graph
+ public:
+  void required_graph(Graph& graph)  // build required graph
   {
     graph.add_vertex({0, 1, 2});
     graph.add_vertex({0, 3, 4, 5});
@@ -92,14 +88,14 @@ public:
 };
 
 class GraphPrinter {
-public:
-  std::string vertex_to_json(const Vertex &vertex) const {
+ public:
+  std::string vertex_to_json(const Vertex& vertex) const {
     std::string res;
     res += "{\n\t\t\t\"id\": ";
     res += std::to_string(vertex.id);
     res += ",\n\t\t\t\"edge_ids\": [";
 
-    for (const auto &edge : vertex.edges) {
+    for (const auto& edge : vertex.edges) {
       res += std::to_string(edge);
       res += ", ";
     }
@@ -110,9 +106,9 @@ public:
     return res;
   }
 
-  std::string edge_to_json(const Edge &edge) const {
+  std::string edge_to_json(const Edge& edge) const {
     std::string res;
-    
+
     res += "{\n\t\t\t\"id\": ";
     res += std::to_string(edge.id);
     res += ",\n\t\t\t\"vertex_ids\": [";
@@ -124,18 +120,18 @@ public:
     return res;
   }
 
-  std::string to_json(Graph &graph) const {
+  std::string to_json(Graph& graph) const {
     std::string res;
     res += "{\n\t \"vertices\": [\n\t\t";
 
-    for (const auto &vertex : graph.get_vertices()) {
+    for (const auto& vertex : graph.get_vertices()) {
       res += vertex_to_json(vertex);
     }
     res.pop_back();
     res.pop_back();
     res += "\n\t],\n\t\"edges\": [\n\t\t";
 
-    for (const auto &edge : graph.get_edges()) {
+    for (const auto& edge : graph.get_edges()) {
       res += edge_to_json(edge);
     }
     res.pop_back();
