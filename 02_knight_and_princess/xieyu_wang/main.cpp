@@ -9,13 +9,13 @@ class Vertex {
   explicit Vertex(int id) : id(id) {}
   void addEdgeId(int eId) {
     assert(!hasEdgeId(eId) && "Edge Id already exists");
-    edgeIds.push_back(eId);
+    edgeIds_.push_back(eId);
   }
   std::string toString() const {
     std::string str = "";
     str += "\t\t{\"id\":" + std::to_string(id) + ",";
     str += "\"edge_ids\": [";
-    for (const auto edgeId : edgeIds) {
+    for (const auto edgeId : edgeIds_) {
       str += std::to_string(edgeId) + ",";
     }
     str.pop_back();
@@ -23,7 +23,7 @@ class Vertex {
     return str;
   }
   bool hasEdgeId(int id) const {
-    for (const auto& eId : edgeIds) {
+    for (const auto& eId : edgeIds_) {
       if (id == eId) {
         return true;
       }
@@ -32,7 +32,7 @@ class Vertex {
   }
 
  private:
-  std::vector<int> edgeIds;
+  std::vector<int> edgeIds_;
 };
 
 class Edge {
@@ -52,17 +52,17 @@ class Edge {
 };
 class Graph {
  public:
-  void addVertex() { vertices.emplace_back(getNextVertexId()); }
+  void addVertex() { vertices_.emplace_back(getNextVertexId()); }
   void addEdge(int fromVertexId, int toVertexId) {
     assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
     assert(hasVertex(toVertexId) && "Vertex doesn't exist");
     assert(!isConnected(fromVertexId, toVertexId) &&
            "Vertices already connected");
     const auto& newEdge =
-        edges.emplace_back(getNextEdgeId(), fromVertexId, toVertexId);
-    for (auto& vertexId : vertices) {
-      if (fromVertexId == vertexId.id || toVertexId == vertexId.id) {
-        vertexId.addEdgeId(newEdge.id);
+        edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId);
+    for (auto& vertex : vertices_) {
+      if (fromVertexId == vertex.id || toVertexId == vertex.id) {
+        vertex.addEdgeId(newEdge.id);
       }
     }
   }
@@ -70,15 +70,15 @@ class Graph {
     // vertex
     std::string strGraph = "";
     strGraph += "{\n\t\"vertices\": [\n";
-    for (const auto vertexId : vertices) {
-      strGraph += vertexId.toString() + ",\n";
+    for (const auto& vertex : vertices_) {
+      strGraph += vertex.toString() + ",\n";
     }
     strGraph.pop_back();
     strGraph.pop_back();
     strGraph += "\n\t],\n";
     // edges
     strGraph += "\t\"edges\": [\n";
-    for (const auto edgeId : edges) {
+    for (const auto edgeId : edges_) {
       strGraph += edgeId.toString() + ",\n";
     }
     strGraph.pop_back();
@@ -87,7 +87,7 @@ class Graph {
     return strGraph;
   }
   bool hasVertex(int idFind) {
-    for (const auto vertexId : vertices) {
+    for (const auto vertexId : vertices_) {
       if (vertexId.id == idFind) {
         return true;
       }
@@ -95,7 +95,7 @@ class Graph {
     return false;
   }
   bool isConnected(int fromVertexId, int toVertexId) {
-    for (const auto edge : edges) {
+    for (const auto edge : edges_) {
       if (edge.fromVertexId == fromVertexId && edge.toVertexId == toVertexId) {
         return true;
       }
@@ -105,17 +105,17 @@ class Graph {
 
  private:
   int getNextEdgeId() {
-    vertexIdCounter++;
-    return vertexIdCounter - 1;
+    vertexIdCounter_++;
+    return vertexIdCounter_ - 1;
   }
   int getNextVertexId() {
-    edgeIdCounter++;
-    return edgeIdCounter - 1;
+    edgeIdCounter_++;
+    return edgeIdCounter_ - 1;
   }
-  int vertexIdCounter = 0;
-  int edgeIdCounter = 0;
-  std::vector<Vertex> vertices;
-  std::vector<Edge> edges;
+  int vertexIdCounter_ = 0;
+  int edgeIdCounter_ = 0;
+  std::vector<Vertex> vertices_;
+  std::vector<Edge> edges_;
 };
 int main() {
   const int number_of_vertices = 18;
