@@ -1,9 +1,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include <iterator>
 #include <map>
-#include <utility>
 #include <vector>
 
 using VertexId = int;
@@ -74,9 +72,6 @@ class Graph {
   int get_vertices_amount() const { return vertices_.size(); }
   int get_edges_amount() const { return edges_.size(); }
 
-  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-  EdgeId get_new_edge_id() { return edge_id_counter_++; }
-
   void add_new_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
 
   bool check_vertex_existence(const VertexId& vertex_id) const {
@@ -146,6 +141,9 @@ class Graph {
 
   // connections_map: vertex1 -> edge -> vertex2
   std::map<VertexId, std::vector<EdgeId>> connections_map_;
+
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
 };
 
 Graph generateCustomGraph(
