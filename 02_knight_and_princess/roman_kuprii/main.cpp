@@ -77,7 +77,7 @@ bool is_vertex_id_included(const std::vector<Vertex>& vertices,
                            const VertexId& id) {
   for (const auto& vert : vertices)
     if (vert.id == id)
-      return (true);
+      return true;
   return false;
 }
 
