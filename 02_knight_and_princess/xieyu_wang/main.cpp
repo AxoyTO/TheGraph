@@ -58,11 +58,11 @@ class Graph {
     assert(hasVertex(toVertexId) && "Vertex doesn't exist");
     assert(!isConnected(fromVertexId, toVertexId) &&
            "Vertices already connected");
-    int eId = getNextEdgeId();
-    edges.emplace_back(eId, fromVertexId, toVertexId);
+    const auto& newEdge =
+        edges.emplace_back(getNextEdgeId(), fromVertexId, toVertexId);
     for (auto& vertexId : vertices) {
       if (fromVertexId == vertexId.id || toVertexId == vertexId.id) {
-        vertexId.addEdgeId(eId);
+        vertexId.addEdgeId(newEdge.id);
       }
     }
   }
