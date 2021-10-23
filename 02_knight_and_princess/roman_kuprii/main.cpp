@@ -110,13 +110,6 @@ struct Vertex {
   vector<EdgeId> edges_ids_;
 };
 
-bool is_vertex_id_included(const vector<Vertex>& vertices, const VertexId& id) {
-  for (const auto& vert : vertices)
-    if (vert.id == id)
-      return true;
-  return false;
-}
-
 class Graph {
  public:
   std::string to_json() const {
@@ -143,7 +136,7 @@ class Graph {
 
   void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
-  bool is_exist(const VertexId& vertex_id) const {
+  bool is_vertex_exist(const VertexId& vertex_id) const {
     for (const auto& vertex : vertices_) {
       if (vertex_id == vertex.id)
         return true;
@@ -179,8 +172,8 @@ class Graph {
                         const VertexId& to_vertex_id,
                         const bool& paint) {
     // check if vertices exist
-    assert(is_vertex_id_included(vertices_, from_vertex_id));
-    assert(is_vertex_id_included(vertices_, to_vertex_id));
+    assert(is_vertex_exist(from_vertex_id));
+    assert(is_vertex_exist(to_vertex_id));
 
     // check if they are not connected
     if (from_vertex_id != to_vertex_id)
