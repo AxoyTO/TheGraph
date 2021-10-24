@@ -13,6 +13,7 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
+constexpr int START_VERTICES_NUMBER = 14;
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
@@ -104,7 +105,7 @@ struct Vertex {
     edges_ids_.push_back(_id);
   }
 
-  vector<EdgeId> get_edges_ids() const { return edges_ids_; }
+  const vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
 
  private:
   vector<EdgeId> edges_ids_;
@@ -360,7 +361,7 @@ void paint_edges(Graph& work_graph) {
 
 int main() {
   Graph my_graph;
-  for (int i = 0; i < 14; i++) {
+  for (int i = 0; i < START_VERTICES_NUMBER; i++) {
     my_graph.add_vertex();
   }
   my_graph.connect_vertices(0, 1, false);
