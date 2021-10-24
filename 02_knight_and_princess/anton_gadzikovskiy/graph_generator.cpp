@@ -24,7 +24,7 @@ int ARRAY_SIZE_E(Edge x[]) {
 
 void Vertex_output(Vertex v, std::ofstream& file) {
   file << "{\n\t\t\t\"id\": " << v.id << ",\n\t\t\t\"edge_ids\": [";
-  for (int i = 0; i < std::size(v.edge_ids); i++) {
+  for (int i = 0; i < std::size_t(v.edge_ids); i++) {
     if (v.edge_ids[i] > -1) {
       file << v.edge_ids[i] << ",";
     } else {
@@ -35,7 +35,7 @@ void Vertex_output(Vertex v, std::ofstream& file) {
 }
 void Edge_output(Edge e, std::ofstream& file) {
   file << "{\n\t\t\t\"id\": " << e.id << ",\n\t\t\t\"vertex_ids\": [";
-  for (int i = 0; i < std::size(e.vertex_ids); i++) {
+  for (int i = 0; i < std::size_t(e.vertex_ids); i++) {
     if (e.vertex_ids[i] > -1) {
       file << e.vertex_ids[i] << ",";
     } else {
