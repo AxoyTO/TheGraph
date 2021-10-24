@@ -12,6 +12,7 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
+constexpr int START_VERTICES_NUMBER = 14;
 constexpr int INVALID_ID = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
@@ -161,7 +162,7 @@ void write_graph(const Graph& graph) {
 
 int main() {
   Graph new_graph;
-  for (int i = 0; i < 14; i++) {
+  for (int i = 0; i < START_VERTICES_NUMBER; i++) {
     new_graph.add_vertex();
   }
   new_graph.connect_vertices(0, 1);
