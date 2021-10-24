@@ -67,7 +67,7 @@ struct Vertex {
     edges_ids_.push_back(_id);
   }
 
-  vector<EdgeId> get_edges_ids() const { return edges_ids_; }
+  const vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
 
  private:
   std::vector<EdgeId> edges_ids_;
