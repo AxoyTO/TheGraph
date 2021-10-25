@@ -65,6 +65,7 @@ struct Edge {
       default:
         break;
     }
+    res += "] }";
     return res;
   }
 
@@ -83,21 +84,19 @@ struct Vertex {
   const VertexId id = INVALID_ID;
   int depth = 0;
 
-  explicit Vertex(VertexId _id) : id(_id) {}
+  explicit Vertex(const VertexId& _id) : id(_id) {}
 
   std::string to_json() const {
     std::string res;
     res = "{ \"id\": ";
     res += to_string(id) + ", \"edge_ids\": [";
-    for (int edge_id : edges_ids_) {
+    for (const auto& edge_id : edges_ids_) {
       res += to_string(edge_id);
       res += ", ";
     }
     res.pop_back();
     res.pop_back();
-    res += "], \"depth\": ";
-    res += to_string(depth);
-    res += " }";
+    res += "] }";
     return res;
   }
 
