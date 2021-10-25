@@ -15,6 +15,7 @@ using VertexId = int;
 
 constexpr int START_VERTICES_NUMBER = 14;
 constexpr int INVALID_ID = -1;
+constexpr int INVALID_NUMBER = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 int min(const int& a, const int& b) {
@@ -239,21 +240,21 @@ class Graph {
 void write_graph(const Graph& graph) {
   std::ofstream out;
   out.open(JSON_GRAPH_FILENAME, std::ofstream::out | std::ofstream::trunc);
-
   out << graph.to_json();
-
   out.close();
 }
 
 void new_vertices_generation(Graph& work_graph) {
   int depth = INVALID_ID;
-  std::cout << "Enter generate graph depth" << endl;
-  std::cin >> depth;
-  // TODO check depth
-  int new_vertices_num;
-  std::cout << "Enter new_vertices_num" << endl;
-  std::cin >> new_vertices_num;
-  // TODO check vertices nums
+  do {
+    std::cout << "Enter generate graph depth" << endl;
+    std::cin >> depth;
+  } while (depth < 0);
+  int new_vertices_num = INVALID_NUMBER;
+  do {
+    std::cout << "Enter new_vertices_num" << endl;
+    std::cin >> new_vertices_num;
+  } while (new_vertices_num < 0);
   const int graph_depth = work_graph.get_depth();
   depth = min(graph_depth, depth);
 
