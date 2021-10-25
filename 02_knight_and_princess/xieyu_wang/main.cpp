@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <array>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 class Vertex {
@@ -30,6 +31,7 @@ class Vertex {
     }
     return false;
   }
+  std::vector<int> getEdgeIds() const { return edgeIds_; }
 
  private:
   std::vector<int> edgeIds_;
@@ -95,9 +97,27 @@ class Graph {
     return false;
   }
   bool isConnected(int fromVertexId, int toVertexId) {
-    for (const auto& edge : edges_) {
-      if (edge.fromVertexId == fromVertexId && edge.toVertexId == toVertexId) {
-        return true;
+    if (!hasVertex(fromVertexId) || !hasVertex(toVertexId)) {
+      std::cerr << "Oh man Vertex " << fromVertexId << " or " << toVertexId
+                << " not exists.";
+      std::exit(-1);
+    }
+    std::vector<int> fromVertexEdgeIds;
+    std::vector<int> toVertexEdgeIds;
+    std::vector<int> intersections;
+    for (const auto& vertex : vertices_) {
+      if (vertex.id == fromVertexId) {
+        fromVertexEdgeIds = vertex.getEdgeIds();
+      }
+      if (vertex.id == toVertexId) {
+        toVertexEdgeIds = vertex.getEdgeIds();
+      }
+    }
+    for (const auto& fromVertexEdgeId : fromVertexEdgeIds) {
+      for (const auto& toVertexEdgeId : toVertexEdgeIds) {
+        if (fromVertexEdgeId == toVertexEdgeId) {
+          return true;
+        }
       }
     }
     return false;
