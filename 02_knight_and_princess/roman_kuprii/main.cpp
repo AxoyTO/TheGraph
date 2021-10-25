@@ -271,7 +271,9 @@ void new_vertices_generation(Graph& work_graph) {
           if (dis(gen) > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
-                vertex.id, work_graph.get_vertices_num() - 1, false);
+                vertex.id,
+                work_graph.get_vertices()[work_graph.get_vertices_num() - 1].id,
+                false);
           }
         }
       }
@@ -311,49 +313,42 @@ void paint_edges(Graph& work_graph) {
     }
   }
 
-  for (const auto& vertex : work_graph.get_vertices()) {
+  for (const auto& start_vertex : work_graph.get_vertices()) {
     // GREEN
     if (dis(gen) < 0.1) {
-      work_graph.connect_vertices(vertex.id, vertex.id, true);
+      work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
     }
     // RED
     if (dis(gen) < 0.33) {
-      if ((vertex.depth + 2) <= graph_depth) {
+      if (start_vertex.depth + 2 <= graph_depth) {
         vector<VertexId> red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
-          if (end_vertex.depth == vertex.depth + 2)
+          if (end_vertex.depth == start_vertex.depth + 2)
             red_vertices_ids.emplace_back(end_vertex.id);
         }
         if (red_vertices_ids.size() > 0) {
           std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
-          work_graph.connect_vertices(vertex.id, red_vertices_ids[distr(gen)],
-                                      true);
+          work_graph.connect_vertices(start_vertex.id,
+                                      red_vertices_ids[distr(gen)], true);
         }
       }
     }
     // YELLOW
-    const double probability =
-        static_cast<double>(vertex.depth) / static_cast<double>(graph_depth);
+    const double probability = static_cast<double>(start_vertex.depth) /
+                               static_cast<double>(graph_depth);
     if (dis(gen) < probability) {
       vector<VertexId> yellow_vertices_ids;
       for (const auto& end_vertex : work_graph.get_vertices()) {
-        if (end_vertex.depth == vertex.depth + 1) {
-          const auto& edges = work_graph.get_edges();
-          bool is_vertices_connected = true;
-          for (const auto& edge_ids : vertex.get_edges_ids())
-            if (edges[edge_ids].connected_vertices[1] == end_vertex.id) {
-              is_vertices_connected = false;
-              break;
-            }
-          if (is_vertices_connected)
+        if (end_vertex.depth == start_vertex.depth + 1) {
+          if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
             yellow_vertices_ids.push_back(end_vertex.id);
         }
       }
       if (yellow_vertices_ids.size() > 0) {
         std::uniform_int_distribution<> distr(0,
                                               yellow_vertices_ids.size() - 1);
-        work_graph.connect_vertices(vertex.id, yellow_vertices_ids[distr(gen)],
-                                    true);
+        work_graph.connect_vertices(start_vertex.id,
+                                    yellow_vertices_ids[distr(gen)], true);
       }
     }
   }
