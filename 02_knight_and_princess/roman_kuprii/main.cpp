@@ -21,12 +21,12 @@ int min(const int& a, const int& b) {
   return (a < b) ? a : b;
 }
 
-enum Colors { GRAY, GREEN, BLUE, YELLOW, RED };
+enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
 
 struct Edge {
   const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
-  Colors color = GRAY;
+  Color color = Color::GRAY;
 
   Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
@@ -41,23 +41,23 @@ struct Edge {
     res += to_string(connected_vertices[1]);
     res += "], \"color\": ";
     switch (color) {
-      case GRAY: {
+      case Color::GRAY: {
         res += "\"gray\" }";
         break;
       }
-      case GREEN: {
+      case Color::GREEN: {
         res += "\"green\" }";
         break;
       }
-      case BLUE: {
+      case Color::BLUE: {
         res += "\"blue\" }";
         break;
       }
-      case YELLOW: {
+      case Color::YELLOW: {
         res += "\"yellow\" }";
         break;
       }
-      case RED: {
+      case Color::RED: {
         res += "\"red\" }";
         break;
       }
@@ -67,7 +67,7 @@ struct Edge {
     return res;
   }
 
-  void paint(const Colors& _color) { color = _color; }
+  void paint(const Color& _color) { color = _color; }
 };
 
 bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
@@ -206,13 +206,13 @@ class Graph {
       int diff =
           vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
       if (from_vertex_id == to_vertex_id) {
-        edges_[new_edge.id].color = GREEN;
+        edges_[new_edge.id].color = Color::GREEN;
       } else if (diff == 0) {
-        edges_[new_edge.id].color = BLUE;
+        edges_[new_edge.id].color = Color::BLUE;
       } else if (diff == 1) {
-        edges_[new_edge.id].color = YELLOW;
+        edges_[new_edge.id].color = Color::YELLOW;
       } else if (diff == 2) {
-        edges_[new_edge.id].color = RED;
+        edges_[new_edge.id].color = Color::RED;
       }
     }
   }
