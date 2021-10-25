@@ -20,6 +20,8 @@ using VertexDepth = int;
 struct Edge;
 struct Vertex;
 
+constexpr auto INVALID_ID = -1;
+
 namespace validation {
 bool edge_id_exists_in_vertex(const EdgeId& edge_id,
                               const vector<EdgeId>& edge_ids) {
@@ -106,8 +108,8 @@ struct Edge {
   std::string to_JSON() const;
 };
 
-std::string color_to_string(const Edge::Color& _color) {
-  switch (_color) {
+std::string color_to_string(const Edge::Color& color) {
+  switch (color) {
     case Edge::Color::Gray:
       return "gray";
     case Edge::Color::Green:
@@ -172,20 +174,20 @@ class Graph {
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
     edges_.emplace_back(source, destination, id, color);
-    if (color != Edge::Color::Green) {
+    if (color == Edge::Color::Green) {
+      vertices_[source].add_edge_id(id);
+    } else {
       vertices_[source].add_edge_id(id);
       vertices_[destination].add_edge_id(id);
-
       if (color == Edge::Color::Gray) {
         vertices_[destination].depth = vertices_[source].depth + 1;
       }
-    } else {
-      vertices_[source].add_edge_id(id);
     }
   }
   void insert_to_depth_map(const vector<VertexId>& vertices_ids,
-                           VertexDepth depth) {
+                           const VertexDepth& depth) {
     depth_vertices_map_[depth] = vertices_ids;
+    depth_map_.push_back(vertices_ids);
   }
   bool are_vertices_connected(const VertexId& source_vertex,
                               const VertexId& destination_vertex) {
@@ -210,7 +212,7 @@ class Graph {
       if (edges_[vertex_edge].color == Edge::Color::Gray)
         return edges_[vertex_edge].source;
     }
-    return -1;
+    return INVALID_ID;
   }
 
   // Returns depth of vertex in the graph
@@ -220,12 +222,16 @@ class Graph {
 
   const vector<Vertex>& get_vertices() const { return vertices_; }
   const vector<Edge>& get_edges() const { return edges_; }
-
-  int vertices_count_in_depth(const VertexDepth& depth) {
-    return depth_vertices_map_[depth].size();
+  const vector<vector<VertexId>>& get_v() const { return depth_map_; }
+  const unordered_map<VertexDepth, vector<VertexId>>& get_m() const {
+    return depth_vertices_map_;
   }
 
-  vector<VertexId> vertices_in_depth(const VertexDepth& depth) {
+  const int vertices_count_in_depth(const VertexDepth& depth) const {
+    return depth_vertices_map_.at(depth).size();
+  }
+
+  const vector<VertexId>& vertices_in_depth(const VertexDepth& depth) {
     return depth_vertices_map_[depth];
   }
 
@@ -258,6 +264,7 @@ class Graph {
   vector<Edge> edges_;
   vector<Vertex> vertices_;
   unordered_map<VertexDepth, vector<VertexId>> depth_vertices_map_;
+  vector<vector<VertexId>> depth_map_;
 };
 
 void generate_vertices_and_gray_edges(Graph& graph,
@@ -348,6 +355,23 @@ void generate_vertices_and_gray_edges(Graph& graph,
               << graph.depth_of(vertex - 1) << "\n";
     max_depth = graph.depth_of(vertex - 1);
   }
+
+  std::cout << "\nDepth Map:\n";
+  for (const auto& s : graph.get_m()) {
+    std::cout << s.first << " ";
+    for (const auto& v : s.second) {
+      std::cout << v << " ";
+    }
+    std::cout << "\n";
+  }
+
+  std::cout << "\nDepth Map Vector:\n";
+  for (const auto& s : graph.get_v()) {
+    for (const auto& v : s) {
+      std::cout << v << " ";
+    }
+    std::cout << "\n";
+  }
 }
 
 void generate_green_edges(Graph& graph) {
@@ -371,9 +395,9 @@ void generate_blue_edges(Graph& graph) {
   }
 }
 
-const int created_by_vertex(const Graph& graph,
-                            const VertexId& id,
-                            const int& new_vertices_num);
+int created_by_vertex(const Graph& graph,
+                      const VertexId& id,
+                      const int& new_vertices_num);
 
 void generate_yellow_edges(Graph& graph,
                            const VertexDepth& max_depth,
@@ -447,11 +471,9 @@ void generate_red_edges(Graph& graph, const VertexDepth& max_depth) {
   }
 }
 
-const int created_by_vertex(const Graph& graph,
-                            const VertexId& id,
-                            const int& new_vertices_num) {
-  if (id == 0)
-    return new_vertices_num;
+int created_by_vertex(const Graph& graph,
+                      const VertexId& id,
+                      const int& new_vertices_num) {
   int count = 0;
   for (const auto& vertex : graph.get_vertices()) {
     if (graph.source_of_vertex(vertex.id) == id)
@@ -461,8 +483,8 @@ const int created_by_vertex(const Graph& graph,
 }
 
 int main() {
-  int max_depth = -1;
-  int new_vertices_num = -1;
+  int max_depth = 0;
+  int new_vertices_num = 0;
 
   std::cout << "Enter max_depth: ";
   do {
@@ -481,7 +503,7 @@ int main() {
 
   std::cout << "\n";
 
-  string filename = "./temp/graph1.json";
+  const string filename = "./temp/graph1.json";
   std::ofstream file(filename, std::ios::out);
   if (!file.is_open())
     std::cerr << "Error opening the file graph.json!\n";
