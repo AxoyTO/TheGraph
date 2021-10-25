@@ -65,7 +65,6 @@ struct Edge {
       default:
         break;
     }
-    res += "] }";
     return res;
   }
 
@@ -178,7 +177,6 @@ class Graph {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
-    // check if they are not connected
     if (from_vertex_id != to_vertex_id)
       assert(!is_connected(from_vertex_id, to_vertex_id));
     else
@@ -187,7 +185,7 @@ class Graph {
     const auto& new_edge =
         edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
 
-    // add information into Verex structure
+    // add information into Vertex structure
     vertices_[from_vertex_id].add_edge_id(new_edge.id);
     if (from_vertex_id != to_vertex_id)
       vertices_[to_vertex_id].add_edge_id(new_edge.id);
@@ -293,7 +291,7 @@ void paint_edges(Graph& work_graph) {
     adjacent_vertices[0] = INVALID_ID;
     adjacent_vertices[1] = INVALID_ID;
     for (const auto& edge_id : vertex.get_edges_ids()) {
-      const auto& edge = work_graph.get_edges()[edge_id];
+      const Edge edge = work_graph.get_edges()[edge_id];
       if (edge.connected_vertices[0] == vertex.id) {
         if (adjacent_vertices[0] == INVALID_ID) {
           adjacent_vertices[0] = edge.connected_vertices[1];
