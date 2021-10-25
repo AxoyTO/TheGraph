@@ -28,8 +28,7 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
-  explicit Vertex(const VertexId& new_id, size_t depth_n)
-      : id(new_id), depth(depth_n) {}
+  Vertex(const VertexId& new_id, size_t depth_n) : id(new_id), depth(depth_n) {}
   const VertexId id = 0;
   size_t depth = 0;
   void add_edge_id(const EdgeId& id);
