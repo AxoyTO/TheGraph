@@ -259,7 +259,7 @@ void new_vertices_generation(Graph& work_graph) {
   depth = min(graph_depth, depth);
 
   std::cout << "Graph depth: " << graph_depth << endl;
-  std::cout << "min depth: " << depth << endl;
+  std::cout << "Depth of adding vertices: " << depth << endl;
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -294,7 +294,7 @@ void paint_edges(Graph& work_graph) {
     adjacent_vertices[0] = INVALID_ID;
     adjacent_vertices[1] = INVALID_ID;
     for (const auto& edge_id : vertex.get_edges_ids()) {
-      Edge edge = work_graph.get_edges()[edge_id];
+      const auto& edge = work_graph.get_edges()[edge_id];
       if (edge.connected_vertices[0] == vertex.id) {
         if (adjacent_vertices[0] == INVALID_ID) {
           adjacent_vertices[0] = edge.connected_vertices[1];
@@ -323,9 +323,9 @@ void paint_edges(Graph& work_graph) {
     if (dis(gen) < 0.33) {
       if ((vertex.depth + 2) <= graph_depth) {
         vector<VertexId> red_vertices_ids;
-        for (const auto& tmp_vertex : work_graph.get_vertices()) {
-          if (tmp_vertex.depth == (vertex.depth + 2))
-            red_vertices_ids.emplace_back(tmp_vertex.id);
+        for (const auto& end_vertex : work_graph.get_vertices()) {
+          if (end_vertex.depth == vertex.depth + 2)
+            red_vertices_ids.emplace_back(end_vertex.id);
         }
         if (red_vertices_ids.size() > 0) {
           std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
@@ -339,17 +339,17 @@ void paint_edges(Graph& work_graph) {
         static_cast<double>(vertex.depth) / static_cast<double>(graph_depth);
     if (dis(gen) < probability) {
       vector<VertexId> yellow_vertices_ids;
-      for (const auto& tmp_vertex : work_graph.get_vertices()) {
-        if (tmp_vertex.depth == (vertex.depth + 1)) {
-          vector<Edge> edges = work_graph.get_edges();
-          bool check = true;
+      for (const auto& end_vertex : work_graph.get_vertices()) {
+        if (end_vertex.depth == vertex.depth + 1) {
+          const auto& edges = work_graph.get_edges();
+          bool is_vertices_connected = true;
           for (const auto& edge_ids : vertex.get_edges_ids())
-            if (edges[edge_ids].connected_vertices[1] == tmp_vertex.id) {
-              check = false;
+            if (edges[edge_ids].connected_vertices[1] == end_vertex.id) {
+              is_vertices_connected = false;
               break;
             }
-          if (check)
-            yellow_vertices_ids.push_back(tmp_vertex.id);
+          if (is_vertices_connected)
+            yellow_vertices_ids.push_back(end_vertex.id);
         }
       }
       if (yellow_vertices_ids.size() > 0) {
