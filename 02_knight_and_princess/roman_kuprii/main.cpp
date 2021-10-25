@@ -28,7 +28,7 @@ struct Edge {
   const std::array<VertexId, 2> connected_vertices;
   Color color = Color::GRAY;
 
-  Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
+  explicit Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
 
   std::string to_json() const {
@@ -88,8 +88,8 @@ struct Vertex {
     std::string res;
     res = "{ \"id\": ";
     res += to_string(id) + ", \"edge_ids\": [";
-    for (int n : edges_ids_) {
-      res += to_string(n);
+    for (int edge_id : edges_ids_) {
+      res += to_string(edge_id);
       res += ", ";
     }
     res.pop_back();
@@ -118,15 +118,15 @@ class Graph {
     res = "{ \"depth\": ";
     res += to_string(depth_);
     res += ", \"vertices\": [ ";
-    for (const auto& v_it : vertices_) {
-      res += v_it.to_json();
+    for (const auto& vertex : vertices_) {
+      res += vertex.to_json();
       res += ", ";
     }
     res.pop_back();
     res.pop_back();
     res += " ], \"edges\": [ ";
-    for (const auto& e_it : edges_) {
-      res += e_it.to_json();
+    for (const auto& edge : edges_) {
+      res += edge.to_json();
       res += ", ";
     }
     res.pop_back();
@@ -147,6 +147,9 @@ class Graph {
 
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
+    assert(is_vertex_exist(from_vertex_id));
+    assert(is_vertex_exist(to_vertex_id));
+
     const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
     const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
@@ -160,7 +163,7 @@ class Graph {
   }
 
   bool is_looped(const VertexId& vertex_id) const {
-    vector<EdgeId> vertex_edges_ids = vertices_[vertex_id].get_edges_ids();
+    const auto& vertex_edges_ids = vertices_[vertex_id].get_edges_ids();
     for (const auto& edge_id : vertex_edges_ids) {
       const auto& connected_vertices = edges_[edge_id].connected_vertices;
       if (connected_vertices[0] == connected_vertices[1])
@@ -172,7 +175,6 @@ class Graph {
   void connect_vertices(const VertexId& from_vertex_id,
                         const VertexId& to_vertex_id,
                         const bool& paint) {
-    // check if vertices exist
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
@@ -196,14 +198,14 @@ class Graph {
         VertexId vert = edges_[edge_idx].connected_vertices[0];
         min_depth = min(min_depth, vertices_[vert].depth);
       }
-      vertices_[to_vertex_id].depth = (min_depth + 1);
+      vertices_[to_vertex_id].depth = min_depth + 1;
 
-      if (depth_ < (min_depth + 1))
+      if (depth_ < min_depth + 1)
         depth_ = min_depth + 1;
     }
 
     if (paint) {
-      int diff =
+      const int diff =
           vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
       if (from_vertex_id == to_vertex_id) {
         edges_[new_edge.id].color = Color::GREEN;
