@@ -266,7 +266,8 @@ class Graph {
 
   const vector<Vertex>& get_vertices() const { return vertices_; }
   // const vector<Edge>& get_edges() const { return edges_; }
-  const vector<vector<VertexId>>& get_depth_map() const { return depth_map_; }
+  // const vector<vector<VertexId>>& get_depth_map() const { return depth_map_;
+  // }
   // const vector<VertexId>& get_vertices_ids() const { return vertices_ids_; }
   // const vector<VertexDepth>& get_depths() const { return vertices_depths_; }
 
@@ -389,31 +390,32 @@ void generate_vertices_and_gray_edges(Graph& graph,
   vector<VertexId> destination_vertices;
   VertexId last_vertex = 0;
   source_vertices.push_back(graph.insert_vertex());  // 0
-  std::cout << "\n";
+  // std::cout << "\n";
 
   for (VertexDepth depth = 0; depth < max_depth; depth++) {
-    std::cout << "Depth: " << depth << " | Condition: " << condition << "\n";
-    std::cout << "---------------------\n";
+    // std::cout << "Depth: " << depth << " | Condition: " << condition << "\n";
+    // std::cout << "---------------------\n";
     for (const auto& source : source_vertices) {
       vector<VertexId> new_vertices;
       for (int j = 0; j < new_vertices_num; j++) {
         if (probability(condition)) {
           const VertexId new_vertex = graph.insert_vertex();
-          std::cout << "Created new vertex: " << new_vertex << "\n";
+          // std::cout << "Created new vertex: " << new_vertex << "\n";
           destination_vertices.push_back(new_vertex);
           new_vertices.push_back(new_vertex);
         }
-        std::cout << j + 1 << "/" << new_vertices_num << "\n";
+        // std::cout << j + 1 << "/" << new_vertices_num << "\n";
       }
-      std::cout << "*************\n";
-      std::cout << "Luckily created " << new_vertices.size() << " vertices.\n";
+      // std::cout << "*************\n";
+      // std::cout << "Luckily created " << new_vertices.size() << "
+      // vertices.\n";
       if (!new_vertices.empty()) {
-        std::cout << "Destinations: ";
+        // std::cout << "Destinations: ";
         for (const auto& destination : new_vertices) {
-          std::cout << destination << " ";
+          // std::cout << destination << " ";
           graph.insert_edge(source, destination, Edge::Color::Gray);
         }
-        std::cout << "\n";
+        // std::cout << "\n";
       }
     }
     source_vertices = destination_vertices;
@@ -421,9 +423,9 @@ void generate_vertices_and_gray_edges(Graph& graph,
       last_vertex = destination_vertices[destination_vertices.size() - 1];
     destination_vertices.clear();
     condition += 100 / (float)max_depth;
-    std::cout << "---------------------\n";
+    // std::cout << "---------------------\n";
   }
-  std::cout << last_vertex << "\n";
+  // std::cout << last_vertex << "\n";
 
   if (max_depth != graph.get_vertex_depth(last_vertex)) {
     std::cout << "\nMax depth couldn't be reached. Depth of final vertex: "
@@ -438,19 +440,14 @@ void generate_green_edges(Graph& graph) {
       graph.insert_edge(vertex.id, vertex.id, Edge::Color::Green);
     }
   }
-  std::cout << "\n";
-  for (int i = 0; i < graph.get_depth_map().size(); i++) {
-    std::cout << i << " ";
-    for (const auto& v : graph.get_depth_map().at(i)) {
-      std::cout << v << " ";
-    }
-    std::cout << "\n";
-  }
-  std::cout << "\n";
-
-  //  std::cout << "Depths: ";
-  //  for (const auto& v : graph.get_depths())
-  //    std::cout << v << " ";
+  //  std::cout << "\n";
+  //  for (int i = 0; i < graph.get_depth_map().size(); i++) {
+  //    std::cout << i << " ";
+  //    for (const auto& v : graph.get_depth_map().at(i)) {
+  //      std::cout << v << " ";
+  //    }
+  //    std::cout << "\n";
+  //  }
   //  std::cout << "\n";
 }
 
@@ -508,7 +505,7 @@ void generate_red_edges(Graph& graph) {
   int m = 0, n = 0;
   const int max_depth =
       graph.get_vertex_depth(graph.get_vertices().size() - 1) - 1;
-  std::cout << "\n";
+  // std::cout << "\n";
   for (VertexDepth depth = 0; depth < max_depth; depth++) {
     // std::cout << "Depth: " << depth << "\n";
     while (m != graph.vertices_in_depth(depth).size()) {
