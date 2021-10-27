@@ -251,11 +251,7 @@ void new_vertices_generation(Graph& work_graph,
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
     for (const auto& vertex : work_graph.get_vertices()) {
-      printf("vertex id: %d\n", vertex.id);
-
       if (vertex.depth == current_depth) {
-        printf("vertex id: %d\n", vertex.id);
-
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (dis(gen) > probability) {
             printf("vertex id: %d\n", vertex.id);
