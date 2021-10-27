@@ -245,7 +245,7 @@ void new_vertices_generation(Graph& work_graph,
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices())
+    for (const auto& vertex : work_graph.get_vertices()) {
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (dis(gen) > probability) {
@@ -256,6 +256,7 @@ void new_vertices_generation(Graph& work_graph,
                 true);
           }
         }
+    }
   }
 }
 
