@@ -21,6 +21,12 @@ class Vertex {
   Vertex(const VertexId& new_vertex_id, const Depth& new_vertex_depth)
       : id_(new_vertex_id), depth_(new_vertex_depth) {}
 
+  void set_depth(const Depth& new_vertex_depth) { depth_ = new_vertex_depth; }
+
+  const Depth& get_depth() { return depth_; }
+
+  const VertexId& get_id() { return id_; }
+
   void add_edge_id(const EdgeId& new_edge_id) {
     assert(!has_edge_id(new_edge_id) && "Edge id already exists");
     edge_ids_.push_back(new_edge_id);
@@ -57,7 +63,7 @@ class Vertex {
 
  private:
   const VertexId id_ = 0;
-  const Depth depth_ = 0;
+  Depth depth_ = 0;
   std::vector<EdgeId> edge_ids_;
 };
 
@@ -79,13 +85,27 @@ class Edge {
   }
 
   std::string color_to_string(const Color& color) const {
-    static const std::unordered_map<Color, std::string> color_map = {
-        {Color::GRAY, "gray"},
-        {Color::GREEN, "green"},
-        {Color::BLUE, "blue"},
-        {Color::YELLOW, "yellow"},
-        {Color::RED, "red"}};
-    return color_map.at(color);
+    switch (color) {
+      case Color::GRAY:
+        return "gray";
+        break;
+      case Color::GREEN:
+        return "green";
+        break;
+      case Color::BLUE:
+        return "blue";
+        break;
+      case Color::YELLOW:
+        return "yellow";
+        break;
+      case Color::RED:
+        return "red";
+        break;
+      default:
+        assert("Unexpected behavior");
+        return "";
+        break;
+    }
   }
 
   std::string to_string() const {
@@ -113,16 +133,31 @@ class Edge {
 
 class Graph {
  public:
-  const VertexId& add_vertex(const Depth& new_vertex_depth = DEFAULT_DEPTH) {
+  const VertexId& add_vertex() {
+    auto new_vertex_id = get_default_vertex_id();
     auto new_vertex = vertex_map_.insert(
-        {default_ver_id_, Vertex(default_ver_id_, new_vertex_depth)});
-    if (depth_map_.size() <= new_vertex_depth) {
-      depth_map_.push_back(std::vector<VertexId>({new_vertex.first->first}));
-    } else {
-      depth_map_.at(new_vertex_depth).push_back(new_vertex.first->first);
-    }
-    ++default_ver_id_;
+        {new_vertex_id, Vertex(new_vertex_id, DEFAULT_DEPTH)});
+    depth_map_.at(DEFAULT_DEPTH).push_back(new_vertex.first->first);
     return new_vertex.first->first;
+  }
+
+  void set_vertex_depth(const VertexId& from_vertex_id,
+                        const VertexId& to_vertex_id) {
+    auto new_vertex_depth = vertex_map_.at(from_vertex_id).get_depth() + 1;
+    auto& to_vertex = vertex_map_.at(to_vertex_id);
+
+    auto& depth_map_default_level = depth_map_.at(to_vertex.get_depth());
+    auto vertex_iter_at_depth_map =
+        std::find(depth_map_default_level.begin(),
+                  depth_map_default_level.end(), to_vertex.get_id());
+    depth_map_default_level.erase(vertex_iter_at_depth_map);
+    to_vertex.set_depth(new_vertex_depth);
+
+    if (depth_map_.size() <= new_vertex_depth) {
+      depth_map_.push_back(std::vector<VertexId>({to_vertex.get_id()}));
+    } else {
+      depth_map_.at(new_vertex_depth).push_back(to_vertex.get_id());
+    }
   }
 
   void add_edge(const VertexId& from_vertex_id,
@@ -131,14 +166,18 @@ class Graph {
     assert(!check_binding(from_vertex_id, to_vertex_id) &&
            "Vertices already binded");
 
-    const auto new_edge = edge_map_.insert(
-        {default_edge_id_,
-         Edge(from_vertex_id, to_vertex_id, default_edge_id_, new_edge_color)});
+    if (new_edge_color == Edge::Color::GRAY) {
+      set_vertex_depth(from_vertex_id, to_vertex_id);
+    }
+
+    auto new_edge_id = get_default_edge_id();
+    const auto new_edge =
+        edge_map_.insert({new_edge_id, Edge(from_vertex_id, to_vertex_id,
+                                            new_edge_id, new_edge_color)});
     vertex_map_.at(from_vertex_id).add_edge_id(new_edge.first->first);
     if (from_vertex_id != to_vertex_id) {
       vertex_map_.at(to_vertex_id).add_edge_id(new_edge.first->first);
     }
-    ++default_edge_id_;
   }
 
   bool check_binding(const VertexId& from_vertex_id,
@@ -157,21 +196,22 @@ class Graph {
           return true;
         }
       }
-      return false;
     } else {
       for (const auto& from_vertex_edge_id : from_vertex.get_edge_ids()) {
         if (to_vertex.has_edge_id(from_vertex_edge_id)) {
           return true;
         }
       }
-      return false;
     }
+    return false;
   }
 
   int get_vertices_count() const { return vertex_map_.size(); }
 
-  const Depth get_depth() const {
-    return (depth_map_.size() - 1) > 0 ? (depth_map_.size() - 1) : 0;
+  Depth get_depth() const {
+    return (depth_map_.size() > DEFAULT_DEPTH) ? (depth_map_.size() - 1)
+                                               : DEFAULT_DEPTH;
+    ;
   }
 
   const std::vector<VertexId>& get_vertices_at_depth(const Depth& depth) {
@@ -206,9 +246,13 @@ class Graph {
   }
 
  private:
-  VertexId default_ver_id_ = 0;
+  VertexId default_vertex_id_ = 0;
   EdgeId default_edge_id_ = 0;
   std::unordered_map<VertexId, Vertex> vertex_map_;
   std::unordered_map<EdgeId, Edge> edge_map_;
-  std::vector<std::vector<VertexId>> depth_map_;
+  std::vector<std::vector<VertexId>> depth_map_ = {{}};
+
+  VertexId get_default_vertex_id() { return default_vertex_id_++; }
+
+  EdgeId get_default_edge_id() { return default_edge_id_++; }
 };
