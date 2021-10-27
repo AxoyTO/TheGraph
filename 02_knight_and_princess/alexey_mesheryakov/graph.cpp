@@ -132,7 +132,7 @@ int main() {
     graph.add_vertex();
   }
   for (const auto& connection : connections) {
-    graph.add_edge(edge.connection, edge.connection);
+    graph.add_edge(connection.first, connection.second);
   }
   std::ofstream file;
   file.open("graph.json", std::fstream::out | std::fstream::trunc);
