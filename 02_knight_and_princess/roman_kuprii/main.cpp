@@ -96,8 +96,10 @@ struct Vertex {
       res += to_string(edge_id);
       res += ", ";
     }
-    res.pop_back();
-    res.pop_back();
+    if (edges_ids_.size() > 0) {
+      res.pop_back();
+      res.pop_back();
+    }
     res += "] }";
     return res;
   }
@@ -131,8 +133,10 @@ class Graph {
       res += edge.to_json();
       res += ", ";
     }
-    res.pop_back();
-    res.pop_back();
+    if (edges_.size() > 0) {
+      res.pop_back();
+      res.pop_back();
+    }
     res += " ] }\n";
     return res;
   }
