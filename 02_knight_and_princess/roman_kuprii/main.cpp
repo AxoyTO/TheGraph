@@ -19,29 +19,29 @@ constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
 
-enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
+enum class Color { Gray, Green, Blue, Yellow, Red };
 
 std::string color_to_string(const Color color) {
     std::string res = "";
     switch (color) {
-      case Color::GRAY: {
-        res += "\"gray\" }";
+      case Color::Gray: {
+        res += "\"Gray\" }";
         break;
       }
-      case Color::GREEN: {
-        res += "\"green\" }";
+      case Color::Green: {
+        res += "\"Green\" }";
         break;
       }
-      case Color::BLUE: {
-        res += "\"blue\" }";
+      case Color::Blue: {
+        res += "\"Blue\" }";
         break;
       }
-      case Color::YELLOW: {
-        res += "\"yellow\" }";
+      case Color::Yellow: {
+        res += "\"Yellow\" }";
         break;
       }
-      case Color::RED: {
-        res += "\"red\" }";
+      case Color::Red: {
+        res += "\"Red\" }";
         break;
       }
       default:
@@ -53,7 +53,7 @@ std::string color_to_string(const Color color) {
 struct Edge {
   const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
-  Color color = Color::GRAY;
+  Color color = Color::Gray;
 
   Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
       : id(_id), connected_vertices({start, end}) {}
@@ -67,32 +67,7 @@ struct Edge {
     res += ", ";
     res += to_string(connected_vertices[1]);
     res += "], \"color\": ";
-/*
-    switch (color) {
-      case Color::GRAY: {
-        res += "\"gray\" }";
-        break;
-      }
-      case Color::GREEN: {
-        res += "\"green\" }";
-        break;
-      }
-      case Color::BLUE: {
-        res += "\"blue\" }";
-        break;
-      }
-      case Color::YELLOW: {
-        res += "\"yellow\" }";
-        break;
-      }
-      case Color::RED: {
-        res += "\"red\" }";
-        break;
-      }
-      default:
-        break;
-    }
-*/
+    res += color_to_string(color);
     return res;
   }
 
@@ -177,10 +152,13 @@ class Graph {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
+if (from_vertex_id == to_vertex_id) return is_looped(to_vertex_id);
+
     const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
     const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
     for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
+
       for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
         if (from_vertex_edge_id == to_vertex_edge_id)
           return true;
@@ -205,10 +183,7 @@ class Graph {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
-    if (from_vertex_id != to_vertex_id)
-      assert(!is_connected(from_vertex_id, to_vertex_id));
-    else
-      assert(!is_looped(from_vertex_id));
+    assert(!is_connected(from_vertex_id, to_vertex_id));
 
     const auto& new_edge =
         edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
@@ -234,13 +209,13 @@ class Graph {
       const int diff =
           vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
       if (from_vertex_id == to_vertex_id) {
-        edges_[new_edge.id].color = Color::GREEN;
+        edges_[new_edge.id].color = Color::Green;
       } else if (diff == 0) {
-        edges_[new_edge.id].color = Color::BLUE;
+        edges_[new_edge.id].color = Color::Blue;
       } else if (diff == 1) {
-        edges_[new_edge.id].color = Color::YELLOW;
+        edges_[new_edge.id].color = Color::Yellow;
       } else if (diff == 2) {
-        edges_[new_edge.id].color = Color::RED;
+        edges_[new_edge.id].color = Color::Red;
       }
     }
   }
@@ -312,7 +287,7 @@ void paint_edges(Graph& work_graph) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
-  // BLUE
+  // Blue
 
   for (int current_depth = 1; current_depth < graph_depth; current_depth++) {
     vector<Vertex> uni_depth_vertices;
@@ -344,44 +319,44 @@ void paint_edges(Graph& work_graph) {
   }
 
   for (const auto& start_vertex : work_graph.get_vertices()) {
-    // GREEN
-    if (!work_graph.is_looped(start_vertex.id)) {
+    // Green
+    if (!work_graph.is_connected(start_vertex.id, start_vertex.id)) {
       if (dis(gen) < 0.1) {
         work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
       }
     }
-    // RED
+    // Red
     if (dis(gen) < 0.33) {
       if (start_vertex.depth + 2 <= graph_depth) {
-        vector<VertexId> red_vertices_ids;
+        vector<VertexId> Red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
           if (end_vertex.depth == start_vertex.depth + 2)
             if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
-              red_vertices_ids.emplace_back(end_vertex.id);
+              Red_vertices_ids.emplace_back(end_vertex.id);
         }
-        if (red_vertices_ids.size() > 0) {
-          std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
+        if (Red_vertices_ids.size() > 0) {
+          std::uniform_int_distribution<> distr(0, Red_vertices_ids.size() - 1);
           work_graph.connect_vertices(start_vertex.id,
-                                      red_vertices_ids[distr(gen)], true);
+                                      Red_vertices_ids[distr(gen)], true);
         }
       }
     }
-    // YELLOW
+    // Yellow
     const double probability = static_cast<double>(start_vertex.depth) /
                                static_cast<double>(graph_depth);
     if (dis(gen) < probability) {
-      vector<VertexId> yellow_vertices_ids;
+      vector<VertexId> Yellow_vertices_ids;
       for (const auto& end_vertex : work_graph.get_vertices()) {
         if (end_vertex.depth == start_vertex.depth + 1) {
           if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
-            yellow_vertices_ids.push_back(end_vertex.id);
+            Yellow_vertices_ids.push_back(end_vertex.id);
         }
       }
-      if (yellow_vertices_ids.size() > 0) {
+      if (Yellow_vertices_ids.size() > 0) {
         std::uniform_int_distribution<> distr(0,
-                                              yellow_vertices_ids.size() - 1);
+                                              Yellow_vertices_ids.size() - 1);
         work_graph.connect_vertices(start_vertex.id,
-                                    yellow_vertices_ids[distr(gen)], true);
+                                    Yellow_vertices_ids[distr(gen)], true);
       }
     }
   }
