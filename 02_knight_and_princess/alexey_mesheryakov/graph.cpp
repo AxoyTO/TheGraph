@@ -218,7 +218,7 @@ class Graph_Generator {
       case Color::Blue:
         return is_lucky(0.25);
       case Color::Yellow:
-        return is_lucky(depth / depth_);
+        return is_lucky((double)depth / depth_);
       default:
         break;
     }
@@ -235,6 +235,7 @@ class Graph_Generator {
       for (const auto& vertex_id : levels[i + 1])
         if (!graph.edge_exist(levels[i][j], vertex_id))
           new_vertices.push_back(vertex_id);
+      // std::cout<<std::rand() % new_vertices.size();
       if (new_vertices.size() > 0)
         graph.add_edge(levels[i][j],
                        new_vertices[std::rand() % new_vertices.size()],
@@ -308,7 +309,7 @@ class Graph_Generator {
 };
 
 int main() {
-  std::srand(std::time(nullptr));
+  std::srand(std::time(0));
   int depth = 0, new_vertices_num = 0;
   while ((depth <= 0) || (new_vertices_num <= 0)) {
     std::cin >> depth >> new_vertices_num;
