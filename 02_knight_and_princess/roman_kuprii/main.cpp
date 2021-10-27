@@ -22,32 +22,14 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 enum class Color { Gray, Green, Blue, Yellow, Red };
 
 std::string color_to_string(const Color& color) {
-  std::string res = "";
   switch (color) {
-    case Color::Gray: {
-      res += "\"gray\" }";
-      break;
-    }
-    case Color::Green: {
-      res += "\"green\" }";
-      break;
-    }
-    case Color::Blue: {
-      res += "\"blue\" }";
-      break;
-    }
-    case Color::Yellow: {
-      res += "\"yellow\" }";
-      break;
-    }
-    case Color::Red: {
-      res += "\"red\" }";
-      break;
-    }
-    default:
-      break;
+    case Color::Gray: return "\"gray\" }";
+    case Color::Green: return "\"green\" }";
+    case Color::Blue: return "\"blue\" }";
+    case Color::Yellow: return "\"yellow\" }";
+    case Color::Red: return "\"red\" }";
   }
-  return res;
+  return "";
 }
 
 struct Edge {
