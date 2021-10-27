@@ -21,27 +21,27 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 
 enum class Color { Gray, Green, Blue, Yellow, Red };
 
-std::string color_to_string(const Color color) {
+std::string color_to_string(const Color& color) {
   std::string res = "";
   switch (color) {
     case Color::Gray: {
-      res += "\"Gray\" }";
+      res += "\"gray\" }";
       break;
     }
     case Color::Green: {
-      res += "\"Green\" }";
+      res += "\"green\" }";
       break;
     }
     case Color::Blue: {
-      res += "\"Blue\" }";
+      res += "\"blue\" }";
       break;
     }
     case Color::Yellow: {
-      res += "\"Yellow\" }";
+      res += "\"yellow\" }";
       break;
     }
     case Color::Red: {
-      res += "\"Red\" }";
+      res += "\"red\" }";
       break;
     }
     default:
@@ -152,28 +152,20 @@ class Graph {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
-    if (from_vertex_id == to_vertex_id)
-      return is_looped(to_vertex_id);
-
     const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
     const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
-    for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
-      for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
-        if (from_vertex_edge_id == to_vertex_edge_id)
+    for (const auto& from_vertex_edge_id : from_vertex_edges_ids)
+      if (from_vertex_id == to_vertex_id) {
+        const auto& connected_vertices =
+            edges_[from_vertex_edge_id].connected_vertices;
+        if (connected_vertices[0] == connected_vertices[1])
           return true;
-      }
-    }
-    return false;
-  }
+      } else
+        for (const auto& to_vertex_edge_id : to_vertex_edges_ids)
+          if (from_vertex_edge_id == to_vertex_edge_id)
+            return true;
 
-  bool is_looped(const VertexId& vertex_id) const {
-    const auto& vertex_edges_ids = vertices_[vertex_id].get_edges_ids();
-    for (const auto& edge_id : vertex_edges_ids) {
-      const auto& connected_vertices = edges_[edge_id].connected_vertices;
-      if (connected_vertices[0] == connected_vertices[1])
-        return true;
-    }
     return false;
   }
 
@@ -244,29 +236,17 @@ void write_graph(const Graph& graph) {
   out.close();
 }
 
-void new_vertices_generation(Graph& work_graph) {
-  int depth = INVALID_NEW_DEPTH;
-  do {
-    std::cout << "Enter generate graph depth" << endl;
-    std::cin >> depth;
-  } while (depth < 0);
-  int new_vertices_num = INVALID_NEW_VERTICES_NUM;
-  do {
-    std::cout << "Enter new_vertices_num" << endl;
-    std::cin >> new_vertices_num;
-  } while (new_vertices_num < 0);
-
-  std::cout << "Depth of adding vertices: " << depth << endl;
-
+void new_vertices_generation(Graph& work_graph,
+                             const int& depth,
+                             const int& new_vertices_num) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
-
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices()) {
-      if (vertex.depth == current_depth) {
+    for (const auto& vertex : work_graph.get_vertices())
+      if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (dis(gen) > probability) {
             work_graph.add_vertex();
@@ -276,8 +256,6 @@ void new_vertices_generation(Graph& work_graph) {
                 false);
           }
         }
-      }
-    }
   }
 }
 
@@ -363,13 +341,23 @@ void paint_edges(Graph& work_graph) {
 }
 
 int main() {
+  int depth = INVALID_NEW_DEPTH;
+  do {
+    std::cout << "Enter generate graph depth" << endl;
+    std::cin >> depth;
+  } while (depth < 0);
+  int new_vertices_num = INVALID_NEW_VERTICES_NUM;
+  do {
+    std::cout << "Enter new_vertices_num" << endl;
+    std::cin >> new_vertices_num;
+  } while (new_vertices_num < 0);
+
+  std::cout << "Depth of adding vertices: " << depth << endl;
+
   Graph my_graph;
-
   my_graph.add_vertex();
-  new_vertices_generation(my_graph);
-
+  new_vertices_generation(my_graph, depth, new_vertices_num);
   paint_edges(my_graph);
-
   write_graph(my_graph);
 
   return 0;
