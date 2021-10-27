@@ -298,16 +298,16 @@ void add_red_edges(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices()) {
     if (get_random_number() < RED_TRASHOULD) {
       if (start_vertex.depth + 2 <= graph_depth) {
-        vector<VertexId> Red_vertices_ids;
+        vector<VertexId> red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
           if (end_vertex.depth == start_vertex.depth + 2)
             if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
-              Red_vertices_ids.emplace_back(end_vertex.id);
+              red_vertices_ids.emplace_back(end_vertex.id);
         }
-        if (Red_vertices_ids.size() > 0) {
-          std::uniform_int_distribution<> distr(0, Red_vertices_ids.size() - 1);
+        if (red_vertices_ids.size() > 0) {
+          std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
           work_graph.connect_vertices(start_vertex.id,
-                                      Red_vertices_ids[distr(gen)], false);
+                                      red_vertices_ids[distr(gen)], false);
         }
       }
     }
@@ -318,23 +318,22 @@ void add_yellow_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
   for (const auto& start_vertex : work_graph.get_vertices()) {
     const double probability = static_cast<double>(start_vertex.depth) /
                                static_cast<double>(graph_depth);
-    if (dis(gen) < probability) {
-      vector<VertexId> Yellow_vertices_ids;
+    if (get_random_number() < probability) {
+      vector<VertexId> yellow_vertices_ids;
       for (const auto& end_vertex : work_graph.get_vertices()) {
         if (end_vertex.depth == start_vertex.depth + 1) {
           if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
-            Yellow_vertices_ids.push_back(end_vertex.id);
+            yellow_vertices_ids.push_back(end_vertex.id);
         }
       }
-      if (Yellow_vertices_ids.size() > 0) {
+      if (yellow_vertices_ids.size() > 0) {
         std::uniform_int_distribution<> distr(0,
-                                              Yellow_vertices_ids.size() - 1);
+                                              yellow_vertices_ids.size() - 1);
         work_graph.connect_vertices(start_vertex.id,
-                                    Yellow_vertices_ids[distr(gen)], false);
+                                    yellow_vertices_ids[distr(gen)], false);
       }
     }
   }
@@ -352,12 +351,12 @@ int main() {
   do {
     std::cout << "Enter generate graph depth" << endl;
     std::cin >> depth;
-  } while (depth < 0);
+  } while (depth <= INVALID_NEW_DEPTH);
   int new_vertices_num = INVALID_NEW_VERTICES_NUM;
   do {
     std::cout << "Enter new_vertices_num" << endl;
     std::cin >> new_vertices_num;
-  } while (new_vertices_num < 0);
+  } while (new_vertices_num < INVALID_NEW_VERTICES_NUM);
 
   std::cout << "Depth of adding vertices: " << depth << endl;
 
