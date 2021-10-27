@@ -7,9 +7,9 @@
 #include <vector>
 
 using std::endl;
+using std::min;
 using std::to_string;
 using std::vector;
-using std::min;
 
 using EdgeId = int;
 using VertexId = int;
@@ -22,32 +22,32 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 enum class Color { Gray, Green, Blue, Yellow, Red };
 
 std::string color_to_string(const Color color) {
-    std::string res = "";
-    switch (color) {
-      case Color::Gray: {
-        res += "\"Gray\" }";
-        break;
-      }
-      case Color::Green: {
-        res += "\"Green\" }";
-        break;
-      }
-      case Color::Blue: {
-        res += "\"Blue\" }";
-        break;
-      }
-      case Color::Yellow: {
-        res += "\"Yellow\" }";
-        break;
-      }
-      case Color::Red: {
-        res += "\"Red\" }";
-        break;
-      }
-      default:
-        break;
+  std::string res = "";
+  switch (color) {
+    case Color::Gray: {
+      res += "\"Gray\" }";
+      break;
     }
-    return res;
+    case Color::Green: {
+      res += "\"Green\" }";
+      break;
+    }
+    case Color::Blue: {
+      res += "\"Blue\" }";
+      break;
+    }
+    case Color::Yellow: {
+      res += "\"Yellow\" }";
+      break;
+    }
+    case Color::Red: {
+      res += "\"Red\" }";
+      break;
+    }
+    default:
+      break;
+  }
+  return res;
 }
 
 struct Edge {
@@ -152,13 +152,13 @@ class Graph {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
 
-if (from_vertex_id == to_vertex_id) return is_looped(to_vertex_id);
+    if (from_vertex_id == to_vertex_id)
+      return is_looped(to_vertex_id);
 
     const auto& from_vertex_edges_ids =
         vertices_[from_vertex_id].get_edges_ids();
     const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
     for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
-
       for (const auto& to_vertex_edge_id : to_vertex_edges_ids) {
         if (from_vertex_edge_id == to_vertex_edge_id)
           return true;
