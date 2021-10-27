@@ -162,12 +162,13 @@ class Graph {
     if (initialization) {
       int min_depth = vertices_[from_vertex_id].depth;
       for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
-        VertexId vert = edges_[edge_idx].connected_vertices[0];
+        const VertexId vert = edges_[edge_idx].connected_vertices[0];
         min_depth = min(min_depth, vertices_[vert].depth);
       }
       vertices_[to_vertex_id].depth = min_depth + 1;
       depth_ = std::max(depth_, min_depth + 1);
     }
+
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
@@ -190,8 +191,8 @@ class Graph {
       vertices_[to_vertex_id].add_edge_id(new_edge.id);
   }
 
-  const vector<Edge>& get_edges() { return edges_; }
-  const vector<Vertex>& get_vertices() { return vertices_; }
+  const vector<Edge>& get_edges() const { return edges_; }
+  const vector<Vertex>& get_vertices() const { return vertices_; }
 
   int get_depth() const { return depth_; }
   int get_vertices_num() const { return vertices_.size(); }
