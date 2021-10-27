@@ -175,9 +175,11 @@ class Graph {
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
     if (initialization) {
-      const int minimum_depth = [&from_vertex_id, &to_vertex_id, vertices = &vertices_, edges = &edges_]() {
+      const int minimum_depth = [&from_vertex_id, &to_vertex_id,
+                                 vertices = &vertices_, edges = &edges_]() {
         int min_depth = vertices->at(from_vertex_id).depth;
-        for (const auto& edge_idx : vertices->at(to_vertex_id).get_edges_ids()) {
+        for (const auto& edge_idx :
+             vertices->at(to_vertex_id).get_edges_ids()) {
           const VertexId vert = edges->at(edge_idx).connected_vertices[0];
           min_depth = min(min_depth, vertices->at(vert).depth);
         }
