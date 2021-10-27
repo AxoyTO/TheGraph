@@ -35,7 +35,9 @@ class Graph {
              << color_to_string() << "\"}";
       return buffer.str();
     }
-    const pair<VertexId, VertexId>& get_vertex_ids() const { return vertex_ids; }
+    const pair<VertexId, VertexId>& get_vertex_ids() const {
+      return vertex_ids;
+    }
     const EdgeId id = 0;
     const pair<VertexId, VertexId> vertex_ids = {-1, -1};
     const Color color = Color::GRAY;
@@ -85,6 +87,7 @@ class Graph {
     const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
     const VertexId id = INVALID_ID;
     const depth = 0;
+
    private:
     vector<EdgeId> edge_ids_ = {};
   };
@@ -96,7 +99,6 @@ class Graph {
     return false;
   }
 
-
   bool edge_exist(const VertexId& first, const VertexId& second) const {
     for (const auto& edge_id_from_first_vertex :
          vertices_[first].get_edge_ids())
@@ -107,15 +109,17 @@ class Graph {
     return false;
   }
 
-  VertexId add_vertex(const int& depth) { 
-	VertexId vertex_id = get_new_vertex_id();
-	vertices_.emplace_back(vertex_id, depth);
-	if (depth > depth_)
-	   depth_ = depth;
-    	return vertex_id;
+  VertexId add_vertex(const int& depth) {
+    VertexId vertex_id = get_new_vertex_id();
+    vertices_.emplace_back(vertex_id, depth);
+    if (depth > depth_)
+      depth_ = depth;
+    return vertex_id;
   }
 
-  void add_edge(const VertexId& first, const VertexId& second, const Color& color = Color::GRAY) {
+  void add_edge(const VertexId& first,
+                const VertexId& second,
+                const Color& color = Color::GRAY) {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
     assert(!edge_exist(first, second) && "Such edge already exist");
@@ -123,7 +127,7 @@ class Graph {
         pair<VertexId, VertexId>{first, second}, get_new_edge_id());
     vertices_[first].add_edge_id(new_edge.id);
     if (first != second)
-    	vertices_[second].add_edge_id(new_edge.id);
+      vertices_[second].add_edge_id(new_edge.id);
   }
 
   std::string to_json() const {
@@ -145,7 +149,6 @@ class Graph {
     buffer << "]}\n";
     return buffer.str();
   }
-
 
  private:
   vector<Edge> edges_ = {};
