@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <array>
 #include <iostream>
 #include <unordered_map>
@@ -5,19 +6,17 @@
 
 using EdgeId = int;
 using VertexId = int;
+using GraphInputEdge = std::pair<int, int>;
 constexpr int INVALID_ID = -1;
 
 class Edge {
  public:
-  Edge(int inpId, std::pair<VertexId, VertexId> inpVertexIds) {
-    id_ = inpId;
-    vertexIds_.first = inpVertexIds.first;
-    vertexIds_.second = inpVertexIds.second;
-  }
+  Edge(EdgeId inpId, VertexId vertexSrcId, VertexId vertexTrgId)
+      : id_(inpId), vertexIds_(vertexSrcId, vertexTrgId) {}
 
-  std::pair<VertexId, VertexId> getVertexIds() { return vertexIds_; }
+  std::pair<VertexId, VertexId> getVertexIds() const { return vertexIds_; }
 
-  std::string toJSON() {
+  std::string toJSON() const {
     std::string json;
     json += "{\n      \"id\": " + std::to_string(id_);
     json += ",\n      \"vertex_ids\": [";
@@ -27,20 +26,17 @@ class Edge {
   }
 
  private:
-  EdgeId id_ = INVALID_ID;
-  std::pair<VertexId, VertexId> vertexIds_ = {INVALID_ID, INVALID_ID};
+  const EdgeId id_ = INVALID_ID;
+  const std::pair<VertexId, VertexId> vertexIds_ = {INVALID_ID, INVALID_ID};
 };
 
 class Vertex {
  public:
-  Vertex(int inpId, EdgeId inpEdgeId) {
-    id_ = inpId;
-    addEdge(inpEdgeId);
-  }
+  Vertex(int inpId) : id_(inpId) {}
 
-  void addEdge(EdgeId inpEdgeId) { edgeIds_.insert(inpEdgeId); }
+  void addEdgeId(EdgeId inpEdgeId) { edgeIds_.insert(inpEdgeId); }
 
-  std::string toJSON() {
+  std::string toJSON() const {
     std::string json;
     json += "{\n      \"id\": " + std::to_string(id_);
     json += ",\n      \"edge_ids\": [";
@@ -56,28 +52,15 @@ class Vertex {
   }
 
  private:
-  EdgeId id_ = INVALID_ID;
+  const EdgeId id_ = INVALID_ID;
   std::unordered_set<EdgeId> edgeIds_ = {};
 };
 
 class Graph {
  public:
-  // структура ребра для входных данных
-  struct InputEdge {
-    EdgeId id = INVALID_ID;
-    std::pair<VertexId, VertexId> vertexIds;
-  };
-
-  // структура вершины для входных данных
-  // (пока не используется)
-  struct InputVertex {
-    VertexId id = INVALID_ID;
-    std::unordered_set<EdgeId> edgeIds;
-  };
-
-  template <std::size_t SIZE>
-  explicit Graph(const std::array<InputEdge, SIZE>& inpEdges) {
-    for (InputEdge inpEdge : inpEdges) {
+  /*template <std::size_t SIZE>
+  explicit Graph(const std::array<GraphInputEdge, SIZE>& inpEdges) {
+    for (GraphInputEdge inpEdge : inpEdges) {
       addEdge(inpEdge);
     }
     for (auto [edgeId, edge] : edges_) {
@@ -88,7 +71,7 @@ class Graph {
     }
   }
 
-  void addEdge(InputEdge newEdge) {
+  void addEdge(GraphInputEdge newEdge) {
     if (newEdge.id != INVALID_ID) {
       auto edge = edges_.find(newEdge.id);
       if (edge == edges_.end()) {
@@ -108,14 +91,69 @@ class Graph {
     auto v = vertices_.find(vertexId);
     if (v == vertices_.end()) {
       // add new vertex
-      vertices_.emplace(vertexId, Vertex(vertexId, edgeId));
+      Vertex newVertex = Vertex(vertexId);
+      newVertex.addEdgeId(edgeId);
+      vertices_.emplace(vertexId, newVertex);
     } else {
       // edit vertex
-      v->second.addEdge(edgeId);
+      v->second.addEdgeId(edgeId);
+    }
+  }
+  */
+
+  template <std::size_t SIZE>
+  explicit Graph(const std::array<GraphInputEdge, SIZE>& inpEdgesVertices) {
+    /*for (GraphInputEdge newEdgeVertices : inpEdgesVertices) {
+      addEdge(newEdgeVertices);
+    }
+    for (auto [edgeId, edge] : edges_) {
+      auto vs = edge.getVertexIds();
+      compliteVertex(vs.first, edgeId);
+      compliteVertex(vs.second, edgeId);
+    }*/
+
+    for (auto [vertexSrcId, vertexTrgId] : inpEdgesVertices) {
+      addVertex(vertexSrcId);
+      addVertex(vertexTrgId);
+      EdgeId newEdgeId = addEdge(vertexSrcId, vertexTrgId);
+      compliteVertex(vertexSrcId, newEdgeId);
+      compliteVertex(vertexTrgId, newEdgeId);
     }
   }
 
-  std::string toJSON() {
+  EdgeId addEdge(VertexId vertexSrcId, VertexId vertexTrgId) {
+    assert(vertices_.find(vertexSrcId) != vertices_.end() &&
+           "Unexpected behavior: vertex doesn't exists");
+    assert(vertices_.find(vertexTrgId) != vertices_.end() &&
+           "Unexpected behavior: vertex doesn't exists");
+
+    for (const auto& [edgeId, edge] : edges_) {
+      auto vs = edge.getVertexIds();
+      if (vs.first == vertexSrcId && vs.second == vertexTrgId) {
+        assert(false && "Unexpected behavior: edge doesn't exists");
+      }
+    }
+
+    EdgeId newEdgeId = edges_.size();
+    edges_.emplace(newEdgeId, Edge(newEdgeId, vertexSrcId, vertexTrgId));
+    return newEdgeId;
+  }
+
+  void addVertex(VertexId vertexId) {
+    auto v = vertices_.find(vertexId);
+    // assert(v == vertices_.end() && "Unexpected behavior: vertex already
+    // exist");
+    if (v == vertices_.end()) {
+      vertices_.emplace(vertexId, Vertex(vertexId));
+    }
+  }
+
+  void compliteVertex(VertexId vertexId, EdgeId edgeId) {
+    auto v = vertices_.find(vertexId);
+    v->second.addEdgeId(edgeId);
+  }
+
+  std::string toJSON() const {
     std::string json;
     json = "{\n  \"vertices\": [\n    ";
     for (auto pVertexPair = vertices_.begin(); pVertexPair != vertices_.end();
