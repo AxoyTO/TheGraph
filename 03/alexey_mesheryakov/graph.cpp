@@ -20,19 +20,19 @@ using std::string;
 enum class Color { Gray, Green, Red, Blue, Yellow };
 
 std::string color_to_string(const Color& color) {
-      switch (color) {
-        case Color::Gray:
-          return "gray";
-        case Color::Green:
-          return "green";
-        case Color::Red:
-          return "red";
-        case Color::Blue:
-          return "blue";
-        case Color::Yellow:
-          return "yellow";
-      }
-    }
+  switch (color) {
+    case Color::Gray:
+      return "gray";
+    case Color::Green:
+      return "green";
+    case Color::Red:
+      return "red";
+    case Color::Blue:
+      return "blue";
+    case Color::Yellow:
+      return "yellow";
+  }
+}
 
 class Graph {
  public:
@@ -123,9 +123,9 @@ class Graph {
                 const Color& color = Color::Gray) {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
-std::cout<<"id: "<< first << " " << second << std::endl;
+    std::cout << "id: " << first << " " << second << std::endl;
     if (first != second)
-	assert(!edge_exist(first, second) && "Such edge already exist");
+      assert(!edge_exist(first, second) && "Such edge already exist");
     const auto& new_edge = edges_.emplace_back(
         pair<VertexId, VertexId>{first, second}, get_new_edge_id(), color);
     vertices_[first].add_edge_id(new_edge.id);
@@ -174,11 +174,11 @@ class Graph_generator {
       new_vertices_num_ = new_vertices_num;
   }
 
-//void set_graph(const Graph& graph) { graph_ = graph; }
+  // void set_graph(const Graph& graph) { graph_ = graph; }
 
   const Graph& get_graph() const { return graph_; }
 
-  VertexId random_vertex_generator (int depth){
+  VertexId random_vertex_generator(int depth) {
     const int luck = rand() % depth_;
     // std::cout << luck << "_" << depth_ - depth - 1 << "|| ";
     if (luck < depth_ - depth)
@@ -187,8 +187,7 @@ class Graph_generator {
       return INVALID_ID;
   }
 
-  bool random_colour_edge_generator(const Color& color,
-                                    int depth = 0) const {
+  bool random_colour_edge_generator(const Color& color, int depth = 0) const {
     int luck = 0;
     switch (color) {
       case Color::Green:
@@ -272,10 +271,10 @@ int main() {
   Graph_generator generator{};
   generator.set_params(depth, new_vertices_num);
   generator.generate();
-  //Graph graph = generator.get_graph();
+  // Graph graph = generator.get_graph();
   std::ofstream file;
   file.open("graph.json", std::fstream::out | std::fstream::trunc);
-  //file << graph.to_json();
+  // file << graph.to_json();
   file << generator.get_graph().to_json();
   file.close();
   return 0;
