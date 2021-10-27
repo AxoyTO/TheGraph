@@ -172,12 +172,12 @@ class Graph {
 
   void connect_vertices(const VertexId& from_vertex_id,
                         const VertexId& to_vertex_id,
-                        const bool& paint) {
+                        const bool& initialization) {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
-    if (!paint) {
+    if (initialization) {
       int min_depth = vertices_[from_vertex_id].depth;
       for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
         VertexId vert = edges_[edge_idx].connected_vertices[0];
@@ -193,7 +193,7 @@ class Graph {
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
     Color color;
-    if (!paint) {
+    if (initialization) {
       color = Color::Gray;
     } else if (from_vertex_id == to_vertex_id) {
       color = Color::Green;
@@ -254,7 +254,7 @@ void new_vertices_generation(Graph& work_graph,
             work_graph.connect_vertices(
                 vertex.id,
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1].id,
-                false);
+                true);
           }
         }
   }
@@ -281,7 +281,7 @@ void paint_blue(Graph& work_graph) {
                                      adjacent_vertices[1]))
           if (dis(gen) < 0.25)
             work_graph.connect_vertices(adjacent_vertices[0],
-                                        adjacent_vertices[1], true);
+                                        adjacent_vertices[1], false);
       } else {
         adjacent_vertices[0] = adjacent_vertices[1];
         adjacent_vertices[1] = vertex.id;
@@ -289,7 +289,7 @@ void paint_blue(Graph& work_graph) {
                                      adjacent_vertices[1]))
           if (dis(gen) < 0.25)
             work_graph.connect_vertices(adjacent_vertices[0],
-                                        adjacent_vertices[1], true);
+                                        adjacent_vertices[1], false);
       }
     }
   }
@@ -302,7 +302,7 @@ void paint_green(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices())
     if (!work_graph.is_connected(start_vertex.id, start_vertex.id))
       if (dis(gen) < 0.1)
-        work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
+        work_graph.connect_vertices(start_vertex.id, start_vertex.id, false);
 }
 
 void paint_red(Graph& work_graph) {
@@ -322,7 +322,7 @@ void paint_red(Graph& work_graph) {
         if (Red_vertices_ids.size() > 0) {
           std::uniform_int_distribution<> distr(0, Red_vertices_ids.size() - 1);
           work_graph.connect_vertices(start_vertex.id,
-                                      Red_vertices_ids[distr(gen)], true);
+                                      Red_vertices_ids[distr(gen)], false);
         }
       }
     }
@@ -349,7 +349,7 @@ void paint_yellow(Graph& work_graph) {
         std::uniform_int_distribution<> distr(0,
                                               Yellow_vertices_ids.size() - 1);
         work_graph.connect_vertices(start_vertex.id,
-                                    Yellow_vertices_ids[distr(gen)], true);
+                                    Yellow_vertices_ids[distr(gen)], false);
       }
     }
   }
