@@ -83,7 +83,6 @@ bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
 
 struct Vertex {
  public:
-  //  const VertexId id = INVALID_ID;
   int depth = 0;
 
   explicit Vertex(const VertexId& _id) : id_(_id) {}
@@ -437,12 +436,12 @@ int main() {
 
   int depth = INVALID_NEW_DEPTH;
   do {
-    std::cout << "Enter generate graph depth" << endl;
+    std::cout << "Enter generate graph depth from zero" << endl;
     std::cin >> depth;
   } while (depth <= INVALID_NEW_DEPTH);
   int new_vertices_num = INVALID_NEW_VERTICES_NUM;
   do {
-    std::cout << "Enter new_vertices_num" << endl;
+    std::cout << "Enter new_vertices_num from zero" << endl;
     std::cin >> new_vertices_num;
   } while (new_vertices_num < INVALID_NEW_VERTICES_NUM);
 
