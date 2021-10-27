@@ -40,7 +40,6 @@ std::string color_to_string(const Color& color) {
     case Color::Red:
       return "\"red\" }";
   }
-  return "";
 }
 
 double get_random_number() {
