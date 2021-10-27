@@ -9,38 +9,20 @@
 using std::endl;
 using std::to_string;
 using std::vector;
+using std::min;
 
 using EdgeId = int;
 using VertexId = int;
 
-constexpr int START_VERTICES_NUMBER = 10;
 constexpr int INVALID_ID = -1;
-constexpr int INVALID_NUMBER = -1;
+constexpr int INVALID_NEW_DEPTH = -1;
+constexpr int INVALID_NEW_VERTICES_NUM = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
-
-int min(const int& a, const int& b) {
-  return (a < b) ? a : b;
-}
 
 enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
 
-struct Edge {
-  const EdgeId id = INVALID_ID;
-  const std::array<VertexId, 2> connected_vertices;
-  Color color = Color::GRAY;
-
-  explicit Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
-      : id(_id), connected_vertices({start, end}) {}
-
-  std::string to_json() const {
-    std::string res;
-    res = "{ \"id\": ";
-    res += to_string(id);
-    res += ", \"vertex_ids\": [";
-    res += to_string(connected_vertices[0]);
-    res += ", ";
-    res += to_string(connected_vertices[1]);
-    res += "], \"color\": ";
+std::string color_to_string(const Color color) {
+    std::string res = "";
     switch (color) {
       case Color::GRAY: {
         res += "\"gray\" }";
@@ -65,6 +47,52 @@ struct Edge {
       default:
         break;
     }
+    return res;
+}
+
+struct Edge {
+  const EdgeId id = INVALID_ID;
+  const std::array<VertexId, 2> connected_vertices;
+  Color color = Color::GRAY;
+
+  Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
+      : id(_id), connected_vertices({start, end}) {}
+
+  std::string to_json() const {
+    std::string res;
+    res = "{ \"id\": ";
+    res += to_string(id);
+    res += ", \"vertex_ids\": [";
+    res += to_string(connected_vertices[0]);
+    res += ", ";
+    res += to_string(connected_vertices[1]);
+    res += "], \"color\": ";
+/*
+    switch (color) {
+      case Color::GRAY: {
+        res += "\"gray\" }";
+        break;
+      }
+      case Color::GREEN: {
+        res += "\"green\" }";
+        break;
+      }
+      case Color::BLUE: {
+        res += "\"blue\" }";
+        break;
+      }
+      case Color::YELLOW: {
+        res += "\"yellow\" }";
+        break;
+      }
+      case Color::RED: {
+        res += "\"red\" }";
+        break;
+      }
+      default:
+        break;
+    }
+*/
     return res;
   }
 
@@ -242,20 +270,17 @@ void write_graph(const Graph& graph) {
 }
 
 void new_vertices_generation(Graph& work_graph) {
-  int depth = INVALID_ID;
+  int depth = INVALID_NEW_DEPTH;
   do {
     std::cout << "Enter generate graph depth" << endl;
     std::cin >> depth;
   } while (depth < 0);
-  int new_vertices_num = INVALID_NUMBER;
+  int new_vertices_num = INVALID_NEW_VERTICES_NUM;
   do {
     std::cout << "Enter new_vertices_num" << endl;
     std::cin >> new_vertices_num;
   } while (new_vertices_num < 0);
-  const int graph_depth = work_graph.get_depth();
-  depth = min(graph_depth, depth);
 
-  std::cout << "Graph depth: " << graph_depth << endl;
   std::cout << "Depth of adding vertices: " << depth << endl;
 
   std::random_device rd;
@@ -365,11 +390,7 @@ void paint_edges(Graph& work_graph) {
 int main() {
   Graph my_graph;
 
-  for (int i = 0; i < START_VERTICES_NUMBER; i++)
-    my_graph.add_vertex();
-  for (int i = 0; i < START_VERTICES_NUMBER - 1; i++)
-    my_graph.connect_vertices(i, i + 1, false);
-
+  my_graph.add_vertex();
   new_vertices_generation(my_graph);
 
   paint_edges(my_graph);
