@@ -36,8 +36,10 @@ std::string color_to_string(const Color& color) {
       return "\"yellow\" }";
     case Color::Red:
       return "\"red\" }";
+    default:
+      assert(false);
+      return "";
   }
-  return "";
 }
 
 double get_random_number() {
