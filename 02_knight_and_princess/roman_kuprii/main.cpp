@@ -17,7 +17,8 @@ constexpr int GRAPH_NUMBER = 10;
 constexpr int START_VERTICES_NUMBER = 10;
 constexpr int INVALID_ID = -1;
 constexpr int INVALID_NUMBER = -1;
-const std::string JSON_GRAPH_FILENAME = "temp/graph.json";
+const std::string JSON_GRAPH_FILENAME = "temp/graph";
+const std::string LOG_FILENAME = "log.txt";
 
 int min(const int& a, const int& b) {
   return (a < b) ? a : b;
@@ -238,7 +239,7 @@ class Graph {
 void write_graph(const Graph& graph, const int& graph_number) {
   std::ofstream out;
   const std::string current_name =
-      JSON_GRAPH_FILENAME + "_" + to_string(graph_number);
+      JSON_GRAPH_FILENAME + "_" + to_string(graph_number) + ".gson";
   out.open(current_name, std::ofstream::out | std::ofstream::trunc);
   out << graph.to_json();
   out.close();
@@ -357,7 +358,14 @@ void paint_edges(Graph& work_graph) {
   }
 }
 
+void write_log(const Graph& graph, std::ofstream& logfile) {
+  logfile << graph.to_json();
+}
+
 int main() {
+  std::ofstream log;
+  log.open(LOG_FILENAME, std::ofstream::out | std::ofstream::app);
+
   int depth = INVALID_ID;
   do {
     std::cout << "Enter generate graph depth" << endl;
@@ -378,10 +386,11 @@ int main() {
       my_graph.connect_vertices(vertex_number, vertex_number + 1, false);
 
     new_vertices_generation(my_graph, depth, new_vertices_num);
-
     paint_edges(my_graph);
-
     write_graph(my_graph, graph_num);
+    write_log(my_graph, log);
   }
+
+  log.close();
   return 0;
 }
