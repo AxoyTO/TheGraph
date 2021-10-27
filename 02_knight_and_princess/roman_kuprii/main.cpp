@@ -13,6 +13,7 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
+constexpr int COLORS_NUMBER = 5;
 constexpr int GRAPH_NUMBER = 10;
 constexpr int START_VERTICES_NUMBER = 10;
 constexpr int INVALID_ID = -1;
@@ -224,6 +225,7 @@ class Graph {
 
   int get_depth() const { return depth_; }
   int get_vertices_num() const { return vertices_.size(); }
+  int get_edges_num() const { return edges_.size(); }
 
  private:
   vector<Vertex> vertices_;
@@ -250,9 +252,6 @@ void new_vertices_generation(Graph& work_graph,
                              const int& new_vertices_num) {
   const int graph_depth = work_graph.get_depth();
   int depth = min(graph_depth, _depth);
-
-  std::cout << "Graph depth: " << graph_depth << endl;
-  std::cout << "Depth of adding vertices: " << depth << endl;
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -358,13 +357,73 @@ void paint_edges(Graph& work_graph) {
   }
 }
 
-void write_log(const Graph& graph, std::ofstream& logfile) {
-  logfile << graph.to_json();
+void write_log(const Graph& graph,
+               std::ofstream& logfile,
+               const int& depth,
+               const int& new_vertices_num,
+               const int& graph_num) {
+  std::string res =
+      "time Graph " + to_string(graph_num) + ", Generation Started\n";
+  res += "time Graph " + to_string(graph_num) + ", Generation Ended {\n";
+  res += "\tdepth: " + to_string(depth) + ",\n";
+  res += "\tnew_vertices_num: " + to_string(new_vertices_num) + ",\n";
+  res += "vertices: " + to_string(graph.get_vertices_num()) + ", [";
+
+  std::vector<int> depth_count;
+  for (int iter = 0; iter < graph.get_depth(); iter++)
+    depth_count.emplace_back(0);
+  for (const auto& vertex : graph.get_vertices()) {
+    depth_count[vertex.depth]++;
+  }
+  for (const auto& depth : depth_count) {
+    res += to_string(depth) + ", ";
+  }
+  res.pop_back();
+  res.pop_back();
+  res += "],\n";
+  res += "edges: " + to_string(graph.get_edges_num()) + ", {";
+  std::array<int, COLORS_NUMBER> colors;
+  for (int iter = 0; iter < COLORS_NUMBER; iter++)
+    colors[iter] = 0;
+  for (const auto& edge : graph.get_edges()) {
+    switch (edge.color) {
+      case Color::GRAY: {
+        colors[0]++;
+        break;
+      }
+      case Color::GREEN: {
+        colors[1]++;
+        break;
+      }
+      case Color::BLUE: {
+        colors[2]++;
+        break;
+      }
+      case Color::YELLOW: {
+        colors[3]++;
+        break;
+      }
+      case Color::RED: {
+        colors[4]++;
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  res += "gray: " + to_string(colors[0]) + ", ";
+  res += "green: " + to_string(colors[1]) + ", ";
+  res += "blue: " + to_string(colors[2]) + ", ";
+  res += "yellow: " + to_string(colors[3]) + ", ";
+  res += "red: " + to_string(colors[4]) + "}\n";
+  res += "}\n";
+  logfile << res;
 }
 
 int main() {
   std::ofstream log;
-  log.open(LOG_FILENAME, std::ofstream::out | std::ofstream::app);
+  log.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
   int depth = INVALID_ID;
   do {
@@ -388,7 +447,7 @@ int main() {
     new_vertices_generation(my_graph, depth, new_vertices_num);
     paint_edges(my_graph);
     write_graph(my_graph, graph_num);
-    write_log(my_graph, log);
+    write_log(my_graph, log, depth, new_vertices_num, graph_num);
   }
 
   log.close();

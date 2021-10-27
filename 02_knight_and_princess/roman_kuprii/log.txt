@@ -1,0 +1,70 @@
+time Graph 0, Generation Started
+time Graph 0, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 16, [1, 2, 2, 3, 3, 1, 1, 1, 1],
+edges: 26, {gray: 15, green: 1, blue: 3, yellow: 2, red: 5}
+}
+time Graph 1, Generation Started
+time Graph 1, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 19, [1, 2, 3, 3, 2, 2, 3, 1, 1],
+edges: 29, {gray: 18, green: 3, blue: 1, yellow: 3, red: 4}
+}
+time Graph 2, Generation Started
+time Graph 2, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 17, [1, 2, 3, 3, 3, 1, 1, 1, 1],
+edges: 32, {gray: 16, green: 4, blue: 3, yellow: 2, red: 7}
+}
+time Graph 3, Generation Started
+time Graph 3, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 16, [1, 2, 2, 2, 3, 2, 1, 1, 1],
+edges: 26, {gray: 15, green: 2, blue: 3, yellow: 4, red: 2}
+}
+time Graph 4, Generation Started
+time Graph 4, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 16, [1, 2, 3, 2, 2, 2, 1, 1, 1],
+edges: 29, {gray: 15, green: 5, blue: 1, yellow: 2, red: 6}
+}
+time Graph 5, Generation Started
+time Graph 5, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 13, [1, 2, 1, 2, 2, 1, 1, 1, 1],
+edges: 18, {gray: 12, green: 1, blue: 0, yellow: 1, red: 4}
+}
+time Graph 6, Generation Started
+time Graph 6, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 14, [1, 2, 2, 2, 2, 1, 1, 1, 1],
+edges: 23, {gray: 13, green: 2, blue: 2, yellow: 1, red: 5}
+}
+time Graph 7, Generation Started
+time Graph 7, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 20, [1, 2, 3, 4, 4, 2, 1, 1, 1],
+edges: 30, {gray: 19, green: 2, blue: 3, yellow: 4, red: 2}
+}
+time Graph 8, Generation Started
+time Graph 8, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 18, [1, 2, 2, 3, 3, 3, 1, 1, 1],
+edges: 27, {gray: 17, green: 1, blue: 2, yellow: 3, red: 4}
+}
+time Graph 9, Generation Started
+time Graph 9, Generation Ended {
+	depth: 6,
+	new_vertices_num: 1,
+vertices: 22, [1, 2, 3, 4, 4, 2, 3, 1, 1],
+edges: 42, {gray: 21, green: 2, blue: 6, yellow: 8, red: 5}
+}
