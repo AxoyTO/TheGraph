@@ -53,10 +53,13 @@ std::string color_to_string(const Color& color) {
 struct Edge {
   const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
-  Color color = Color::Gray;
+  const Color color = Color::Gray;
 
-  Edge(const VertexId& start, const VertexId& end, const EdgeId& _id)
-      : id(_id), connected_vertices({start, end}) {}
+  Edge(const VertexId& start,
+       const VertexId& end,
+       const EdgeId& _id,
+       const Color& _color)
+      : id(_id), connected_vertices({start, end}), color(_color) {}
 
   std::string to_json() const {
     std::string res;
@@ -70,8 +73,6 @@ struct Edge {
     res += color_to_string(color);
     return res;
   }
-
-  void paint(const Color& _color) { color = _color; }
 };
 
 bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
@@ -174,16 +175,7 @@ class Graph {
                         const bool& paint) {
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
-
     assert(!is_connected(from_vertex_id, to_vertex_id));
-
-    const auto& new_edge =
-        edges_.emplace_back(from_vertex_id, to_vertex_id, get_next_edge_id());
-
-    // add information into Vertex structure
-    vertices_[from_vertex_id].add_edge_id(new_edge.id);
-    if (from_vertex_id != to_vertex_id)
-      vertices_[to_vertex_id].add_edge_id(new_edge.id);
 
     if (!paint) {
       int min_depth = vertices_[from_vertex_id].depth;
@@ -197,19 +189,28 @@ class Graph {
         depth_ = min_depth + 1;
     }
 
-    if (paint) {
-      const int diff =
-          vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
-      if (from_vertex_id == to_vertex_id) {
-        edges_[new_edge.id].color = Color::Green;
-      } else if (diff == 0) {
-        edges_[new_edge.id].color = Color::Blue;
-      } else if (diff == 1) {
-        edges_[new_edge.id].color = Color::Yellow;
-      } else if (diff == 2) {
-        edges_[new_edge.id].color = Color::Red;
-      }
+    const int diff =
+        vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
+
+    Color color;
+    if (!paint) {
+      color = Color::Gray;
+    } else if (from_vertex_id == to_vertex_id) {
+      color = Color::Green;
+    } else if (diff == 0) {
+      color = Color::Blue;
+    } else if (diff == 1) {
+      color = Color::Yellow;
+    } else if (diff == 2) {
+      color = Color::Red;
     }
+
+    const auto& new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id,
+                                               get_next_edge_id(), color);
+
+    vertices_[from_vertex_id].add_edge_id(new_edge.id);
+    if (from_vertex_id != to_vertex_id)
+      vertices_[to_vertex_id].add_edge_id(new_edge.id);
   }
 
   vector<Edge> get_edges() const { return edges_; }
