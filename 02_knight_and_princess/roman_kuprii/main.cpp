@@ -175,31 +175,35 @@ class Graph {
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
     if (initialization) {
-      int min_depth = vertices_[from_vertex_id].depth;
-      for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
-        const VertexId vert = edges_[edge_idx].connected_vertices[0];
-        min_depth = min(min_depth, vertices_[vert].depth);
-      }
-      vertices_[to_vertex_id].depth = min_depth + 1;
-      depth_ = std::max(depth_, min_depth + 1);
+      const int minimum_depth = [=]() {
+        int min_depth = vertices_[from_vertex_id].depth;
+        for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
+          const VertexId vert = edges_[edge_idx].connected_vertices[0];
+          min_depth = min(min_depth, vertices_[vert].depth);
+        }
+        return min_depth;
+      }();
+      vertices_[to_vertex_id].depth = minimum_depth + 1;
+      depth_ = std::max(depth_, minimum_depth + 1);
     }
-
-    //    const int min_depth =  []
 
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-    Color color;
-    if (initialization)
-      color = Color::Gray;
-    else if (from_vertex_id == to_vertex_id)
-      color = Color::Green;
-    else if (diff == 0)
-      color = Color::Blue;
-    else if (diff == 1)
-      color = Color::Yellow;
-    else if (diff == 2)
-      color = Color::Red;
+    const Color color = [=]() {
+      if (initialization)
+        return Color::Gray;
+      else if (from_vertex_id == to_vertex_id)
+        return Color::Green;
+      else if (diff == 0)
+        return Color::Blue;
+      else if (diff == 1)
+        return Color::Yellow;
+      else if (diff == 2)
+        return Color::Red;
+      else
+        return Color::Gray;
+    }();
 
     const auto& new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id,
                                                get_next_edge_id(), color);
