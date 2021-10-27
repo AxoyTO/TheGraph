@@ -16,18 +16,6 @@ struct Vertex {
   Vertex(const VertexId& _id) : id(_id) {}
   void NewEdge(const EdgeId& edge_id) { edge_ids.push_back(edge_id); }
   EdgeId IthEdgeId(int i) { return edge_ids[i]; }
-  bool SelfConnected() {
-    for (auto it = edge_ids.begin(); it != edge_ids.end(); it++) {
-      auto it1 = it;
-      it++;
-      for (; it1 != edge_ids.end(); it1++) {
-        if (*it == *it1) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
   int Length() { return edge_ids.size(); }
 
  private:
@@ -55,18 +43,16 @@ class Graph {
   bool AreConnected(const VertexId& vertex_id1, const VertexId& vertex_id2) {
     assert(InGraph(vertex_id1) && InGraph(vertex_id2) &&
            "Vertex index is out of range");
-    if (vertex_id1 != vertex_id2) {
-      for (int i = 0; i < vertexes[vertex_id1].Length(); i++) {
-        for (int j = 0; j < vertexes[vertex_id2].Length(); j++) {
-          if (vertexes[vertex_id1].IthEdgeId(i) ==
-              vertexes[vertex_id2].IthEdgeId(j)) {
-            return true;
-          }
+    for (int i = 0; i < vertexes[vertex_id1].Length(); i++) {
+      int j = (i + 1) * (vertex_id1 == vertex_id2);
+      for (; j < vertexes[vertex_id2].Length(); j++) {
+        if (vertexes[vertex_id1].IthEdgeId(i) ==
+            vertexes[vertex_id2].IthEdgeId(j)) {
+          return true;
         }
       }
-      return false;
     }
-    return vertexes[vertex_id1].SelfConnected();
+    return false;
   }
 
   void AddVert() {
