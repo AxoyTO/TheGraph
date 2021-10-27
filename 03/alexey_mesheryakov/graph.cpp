@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-constexpr int VERTEX_CNT = 14;
 constexpr int INVALID_ID = -1;
 
 using std::pair;
@@ -60,7 +59,7 @@ class Graph {
 
   class Vertex {
    public:
-    explicit Vertex(const VertexId& new_id, const int& new_depth)
+    explicit Vertex(const VertexId& new_id, int new_depth)
         : id(new_id), depth(new_depth) {}
 
     std::string to_string() const {
