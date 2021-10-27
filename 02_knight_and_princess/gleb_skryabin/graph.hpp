@@ -58,61 +58,9 @@ class Vertex {
 
 class Graph {
  public:
-  /*template <std::size_t SIZE>
-  explicit Graph(const std::array<GraphInputEdge, SIZE>& inpEdges) {
-    for (GraphInputEdge inpEdge : inpEdges) {
-      addEdge(inpEdge);
-    }
-    for (auto [edgeId, edge] : edges_) {
-      auto vs = edge.getVertexIds();
-      for (VertexId vsid : std::array<VertexId, 2>{vs.first, vs.second}) {
-        compliteVertex(vsid, edgeId);
-      }
-    }
-  }
-
-  void addEdge(GraphInputEdge newEdge) {
-    if (newEdge.id != INVALID_ID) {
-      auto edge = edges_.find(newEdge.id);
-      if (edge == edges_.end()) {
-        // add new edge
-        edges_.emplace(newEdge.id, Edge(newEdge.id, newEdge.vertexIds));
-      } else {
-        // edit edge
-        // edge->second.vertexIds = newEdge.vertexIds;
-        // редактирование ребра пока что не предусматривается
-        std::cout << "warning: edge with id " << newEdge.id
-                  << " is already in the graph.\n";
-      }
-    }
-  }
-
-  void compliteVertex(VertexId vertexId, EdgeId edgeId) {
-    auto v = vertices_.find(vertexId);
-    if (v == vertices_.end()) {
-      // add new vertex
-      Vertex newVertex = Vertex(vertexId);
-      newVertex.addEdgeId(edgeId);
-      vertices_.emplace(vertexId, newVertex);
-    } else {
-      // edit vertex
-      v->second.addEdgeId(edgeId);
-    }
-  }
-  */
-
   template <std::size_t SIZE>
   explicit Graph(const std::array<GraphInputEdge, SIZE>& inpEdgesVertices) {
-    /*for (GraphInputEdge newEdgeVertices : inpEdgesVertices) {
-      addEdge(newEdgeVertices);
-    }
-    for (auto [edgeId, edge] : edges_) {
-      auto vs = edge.getVertexIds();
-      compliteVertex(vs.first, edgeId);
-      compliteVertex(vs.second, edgeId);
-    }*/
-
-    for (auto [vertexSrcId, vertexTrgId] : inpEdgesVertices) {
+    for (const auto& [vertexSrcId, vertexTrgId] : inpEdgesVertices) {
       addVertex(vertexSrcId);
       addVertex(vertexTrgId);
       EdgeId newEdgeId = addEdge(vertexSrcId, vertexTrgId);
@@ -140,16 +88,14 @@ class Graph {
   }
 
   void addVertex(VertexId vertexId) {
-    auto v = vertices_.find(vertexId);
-    // assert(v == vertices_.end() && "Unexpected behavior: vertex already
-    // exist");
+    const auto& v = vertices_.find(vertexId);
     if (v == vertices_.end()) {
       vertices_.emplace(vertexId, Vertex(vertexId));
     }
   }
 
   void compliteVertex(VertexId vertexId, EdgeId edgeId) {
-    auto v = vertices_.find(vertexId);
+    const auto& v = vertices_.find(vertexId);
     v->second.addEdgeId(edgeId);
   }
 
