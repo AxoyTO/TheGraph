@@ -11,7 +11,7 @@ void writeGraphJSON(const Graph& graph, const std::string& filename) {
     json.close();
     std::cout << "Graph is written to " << filename << std::endl;
   } else {
-    std::cout << "Unable to open file" << std::endl;
+    std::runtime_error("Unable to open file");
   }
 }
 
@@ -19,7 +19,7 @@ int main() {
   Graph graph = Graph();
   const int edgesCount = 18;
   const int verticesCount = 14;
-  const std::array<GraphInputEdge, edgesCount> inputEdges = {{
+  const std::array<std::pair<int, int>, edgesCount> inputEdges = {{
       {0, 1},
       {0, 2},
       {0, 3},
@@ -46,8 +46,6 @@ int main() {
 
   for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {
     EdgeId newEdgeId = graph.addEdge(vertexSrcId, vertexTrgId);
-    graph.compliteVertex(vertexSrcId, newEdgeId);
-    graph.compliteVertex(vertexTrgId, newEdgeId);
   }
 
   writeGraphJSON(graph, "graph.json");
