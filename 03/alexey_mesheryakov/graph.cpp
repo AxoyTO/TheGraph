@@ -17,7 +17,22 @@ using EdgeId = int;
 using VertexId = int;
 using std::string;
 
-enum class Color { GRAY, GREEN, RED, BLUE, YELLOW };
+enum class Color { Gray, Green, Red, Blue, Yellow };
+
+std::string color_to_string(const Color& color) {
+      switch (color) {
+        case Color::Gray:
+          return "gray";
+        case Color::Green:
+          return "green";
+        case Color::Red:
+          return "red";
+        case Color::Blue:
+          return "blue";
+        case Color::Yellow:
+          return "yellow";
+      }
+    }
 
 class Graph {
  public:
@@ -25,14 +40,14 @@ class Graph {
    public:
     Edge(const pair<VertexId, VertexId>& new_vertex_ids,
          const EdgeId& edge_id,
-         const Color& new_color = Color::GRAY)
+         const Color& new_color = Color::Gray)
         : vertex_ids(new_vertex_ids), id(edge_id), color(new_color) {}
 
     std::string to_string() const {
       std::stringstream buffer;
       buffer << "{\"id\":" << id << ",\"vertex_ids\":[" << vertex_ids.first
              << "," << vertex_ids.second << "],\"color\":\""
-             << color_to_string() << "\"}";
+             << color_to_string(color) << "\"}";
       return buffer.str();
     }
     const pair<VertexId, VertexId>& get_vertex_ids() const {
@@ -40,21 +55,7 @@ class Graph {
     }
     const EdgeId id = 0;
     const pair<VertexId, VertexId> vertex_ids = {-1, -1};
-    const Color color = Color::GRAY;
-    std::string color_to_string() const {
-      switch (color) {
-        case Color::GRAY:
-          return "gray";
-        case Color::GREEN:
-          return "green";
-        case Color::RED:
-          return "red";
-        case Color::BLUE:
-          return "blue";
-        case Color::YELLOW:
-          return "yellow";
-      }
-    }
+    const Color color = Color::Gray;
   };
 
   class Vertex {
@@ -86,7 +87,7 @@ class Graph {
     }
     const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
     const VertexId id = INVALID_ID;
-    const depth = 0;
+    const int depth = 0;
 
    private:
     vector<EdgeId> edge_ids_ = {};
@@ -119,12 +120,14 @@ class Graph {
 
   void add_edge(const VertexId& first,
                 const VertexId& second,
-                const Color& color = Color::GRAY) {
+                const Color& color = Color::Gray) {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
-    assert(!edge_exist(first, second) && "Such edge already exist");
+std::cout<<"id: "<< first << " " << second << std::endl;
+    if (first != second)
+	assert(!edge_exist(first, second) && "Such edge already exist");
     const auto& new_edge = edges_.emplace_back(
-        pair<VertexId, VertexId>{first, second}, get_new_edge_id());
+        pair<VertexId, VertexId>{first, second}, get_new_edge_id(), color);
     vertices_[first].add_edge_id(new_edge.id);
     if (first != second)
       vertices_[second].add_edge_id(new_edge.id);
@@ -171,11 +174,11 @@ class Graph_generator {
       new_vertices_num_ = new_vertices_num;
   }
 
-  void set_graph(const Graph& graph) { graph_ = graph; }
+//void set_graph(const Graph& graph) { graph_ = graph; }
 
-  Graph get_graph() { return graph_; }
+  const Graph& get_graph() const { return graph_; }
 
-  VertexId random_vertex_generator(int depth) {
+  VertexId random_vertex_generator (int depth){
     const int luck = rand() % depth_;
     // std::cout << luck << "_" << depth_ - depth - 1 << "|| ";
     if (luck < depth_ - depth)
@@ -185,19 +188,19 @@ class Graph_generator {
   }
 
   bool random_colour_edge_generator(const Color& color,
-                                    const int& depth = 0) const {
+                                    int depth = 0) const {
     int luck = 0;
     switch (color) {
-      case Color::GREEN:
+      case Color::Green:
         luck = rand() % 10;
         return (luck == 0);
-      case Color::RED:
+      case Color::Red:
         luck = rand() % 3;
         return (luck == 0);
-      case Color::BLUE:
+      case Color::Blue:
         luck = rand() % 4;
         return (luck == 0);
-      case Color::YELLOW:
+      case Color::Yellow:
         luck = rand() % depth_;
         return (depth > luck);
       default:
@@ -205,6 +208,7 @@ class Graph_generator {
     }
     return false;
   }
+
   void generate() {
     srand(time(0));
     vector<vector<VertexId> > levels = {{graph_.add_vertex(0)}};
@@ -215,7 +219,6 @@ class Graph_generator {
           VertexId new_vertex_id = random_vertex_generator(i - 1);
           if (new_vertex_id != INVALID_ID) {
             levels[i].push_back(new_vertex_id);
-            // std::cout << vertex_id << " " << new_vertex_id << std::endl;
             graph_.add_edge(vertex_id, new_vertex_id);
           }
         }
@@ -224,34 +227,25 @@ class Graph_generator {
       vector<VertexId> unmarked_blue = levels[i];
       for (int j = 0; j < levels[i].size(); j++) {
         std::cout << levels[i][j] << " ";
-        if (random_colour_edge_generator(Color::GREEN)) {
-          graph_.add_edge(levels[i][j], levels[i][j], Color::GREEN);
+        if (random_colour_edge_generator(Color::Green)) {
+          graph_.add_edge(levels[i][j], levels[i][j], Color::Green);
         }
         if (j > 0 && j < levels[i].size() - 1 &&
-            random_colour_edge_generator(Color::BLUE)) {
+            random_colour_edge_generator(Color::Blue)) {
           bool randomiser = rand() % 2;
           VertexId nearest_id =
               randomiser ? levels[i][j - 1] : levels[i][j + 1];
-          /*auto first_vertex =
-            std::find(unmarked_blue.begin(), unmarked_blue.end(), levels[i][j]);
-          auto second_vertex =
-            std::find(unmarked_blue.begin(), unmarked_blue.end(), nearest_id);
-          if(first_vertex != unmarked_blue.end() && second_vertex !=
-          unmarked_blue.end() ) { graph_.add_edge(levels[i][j], nearest_id,
-          Color::BLUE); unmarked_blue.erase(first_vertex);
-                unmarked_blue.erase(second_vertex);
-          }*/
           if (!graph_.edge_exist(levels[i][j], nearest_id))
-            graph_.add_edge(levels[i][j], nearest_id, Color::BLUE);
+            graph_.add_edge(levels[i][j], nearest_id, Color::Blue);
         }
         if (i < levels.size() - 2 && levels[i + 2].size() > 0 &&
-            random_colour_edge_generator(Color::RED)) {
+            random_colour_edge_generator(Color::Red)) {
           graph_.add_edge(levels[i][j],
                           levels[i + 2][rand() % levels[i + 2].size()],
-                          Color::RED);
+                          Color::Red);
         }
         if (i < levels.size() - 1 &&
-            random_colour_edge_generator(Color::YELLOW, i)) {
+            random_colour_edge_generator(Color::Yellow, i)) {
           vector<VertexId> new_vertices = {};
           for (const auto& vertex_id : levels[i + 1])
             if (!graph_.edge_exist(levels[i][j], vertex_id))
@@ -259,7 +253,7 @@ class Graph_generator {
           if (new_vertices.size() > 0)
             graph_.add_edge(levels[i][j],
                             new_vertices[rand() % new_vertices.size()],
-                            Color::YELLOW);
+                            Color::Yellow);
         }
       }
       std::cout << std::endl;
@@ -275,13 +269,14 @@ class Graph_generator {
 int main() {
   int depth = 0, new_vertices_num = 0;
   std::cin >> depth >> new_vertices_num;
-  Graph_generator generator;
+  Graph_generator generator{};
   generator.set_params(depth, new_vertices_num);
   generator.generate();
-  Graph graph = generator.get_graph();
+  //Graph graph = generator.get_graph();
   std::ofstream file;
   file.open("graph.json", std::fstream::out | std::fstream::trunc);
-  file << graph.to_json();
+  //file << graph.to_json();
+  file << generator.get_graph().to_json();
   file.close();
   return 0;
 }
