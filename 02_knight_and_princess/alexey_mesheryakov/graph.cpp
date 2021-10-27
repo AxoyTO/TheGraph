@@ -131,8 +131,8 @@ int main() {
   for (int i = 0; i < VERTEX_COUNT; i++) {
     graph.add_vertex();
   }
-  for (const auto& edge : connections) {
-    graph.add_edge(edge.first, edge.second);
+  for (const auto& connection : connections) {
+    graph.add_edge(edge.connection, edge.connection);
   }
   std::ofstream file;
   file.open("graph.json", std::fstream::out | std::fstream::trunc);
