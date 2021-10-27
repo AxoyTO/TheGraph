@@ -14,6 +14,9 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
+constexpr double GREEN_TRASHOULD = 0.1;
+constexpr double BLUE_TRASHOULD = 0.25;
+constexpr double RED_TRASHOULD = 0.33;
 constexpr int INVALID_ID = -1;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
@@ -23,13 +26,25 @@ enum class Color { Gray, Green, Blue, Yellow, Red };
 
 std::string color_to_string(const Color& color) {
   switch (color) {
-    case Color::Gray: return "\"gray\" }";
-    case Color::Green: return "\"green\" }";
-    case Color::Blue: return "\"blue\" }";
-    case Color::Yellow: return "\"yellow\" }";
-    case Color::Red: return "\"red\" }";
+    case Color::Gray:
+      return "\"gray\" }";
+    case Color::Green:
+      return "\"green\" }";
+    case Color::Blue:
+      return "\"blue\" }";
+    case Color::Yellow:
+      return "\"yellow\" }";
+    case Color::Red:
+      return "\"red\" }";
   }
   return "";
+}
+
+double get_random_number() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+  return dis(gen);
 }
 
 struct Edge {
@@ -169,6 +184,8 @@ class Graph {
       depth_ = std::max(depth_, min_depth + 1);
     }
 
+    //    const int min_depth =  []
+
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
@@ -218,16 +235,13 @@ void write_graph(const Graph& graph) {
 void new_vertices_generation(Graph& work_graph,
                              const int& depth,
                              const int& new_vertices_num) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
     for (const auto& vertex : work_graph.get_vertices())
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
-          if (dis(gen) > probability) {
+          if (get_random_number() > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
                 vertex.id,
@@ -238,11 +252,8 @@ void new_vertices_generation(Graph& work_graph,
   }
 }
 
-void paint_blue(Graph& work_graph) {
+void add_blue_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
   for (int current_depth = 1; current_depth <= graph_depth; current_depth++) {
     vector<Vertex> uni_depth_vertices;
     for (const auto& vertex : work_graph.get_vertices())
@@ -257,7 +268,7 @@ void paint_blue(Graph& work_graph) {
         adjacent_vertices[1] = vertex.id;
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (dis(gen) < 0.25)
+          if (get_random_number() < BLUE_TRASHOULD)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
       } else {
@@ -265,7 +276,7 @@ void paint_blue(Graph& work_graph) {
         adjacent_vertices[1] = vertex.id;
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (dis(gen) < 0.25)
+          if (get_random_number() < BLUE_TRASHOULD)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
       }
@@ -273,23 +284,19 @@ void paint_blue(Graph& work_graph) {
   }
 }
 
-void paint_green(Graph& work_graph) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
+void add_green_edges(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices())
     if (!work_graph.is_connected(start_vertex.id, start_vertex.id))
-      if (dis(gen) < 0.1)
+      if (get_random_number() < GREEN_TRASHOULD)
         work_graph.connect_vertices(start_vertex.id, start_vertex.id, false);
 }
 
-void paint_red(Graph& work_graph) {
+void add_red_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
   for (const auto& start_vertex : work_graph.get_vertices()) {
-    if (dis(gen) < 0.33) {
+    if (get_random_number() < RED_TRASHOULD) {
       if (start_vertex.depth + 2 <= graph_depth) {
         vector<VertexId> Red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
@@ -307,7 +314,7 @@ void paint_red(Graph& work_graph) {
   }
 }
 
-void paint_yellow(Graph& work_graph) {
+void add_yellow_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -334,10 +341,10 @@ void paint_yellow(Graph& work_graph) {
 }
 
 void paint_edges(Graph& work_graph) {
-  paint_blue(work_graph);
-  paint_green(work_graph);
-  paint_red(work_graph);
-  paint_yellow(work_graph);
+  add_blue_edges(work_graph);
+  add_green_edges(work_graph);
+  add_red_edges(work_graph);
+  add_yellow_edges(work_graph);
 }
 
 int main() {
