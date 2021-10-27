@@ -1,4 +1,4 @@
-CXX = g++
+CXX = clang++
 CXXFLAGS = -Wall -std=c++17 -g
 
 all: clean prog
