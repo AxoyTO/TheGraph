@@ -260,15 +260,12 @@ void new_vertices_generation(Graph& work_graph,
   }
 }
 
-void paint_edges(Graph& work_graph) {
+void paint_blue(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
-
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
-  // Blue
-
-  for (int current_depth = 1; current_depth < graph_depth; current_depth++) {
+  for (int current_depth = 1; current_depth <= graph_depth; current_depth++) {
     vector<Vertex> uni_depth_vertices;
     for (const auto& vertex : work_graph.get_vertices())
       if (vertex.depth == current_depth)
@@ -296,15 +293,24 @@ void paint_edges(Graph& work_graph) {
       }
     }
   }
+}
 
-  for (const auto& start_vertex : work_graph.get_vertices()) {
-    // Green
-    if (!work_graph.is_connected(start_vertex.id, start_vertex.id)) {
-      if (dis(gen) < 0.1) {
+void paint_green(Graph& work_graph) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+  for (const auto& start_vertex : work_graph.get_vertices())
+    if (!work_graph.is_connected(start_vertex.id, start_vertex.id))
+      if (dis(gen) < 0.1)
         work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
-      }
-    }
-    // Red
+}
+
+void paint_red(Graph& work_graph) {
+  const int graph_depth = work_graph.get_depth();
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+  for (const auto& start_vertex : work_graph.get_vertices()) {
     if (dis(gen) < 0.33) {
       if (start_vertex.depth + 2 <= graph_depth) {
         vector<VertexId> Red_vertices_ids;
@@ -320,7 +326,15 @@ void paint_edges(Graph& work_graph) {
         }
       }
     }
-    // Yellow
+  }
+}
+
+void paint_yellow(Graph& work_graph) {
+  const int graph_depth = work_graph.get_depth();
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+  for (const auto& start_vertex : work_graph.get_vertices()) {
     const double probability = static_cast<double>(start_vertex.depth) /
                                static_cast<double>(graph_depth);
     if (dis(gen) < probability) {
@@ -339,6 +353,13 @@ void paint_edges(Graph& work_graph) {
       }
     }
   }
+}
+
+void paint_edges(Graph& work_graph) {
+  paint_blue(work_graph);
+  paint_green(work_graph);
+  paint_red(work_graph);
+  paint_yellow(work_graph);
 }
 
 int main() {
