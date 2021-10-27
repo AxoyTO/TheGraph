@@ -1,123 +1,85 @@
 #include "task2.hpp"
 
-int main() {
-  FILE* fd;
-  int* edge_ids;
-
-  //вспомогательная матрица нумерации рёбер
-  if (!(fd = fopen("graph.json", "w"))) {
-    std::cerr << "Can't open/create file";
-    return 1;
-  }
-  edge_ids = edge_ids_init();
-  vertices_json_output(fd, edge_ids);
-  edges_json_output(fd, edge_ids);
-  edge_ids_free(edge_ids);
-  fclose(fd);
-  return 0;
-}
-
-//создаём динамический массив и заполняем данными о номерах
-//ребёр, соединяющих вершины графа
-int* edge_ids_init(void) {
-  int* edge_ids = (int*)malloc(sizeof(int) * VERTEX_NUM * VERTEX_NUM);
-
-  int edge_count = 0;
-  //счётчик для нумерации вершин
-
-  for (int i = 0; i < VERTEX_NUM; i++)
-    for (int j = 0; j < VERTEX_NUM; j++)
-      edge_ids[i * VERTEX_NUM + j] = -1;
-
-  for (int i = 0; i < VERTEX_NUM; i++) {
-    for (int j = i; j < VERTEX_NUM; j++) {
-      if (adj_matrix[i][j] == 1) {
-        edge_ids[i * VERTEX_NUM + j] = edge_count;
-        edge_count++;
-      }
-    }
-  }
-  //нумеруем рёбра, проходя по элементам верхнего
-  //треугольника матрицы связности графа
-
-  return edge_ids;
-}
-
-//чистка динамической памяти вспомогательной матрицы
-void edge_ids_free(int* edge_ids) {
-  free(edge_ids);
-}
-
-//вывод информации о вершинах графа в файл
-void vertices_json_output(FILE* fd, int* edge_ids) {
-  int first_num_flag;
-  //флаг первого числа в списке ребёр для выставления запятых
-
-  char help_str[HELP_STR_LEN];
-  //вспомогательная строка для перевода чисел в строки
-
-  fprintf(fd, "{\n");
-  fprintf(fd, "\t\"vertices\": [\n");
-
-  for (int i = 0; i < VERTEX_NUM; i++) {
-    fprintf(fd, "\t\t{ \"id\": ");
-    sprintf(help_str, "%d", i);
-    fprintf(fd, "%s", help_str);
-    fprintf(fd, ", \"edge_ids\": [");
-    first_num_flag = 1;
-
-    for (int j = 0; j < VERTEX_NUM; j++) {
-      if ((adj_matrix[i][j] == 1) && (i < j)) {
-        if (!first_num_flag)
-          fprintf(fd, ", ");
-        else
-          first_num_flag = 0;
-        sprintf(help_str, "%d", edge_ids[i * VERTEX_NUM + j]);
-        fprintf(fd, "%s", help_str);
-      }
-      if ((adj_matrix[i][j] == 1) && (i > j)) {
-        if (!first_num_flag)
-          fprintf(fd, ", ");
-        else
-          first_num_flag = 0;
-        sprintf(help_str, "%d", edge_ids[j * VERTEX_NUM + i]);
-        fprintf(fd, "%s", help_str);
-      }
-    }
-
-    if (i != (VERTEX_NUM - 1))
-      fprintf(fd, "] },\n");
+void Vertex::json_string(std::ofstream& graph_json) const {
+  graph_json << "\t\t{ \"id\": " << this->id << ", \"edge_ids\": [";
+  for (int i = 0; i < (int)(this->edges.size()); i++) {
+    graph_json << this->edges[i];
+    if (i != (int)(this->edges.size() - 1))
+      graph_json << ", ";
     else
-      fprintf(fd, "] }\n");
+      graph_json << "] }";
   }
-  fprintf(fd, "\t],\n");
 }
 
-void edges_json_output(FILE* fd, int* edge_ids) {
-  int first_str_flag = 1;
-  //флаг используется для обозначения первой строки вывода
+void Edge::json_string(std::ofstream& graph_json) const {
+  graph_json << "\t\t{ \"id\": " << this->id << ", \"vertex_ids\": ["
+             << this->vertex_1 << ", " << this->vertex_2 << "] }";
+}
 
-  char help_str[HELP_STR_LEN];
-  //вспомогательная строка для перевода чисел в строки
+void print_graph(std::vector<Vertex> vertex,
+                 int vertices_num,
+                 std::vector<Edge> edge,
+                 int edges_num) {
+  std::ofstream graph_json("graph.json");
 
-  fprintf(fd, "\t\"edges\": [");
-  for (int i = 0; i < VERTEX_NUM; i++) {
-    for (int j = 1; j < VERTEX_NUM; j++) {
-      if (edge_ids[i * VERTEX_NUM + j] != (-1)) {
-        if (first_str_flag) {
-          fprintf(fd, "\n");
-          first_str_flag = 0;
-        } else
-          fprintf(fd, ",\n");
-        fprintf(fd, "\t\t{ \"id\": ");
-        sprintf(help_str, "%d", edge_ids[i * VERTEX_NUM + j]);
-        fprintf(fd, "%s, \"vertex_ids\": [", help_str);
-        sprintf(help_str, "%d", i);
-        fprintf(fd, "%s, ", help_str);
-        sprintf(help_str, "%d", j);
-        fprintf(fd, "%s] }", help_str);
-      }
-    }
+  graph_json << "{" << std::endl;
+
+  graph_json << "\t\"vertices\": [" << std::endl;
+  for (int i = 0; i < vertices_num; i++) {
+    vertex[i].json_string(graph_json);
+    if (i != vertices_num - 1)
+      graph_json << "," << std::endl;
+    else
+      graph_json << std::endl << "\t]," << std::endl;
   }
-  fprintf(fd, "\n\t]\n}");
+
+  graph_json << "\t\"edges\": [" << std::endl;
+  for (int i = 0; i < edges_num; i++) {
+    edge[i].json_string(graph_json);
+    if (i != edges_num - 1)
+      graph_json << "," << std::endl;
+    else
+      graph_json << std::endl << "\t]" << std::endl;
+  }
+
+  graph_json << "}" << std::endl;
+
+  graph_json.close();
+}
+
+int main() {
+  const int vertices_num = 14;
+  const int edges_num = 18;
+
+  std::vector<Vertex> vertex;
+  std::vector<Edge> edge;
+
+  vertex.resize(vertices_num);
+  for (int i = 0; i < vertices_num; i++) {
+    vertex[i].id = i;
+  }
+
+  edge.resize(edges_num);
+  for (int i = 0; i < edges_num; i++) {
+    edge[i].id = i;
+  }
+
+  //информация о парах вершин, соединённых рёбрами
+  std::vector<std::pair<int, int>> vertex_pairs = {
+      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
+      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
+      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
+
+  for (int i = 0; i < (int)vertex_pairs.size(); i++) {
+    //заполняем номера рёбер для вершин графа
+    vertex[vertex_pairs[i].first].edges.push_back(i);
+    vertex[vertex_pairs[i].second].edges.push_back(i);
+    //заполняет номера вершин графа для рёбер
+    edge[i].vertex_1 = vertex_pairs[i].first;
+    edge[i].vertex_2 = vertex_pairs[i].second;
+  }
+
+  print_graph(vertex, vertices_num, edge, edges_num);
+
+  return 0;
 }

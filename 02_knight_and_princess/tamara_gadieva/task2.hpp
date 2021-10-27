@@ -1,38 +1,21 @@
-#include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <vector>
 
-#define VERTEX_NUM 14
-#define HELP_STR_LEN 2
+using VertexId = int;
+using EdgeId = int;
 
-//матрица связности данного графа
-int adj_matrix[VERTEX_NUM][VERTEX_NUM] = {
-    {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-    {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-    {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-    {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-    {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1},
-    {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0}};
+struct Vertex {
+  VertexId id;
+  std::vector<EdgeId> edges;
 
-int* edge_ids_init(void);
-//функция для создания вспомогательной матрицы
-//и внесения в неё информации о номерах вершин
+  void json_string(std::ofstream& graph_json) const;
+};
 
-void edge_ids_free(int*);
-//функция очистки динамической памяти
-//вспомогательной матрицы
+struct Edge {
+  EdgeId id;
+  VertexId vertex_1;
+  VertexId vertex_2;
 
-void vertices_json_output(FILE*, int*);
-//функция заполнения в формате json информации
-//о вершинах данного графа
-
-void edges_json_output(FILE*, int*);
-//функция заполнения в формате json информации
-//о рёбрах данного графа
+  void json_string(std::ofstream& graph_json) const;
+};
