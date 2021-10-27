@@ -3,85 +3,108 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <array>
 
-using VertId = int;
+using VertexId = int;
 using EdgeId = int;
 
+enum class GraphParameters {
+  VertexNum = 14,
+  EdgeNum = 18
+};
+
 struct Vertex {
-  VertId id;
-  std::vector<EdgeId> edges;
+  const VertexId id;
+
+  Vertex(const VertexId& _id) : id(_id) {}
+  void NewEdge(const EdgeId& edge_id)
+  {
+      edge_ids.push_back(edge_id);
+  }
+  EdgeId IthEdgeId(int i)
+  {
+      return edge_ids[i];
+  }
+  bool SelfConnected()
+  {
+      for (auto it = edge_ids.begin(); it != edge_ids.end(); it++) {
+          auto it1 = it;
+          it++;
+          for (; it1 != edge_ids.end(); it1++) {
+              if (*it == *it1) {
+                  return true;
+              }
+          }
+      }
+      return false;
+  }
+  int Length()
+  {
+      return edge_ids.size();
+  }
+private:
+    std::vector<EdgeId> edge_ids;
 };
 
 struct Edge {
-  EdgeId id;
-  VertId verts[2];
+  const EdgeId id;
+  std::array<VertexId, 2> vertex_ids;
+  Edge(EdgeId _id, std::array<VertexId, 2> _vertex_ids) : id(_id), vertex_ids(_vertex_ids) {}
 };
 
 class Graph {
  public:
-  std::vector<Vertex> verts;
-  std::vector<Edge> edges;
-  int vert_num, edge_num;
-
-  Graph() { vert_num = edge_num = 0; }
-
-  bool CheckNeighborhood(VertId vertex1, VertId vertex2) {
-    assert(std::max(vertex1, vertex2) <= vert_num &&
-           "Vertex index is out of range");
-    if (vertex1 != vertex2) {
-      for (auto it1 = verts[vertex1].edges.begin();
-           it1 != verts[vertex1].edges.end(); it1++) {
-        for (auto it2 = verts[vertex2].edges.begin();
-             it2 != verts[vertex2].edges.end(); it2++) {
-          if (*it1 == *it2) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-    for (auto it = verts[vertex1].edges.begin();
-         it != verts[vertex1].edges.end(); it++) {
-      if (edges[*it].verts[0] == edges[*it].verts[1]) {
+  
+  bool InGraph(const VertexId& vertex_id) {
+    for (auto it = vertexes.begin(); it < vertexes.end(); it++) {
+      if ((*it).id == vertex_id) {
         return true;
       }
     }
     return false;
   }
 
-  void AddVert() {
-    Vertex new_vert;
-    new_vert.id = vert_num;
-    verts.push_back(new_vert);
-    vert_num++;
+  bool AreConnected(const VertexId& vertex_id1, const VertexId& vertex_id2) {
+    assert(InGraph(vertex_id1) && InGraph(vertex_id2) && "Vertex index is out of range");
+    if (vertex_id1 != vertex_id2) {
+      for (int i = 0; i < vertexes[vertex_id1].Length(); i++) {
+          for (int j = 0; j < vertexes[vertex_id2].Length(); j++) {
+              if (vertexes[vertex_id1].IthEdgeId(i) == vertexes[vertex_id2].IthEdgeId(j)) {
+                  return true;
+              }
+          }
+      }
+      return false;
+    }
+    return vertexes[vertex_id1].SelfConnected();
   }
 
-  void AddEdge(VertId vertex1, VertId vertex2) {
-    assert(!CheckNeighborhood(vertex1, vertex2) &&
-           "These vertexes are already connected");
-    Edge new_edge;
-    new_edge.id = edge_num;
-    new_edge.verts[0] = std::min(vertex1, vertex2);
-    new_edge.verts[1] = std::max(vertex1, vertex2);
-    edges.push_back(new_edge);
-    verts[vertex1].edges.push_back(edge_num);
-    verts[vertex2].edges.push_back(edge_num);
+  void AddVert() {
+    vertexes.emplace_back(vertex_num);
+    vertex_num++;
+  }
+
+  void AddEdge(const VertexId& vertex1, const VertexId& vertex2) {
+    assert(!AreConnected(vertex1, vertex2) && "These vertexes are already connected");
+    edges.emplace_back(edge_num, std::array<int, 2>{std::min(vertex1, vertex2), std::max(vertex1, vertex2)});
+    vertexes[vertex1].NewEdge(edge_num);
+    vertexes[vertex2].NewEdge(edge_num);
     edge_num++;
   }
-
-  ~Graph() {}
+private:
+  std::vector<Vertex> vertexes;
+  std::vector<Edge> edges;
+    int vertex_num = 0, edge_num = 0;
 };
 
 int main() {
-  VertId vrt[18][2] = {{0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-                       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-                       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
-  Graph g;
-  for (int i = 0; i < 14; i++) {
-    g.AddVert();
+  const std::vector<std::array<VertexId, 2>>vertex = {{0, 1}, {0, 2}, {0, 3},  {1, 4},  {1, 5},  {1, 6}, {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10}, {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
+  Graph graph;
+  for (int i = 0; i < static_cast<int>(GraphParameters::VertexNum); i++) {
+    graph.AddVert();
   }
-  for (int i = 0; i < 18; i++) {
-    g.AddEdge(vrt[i][0], vrt[i][1]);
+  for (int i = 0; i < static_cast<int>(GraphParameters::EdgeNum); i++) {
+    graph.AddEdge(vertex[i][0], vertex[i][1]);
   }
   return 0;
 }
