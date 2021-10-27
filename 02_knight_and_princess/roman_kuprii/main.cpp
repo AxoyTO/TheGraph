@@ -362,12 +362,12 @@ void paint_edges(Graph& work_graph) {
 int main() {
   int depth = INVALID_NEW_DEPTH;
   do {
-    std::cout << "Enter generate graph depth" << endl;
+    std::cout << "Enter generate graph depth from zero" << endl;
     std::cin >> depth;
   } while (depth <= INVALID_NEW_DEPTH);
   int new_vertices_num = INVALID_NEW_VERTICES_NUM;
   do {
-    std::cout << "Enter new_vertices_num" << endl;
+    std::cout << "Enter new_vertices_num from zero" << endl;
     std::cin >> new_vertices_num;
   } while (new_vertices_num < INVALID_NEW_VERTICES_NUM);
 
