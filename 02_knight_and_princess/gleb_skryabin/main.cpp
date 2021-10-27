@@ -45,7 +45,7 @@ int main() {
   }
 
   for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {
-    EdgeId newEdgeId = graph.addEdge(vertexSrcId, vertexTrgId);
+    graph.addEdge(vertexSrcId, vertexTrgId);
   }
 
   writeGraphJSON(graph, "graph.json");
