@@ -17,8 +17,9 @@ void writeGraphJSON(const Graph& graph, const std::string& filename) {
 
 int main() {
   Graph graph = Graph();
-  std::unordered_set<int> inputVertices;
-  const std::array<GraphInputEdge, 18> inputEdges = {{
+  const int edgesCount = 18;
+  const int verticesCount = 14;
+  const std::array<GraphInputEdge, edgesCount> inputEdges = {{
       {0, 1},
       {0, 2},
       {0, 3},
@@ -39,13 +40,8 @@ int main() {
       {12, 13},
   }};
 
-  for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {
-    inputVertices.insert(vertexSrcId);
-    inputVertices.insert(vertexTrgId);
-  }
-
-  for (const int& inputVertex : inputVertices) {
-    graph.addVertex(inputVertex);
+  for (int i = 0; i < verticesCount; i++) {
+    graph.addVertex();
   }
 
   for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {

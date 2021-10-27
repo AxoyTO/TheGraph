@@ -34,7 +34,14 @@ class Vertex {
  public:
   Vertex(int inpId) : id_(inpId) {}
 
-  void addEdgeId(EdgeId inpEdgeId) { edgeIds_.insert(inpEdgeId); }
+  void addEdgeId(EdgeId edgeId) {
+    assert(!containEdge(edgeId) && "ERROR: vertex already contain edge");
+    edgeIds_.insert(edgeId);
+  }
+
+  bool containEdge(EdgeId edgeId) {
+    return edgeIds_.find(edgeId) != edgeIds_.end();
+  }
 
   std::string toJSON() const {
     std::string json;
@@ -59,19 +66,19 @@ class Vertex {
 class Graph {
  public:
   EdgeId addEdge(VertexId vertexSrcId, VertexId vertexTrgId) {
-    assert(vertices_.find(vertexSrcId) != vertices_.end() &&
-           "Unexpected behavior: vertex doesn't exists");
-    assert(vertices_.find(vertexTrgId) != vertices_.end() &&
-           "Unexpected behavior: vertex doesn't exists");
+    assert(containVertex(vertexSrcId) && "ERROR: Vertex doesn't exists");
+    assert(containVertex(vertexTrgId) && "ERROR: vertex doesn't exists");
     assert(!checkConnectoin(vertexSrcId, vertexTrgId) &&
-           "Unexpected behavior: edge doesn't exists");
+           "ERROR: edge doesn't exists");
 
-    EdgeId newEdgeId = edges_.size();
+    EdgeId newEdgeId = generateEdgeId();
     edges_.emplace(newEdgeId, Edge(newEdgeId, vertexSrcId, vertexTrgId));
     return newEdgeId;
   }
 
   bool checkConnectoin(VertexId vertexSrcId, VertexId vertexTrgId) {
+    assert(containVertex(vertexSrcId) && "ERROR: Vertex doesn't exists");
+    assert(containVertex(vertexTrgId) && "ERROR: vertex doesn't exists");
     for (const auto& [edgeId, edge] : edges_) {
       const auto& vs = edge.getVertexIds();
       if (vs.first == vertexSrcId && vs.second == vertexTrgId) {
@@ -81,15 +88,27 @@ class Graph {
     return false;
   }
 
+  VertexId addVertex() {
+    VertexId newVertexId = generateVertexId();
+    vertices_.emplace(newVertexId, newVertexId);
+    return newVertexId;
+  }
+
   void addVertex(VertexId vertexId) {
-    assert(vertices_.find(vertexId) == vertices_.end() &&
-           "Unexpected behavior: vertex already exists");
+    assert(!containVertex(vertexId) && "ERROR: vertex already exists");
     vertices_.emplace(vertexId, vertexId);
   }
 
   void compliteVertex(VertexId vertexId, EdgeId edgeId) {
-    const auto& v = vertices_.find(vertexId);
-    v->second.addEdgeId(edgeId);
+    vertices_.at(vertexId).addEdgeId(edgeId);
+  }
+
+  bool containVertex(EdgeId vertexId) {
+    return vertices_.find(vertexId) != vertices_.end();
+  }
+
+  bool containEdge(EdgeId edgeId) {
+    return edges_.find(edgeId) != edges_.end();
   }
 
   std::string toJSON() const {
@@ -113,6 +132,11 @@ class Graph {
   }
 
  private:
+  EdgeId nextEdgeId = 0;
+  VertexId nextVertexId = 0;
+  EdgeId generateEdgeId() { return nextEdgeId++; }
+  VertexId generateVertexId() { return nextVertexId++; }
+
   std::unordered_map<EdgeId, Edge> edges_;
   std::unordered_map<VertexId, Vertex> vertices_;
 };
