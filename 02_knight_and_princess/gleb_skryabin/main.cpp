@@ -1,6 +1,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <unordered_set>
 #include "graph.hpp"
 
 void writeGraphJSON(const Graph& graph, const std::string& filename) {
@@ -15,6 +16,8 @@ void writeGraphJSON(const Graph& graph, const std::string& filename) {
 }
 
 int main() {
+  Graph graph = Graph();
+  std::unordered_set<int> inputVertices;
   const std::array<GraphInputEdge, 18> inputEdges = {{
       {0, 1},
       {0, 2},
@@ -36,7 +39,21 @@ int main() {
       {12, 13},
   }};
 
-  const Graph graph(inputEdges);
+  for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {
+    inputVertices.insert(vertexSrcId);
+    inputVertices.insert(vertexTrgId);
+  }
+
+  for (const int& inputVertex : inputVertices) {
+    graph.addVertex(inputVertex);
+  }
+
+  for (const auto& [vertexSrcId, vertexTrgId] : inputEdges) {
+    EdgeId newEdgeId = graph.addEdge(vertexSrcId, vertexTrgId);
+    graph.compliteVertex(vertexSrcId, newEdgeId);
+    graph.compliteVertex(vertexTrgId, newEdgeId);
+  }
+
   writeGraphJSON(graph, "graph.json");
   return 0;
 }

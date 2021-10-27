@@ -58,40 +58,33 @@ class Vertex {
 
 class Graph {
  public:
-  template <std::size_t SIZE>
-  explicit Graph(const std::array<GraphInputEdge, SIZE>& inpEdgesVertices) {
-    for (const auto& [vertexSrcId, vertexTrgId] : inpEdgesVertices) {
-      addVertex(vertexSrcId);
-      addVertex(vertexTrgId);
-      EdgeId newEdgeId = addEdge(vertexSrcId, vertexTrgId);
-      compliteVertex(vertexSrcId, newEdgeId);
-      compliteVertex(vertexTrgId, newEdgeId);
-    }
-  }
-
   EdgeId addEdge(VertexId vertexSrcId, VertexId vertexTrgId) {
     assert(vertices_.find(vertexSrcId) != vertices_.end() &&
            "Unexpected behavior: vertex doesn't exists");
     assert(vertices_.find(vertexTrgId) != vertices_.end() &&
            "Unexpected behavior: vertex doesn't exists");
-
-    for (const auto& [edgeId, edge] : edges_) {
-      auto vs = edge.getVertexIds();
-      if (vs.first == vertexSrcId && vs.second == vertexTrgId) {
-        assert(false && "Unexpected behavior: edge doesn't exists");
-      }
-    }
+    assert(!checkConnectoin(vertexSrcId, vertexTrgId) &&
+           "Unexpected behavior: edge doesn't exists");
 
     EdgeId newEdgeId = edges_.size();
     edges_.emplace(newEdgeId, Edge(newEdgeId, vertexSrcId, vertexTrgId));
     return newEdgeId;
   }
 
-  void addVertex(VertexId vertexId) {
-    const auto& v = vertices_.find(vertexId);
-    if (v == vertices_.end()) {
-      vertices_.emplace(vertexId, Vertex(vertexId));
+  bool checkConnectoin(VertexId vertexSrcId, VertexId vertexTrgId) {
+    for (const auto& [edgeId, edge] : edges_) {
+      const auto& vs = edge.getVertexIds();
+      if (vs.first == vertexSrcId && vs.second == vertexTrgId) {
+        return true;
+      }
     }
+    return false;
+  }
+
+  void addVertex(VertexId vertexId) {
+    assert(vertices_.find(vertexId) == vertices_.end() &&
+           "Unexpected behavior: vertex already exists");
+    vertices_.emplace(vertexId, vertexId);
   }
 
   void compliteVertex(VertexId vertexId, EdgeId edgeId) {
