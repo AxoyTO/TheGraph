@@ -1,10 +1,12 @@
 #include <assert.h>
+#include <array>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
 constexpr int VERTEX_COUNT = 14;
+constexpr int EDGE_COUNT = 18;
 constexpr int INVALID_ID = -1;
 
 using std::pair;
@@ -41,7 +43,7 @@ class Graph {
       return buffer.str();
     }
 
-    void add_edge(const EdgeId& edge_id) {
+    void add_edge_id(const EdgeId& edge_id) {
       assert(!has_edge_id(edge_id) && "Edge id already exist");
       edge_ids_.push_back(edge_id);
     }
@@ -67,17 +69,12 @@ class Graph {
     return false;
   }
 
-  bool edge_exist(const EdgeId& id) const {
-    for (const auto& edge : edges_)
-      if (edge.id == id)
-        return true;
-    return false;
-  }
-
   bool edge_exist(const VertexId& first, const VertexId& second) const {
-    for (const auto& first_vertex : vertices_[first].get_edge_ids())
-      for (const auto& second_vertex : vertices_[second].get_edge_ids())
-        if (first_vertex == second_vertex)
+    for (const auto& edge_id_from_first_vertex :
+         vertices_[first].get_edge_ids())
+      for (const auto& edge_id_from_second_vertex :
+           vertices_[second].get_edge_ids())
+        if (edge_id_from_first_vertex == edge_id_from_second_vertex)
           return true;
     return false;
   }
@@ -88,10 +85,10 @@ class Graph {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
     assert(!edge_exist(first, second) && "Such edge already exist");
-    const auto new_id = get_new_edge_id();
-    edges_.emplace_back(pair<VertexId, VertexId>{first, second}, new_id);
-    vertices_[first].add_edge(new_id);
-    vertices_[second].add_edge(new_id);
+    const auto& new_edge = edges_.emplace_back(
+        pair<VertexId, VertexId>{first, second}, get_new_edge_id());
+    vertices_[first].add_edge_id(new_edge.id);
+    vertices_[second].add_edge_id(new_edge.id);
   }
 
   std::string to_json() const {
@@ -126,15 +123,15 @@ class Graph {
 };
 
 int main() {
-  Graph graph;
-  const vector<pair<VertexId, VertexId> > edges = {
+  Graph graph{};
+  pair<VertexId, VertexId> connections[EDGE_COUNT] = {
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
   for (int i = 0; i < VERTEX_COUNT; i++) {
     graph.add_vertex();
   }
-  for (const auto& edge : edges) {
+  for (const auto& edge : connections) {
     graph.add_edge(edge.first, edge.second);
   }
   std::ofstream file;
