@@ -159,7 +159,7 @@ int main() {
        {11, 13},
        {12, 13}}};
   Graph graph;
-  for (int i = 0; i < number_of_vertices; i++) {
+  for (int i = 0; i <= 13; i++) {
     graph.addVertex();
   }
   for (const auto& connection : connections) {
