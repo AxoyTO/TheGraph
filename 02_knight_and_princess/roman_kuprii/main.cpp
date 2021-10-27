@@ -141,7 +141,11 @@ class Graph {
     return res;
   }
 
-  void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
+  void add_vertex() {
+    if(vertices_.size()) printf("id before: %d\n", vertices_[0].id);
+    vertices_.emplace_back(get_next_vertex_id());
+    printf("id after: %d\n", vertices_[0].id);
+    }
 
   bool is_vertex_exist(const VertexId& vertex_id) const {
     for (const auto& vertex : vertices_) {
@@ -176,6 +180,7 @@ class Graph {
   void connect_vertices(const VertexId& from_vertex_id,
                         const VertexId& to_vertex_id,
                         const bool& initialization) {
+printf("from_vertex_id: %d\n", from_vertex_id);
     assert(is_vertex_exist(from_vertex_id));
     assert(is_vertex_exist(to_vertex_id));
     assert(!is_connected(from_vertex_id, to_vertex_id));
@@ -246,16 +251,24 @@ void new_vertices_generation(Graph& work_graph,
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
     for (const auto& vertex : work_graph.get_vertices()) {
-      if (vertex.depth == current_depth)
+      printf("vertex id: %d\n", vertex.id);
+
+      if (vertex.depth == current_depth) {
+        printf("vertex id: %d\n", vertex.id);
+
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (dis(gen) > probability) {
+            printf("vertex id: %d\n", vertex.id);
             work_graph.add_vertex();
+            printf("vertex id: %d\n", vertex.id);
+
             work_graph.connect_vertices(
                 vertex.id,
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1].id,
                 true);
           }
         }
+      }
     }
   }
 }
