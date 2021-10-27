@@ -13,7 +13,7 @@ using std::vector;
 using EdgeId = int;
 using VertexId = int;
 
-constexpr int START_VERTICES_NUMBER = 14;
+constexpr int START_VERTICES_NUMBER = 10;
 constexpr int INVALID_ID = -1;
 constexpr int INVALID_NUMBER = -1;
 const std::string JSON_GRAPH_FILENAME = "graph.json";
@@ -262,12 +262,12 @@ void new_vertices_generation(Graph& work_graph) {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
 
-  for (int i = 0; i <= depth; i++) {
+  for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
-        static_cast<double>(i) / static_cast<double>(depth);
+        static_cast<double>(current_depth) / static_cast<double>(depth);
     for (const auto& vertex : work_graph.get_vertices()) {
-      if (vertex.depth == i) {
-        for (int j = 0; j < new_vertices_num; j++) {
+      if (vertex.depth == current_depth) {
+        for (int iter = 0; iter < new_vertices_num; iter++) {
           if (dis(gen) > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
@@ -288,35 +288,42 @@ void paint_edges(Graph& work_graph) {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
   // BLUE
-  std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
-  for (const auto& vertex : work_graph.get_vertices()) {
-    adjacent_vertices[0] = INVALID_ID;
-    adjacent_vertices[1] = INVALID_ID;
-    for (const auto& edge_id : vertex.get_edges_ids()) {
-      const Edge edge = work_graph.get_edges()[edge_id];
-      if (edge.connected_vertices[0] == vertex.id) {
-        if (adjacent_vertices[0] == INVALID_ID) {
-          adjacent_vertices[0] = edge.connected_vertices[1];
-        } else if (adjacent_vertices[1] == INVALID_ID) {
-          adjacent_vertices[1] = edge.connected_vertices[1];
+
+  for (int current_depth = 1; current_depth < graph_depth; current_depth++) {
+    vector<Vertex> uni_depth_vertices;
+    for (const auto& vertex : work_graph.get_vertices())
+      if (vertex.depth == current_depth)
+        uni_depth_vertices.emplace_back(vertex);
+
+    std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
+    for (const auto& vertex : uni_depth_vertices) {
+      if (adjacent_vertices[0] == INVALID_ID) {
+        adjacent_vertices[0] = vertex.id;
+      } else if (adjacent_vertices[1] == INVALID_ID) {
+        adjacent_vertices[1] = vertex.id;
+        if (!work_graph.is_connected(adjacent_vertices[0],
+                                     adjacent_vertices[1]))
           if (dis(gen) < 0.25)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], true);
-        } else {
-          adjacent_vertices[0] = adjacent_vertices[1];
-          adjacent_vertices[1] = edge.connected_vertices[1];
+      } else {
+        adjacent_vertices[0] = adjacent_vertices[1];
+        adjacent_vertices[1] = vertex.id;
+        if (!work_graph.is_connected(adjacent_vertices[0],
+                                     adjacent_vertices[1]))
           if (dis(gen) < 0.25)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], true);
-        }
       }
     }
   }
 
   for (const auto& start_vertex : work_graph.get_vertices()) {
     // GREEN
-    if (dis(gen) < 0.1) {
-      work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
+    if (!work_graph.is_looped(start_vertex.id)) {
+      if (dis(gen) < 0.1) {
+        work_graph.connect_vertices(start_vertex.id, start_vertex.id, true);
+      }
     }
     // RED
     if (dis(gen) < 0.33) {
@@ -324,7 +331,8 @@ void paint_edges(Graph& work_graph) {
         vector<VertexId> red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
           if (end_vertex.depth == start_vertex.depth + 2)
-            red_vertices_ids.emplace_back(end_vertex.id);
+            if (!work_graph.is_connected(start_vertex.id, end_vertex.id))
+              red_vertices_ids.emplace_back(end_vertex.id);
         }
         if (red_vertices_ids.size() > 0) {
           std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
@@ -356,28 +364,11 @@ void paint_edges(Graph& work_graph) {
 
 int main() {
   Graph my_graph;
-  for (int i = 0; i < START_VERTICES_NUMBER; i++) {
-    my_graph.add_vertex();
-  }
-  my_graph.connect_vertices(0, 1, false);
-  my_graph.connect_vertices(0, 2, false);
 
-  my_graph.connect_vertices(0, 3, false);
-  my_graph.connect_vertices(1, 4, false);
-  my_graph.connect_vertices(1, 5, false);
-  my_graph.connect_vertices(1, 6, false);
-  my_graph.connect_vertices(2, 7, false);
-  my_graph.connect_vertices(2, 8, false);
-  my_graph.connect_vertices(3, 9, false);
-  my_graph.connect_vertices(4, 10, false);
-  my_graph.connect_vertices(5, 10, false);
-  my_graph.connect_vertices(6, 10, false);
-  my_graph.connect_vertices(7, 11, false);
-  my_graph.connect_vertices(8, 11, false);
-  my_graph.connect_vertices(9, 12, false);
-  my_graph.connect_vertices(10, 13, false);
-  my_graph.connect_vertices(11, 13, false);
-  my_graph.connect_vertices(12, 13, false);
+  for (int i = 0; i < START_VERTICES_NUMBER; i++)
+    my_graph.add_vertex();
+  for (int i = 0; i < START_VERTICES_NUMBER - 1; i++)
+    my_graph.connect_vertices(i, i + 1, false);
 
   new_vertices_generation(my_graph);
 
