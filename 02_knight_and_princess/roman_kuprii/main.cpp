@@ -175,11 +175,11 @@ class Graph {
     assert(!is_connected(from_vertex_id, to_vertex_id));
 
     if (initialization) {
-      const int minimum_depth = [=]() {
-        int min_depth = vertices_[from_vertex_id].depth;
-        for (const auto& edge_idx : vertices_[to_vertex_id].get_edges_ids()) {
-          const VertexId vert = edges_[edge_idx].connected_vertices[0];
-          min_depth = min(min_depth, vertices_[vert].depth);
+      const int minimum_depth = [&from_vertex_id, &to_vertex_id, vertices = &vertices_, edges = &edges_]() {
+        int min_depth = vertices->at(from_vertex_id).depth;
+        for (const auto& edge_idx : vertices->at(to_vertex_id).get_edges_ids()) {
+          const VertexId vert = edges->at(edge_idx).connected_vertices[0];
+          min_depth = min(min_depth, vertices->at(vert).depth);
         }
         return min_depth;
       }();
@@ -190,7 +190,7 @@ class Graph {
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-    const Color color = [=]() {
+    const Color color = [initialization, diff, from_vertex_id, to_vertex_id]() {
       if (initialization)
         return Color::Gray;
       else if (from_vertex_id == to_vertex_id)
