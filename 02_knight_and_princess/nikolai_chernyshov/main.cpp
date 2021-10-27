@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -12,59 +13,76 @@ struct Edge {
   const EdgeId id;
   const VertexId vertex1, vertex2;
 
-  Edge(VertexId _vertex1, VertexId _vertex2, EdgeId id_max)
+  Edge(const VertexId& _vertex1, const VertexId& _vertex2, const EdgeId& id_max)
       : id(id_max), vertex1(_vertex1), vertex2(_vertex2) {}
 };
 
 struct Vertex {
   const VertexId id;
-  const std::vector<EdgeId> edges;
+  std::vector<EdgeId> edges;
 
-  Vertex(const std::vector<EdgeId>& _edges, VertexId id_max)
-      : id(id_max), edges(_edges) {}
+  Vertex(const VertexId& id_max) : id(id_max) {}
 };
 
 class Graph {
+ public:
+  const EdgeId get_max_edge_id() {
+    const auto id = edge_id_max_;
+    edge_id_max_++;
+    return id;
+  }
+
+  const VertexId get_max_vertex_id() {
+    const auto id = vertex_id_max_;
+    vertex_id_max_++;
+    return id;
+  }
+
+  void push_edge_to_vertex(EdgeId edge_id, VertexId vertex_id) {
+    vertices_[vertex_id].edges.push_back(edge_id);
+  }
+
+  void check_edge(VertexId vertex1_id, VertexId vertex2_id) const {
+    assert((vertex1_id < vertex_id_max_) && (vertex2_id < vertex_id_max_) &&
+           "Bad vertex/vertices");
+    for (const auto& edge1 : vertices_[vertex1_id].edges) {
+      for (const auto& edge2 : vertices_[vertex2_id].edges) {
+        assert((edge1 != edge2) && "Edge already exists");
+      }
+    }
+  }
+
+  void add_edge(VertexId vertex1_id, VertexId vertex2_id) {
+    check_edge(vertex1_id, vertex2_id);
+
+    auto new_id = get_max_edge_id();
+    edges_.emplace_back(vertex1_id, vertex2_id, new_id);
+    push_edge_to_vertex(new_id, vertex1_id);
+    push_edge_to_vertex(new_id, vertex2_id);
+  }
+
+  void add_vertex() { vertices_.emplace_back(get_max_vertex_id()); }
+
+  const std::vector<Edge>& get_edges() const { return edges_; }
+
+  const std::vector<Vertex>& get_vertices() const { return vertices_; }
+
  private:
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
-
- public:
-  void add_edge(VertexId vertex1, VertexId vertex2) {
-    edges_.emplace_back(vertex1, vertex2, edge_id_max_);
-    edge_id_max_++;
-  }
-
-  void add_vertex(const std::vector<EdgeId>& edges) {
-    vertices_.emplace_back(edges, vertex_id_max_);
-    vertex_id_max_++;
-  }
-
-  const std::vector<Edge>& get_edges() { return edges_; }
-
-  const std::vector<Vertex>& get_vertices() { return vertices_; }
 };
 
 class GraphGenerator {
  public:
-  void required_graph(Graph& graph)  // build required graph
-  {
-    graph.add_vertex({0, 1, 2});
-    graph.add_vertex({0, 3, 4, 5});
-    graph.add_vertex({1, 6, 7});
-    graph.add_vertex({2, 8});
-    graph.add_vertex({3, 9});
-    graph.add_vertex({4, 10});
-    graph.add_vertex({5, 11});
-    graph.add_vertex({6, 12});
-    graph.add_vertex({7, 13});
-    graph.add_vertex({8, 14});
-    graph.add_vertex({9, 10, 11, 15});
-    graph.add_vertex({12, 13, 16});
-    graph.add_vertex({14, 17});
-    graph.add_vertex({15, 16, 17});
+  Graph build_required_graph() const {
+    Graph graph;
+
+    const int VERTICES_COUNT = 14;
+    for (int i = 0; i < VERTICES_COUNT; i++) {
+      graph.add_vertex();
+    }
 
     graph.add_edge(0, 1);
     graph.add_edge(0, 2);
@@ -84,6 +102,8 @@ class GraphGenerator {
     graph.add_edge(10, 13);
     graph.add_edge(11, 13);
     graph.add_edge(12, 13);
+
+    return graph;
   }
 };
 
@@ -101,7 +121,7 @@ class GraphPrinter {
     }
     res.pop_back();
     res.pop_back();
-    res += "]\n\t\t}, ";
+    res += "]\n\t\t}";
 
     return res;
   }
@@ -120,12 +140,13 @@ class GraphPrinter {
     return res;
   }
 
-  std::string to_json(Graph& graph) const {
+  std::string to_json(const Graph& graph) const {
     std::string res;
     res += "{\n\t \"vertices\": [\n\t\t";
 
     for (const auto& vertex : graph.get_vertices()) {
       res += vertex_to_json(vertex);
+      res += ", ";
     }
     res.pop_back();
     res.pop_back();
@@ -143,12 +164,10 @@ class GraphPrinter {
 };
 
 int main() {
-  Graph graph;
+  const GraphGenerator generator;
+  Graph graph = generator.build_required_graph();
 
-  GraphGenerator generator;
-  generator.required_graph(graph);
-
-  GraphPrinter printer;
+  const GraphPrinter printer;
   std::ofstream myfile;
   myfile.open("graph.json");
   myfile << printer.to_json(graph);
