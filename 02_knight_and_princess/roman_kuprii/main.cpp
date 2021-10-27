@@ -194,7 +194,7 @@ class Graph {
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-    const Color color = [initialization, diff, from_vertex_id, to_vertex_id]() {
+    const Color color = [&initialization, &diff, &from_vertex_id, &to_vertex_id]() {
       if (initialization)
         return Color::Gray;
       else if (from_vertex_id == to_vertex_id)
