@@ -83,7 +83,7 @@ bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
 
 struct Vertex {
  public:
-//  const VertexId id = INVALID_ID;
+  //  const VertexId id = INVALID_ID;
   int depth = 0;
 
   explicit Vertex(const VertexId& _id) : id_(_id) {}
@@ -96,8 +96,10 @@ struct Vertex {
       res += to_string(edge_id);
       res += ", ";
     }
-    res.pop_back();
-    res.pop_back();
+    if (edges_ids_.size() > 0) {
+      res.pop_back();
+      res.pop_back();
+    }
     res += "] }";
     return res;
   }
@@ -127,8 +129,10 @@ class Graph {
       res += vertex.to_json();
       res += ", ";
     }
-    res.pop_back();
-    res.pop_back();
+    if (vertices_.size()) {
+      res.pop_back();
+      res.pop_back();
+    }
     res += " ], \"edges\": [ ";
     for (const auto& edge : edges_) {
       res += edge.to_json();
@@ -183,7 +187,8 @@ class Graph {
       const int minimum_depth = [&from_vertex_id, &to_vertex_id,
                                  vertices = &vertices_, edges = &edges_]() {
         int min_depth = vertices->at(from_vertex_id).depth;
-        for (const auto& edge_idx : vertices->at(to_vertex_id).get_edges_ids()) {
+        for (const auto& edge_idx :
+             vertices->at(to_vertex_id).get_edges_ids()) {
           const VertexId vert = edges->at(edge_idx).connected_vertices[0];
           min_depth = min(min_depth, vertices->at(vert).depth);
         }
@@ -196,7 +201,8 @@ class Graph {
     const int diff =
         vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-    const Color color = [initialization, diff, from_vertex_id, to_vertex_id]() {
+    const Color color = [&initialization, &diff, &from_vertex_id,
+                         &to_vertex_id]() {
       if (initialization)
         return Color::Gray;
       else if (from_vertex_id == to_vertex_id)
@@ -256,7 +262,8 @@ void new_vertices_generation(Graph& work_graph,
             work_graph.add_vertex();
             work_graph.connect_vertices(
                 vertex.get_id(),
-                work_graph.get_vertices()[work_graph.get_vertices_num() - 1].get_id(),
+                work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
+                    .get_id(),
                 true);
           }
         }
@@ -299,7 +306,8 @@ void add_green_edges(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices())
     if (!work_graph.is_connected(start_vertex.get_id(), start_vertex.get_id()))
       if (get_random_number() < GREEN_TRASHOULD)
-        work_graph.connect_vertices(start_vertex.get_id(), start_vertex.get_id(), false);
+        work_graph.connect_vertices(start_vertex.get_id(),
+                                    start_vertex.get_id(), false);
 }
 
 void add_red_edges(Graph& work_graph) {
@@ -312,7 +320,8 @@ void add_red_edges(Graph& work_graph) {
         vector<VertexId> red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
           if (end_vertex.depth == start_vertex.depth + 2)
-            if (!work_graph.is_connected(start_vertex.get_id(), end_vertex.get_id()))
+            if (!work_graph.is_connected(start_vertex.get_id(),
+                                         end_vertex.get_id()))
               red_vertices_ids.emplace_back(end_vertex.get_id());
         }
         if (red_vertices_ids.size() > 0) {
@@ -336,7 +345,8 @@ void add_yellow_edges(Graph& work_graph) {
       vector<VertexId> yellow_vertices_ids;
       for (const auto& end_vertex : work_graph.get_vertices()) {
         if (end_vertex.depth == start_vertex.depth + 1) {
-          if (!work_graph.is_connected(start_vertex.get_id(), end_vertex.get_id()))
+          if (!work_graph.is_connected(start_vertex.get_id(),
+                                       end_vertex.get_id()))
             yellow_vertices_ids.push_back(end_vertex.get_id());
         }
       }
