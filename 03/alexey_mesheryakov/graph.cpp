@@ -98,9 +98,11 @@ class Graph {
 
 
   bool edge_exist(const VertexId& first, const VertexId& second) const {
-    for (const auto& first_vertex : vertices_[first].get_edge_ids())
-      for (const auto& second_vertex : vertices_[second].get_edge_ids())
-        if (first_vertex == second_vertex)
+    for (const auto& edge_id_from_first_vertex :
+         vertices_[first].get_edge_ids())
+      for (const auto& edge_id_from_second_vertex :
+           vertices_[second].get_edge_ids())
+        if (edge_id_from_first_vertex == edge_id_from_second_vertex)
           return true;
     return false;
   }
@@ -117,11 +119,11 @@ class Graph {
     assert(vertex_exist(first) && "Source vertex id doesn't exist");
     assert(vertex_exist(second) && "Destination vertex id doesn't exist");
     assert(!edge_exist(first, second) && "Such edge already exist");
-    const auto new_id = get_new_edge_id();
-    edges_.emplace_back(pair<VertexId, VertexId>{first, second}, new_id);
-    vertices_[first].add_edge_id(new_id);
+    const auto& new_edge = edges_.emplace_back(
+        pair<VertexId, VertexId>{first, second}, get_new_edge_id());
+    vertices_[first].add_edge_id(new_edge.id);
     if (first != second)
-    	vertices_[second].add_edge_id(new_id);
+    	vertices_[second].add_edge_id(new_edge.id);
   }
 
   std::string to_json() const {
