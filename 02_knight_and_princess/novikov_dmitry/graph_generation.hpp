@@ -16,23 +16,19 @@ double get_color_probability(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Green:
       return 0.1;
-      break;
     case Edge::Color::Blue:
       return 0.25;
-      break;
     case Edge::Color::Red:
       return 0.33;
-      break;
     default:
       assert(false && "Unexpected behavior");
       return 0.0;
-      break;
   }
 }
 
 bool is_lucky(const double probability) {
-  const double eps = std::numeric_limits<double>::epsilon();
-  assert(probability + eps > 0 && probability - eps < 1 &&
+  assert(probability + std::numeric_limits<double>::epsilon() > 0 &&
+         probability - std::numeric_limits<double>::epsilon() < 1 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
@@ -50,28 +46,23 @@ int get_random_number(const int size) {
 
 void generate_green_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Green);
-  for (Depth current_depth = 0; current_depth < graph.get_depth();
-       ++current_depth) {
-    for (const auto& current_vertex_id :
-         graph.get_vertices_at_depth(current_depth)) {
-      if (is_lucky(probability)) {
-        graph.add_edge(current_vertex_id, current_vertex_id,
-                       Edge::Color::Green);
-      }
+  for (const auto& [current_vertex_id, current_vertex] :
+       graph.get_vertex_map()) {
+    if (is_lucky(probability)) {
+      graph.add_edge(current_vertex_id, current_vertex_id, Edge::Color::Green);
     }
   }
 }
 
 void generate_blue_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Blue);
-  for (Depth current_depth = 1;
-       current_depth <=
-       graph.get_depth();  // так как на нулевом уровне только одна вершина ==
-                           // нулевая, нет смысла ее учитывать
+  // так как на нулевом уровне только одна вершина == нулевая, нет смысла ее
+  // учитывать
+  for (Depth current_depth = 1; current_depth <= graph.get_depth();
        ++current_depth) {
     const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     for (int idx = 0; idx < vertices_at_depth.size() - 1; ++idx) {
-      if ((idx < vertices_at_depth.size()) && is_lucky(probability)) {
+      if (is_lucky(probability)) {
         graph.add_edge(vertices_at_depth[idx], vertices_at_depth[idx + 1],
                        Edge::Color::Blue);
       }
@@ -81,11 +72,9 @@ void generate_blue_edges(Graph& graph) {
 
 void generate_yellow_edges(Graph& graph) {
   double yellow_edge_probability = 1.0 / (graph.get_depth() - 1);
-  for (Depth current_depth = 1;
-       current_depth <
-       graph.get_depth();  //так как вероятность генерации желтых ребер из
-                           //нулевой вершины должна быть нулевой, то можно
-                           //просто не рассматривать эту вершину
+  //так как вероятность генерации желтых ребер из нулевой вершины должна быть
+  //нулевой, то можно просто не рассматривать эту вершину
+  for (Depth current_depth = 1; current_depth < graph.get_depth();
        ++current_depth) {
     const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     const auto& vertices_at_next_depth =

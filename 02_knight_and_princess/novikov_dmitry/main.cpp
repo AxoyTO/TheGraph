@@ -7,8 +7,8 @@
 #include "graph_generation.hpp"
 
 void generate_graphs() {
-  const std::string DEFAULT_FILENAME = "Graph";
-  const std::string DEFAULT_FILEFORMAT = ".json";
+  const std::string dafault_filename = "Graph";
+  const std::string dafault_fileformat = ".json";
 
   int new_vertices_num;
   Depth depth;  //Глубина графа (int от 0 и до бесконечности).
@@ -19,7 +19,7 @@ void generate_graphs() {
 
   const auto& graph = graph_generation::generate_graph(depth, new_vertices_num);
   std::stringstream ss_filename;
-  ss_filename << DEFAULT_FILENAME << '_' << DEFAULT_FILEFORMAT;
+  ss_filename << dafault_filename << dafault_fileformat;
   std::ofstream file_out;
   file_out.open(ss_filename.str(), std::fstream::out | std::fstream::trunc);
   file_out << graph.to_string();
