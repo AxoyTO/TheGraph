@@ -25,9 +25,7 @@ struct Vertex {
 
   explicit Vertex(const VertexId& id_max) : id(id_max) {}
 
-  void add_edge_id(const EdgeId &id) {
-    edge_ids_.push_back(id);
-  }
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
 
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
@@ -37,25 +35,28 @@ struct Vertex {
 
 class Graph {
  public:
-  bool are_connected(const VertexId &vertex1_id, const VertexId &vertex2_id) const {
+  bool are_connected(const VertexId& vertex1_id,
+                     const VertexId& vertex2_id) const {
     for (const auto& edge1 : vertices_[vertex1_id].get_edge_ids()) {
       for (const auto& edge2 : vertices_[vertex2_id].get_edge_ids()) {
-        if (edge1 == edge2) return true;
+        if (edge1 == edge2)
+          return true;
       }
     }
     return false;
   }
 
-  bool has_vertex(const VertexId &vertex_id) const {
+  bool has_vertex(const VertexId& vertex_id) const {
     return vertex_id < vertex_id_max_;
   }
 
-  void add_edge(const VertexId &vertex1_id, const VertexId &vertex2_id) {
+  void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
     assert(!are_connected(vertex1_id, vertex2_id));
     assert(has_vertex(vertex1_id));
     assert(has_vertex(vertex2_id));
 
-    const auto& new_edge = edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id());
+    const auto& new_edge =
+        edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id());
     vertices_[vertex1_id].add_edge_id(new_edge.id);
     vertices_[vertex2_id].add_edge_id(new_edge.id);
   }
