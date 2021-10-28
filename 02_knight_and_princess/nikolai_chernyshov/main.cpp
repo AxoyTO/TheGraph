@@ -9,6 +9,8 @@
 using VertexId = int;
 using EdgeId = int;
 
+constexpr int VERTICES_COUNT = 14;
+
 struct Edge {
   const EdgeId id;
   const VertexId vertex1, vertex2;
@@ -18,47 +20,44 @@ struct Edge {
 };
 
 struct Vertex {
+ public:
   const VertexId id;
-  std::vector<EdgeId> edges;
 
-  Vertex(const VertexId& id_max) : id(id_max) {}
+  explicit Vertex(const VertexId& id_max) : id(id_max) {}
+
+  void add_edge_id(const EdgeId &id) {
+    edge_ids_.push_back(id);
+  }
+
+  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+
+ private:
+  std::vector<EdgeId> edge_ids_;
 };
 
 class Graph {
  public:
-  const EdgeId get_max_edge_id() {
-    const auto id = edge_id_max_;
-    edge_id_max_++;
-    return id;
-  }
-
-  const VertexId get_max_vertex_id() {
-    const auto id = vertex_id_max_;
-    vertex_id_max_++;
-    return id;
-  }
-
-  void push_edge_to_vertex(EdgeId edge_id, VertexId vertex_id) {
-    vertices_[vertex_id].edges.push_back(edge_id);
-  }
-
-  void check_edge(VertexId vertex1_id, VertexId vertex2_id) const {
-    assert((vertex1_id < vertex_id_max_) && (vertex2_id < vertex_id_max_) &&
-           "Bad vertex/vertices");
-    for (const auto& edge1 : vertices_[vertex1_id].edges) {
-      for (const auto& edge2 : vertices_[vertex2_id].edges) {
-        assert((edge1 != edge2) && "Edge already exists");
+  bool are_connected(const VertexId &vertex1_id, const VertexId &vertex2_id) const {
+    for (const auto& edge1 : vertices_[vertex1_id].get_edge_ids()) {
+      for (const auto& edge2 : vertices_[vertex2_id].get_edge_ids()) {
+        if (edge1 == edge2) return true;
       }
     }
+    return false;
   }
 
-  void add_edge(VertexId vertex1_id, VertexId vertex2_id) {
-    check_edge(vertex1_id, vertex2_id);
+  bool has_vertex(const VertexId &vertex_id) const {
+    return vertex_id < vertex_id_max_;
+  }
 
-    auto new_id = get_max_edge_id();
-    edges_.emplace_back(vertex1_id, vertex2_id, new_id);
-    push_edge_to_vertex(new_id, vertex1_id);
-    push_edge_to_vertex(new_id, vertex2_id);
+  void add_edge(const VertexId &vertex1_id, const VertexId &vertex2_id) {
+    assert(!are_connected(vertex1_id, vertex2_id));
+    assert(has_vertex(vertex1_id));
+    assert(has_vertex(vertex2_id));
+
+    const auto& new_edge = edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id());
+    vertices_[vertex1_id].add_edge_id(new_edge.id);
+    vertices_[vertex2_id].add_edge_id(new_edge.id);
   }
 
   void add_vertex() { vertices_.emplace_back(get_max_vertex_id()); }
@@ -72,6 +71,18 @@ class Graph {
   std::vector<Vertex> vertices_;
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
+
+  const EdgeId get_max_edge_id() {
+    const auto id = edge_id_max_;
+    edge_id_max_++;
+    return id;
+  }
+
+  const VertexId get_max_vertex_id() {
+    const auto id = vertex_id_max_;
+    vertex_id_max_++;
+    return id;
+  }
 };
 
 class GraphGenerator {
@@ -79,7 +90,6 @@ class GraphGenerator {
   Graph build_required_graph() const {
     Graph graph;
 
-    const int VERTICES_COUNT = 14;
     for (int i = 0; i < VERTICES_COUNT; i++) {
       graph.add_vertex();
     }
@@ -115,7 +125,7 @@ class GraphPrinter {
     res += std::to_string(vertex.id);
     res += ",\n\t\t\t\"edge_ids\": [";
 
-    for (const auto& edge : vertex.edges) {
+    for (const auto& edge : vertex.get_edge_ids()) {
       res += std::to_string(edge);
       res += ", ";
     }
