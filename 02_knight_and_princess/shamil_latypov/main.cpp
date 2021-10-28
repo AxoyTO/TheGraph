@@ -52,7 +52,6 @@ class Graph {
 
  public:
   Graph() {}
-  
   // Изменение размеров векторов
   void vert_mas_resize(int size) { vert_mas.resize(size); }
 
@@ -101,9 +100,7 @@ class Graph {
     out_json << "\n  ]\n}\n";
     out_json.close();
   }
-  
 };
-
 
 int main() {
   const int numedge = 18, numvertex = 14;
