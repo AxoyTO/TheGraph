@@ -9,10 +9,7 @@
 
 using std::endl;
 using std::min;
-<<<<<<< HEAD
 using std::shared_ptr;
-=======
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
 using std::to_string;
 using std::vector;
 
@@ -22,7 +19,6 @@ using VertexId = int;
 constexpr double GREEN_TRASHOULD = 0.1;
 constexpr double BLUE_TRASHOULD = 0.25;
 constexpr double RED_TRASHOULD = 0.33;
-<<<<<<< HEAD
 constexpr int GRAPH_NUMBER = 10;
 constexpr int COLORS_NUMBER = 5;
 constexpr int INVALID_ID = -1;
@@ -52,15 +48,6 @@ class Logger {
   static shared_ptr<Logger> log;
 };
 
-=======
-constexpr int INVALID_ID = -1;
-constexpr int INVALID_NEW_DEPTH = -1;
-constexpr int INVALID_NEW_VERTICES_NUM = -1;
-const std::string JSON_GRAPH_FILENAME = "graph.json";
-
-enum class Color { Gray, Green, Blue, Yellow, Red };
-
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
 std::string color_to_string(const Color& color) {
   switch (color) {
     case Color::Gray:
@@ -73,12 +60,6 @@ std::string color_to_string(const Color& color) {
       return "\"yellow\" }";
     case Color::Red:
       return "\"red\" }";
-<<<<<<< HEAD
-=======
-    default:
-      assert(false);
-      return "";
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
   }
 }
 
@@ -304,14 +285,9 @@ void new_vertices_generation(Graph& work_graph,
           if (get_random_number() > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
-<<<<<<< HEAD
                 vertex.get_id(),
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
                     .get_id(),
-=======
-                vertex.id,
-                work_graph.get_vertices()[work_graph.get_vertices_num() - 1].id,
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
                 true);
           }
         }
@@ -352,16 +328,10 @@ void add_blue_edges(Graph& work_graph) {
 
 void add_green_edges(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices())
-<<<<<<< HEAD
     if (!work_graph.is_connected(start_vertex.get_id(), start_vertex.get_id()))
       if (get_random_number() < GREEN_TRASHOULD)
         work_graph.connect_vertices(start_vertex.get_id(),
                                     start_vertex.get_id(), false);
-=======
-    if (!work_graph.is_connected(start_vertex.id, start_vertex.id))
-      if (get_random_number() < GREEN_TRASHOULD)
-        work_graph.connect_vertices(start_vertex.id, start_vertex.id, false);
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
 }
 
 void add_red_edges(Graph& work_graph) {
@@ -380,11 +350,7 @@ void add_red_edges(Graph& work_graph) {
         }
         if (red_vertices_ids.size() > 0) {
           std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
-<<<<<<< HEAD
           work_graph.connect_vertices(start_vertex.get_id(),
-=======
-          work_graph.connect_vertices(start_vertex.id,
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
                                       red_vertices_ids[distr(gen)], false);
         }
       }
@@ -411,11 +377,7 @@ void add_yellow_edges(Graph& work_graph) {
       if (yellow_vertices_ids.size() > 0) {
         std::uniform_int_distribution<> distr(0,
                                               yellow_vertices_ids.size() - 1);
-<<<<<<< HEAD
         work_graph.connect_vertices(start_vertex.get_id(),
-=======
-        work_graph.connect_vertices(start_vertex.id,
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
                                     yellow_vertices_ids[distr(gen)], false);
       }
     }
@@ -428,7 +390,6 @@ void paint_edges(Graph& work_graph) {
   add_red_edges(work_graph);
   add_yellow_edges(work_graph);
 }
-<<<<<<< HEAD
 
 void write_log(Graph& work_graph,
                std::ofstream& logfile,
@@ -501,10 +462,6 @@ int main() {
   std::ofstream log_stream;
   log_stream.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
-=======
-
-int main() {
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
   int depth = INVALID_NEW_DEPTH;
   do {
     std::cout << "Enter generate graph depth from zero" << endl;
@@ -518,7 +475,6 @@ int main() {
 
   std::cout << "Depth of adding vertices: " << depth << endl;
 
-<<<<<<< HEAD
   for (int graph_num = 0; graph_num < GRAPH_NUMBER; graph_num++) {
     Graph my_graph;
     my_graph.add_vertex();
@@ -529,13 +485,6 @@ int main() {
   }
 
   log_stream.close();
-=======
-  Graph my_graph;
-  my_graph.add_vertex();
-  new_vertices_generation(my_graph, depth, new_vertices_num);
-  paint_edges(my_graph);
-  write_graph(my_graph);
->>>>>>> ffbf0d04b3afeb1d665eb9462a15b173f69e02bc
 
   return 0;
 }
