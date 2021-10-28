@@ -1,0 +1,7 @@
+time Graph 9, Generation Started
+time Graph 9, Generation Ended {
+	depth: 4,
+	new_vertices_num: 3,
+vertices: 18, [1, 3, 4, 7],
+edges: 38, {gray: 17, green: 2, blue: 4, yellow: 10, red: 5}
+}

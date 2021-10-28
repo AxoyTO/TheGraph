@@ -2,12 +2,14 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <random>
 #include <string>
 #include <vector>
 
 using std::endl;
 using std::min;
+using std::shared_ptr;
 using std::to_string;
 using std::vector;
 
@@ -26,6 +28,25 @@ const std::string JSON_GRAPH_FILENAME = "graph.json";
 const std::string LOG_FILENAME = "log.txt";
 
 enum class Color { Gray, Green, Blue, Yellow, Red };
+
+class Logger {
+ public:
+  static Logger& get_logger() {
+    static Logger logger;
+    return logger;
+  }
+
+  void write(std::ofstream& logfile, const std::string log) const {
+    std::cout << log << std::endl;
+    logfile << log;
+  }
+
+ private:
+  Logger() {}
+  Logger(const Logger& root) = delete;
+  Logger& operator=(const Logger&) = delete;
+  static shared_ptr<Logger> log;
+};
 
 std::string color_to_string(const Color& color) {
   switch (color) {
@@ -370,7 +391,7 @@ void write_log(Graph& work_graph,
                std::ofstream& logfile,
                const int& depth,
                const int& new_vertices_num,
-               const int& graph_num) {
+               const int& graph_num, const Logger& logger) {
   std::string res =
       "time Graph " + to_string(graph_num) + ", Generation Started\n";
   res += "time Graph " + to_string(graph_num) + ", Generation Ended {\n";
@@ -427,12 +448,14 @@ void write_log(Graph& work_graph,
   res += "yellow: " + to_string(colors[3]) + ", ";
   res += "red: " + to_string(colors[4]) + "}\n";
   res += "}\n";
-  logfile << res;
+
+  logger.write(logfile, res);
 }
 
 int main() {
-  std::ofstream log;
-  log.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
+  const auto& logger = Logger::get_logger();
+  std::ofstream log_stream;
+  log_stream.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
   int depth = INVALID_NEW_DEPTH;
   do {
@@ -453,10 +476,10 @@ int main() {
     new_vertices_generation(my_graph, depth, new_vertices_num);
     paint_edges(my_graph);
     write_graph(my_graph);
-    write_log(my_graph, log, depth, new_vertices_num, graph_num);
+    write_log(my_graph, log_stream, depth, new_vertices_num, graph_num, logger);
   }
 
-  log.close();
+  log_stream.close();
 
   return 0;
 }
