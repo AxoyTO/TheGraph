@@ -264,7 +264,8 @@ class Graph {
 
 void write_graph(const Graph& graph, const int& graph_num) {
   std::ofstream out;
-  const std::string filename = JSON_GRAPH_FILENAME + to_string(graph_num) + ".json";
+  const std::string filename =
+      JSON_GRAPH_FILENAME + to_string(graph_num) + ".json";
   out.open(filename, std::ofstream::out | std::ofstream::trunc);
   out << graph.to_json();
   out.close();
@@ -392,7 +393,8 @@ void write_log(Graph& work_graph,
                std::ofstream& logfile,
                const int& depth,
                const int& new_vertices_num,
-               const int& graph_num, const Logger& logger) {
+               const int& graph_num,
+               const Logger& logger) {
   std::string res =
       "time Graph " + to_string(graph_num) + ", Generation Started\n";
   res += "time Graph " + to_string(graph_num) + ", Generation Ended {\n";
