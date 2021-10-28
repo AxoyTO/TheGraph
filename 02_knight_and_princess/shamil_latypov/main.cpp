@@ -52,12 +52,7 @@ class Graph {
 
  public:
   Graph() {}
-
-  // Возврат векторов
-  std::vector<Vertex>& get_vert_mas() { return vert_mas; }
-  std::vector<Edge>& get_edge_mas() { return edge_mas; }
-  Vertex& get_vertex(int num) { return vert_mas[num]; }
-
+  
   // Изменение размеров векторов
   void vert_mas_resize(int size) { vert_mas.resize(size); }
 
@@ -78,35 +73,37 @@ class Graph {
     vert_mas[(int)vert_num].id = vert_num;
     add_edge_in_vert((int)vert_num, edge_i);
   }
+
+  void output_graph() {
+    std::ofstream out_json("out.json");
+    out_json << "{\n  \"vertices\": [\n    ";
+    bool check_first_comma = false;
+
+    for (auto& i : vert_mas) {
+      if (check_first_comma) {
+        out_json << ",\n    ";
+      }
+      check_first_comma = true;
+      i.to_string(out_json);
+    }
+
+    out_json << "\n  ],\n  \"edges\": [\n    ";
+    check_first_comma = false;
+
+    for (auto& i : edge_mas) {
+      if (check_first_comma) {
+        out_json << ",\n    ";
+      }
+      check_first_comma = true;
+      i.to_string(out_json);
+    }
+
+    out_json << "\n  ]\n}\n";
+    out_json.close();
+  }
+  
 };
 
-void output_graph(Graph& graph, int numedge, int numvert) {
-  std::ofstream out_json("out.json");
-  out_json << "{\n  \"vertices\": [\n    ";
-  bool check_first_comma = false;
-
-  for (auto& i : (graph.get_vert_mas())) {
-    if (check_first_comma) {
-      out_json << ",\n    ";
-    }
-    check_first_comma = true;
-    i.to_string(out_json);
-  }
-
-  out_json << "\n  ],\n  \"edges\": [\n    ";
-  check_first_comma = false;
-
-  for (auto& i : (graph.get_edge_mas())) {
-    if (check_first_comma) {
-      out_json << ",\n    ";
-    }
-    check_first_comma = true;
-    i.to_string(out_json);
-  }
-
-  out_json << "\n  ]\n}\n";
-  out_json.close();
-}
 
 int main() {
   const int numedge = 18, numvertex = 14;
@@ -131,7 +128,7 @@ int main() {
     graph.add_vertex(graph_data[i].second, i);
   }
 
-  output_graph(graph, numedge, numvertex);
+  graph.output_graph();
 
   return 0;
 }
