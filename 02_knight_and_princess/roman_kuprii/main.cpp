@@ -24,7 +24,7 @@ constexpr int COLORS_NUMBER = 5;
 constexpr int INVALID_ID = -1;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
-const std::string JSON_GRAPH_FILENAME = "graph.json";
+const std::string JSON_GRAPH_FILENAME = "temp/graph_";
 const std::string LOG_FILENAME = "log.txt";
 
 enum class Color { Gray, Green, Blue, Yellow, Red };
@@ -262,9 +262,10 @@ class Graph {
   VertexId get_next_edge_id() { return edge_id_counter_++; }
 };
 
-void write_graph(const Graph& graph) {
+void write_graph(const Graph& graph, const int& graph_num) {
   std::ofstream out;
-  out.open(JSON_GRAPH_FILENAME, std::ofstream::out | std::ofstream::trunc);
+  const std::string filename = JSON_GRAPH_FILENAME + to_string(graph_num) + ".json";
+  out.open(filename, std::ofstream::out | std::ofstream::trunc);
   out << graph.to_json();
   out.close();
 }
@@ -475,7 +476,7 @@ int main() {
     my_graph.add_vertex();
     new_vertices_generation(my_graph, depth, new_vertices_num);
     paint_edges(my_graph);
-    write_graph(my_graph);
+    write_graph(my_graph, graph_num);
     write_log(my_graph, log_stream, depth, new_vertices_num, graph_num, logger);
   }
 
