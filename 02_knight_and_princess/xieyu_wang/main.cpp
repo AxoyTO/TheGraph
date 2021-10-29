@@ -68,6 +68,13 @@ class Graph {
       }
     }
   }
+  const Vertex& getVertex(const int id) {
+    for (auto& vertex : vertices_) {
+      if (vertex.id == id) {
+        return vertex;
+      }
+    }
+  }
   std::string toString() {
     // vertex
     std::string strGraph = "";
@@ -97,22 +104,13 @@ class Graph {
     return false;
   }
   bool isConnected(int fromVertexId, int toVertexId) {
-    if (!hasVertex(fromVertexId) || !hasVertex(toVertexId)) {
-      std::cerr << "Oh man Vertex " << fromVertexId << " or " << toVertexId
-                << " not exists.";
-      std::exit(-1);
-    }
+    assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
+    assert(hasVertex(toVertexId) && "Vertex doesn't exist");
     std::vector<int> fromVertexEdgeIds;
     std::vector<int> toVertexEdgeIds;
     std::vector<int> intersections;
-    for (const auto& vertex : vertices_) {
-      if (vertex.id == fromVertexId) {
-        fromVertexEdgeIds = vertex.getEdgeIds();
-      }
-      if (vertex.id == toVertexId) {
-        toVertexEdgeIds = vertex.getEdgeIds();
-      }
-    }
+    fromVertexEdgeIds = getVertex(fromVertexId).getEdgeIds();
+    toVertexEdgeIds = getVertex(toVertexId).getEdgeIds();
     for (const auto& fromVertexEdgeId : fromVertexEdgeIds) {
       for (const auto& toVertexEdgeId : toVertexEdgeIds) {
         if (fromVertexEdgeId == toVertexEdgeId) {
@@ -138,8 +136,9 @@ class Graph {
   std::vector<Edge> edges_;
 };
 int main() {
-  const int number_of_vertices = 18;
-  const std::array<std::pair<int, int>, number_of_vertices> connections = {
+  const int numberOfVertices = 18;
+  const int verticesCount = 14;
+  const std::array<std::pair<int, int>, numberOfVertices> connections = {
       {{0, 1},
        {0, 2},
        {0, 3},
@@ -159,7 +158,7 @@ int main() {
        {11, 13},
        {12, 13}}};
   Graph graph;
-  for (int i = 0; i <= 13; i++) {
+  for (int i = 0; i < verticesCount; i++) {
     graph.addVertex();
   }
   for (const auto& connection : connections) {
