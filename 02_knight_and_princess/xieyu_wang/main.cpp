@@ -69,11 +69,13 @@ class Graph {
     }
   }
   const Vertex& getVertex(const int id) {
+    Vertex* vertexFind = NULL;
     for (auto& vertex : vertices_) {
       if (vertex.id == id) {
-        return vertex;
+        vertexFind = &vertex;
       }
     }
+    return *vertexFind;
   }
   std::string toString() {
     // vertex
