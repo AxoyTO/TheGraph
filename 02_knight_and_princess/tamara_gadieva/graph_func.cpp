@@ -5,7 +5,7 @@ void Graph::add_vertex() {
 }
 
 void Graph::add_vertex_inf(const VertexId& cur_vertex_id) {
-  this->vertices_[cur_vertex_id].add_edge_id(get_cur_edge_id());
+  vertices_[cur_vertex_id].add_edge_id(get_cur_edge_id());
 }
 
 void Graph::add_edge(const VertexId& from_vertex_id,
@@ -20,18 +20,18 @@ std::string Graph::json_string() const {
   result_graph += "{\n";
 
   result_graph += "\t\"vertices\": [\n";
-  for (int i = 0; i < this->vertices_.size(); i++) {
-    result_graph += this->vertices_[i].json_string();
-    if (i != this->vertices_.size() - 1)
+  for (int i = 0; i < vertices_.size(); i++) {
+    result_graph += vertices_[i].json_string();
+    if (i != vertices_.size() - 1)
       result_graph += ",\n";
     else
       result_graph += "\n\t],\n";
   }
 
   result_graph += "\t\"edges\": [\n";
-  for (int i = 0; i < this->edges_.size(); i++) {
-    result_graph += this->edges_[i].json_string();
-    if (i != this->edges_.size() - 1)
+  for (int i = 0; i < edges_.size(); i++) {
+    result_graph += edges_[i].json_string();
+    if (i != edges_.size() - 1)
       result_graph += ",\n";
     else
       result_graph += "\n\t]\n";
