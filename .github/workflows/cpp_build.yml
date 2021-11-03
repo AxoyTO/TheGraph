@@ -11,7 +11,15 @@ jobs:
     steps:
     - name: Checkout Repository Code
       uses: actions/checkout@v2
+    - name: Install Homebrew Prepare
+      run: sudo apt-get install build-essential procps curl file git;
+    - name: Install Homebrew Script
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)";
+    - name: Install Homebrew Afteractions
+      run: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile; eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+    - name: Update & Upgrade Homebrew
+      run: brew update; brew upgrade;
     - name: Install Clang
-      run: sudo apt install clang
+      run: brew install llvm
     - name: Build
-      run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do clang++ $d/*.cpp -o $d/test_build -std=c++17 -Werror; done;
+      run: for d in $(find $GITHUB_WORKSPACE/*/* -maxdepth 1 -type d); do echo $d; clang++ $d/*.cpp -o $d/test_build -std=c++17 -Werror; done;
