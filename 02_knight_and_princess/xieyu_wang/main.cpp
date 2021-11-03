@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 class Vertex {
@@ -62,22 +61,10 @@ class Graph {
            "Vertices already connected");
     const auto& newEdge =
         edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId);
-    for (auto& vertex : vertices_) {
-      if (fromVertexId == vertex.id || toVertexId == vertex.id) {
-        vertex.addEdgeId(newEdge.id);
-      }
-    }
+    getVertex(fromVertexId).addEdgeId(newEdge.id);
+    getVertex(toVertexId).addEdgeId(newEdge.id);
   }
-  const Vertex& getVertex(const int id) {
-    Vertex* vertexFind = NULL;
-    for (auto& vertex : vertices_) {
-      if (vertex.id == id) {
-        vertexFind = &vertex;
-      }
-    }
-    return *vertexFind;
-  }
-  std::string toString() {
+  std::string toString() const {
     // vertex
     std::string strGraph = "";
     strGraph += "{\n\t\"vertices\": [\n";
@@ -108,13 +95,8 @@ class Graph {
   bool isConnected(int fromVertexId, int toVertexId) {
     assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
     assert(hasVertex(toVertexId) && "Vertex doesn't exist");
-    std::vector<int> fromVertexEdgeIds;
-    std::vector<int> toVertexEdgeIds;
-    std::vector<int> intersections;
-    fromVertexEdgeIds = getVertex(fromVertexId).getEdgeIds();
-    toVertexEdgeIds = getVertex(toVertexId).getEdgeIds();
-    for (const auto& fromVertexEdgeId : fromVertexEdgeIds) {
-      for (const auto& toVertexEdgeId : toVertexEdgeIds) {
+    for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
+      for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
         if (fromVertexEdgeId == toVertexEdgeId) {
           return true;
         }
@@ -124,14 +106,16 @@ class Graph {
   }
 
  private:
-  int getNextEdgeId() {
-    vertexIdCounter_++;
-    return vertexIdCounter_ - 1;
+  Vertex& getVertex(int id) const {
+    for (const auto& vertex : vertices_) {
+      if (vertex.id == id) {
+        return (Vertex&)vertex;
+      }
+    }
+    return const_cast<Vertex&>(vertices_.at(-1));
   }
-  int getNextVertexId() {
-    edgeIdCounter_++;
-    return edgeIdCounter_ - 1;
-  }
+  int getNextEdgeId() { return vertexIdCounter_++; }
+  int getNextVertexId() { return edgeIdCounter_++; }
   int vertexIdCounter_ = 0;
   int edgeIdCounter_ = 0;
   std::vector<Vertex> vertices_;
