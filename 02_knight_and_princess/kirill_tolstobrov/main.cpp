@@ -1,6 +1,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <vector>
 
@@ -83,12 +84,15 @@ class Graph {
     return false;
   }
 
-  bool are_vertices_connected(const VertexId& id1, const VertexId& id2) {
+  bool are_vertices_connected(const VertexId& id1, const VertexId& id2) const {
     assert(check_vertex_existence(id1) &&
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
            "Attemptig to access to nonexistent vertex: Error.");
-    for (const auto& edge_id : connections_map_[id1]) {
+    if (connections_map_.find(id1) == connections_map_.end()) {
+      return false;
+    }
+    for (const auto& edge_id : connections_map_.at(id1)) {
       if (edges_[edge_id].vertex1_id == id2 ||
           edges_[edge_id].vertex2_id == id2) {
         return true;
