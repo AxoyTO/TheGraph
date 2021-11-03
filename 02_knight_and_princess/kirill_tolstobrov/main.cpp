@@ -12,26 +12,26 @@ class Vertex {
  public:
   explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
   bool check_edge_presence(const EdgeId& edge_id) const {
-    for (const auto& id : connected_edges_) {
+    for (const auto& id : edge_ids_) {
       if (edge_id == id) {
         return true;
       }
     }
     return false;
   }
-  void add_edge(const EdgeId& edge_id) {
+  void add_edge_id(const EdgeId& edge_id) {
     assert(!check_edge_presence(edge_id) &&
            "Attemptig to add added edge to vertex: Error.");
-    connected_edges_.push_back(edge_id);
+    edge_ids_.push_back(edge_id);
   }
   operator std::string() const {
     std::string result = "";
     result += "{\n\"id\": " + std::to_string(id);
     result += ",\n\"edge_ids\": [";
 
-    for (int i = 0; i < connected_edges_.size(); i++) {
-      result += std::to_string(connected_edges_[i]);
-      if (i == connected_edges_.size() - 1) {
+    for (int i = 0; i < edge_ids_.size(); i++) {
+      result += std::to_string(edge_ids_[i]);
+      if (i == edge_ids_.size() - 1) {
         result += "]\n";
       } else {
         result += ", ";
@@ -44,7 +44,7 @@ class Vertex {
   const VertexId id;
 
  private:
-  std::vector<EdgeId> connected_edges_;
+  std::vector<EdgeId> edge_ids_;
 };
 
 class Edge {
@@ -70,9 +70,6 @@ class Edge {
 
 class Graph {
  public:
-  int get_vertices_amount() const { return vertices_.size(); }
-  int get_edges_amount() const { return edges_.size(); }
-
   void add_new_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
 
   bool check_vertex_existence(const VertexId& vertex_id) const {
@@ -111,8 +108,8 @@ class Graph {
     const auto& edge = edges_.emplace_back(get_new_edge_id(), id1, id2);
     connections_map_[id1].push_back(edge.id);
     connections_map_[id2].push_back(edge.id);
-    vertices_[id1].add_edge(edge.id);
-    vertices_[id2].add_edge(edge.id);
+    vertices_[id1].add_edge_id(edge.id);
+    vertices_[id2].add_edge_id(edge.id);
   }
 
   operator std::string() const {
@@ -150,9 +147,12 @@ class Graph {
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
 };
 
-Graph generateCustomGraph(
-    int vert_number,
-    const std::vector<std::pair<VertexId, VertexId>>& connections) {
+constexpr int VERTICES_AMOUNT = 14;
+constexpr int CONNECTIONS_AMOUNT = 18;
+
+Graph generate_custom_graph(int vert_number,
+                            const std::array<std::pair<VertexId, VertexId>,
+                                             CONNECTIONS_AMOUNT>& connections) {
   Graph graph = Graph();
   for (int i = 0; i < vert_number; i++) {
     graph.add_new_vertex();
@@ -164,12 +164,27 @@ Graph generateCustomGraph(
 }
 
 int main() {
-  const std::vector<std::pair<VertexId, VertexId>> g_connections{
-      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
+  const std::array<std::pair<VertexId, VertexId>, CONNECTIONS_AMOUNT>
+      graph_connections{{{0, 1},
+                         {0, 2},
+                         {0, 3},
+                         {1, 4},
+                         {1, 5},
+                         {1, 6},
+                         {2, 7},
+                         {2, 8},
+                         {3, 9},
+                         {4, 10},
+                         {5, 10},
+                         {6, 10},
+                         {7, 11},
+                         {8, 11},
+                         {9, 12},
+                         {10, 13},
+                         {11, 13},
+                         {12, 13}}};
 
-  const Graph graph = generateCustomGraph(14, g_connections);
+  const Graph graph = generate_custom_graph(VERTICES_AMOUNT, graph_connections);
 
   std::ofstream file;
   file.open("graph.json");
