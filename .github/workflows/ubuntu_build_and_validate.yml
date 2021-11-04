@@ -1,0 +1,110 @@
+---
+name: Ubuntu Check
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  get_changed_files:
+    name: Get Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      all: ${{ steps.changed_files.outputs.all }}
+      directory: ${{ steps.changed_directory.outputs.directory }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Get Changed Files
+        id: changed_files
+        uses: jitterbit/get-changed-files@v1
+      - name: Get Changed Directory
+        id: changed_directory
+        run: |
+          FUNCTION_RESULT="";
+          find_dir_name() {
+            BASE_DIR_NAME_01="01_hello_world";
+            BASE_DIR_NAME_02="02_knight_and_princess";
+            RESULT_DIR_NAME="";
+            PREV_RESULT_DIR_NAME="";
+            for FILE_NAME in ${{ steps.changed_files.outputs.all }}; do
+              echo "CHANGED_FILE: $FILE_NAME"
+              RESULT_DIR_NAME="$(dirname "$FILE_NAME")";
+              PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
+              while [ "$RESULT_DIR_NAME" != "$(dirname "$RESULT_DIR_NAME")" ]; do
+                DIR_NAME=$(basename "$RESULT_DIR_NAME");
+                if [ "$DIR_NAME" == "$BASE_DIR_NAME_01" ] || [ "$DIR_NAME" == "$BASE_DIR_NAME_02" ]; then
+                  FUNCTION_RESULT="$PREV_RESULT_DIR_NAME";
+                  return;
+                fi;
+                PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
+                RESULT_DIR_NAME="$(dirname "$RESULT_DIR_NAME")";
+              done;
+            done;
+          }
+          find_dir_name;
+          # Check if empty
+          if [[ -z "$FUNCTION_RESULT" ]]; then
+            echo "CHANGED DIRECTORY not found";
+          else
+            echo "CHANGED DIRECTORY found: $FUNCTION_RESULT";
+          fi;
+          echo "::set-output name=directory::$FUNCTION_RESULT";
+  build_and_check_includes:
+    name: Build and Check Includes
+    runs-on: ubuntu-latest
+    needs: get_changed_files
+    if: ${{ needs.get_changed_files.outputs.directory }}
+    steps:
+    - name: Checkout Repository Code
+      uses: actions/checkout@v2
+    - name: Install Homebrew Prepare
+      run: sudo apt-get install build-essential procps curl file git;
+    - name: Install Homebrew Script
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)";
+    - name: Install Homebrew Afteractions
+      run: |
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile;
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
+    # - name: Update & Upgrade Homebrew
+    #   run: |
+    #     brew update;
+    #     brew upgrade;
+    - name: Install Clang
+      run: brew install llvm;
+    - name: Build
+      run: |
+        clang++ --version;
+        echo "Compile directory with changes: ${{ needs.get_changed_files.outputs.directory }}";
+        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -Werror;
+    # - name: Install include-what-you-use
+    #   run: brew install iwyu;
+    # - name: Validate "#include" preprocessors
+    #   run: |
+    #     # 2>&1 needs to capture stderr output
+    #     OUTPUT="$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \; 2>&1)";
+    #     echo "$OUTPUT";
+    #     if [[ "$OUTPUT" == *"The full include-list for"* ]]; then
+    #       echo "Some _#include_ need to be fixed!";
+    #       exit 1;
+    #     else
+    #       echo "All _#inlude_ are good!";
+    #     fi;
+  lint:
+    name: Lint Code Base
+    runs-on: ubuntu-latest
+    needs: get_changed_files
+    if: ${{ needs.get_changed_files.outputs.directory }}
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v2
+        with:
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: github/super-linter/slim@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_CLANG_FORMAT: true
+          DEFAULT_BRANCH: master
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
