@@ -50,8 +50,8 @@ jobs:
             echo "CHANGED DIRECTORY found: $FUNCTION_RESULT";
           fi;
           echo "::set-output name=directory::$FUNCTION_RESULT";
-  build_and_check_includes:
-    name: Build and Check Includes
+  compile:
+    name: Compile
     runs-on: macos-latest
     needs: get_changed_files
     if: ${{ needs.get_changed_files.outputs.directory }}
