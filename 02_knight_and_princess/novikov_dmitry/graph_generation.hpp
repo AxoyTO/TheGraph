@@ -20,9 +20,10 @@ double get_color_probability(const Edge::Color& color) {
       return 0.25;
     case Edge::Color::Red:
       return 0.33;
-    default:
-      assert(false && "Unexpected behavior");
-      return 0.0;
+    case Edge::Color::Yellow:
+      return 1.0;
+    case Edge::Color::Gray:
+      return 1.0;
   }
 }
 
@@ -71,7 +72,9 @@ void generate_blue_edges(Graph& graph) {
 }
 
 void generate_yellow_edges(Graph& graph) {
-  double yellow_edge_probability = 1.0 / (graph.get_depth() - 1);
+  double probability =
+      get_color_probability(Edge::Color::Yellow) / (graph.get_depth() - 1);
+  double yellow_edge_probability = probability;
   //так как вероятность генерации желтых ребер из нулевой вершины должна быть
   //нулевой, то можно просто не рассматривать эту вершину
   for (Depth current_depth = 1; current_depth < graph.get_depth();
@@ -88,13 +91,13 @@ void generate_yellow_edges(Graph& graph) {
           }
         }
         if (not_binded_vertices.size()) {
-          int idx = get_random_number(not_binded_vertices.size());
+          const int idx = get_random_number(not_binded_vertices.size());
           graph.add_edge(current_vertex_id, not_binded_vertices[idx],
                          Edge::Color::Yellow);
         }
       }
     }
-    yellow_edge_probability += 1.0 / (graph.get_depth() - 1);
+    yellow_edge_probability += probability;
   }
 }
 
@@ -118,7 +121,8 @@ void generate_red_edges(Graph& graph) {
 void generate_gray_edges(Graph& graph,
                          const Depth& depth,
                          const int new_vertices_num) {
-  double new_vertext_probability = 1.0;
+  double probability = get_color_probability(Edge::Color::Gray);
+  double new_vertext_probability = probability;
 
   for (Depth current_depth = 0;
        current_depth < depth && current_depth <= graph.get_depth();
@@ -136,11 +140,13 @@ void generate_gray_edges(Graph& graph,
         }
       }
     }
-    new_vertext_probability -= 1.0 / depth;
+    new_vertext_probability -= probability / depth;
   }
 }
 
-Graph generate_graph(const Depth& depth, int new_vertices_num) {
+void generate_graph(const Depth& depth,
+                    int new_vertices_num,
+                    const std::string& filename) {
   auto graph = Graph();
   graph.add_vertex();
   generate_gray_edges(graph, depth, new_vertices_num);
@@ -148,6 +154,10 @@ Graph generate_graph(const Depth& depth, int new_vertices_num) {
   generate_blue_edges(graph);
   generate_yellow_edges(graph);
   generate_red_edges(graph);
-  return graph;
+
+  std::ofstream file_out;
+  file_out.open(filename, std::fstream::out | std::fstream::trunc);
+  file_out << graph.to_string();
+  file_out.close();
 }
 }  // namespace graph_generation
