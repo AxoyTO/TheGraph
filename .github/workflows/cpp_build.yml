@@ -17,7 +17,8 @@ jobs:
       - name: Get changed files
         id: changes
         run: |
-          echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)"
+          CHENGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs);
+          echo "::set-output name=all::$CHENGED_FILES"
 
           FUNCTION_RESULT="";
           find_dir_name() {
@@ -25,7 +26,7 @@ jobs:
             BASE_DIR_NAME_02="02_knight_and_princess";
             RESULT_DIR_NAME="";
             PREV_RESULT_DIR_NAME="";
-            for FILE_NAME in ${FILE_NAMES[@]}; do
+            for FILE_NAME in ${CHENGED_FILES[@]}; do
               echo "CHANGED_FILE: $FILE_NAME"
               RESULT_DIR_NAME="$(dirname "$FILE_NAME")";
               PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
