@@ -71,7 +71,9 @@ jobs:
     #     brew update;
     #     brew upgrade;
     - name: Install Clang
-      run: brew install llvm;
+      run: |
+        brew install llvm;
+        brew info llvm;
     - name: Build
       run: |
         clang++ --version;

@@ -63,8 +63,9 @@ jobs:
     - name: Install Clang
       run: |
         brew install llvm;
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+        brew info llvm;
         echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.zshrc
+        exec zsh
     - name: Build
       run: |
         clang++ --version;
