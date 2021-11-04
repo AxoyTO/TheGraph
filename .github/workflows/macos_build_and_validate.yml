@@ -64,8 +64,7 @@ jobs:
       run: |
         brew install llvm;
         brew info llvm;
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.zshrc
-        exec zsh
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
     - name: Build
       run: |
         clang++ --version;
