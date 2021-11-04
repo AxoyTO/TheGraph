@@ -7,6 +7,7 @@ on:
     branches: [master]
 jobs:
   get_changed_files:
+    name: Get Changed Files
     runs-on: ubuntu-latest
     outputs:
       all: ${{ steps.changed_files.outputs.all }}
@@ -50,6 +51,7 @@ jobs:
           fi;
           echo "::set-output name=directory::$FUNCTION_RESULT";
   build_and_check_includes:
+    name: Build and Check Includes
     runs-on: ubuntu-latest
     needs: get_changed_files
     if: ${{ needs.get_changed_files.outputs.directory }}
@@ -61,24 +63,24 @@ jobs:
     - name: Install Homebrew Script
       run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)";
     - name: Install Homebrew Afteractions
-      run: >
+      run: |
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile;
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";
     - name: Update & Upgrade Homebrew
-      run: >
+      run: |
         brew update;
         brew upgrade;
     - name: Install Clang
       run: brew install llvm;
     - name: Build
-      run: >
+      run: |
         clang++ --version;
         echo "Compile directory with changes: ${{ needs.get_changed_files.outputs.directory }}";
         clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -Werror;
     - name: Install include-what-you-use
       run: brew install iwyu;
     - name: Validate "#include" preprocessors
-      run: >
+      run: |
         # 2>&1 needs to capture stderr output
         OUTPUT=$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \; 2>&1);
         echo $OUTPUT;
