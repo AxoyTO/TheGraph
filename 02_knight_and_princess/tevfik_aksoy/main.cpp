@@ -28,6 +28,7 @@ bool edge_id_exists_in_vertex(const EdgeId& edge_id,
   }
   return false;
 }
+
 bool does_vertex_exist(const VertexId& id, const vector<Vertex>& vertices);
 }  // namespace validation
 
@@ -169,7 +170,6 @@ class Graph {
                    const Edge::Color& color = Edge::Color::Gray) {
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
-    // assert(validation::is_color_valid(color) && "Color is not valid!");
     const int edge_id = get_new_edge_id_();
     edges_.emplace_back(source, destination, edge_id, color);
 
