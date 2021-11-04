@@ -82,9 +82,9 @@ jobs:
     - name: Validate "#include" preprocessors
       run: |
         # 2>&1 needs to capture stderr output
-        OUTPUT=$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \; 2>&1);
-        echo $OUTPUT;
-        if [[ $OUTPUT == *"The full include-list for"* ]]; then
+        OUTPUT="$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \; 2>&1)";
+        echo "$OUTPUT";
+        if [[ "$OUTPUT" == *"The full include-list for"* ]]; then
           echo "Some _#include_ need to be fixed!";
           exit 1;
         else
