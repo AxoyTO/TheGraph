@@ -45,7 +45,7 @@ jobs:
           # Check if empty
           if [[ -z "$FUNCTION_RESULT" ]]; then
             echo "CHANGED DIRECTORY not found";
-          else
+          else;
             echo "CHANGED DIRECTORY found: $FUNCTION_RESULT"
           fi;
           echo "::set-output name=directory::$FUNCTION_RESULT"
@@ -80,9 +80,10 @@ jobs:
     - name: Validate "#include" preprocessors
       run: >
         OUTPUT=$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \;)
+        echo $OUTPUT
         if [[ $OUTPUT == *"The full include-list for"* ]]; then
-          echo "Some #include need to be fixed!"
-          exit 1
-        else
-          echo "All #inlude are good!"
-        fi
+          echo "Some _#include_ need to be fixed!";
+          exit 1;
+        else;
+          echo "All _#inlude_ are good!";
+        fi;
