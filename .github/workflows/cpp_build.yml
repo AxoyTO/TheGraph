@@ -9,24 +9,24 @@ jobs:
   get_changed_files:
     runs-on: ubuntu-latest
     outputs:
-      all: ${{ steps.changes.outputs.all }}
-      directory: ${{ steps.changes.outputs.directory }}
+      all: ${{ steps.files.outputs.all }}
+      directory: ${{ steps.directory.outputs.directory }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Get changed files
-        id: changes
+        id: files
+        uses: jitterbit/get-changed-files@v1
+      - name: Get changed directory
+        id: directory
         run: |
-          CHENGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs);
-          echo "::set-output name=all::$CHENGED_FILES"
-
           FUNCTION_RESULT="";
           find_dir_name() {
             BASE_DIR_NAME_01="01_hello_world";
             BASE_DIR_NAME_02="02_knight_and_princess";
             RESULT_DIR_NAME="";
             PREV_RESULT_DIR_NAME="";
-            for FILE_NAME in ${CHENGED_FILES[@]}; do
+            for FILE_NAME in ${{ steps.files.outputs.all }}; do
               echo "CHANGED_FILE: $FILE_NAME"
               RESULT_DIR_NAME="$(dirname "$FILE_NAME")";
               PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
@@ -48,12 +48,11 @@ jobs:
           else
             echo "DIRECTORY WITH CHANGED FOUND: $FUNCTION_RESULT"
           fi;
-
           echo "::set-output name=directory::$FUNCTION_RESULT"
   build_and_check:
     runs-on: ubuntu-latest
     needs: get_changed_files
-    if: ${{needs.get_changed_files.outputs.directory}}
+    if: ${{ needs.get_changed_files.outputs.directory }}
     steps:
     - name: Checkout Repository Code
       uses: actions/checkout@v2
@@ -74,9 +73,9 @@ jobs:
     - name: Build
       run: >
         clang++ --version;
-        echo "Compile directory with changes: ${{needs.get_changed_files.outputs.directory}}";
-        clang++ ${{needs.get_changed_files.outputs.directory}}/*.cpp -o ${{needs.get_changed_files.outputs.directory}}/test_build -std=c++17 -Werror;
+        echo "Compile directory with changes: ${{ needs.get_changed_files.outputs.directory }}";
+        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -Werror;
     - name: Install include-what-you-use
       run: brew install iwyu;
     - name: Validate "#include" preprocessors
-      run: find ${{needs.get_changed_files.outputs.directory}} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \;
+      run: find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \;
