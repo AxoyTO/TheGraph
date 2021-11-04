@@ -78,4 +78,11 @@ jobs:
     - name: Install include-what-you-use
       run: brew install iwyu;
     - name: Validate "#include" preprocessors
-      run: find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \;
+      run: >
+        OUTPUT=$(find ${{ needs.get_changed_files.outputs.directory }} -type f -name "*.cpp" -exec include-what-you-use -std=c++17 {} \;)
+        if [[ $OUTPUT == *"The full include-list for"* ]]; then
+          echo "Some #include need to be fixed!"
+          exit 1
+        else
+          echo "All #inlude are good!"
+        fi
