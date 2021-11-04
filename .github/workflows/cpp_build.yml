@@ -9,16 +9,16 @@ jobs:
   get_changed_files:
     runs-on: ubuntu-latest
     outputs:
-      all: ${{ steps.files.outputs.all }}
-      directory: ${{ steps.directory.outputs.directory }}
+      all: ${{ steps.changed_files.outputs.all }}
+      directory: ${{ steps.changed_directory.outputs.directory }}
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Get changed files
-        id: files
+      - name: Get Changed Files
+        id: changed_files
         uses: jitterbit/get-changed-files@v1
-      - name: Get changed directory
-        id: directory
+      - name: Get Changed Directory
+        id: changed_directory
         run: |
           FUNCTION_RESULT="";
           find_dir_name() {
@@ -26,7 +26,7 @@ jobs:
             BASE_DIR_NAME_02="02_knight_and_princess";
             RESULT_DIR_NAME="";
             PREV_RESULT_DIR_NAME="";
-            for FILE_NAME in ${{ steps.files.outputs.all }}; do
+            for FILE_NAME in ${{ steps.changed_files.outputs.all }}; do
               echo "CHANGED_FILE: $FILE_NAME"
               RESULT_DIR_NAME="$(dirname "$FILE_NAME")";
               PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
@@ -44,9 +44,9 @@ jobs:
           find_dir_name;
           # Check if empty
           if [[ -z "$FUNCTION_RESULT" ]]; then
-            echo "DIRECTORY WITH CHANGES NOT FOUND";
+            echo "CHANGED DIRECTORY not found";
           else
-            echo "DIRECTORY WITH CHANGED FOUND: $FUNCTION_RESULT"
+            echo "CHANGED DIRECTORY found: $FUNCTION_RESULT"
           fi;
           echo "::set-output name=directory::$FUNCTION_RESULT"
   build_and_check:
