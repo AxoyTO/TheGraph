@@ -63,7 +63,7 @@ jobs:
     - name: Update & Upgrade Homebrew
       run: |
         brew update;
-        brew upgrade;
+    #    brew upgrade;
     # - name: Install Clang
     #   run: |
     #     brew install llvm;
@@ -86,21 +86,21 @@ jobs:
         else
           echo "All _#inlude_ are good!";
         fi;
-  lint:
-    name: Lint Code Base
-    runs-on: macos-latest
-    needs: get_changed_files
-    if: ${{ needs.get_changed_files.outputs.directory }}
-    steps:
-      - name: Checkout Repository Code
-        uses: actions/checkout@v2
-        with:
-          # Full git history is needed to get a proper list of changed files within `super-linter`
-          fetch-depth: 0
-      - name: Lint Code Base
-        uses: github/super-linter/slim@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_CLANG_FORMAT: true
-          DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # lint:
+  #   name: Lint Code Base
+  #   runs-on: macos-latest
+  #   needs: get_changed_files
+  #   if: ${{ needs.get_changed_files.outputs.directory }}
+  #   steps:
+  #     - name: Checkout Repository Code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         # Full git history is needed to get a proper list of changed files within `super-linter`
+  #         fetch-depth: 0
+  #     - name: Lint Code Base
+  #       uses: github/super-linter/slim@v4
+  #       env:
+  #         VALIDATE_ALL_CODEBASE: false
+  #         VALIDATE_CLANG_FORMAT: true
+  #         DEFAULT_BRANCH: master
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
