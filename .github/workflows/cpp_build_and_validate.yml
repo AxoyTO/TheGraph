@@ -8,7 +8,7 @@ on:
 jobs:
   get_changed_files:
     name: Get Changed Files
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     outputs:
       all: ${{ steps.changed_files.outputs.all }}
       directory: ${{ steps.changed_directory.outputs.directory }}
@@ -52,7 +52,7 @@ jobs:
           echo "::set-output name=directory::$FUNCTION_RESULT";
   build_and_check_includes:
     name: Build and Check Includes
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: get_changed_files
     if: ${{ needs.get_changed_files.outputs.directory }}
     steps:
@@ -92,7 +92,7 @@ jobs:
         fi;
   lint:
     name: Lint Code Base
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: get_changed_files
     if: ${{ needs.get_changed_files.outputs.directory }}
     steps:
