@@ -271,6 +271,101 @@ class Graph {
   }
 };
 
+class GraphGenerator {
+ public:
+  Graph graph;
+
+  GraphGenerator(const int depth, const int new_vertices_num)
+      : depth_(depth), new_vertices_num_(new_vertices_num) {}
+
+  void generate_vertices() {
+    graph.add_vertex();
+    for (int i = 0; i <= depth_; ++i) {
+      auto same_depth_vertices = graph.get_vertices_at_depth(i);
+      for (const auto& current_vertex_id : same_depth_vertices) {
+        for (int j = 0; j < new_vertices_num_; ++j) {
+          if (depth_ > 0 && is_lucky(1.0 - (double)i / depth_)) {
+            VertexId new_vertex = graph.add_vertex();
+            graph.add_edge(current_vertex_id, new_vertex);
+          }
+        }
+      }
+    }
+    initial_depth_distribution_ = graph.depth_distribution();
+  }
+
+  void generate_green_edges() {
+    for (auto vertex_id : graph.vertex_ids()) {
+      if (is_lucky(0.1)) {
+        graph.add_edge(vertex_id, vertex_id, EdgeColor::GREEN);
+      }
+    }
+  }
+
+  void generate_blue_edges() {
+    for (size_t cur_depth = 0; cur_depth < graph.max_depth(); ++cur_depth) {
+      const auto& same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+      for (const auto& vertex1_id : same_depth_vertices) {
+        for (const auto& vertex2_id : same_depth_vertices) {
+          if (is_lucky(0.25) && !graph.is_connected(vertex1_id, vertex2_id) &&
+              graph.is_id_neighbor(vertex1_id, vertex2_id)) {
+            graph.add_edge(vertex1_id, vertex2_id, EdgeColor::BLUE);
+          }
+        }
+      }
+    }
+  }
+
+  void generate_yellow_edges() {
+    for (size_t cur_depth = 0; cur_depth + 1 <= graph.max_depth();
+         ++cur_depth) {
+      const auto& cur_depth_vertices =
+          initial_depth_distribution_.find(cur_depth)->second;
+      const auto& next_depth_vertices =
+          initial_depth_distribution_.find(cur_depth + 1)->second;
+      for (const auto& cur_vertex_id : cur_depth_vertices) {
+        if (depth_ > 1 && is_lucky((double)cur_depth / (depth_ - 1))) {
+          std::set<VertexId> not_connected_vertices;
+          for (const auto& next_vertex_id : next_depth_vertices) {
+            if (!graph.is_connected(cur_vertex_id, next_vertex_id)) {
+              not_connected_vertices.insert(next_vertex_id);
+            }
+          }
+          if (!not_connected_vertices.empty()) {
+            size_t rand_id = std::rand() % not_connected_vertices.size();
+            auto rand_it = not_connected_vertices.begin();
+            std::advance(rand_it, rand_id);
+            graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::YELLOW);
+          }
+        }
+      }
+    }
+  }
+
+  void generate_red_edges() {
+    for (size_t cur_depth = 0; cur_depth + 2 <= graph.max_depth();
+         ++cur_depth) {
+      const auto& cur_depth_vertices =
+          initial_depth_distribution_.find(cur_depth)->second;
+      const auto& next_depth_vertices =
+          initial_depth_distribution_.find(cur_depth + 2)->second;
+      for (const auto& cur_vertex_id : cur_depth_vertices) {
+        if (is_lucky(0.33) && !next_depth_vertices.empty()) {
+          size_t rand_id = std::rand() % next_depth_vertices.size();
+          auto rand_it = next_depth_vertices.begin();
+          std::advance(rand_it, rand_id);
+          graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::RED);
+        }
+      }
+    }
+  }
+
+ private:
+  const int depth_;
+  const int new_vertices_num_;
+  std::map<size_t, std::set<VertexId>> initial_depth_distribution_;
+};
+
 Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   if (depth < 0) {
     throw std::invalid_argument("invalid depth argument");
@@ -278,86 +373,19 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   if (new_vertices_num < 0) {
     throw std::invalid_argument("invalid new_vertices_num argument");
   }
-  Graph working_graph;
-  working_graph.add_vertex();
-  for (int i = 0; i <= depth; ++i) {
-    auto same_depth_vertices = working_graph.get_vertices_at_depth(i);
-    for (const auto& current_vertex_id : same_depth_vertices) {
-      for (int j = 0; j < new_vertices_num; ++j) {
-        if (depth > 0 && is_lucky(1.0 - (double)i / depth)) {
-          VertexId new_vertex = working_graph.add_vertex();
-          working_graph.add_edge(current_vertex_id, new_vertex);
-        }
-      }
-    }
-  }
-  // green edges:
-  for (auto vertex_id : working_graph.vertex_ids()) {
-    if (is_lucky(0.1)) {
-      working_graph.add_edge(vertex_id, vertex_id, EdgeColor::GREEN);
-    }
-  }
-  // blue edges:
-  for (size_t cur_depth = 0; cur_depth < working_graph.max_depth();
-       ++cur_depth) {
-    const auto& same_depth_vertices =
-        working_graph.get_vertices_at_depth(cur_depth);
-    for (const auto& vertex1_id : same_depth_vertices) {
-      for (const auto& vertex2_id : same_depth_vertices) {
-        if (is_lucky(0.25) &&
-            !working_graph.is_connected(vertex1_id, vertex2_id) &&
-            working_graph.is_id_neighbor(vertex1_id, vertex2_id)) {
-          working_graph.add_edge(vertex1_id, vertex2_id, EdgeColor::BLUE);
-        }
-      }
-    }
-  }
-  // used for both yellow and red edges to save current depth's distribution
-  // info before addition of new edges will mess it up:
-  const auto& depth_distribution = working_graph.depth_distribution();
-  // yellow edges:
-  for (size_t cur_depth = 0; cur_depth + 1 <= working_graph.max_depth();
-       ++cur_depth) {
-    const auto& cur_depth_vertices = depth_distribution.find(cur_depth)->second;
-    const auto& next_depth_vertices =
-        depth_distribution.find(cur_depth + 1)->second;
-    for (const auto& cur_vertex_id : cur_depth_vertices) {
-      if (depth > 1 && is_lucky((double)cur_depth / (depth - 1))) {
-        std::set<VertexId> not_connected_vertices;
-        for (const auto& next_vertex_id : next_depth_vertices) {
-          if (!working_graph.is_connected(cur_vertex_id, next_vertex_id)) {
-            not_connected_vertices.insert(next_vertex_id);
-          }
-        }
-        if (!not_connected_vertices.empty()) {
-          size_t rand_id = std::rand() % not_connected_vertices.size();
-          auto rand_it = not_connected_vertices.begin();
-          std::advance(rand_it, rand_id);
-          working_graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::YELLOW);
-        }
-      }
-    }
-  }
-  // red edges:
-  for (size_t cur_depth = 0; cur_depth + 2 <= working_graph.max_depth();
-       ++cur_depth) {
-    const auto& cur_depth_vertices = depth_distribution.find(cur_depth)->second;
-    const auto& next_depth_vertices =
-        depth_distribution.find(cur_depth + 2)->second;
-    for (const auto& cur_vertex_id : cur_depth_vertices) {
-      if (is_lucky(0.33) && !next_depth_vertices.empty()) {
-        size_t rand_id = std::rand() % next_depth_vertices.size();
-        auto rand_it = next_depth_vertices.begin();
-        std::advance(rand_it, rand_id);
-        working_graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::RED);
-      }
-    }
-  }
-  if (working_graph.max_depth() < (size_t)depth) {
-    std::cerr << "generated graph's depth=" << working_graph.max_depth()
+
+  GraphGenerator graph_generator(depth, new_vertices_num);
+  graph_generator.generate_vertices();
+  graph_generator.generate_green_edges();
+  graph_generator.generate_blue_edges();
+  graph_generator.generate_yellow_edges();
+  graph_generator.generate_red_edges();
+
+  if (graph_generator.graph.max_depth() < (size_t)depth) {
+    std::cerr << "generated graph's depth=" << graph_generator.graph.max_depth()
               << " is less than specified one =" << depth << std::endl;
   }
-  return working_graph;
+  return graph_generator.graph;
 }
 
 int main() {
