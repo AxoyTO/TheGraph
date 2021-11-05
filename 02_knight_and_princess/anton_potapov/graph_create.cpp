@@ -34,7 +34,7 @@ class Vertex {
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
 
-  void init_depth(size_t new_depth) { depth = new_depth; }
+  void init_depth(size_t new_depth) { depth_ = new_depth; }
 
   std::string get_json_string() const {
     std::stringstream json_stringstream;
@@ -48,7 +48,7 @@ class Vertex {
       }
     }
     json_stringstream << "],"
-                      << "\"depth\":" << depth << "}";
+                      << "\"depth\":" << depth_ << "}";
     return json_stringstream.str();
   }
 
@@ -64,7 +64,7 @@ class Vertex {
  private:
   const VertexId id_;
   std::set<EdgeId> connected_edges_;
-  size_t depth;
+  size_t depth_;
 };
 
 class Edge {
