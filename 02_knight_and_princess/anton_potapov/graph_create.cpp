@@ -13,7 +13,7 @@
 
 const double EPS = 1e-9;
 
-enum class Color { GRAY, GREEN, BLUE, YELLOW, RED };
+enum class EdgeColor { GRAY, GREEN, BLUE, YELLOW, RED };
 
 using VertexId = int;
 using EdgeId = int;
@@ -72,19 +72,19 @@ class Edge {
   Edge(const EdgeId& edge_id,
        const VertexId& vertex1,
        const VertexId& vertex2,
-       Color edge_color)
+       EdgeColor edge_color)
       : vertex1_id(vertex1),
         vertex2_id(vertex2),
         color_(edge_color),
         id_(edge_id) {}
 
   std::string get_json_string() const {
-    static const std::map<Color, std::string> color_string_map = {
-        {Color::GRAY, "gray"},
-        {Color::GREEN, "green"},
-        {Color::BLUE, "blue"},
-        {Color::YELLOW, "yellow"},
-        {Color::RED, "red"}};
+    static const std::map<EdgeColor, std::string> color_string_map = {
+        {EdgeColor::GRAY, "gray"},
+        {EdgeColor::GREEN, "green"},
+        {EdgeColor::BLUE, "blue"},
+        {EdgeColor::YELLOW, "yellow"},
+        {EdgeColor::RED, "red"}};
     std::stringstream json_stringstream;
     std::string color_string = color_string_map.find(color_)->second;
     json_stringstream << "{\"id\":" << id_ << ","
@@ -95,7 +95,7 @@ class Edge {
   }
 
  private:
-  const Color color_;
+  const EdgeColor color_;
   const EdgeId id_;
   const std::string color;
 };
@@ -164,7 +164,7 @@ class Graph {
 
   EdgeId add_edge(const VertexId& vertex1,
                   const VertexId& vertex2,
-                  Color edge_color = Color::GRAY) {
+                  EdgeColor edge_color = EdgeColor::GRAY) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
@@ -310,7 +310,7 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   // green edges:
   for (auto vertex_id : working_graph.vertex_ids()) {
     if (is_lucky(0.1)) {
-      working_graph.add_edge(vertex_id, vertex_id, Color::GREEN);
+      working_graph.add_edge(vertex_id, vertex_id, EdgeColor::GREEN);
     }
   }
   // blue edges:
@@ -323,7 +323,7 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
         if (is_lucky(0.25) &&
             !working_graph.is_connected(vertex1_id, vertex2_id) &&
             working_graph.is_adjacent(vertex1_id, vertex2_id)) {
-          working_graph.add_edge(vertex1_id, vertex2_id, Color::BLUE);
+          working_graph.add_edge(vertex1_id, vertex2_id, EdgeColor::BLUE);
         }
       }
     }
@@ -349,7 +349,7 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
           size_t rand_id = std::rand() % not_connected_vertices.size();
           auto rand_it = not_connected_vertices.begin();
           std::advance(rand_it, rand_id);
-          working_graph.add_edge(cur_vertex_id, *rand_it, Color::YELLOW);
+          working_graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::YELLOW);
         }
       }
     }
@@ -365,7 +365,7 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
         size_t rand_id = std::rand() % next_depth_vertices.size();
         auto rand_it = next_depth_vertices.begin();
         std::advance(rand_it, rand_id);
-        working_graph.add_edge(cur_vertex_id, *rand_it, Color::RED);
+        working_graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::RED);
       }
     }
   }
