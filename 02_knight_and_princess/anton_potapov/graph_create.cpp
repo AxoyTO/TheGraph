@@ -30,11 +30,11 @@ bool is_lucky(const double probability) {
 
 class Vertex {
  public:
-  const std::set<EdgeId>& connected_edges() const { return connected_edges_; }
+  size_t depth;
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
 
-  void init_depth(size_t new_depth) { depth_ = new_depth; }
+  const std::set<EdgeId>& connected_edges() const { return connected_edges_; }
 
   std::string get_json_string() const {
     std::stringstream json_stringstream;
@@ -48,7 +48,7 @@ class Vertex {
       }
     }
     json_stringstream << "],"
-                      << "\"depth\":" << depth_ << "}";
+                      << "\"depth\":" << depth << "}";
     return json_stringstream.str();
   }
 
@@ -64,7 +64,6 @@ class Vertex {
  private:
   const VertexId id_;
   std::set<EdgeId> connected_edges_;
-  size_t depth_;
 };
 
 class Edge {
@@ -257,7 +256,7 @@ class Graph {
     }
     size_t new_max_depth = 0;
     for (const auto& [vertex_id, depth] : depths) {
-      vertices_.find(vertex_id)->second.init_depth(depth);
+      vertices_.find(vertex_id)->second.depth = depth;
       if (depth > new_max_depth) {
         new_max_depth = depth;
       }
