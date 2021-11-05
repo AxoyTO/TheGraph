@@ -15,6 +15,16 @@ constexpr double DOUBLE_COMPARISON_EPS = 1e-9;
 
 enum class EdgeColor { GRAY, GREEN, BLUE, YELLOW, RED };
 
+std::string get_edge_color_string(const EdgeColor& color) {
+  static const std::map<EdgeColor, std::string> color_string_map = {
+        {EdgeColor::GRAY, "gray"},
+        {EdgeColor::GREEN, "green"},
+        {EdgeColor::BLUE, "blue"},
+        {EdgeColor::YELLOW, "yellow"},
+        {EdgeColor::RED, "red"}};
+  return color_string_map.find(color)->second;
+}
+
 using VertexId = int;
 using EdgeId = int;
 
@@ -79,14 +89,8 @@ class Edge {
         id_(edge_id) {}
 
   std::string get_json_string() const {
-    static const std::map<EdgeColor, std::string> color_string_map = {
-        {EdgeColor::GRAY, "gray"},
-        {EdgeColor::GREEN, "green"},
-        {EdgeColor::BLUE, "blue"},
-        {EdgeColor::YELLOW, "yellow"},
-        {EdgeColor::RED, "red"}};
     std::stringstream json_stringstream;
-    std::string color_string = color_string_map.find(color_)->second;
+    std::string color_string = get_edge_color_string(color_);
     json_stringstream << "{\"id\":" << id_ << ","
                       << "\"vertex_ids\":[" << vertex1_id << "," << vertex2_id
                       << "],\"color\":\"" << color_string << "\""
