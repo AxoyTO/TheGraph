@@ -73,7 +73,7 @@ class Edge {
   Edge(const EdgeId& edge_id,
        const VertexId& vertex1,
        const VertexId& vertex2,
-       EdgeColor edge_color)
+       const EdgeColor& edge_color)
       : vertex1_id(vertex1),
         vertex2_id(vertex2),
         color_(edge_color),
