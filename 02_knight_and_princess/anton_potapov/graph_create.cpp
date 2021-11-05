@@ -17,11 +17,11 @@ enum class EdgeColor { GRAY, GREEN, BLUE, YELLOW, RED };
 
 std::string get_edge_color_string(const EdgeColor& color) {
   static const std::map<EdgeColor, std::string> color_string_map = {
-        {EdgeColor::GRAY, "gray"},
-        {EdgeColor::GREEN, "green"},
-        {EdgeColor::BLUE, "blue"},
-        {EdgeColor::YELLOW, "yellow"},
-        {EdgeColor::RED, "red"}};
+      {EdgeColor::GRAY, "gray"},
+      {EdgeColor::GREEN, "green"},
+      {EdgeColor::BLUE, "blue"},
+      {EdgeColor::YELLOW, "yellow"},
+      {EdgeColor::RED, "red"}};
   return color_string_map.find(color)->second;
 }
 
