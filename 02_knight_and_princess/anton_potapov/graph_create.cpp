@@ -127,7 +127,7 @@ class Graph {
     return vertices_.find(vertex_id) != vertices_.end();
   }
 
-  bool is_id_adjacent(const VertexId& vertex1_id,
+  bool is_id_neighbor(const VertexId& vertex1_id,
                       const VertexId& vertex2_id) const {
     return vertex1_id + 1 == vertex2_id || vertex2_id + 1 == vertex1_id;
   }
@@ -323,7 +323,7 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
       for (const auto& vertex2_id : same_depth_vertices) {
         if (is_lucky(0.25) &&
             !working_graph.is_connected(vertex1_id, vertex2_id) &&
-            working_graph.is_id_adjacent(vertex1_id, vertex2_id)) {
+            working_graph.is_id_neighbor(vertex1_id, vertex2_id)) {
           working_graph.add_edge(vertex1_id, vertex2_id, EdgeColor::BLUE);
         }
       }
