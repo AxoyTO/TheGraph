@@ -269,25 +269,6 @@ class Graph {
   }
 };
 
-Graph task_02_get_graph() {
-  Graph task_02_graph;
-  const size_t n = 14;
-  std::vector<VertexId> added_vertices;
-  for (size_t i = 0; i < n; ++i) {
-    added_vertices.push_back(task_02_graph.add_vertex());
-  }
-  const std::vector<std::pair<size_t, size_t>> edge_vertices_indexes{
-      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
-  for (const auto& edge : edge_vertices_indexes) {
-    const VertexId vertex1 = added_vertices[edge.first];
-    const VertexId vertex2 = added_vertices[edge.second];
-    task_02_graph.add_edge(vertex1, vertex2);
-  }
-  return task_02_graph;
-}
-
 Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   if (depth < 0) {
     throw std::invalid_argument("invalid depth argument");
