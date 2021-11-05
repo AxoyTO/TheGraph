@@ -97,7 +97,6 @@ class Edge {
  private:
   const EdgeColor color_;
   const EdgeId id_;
-  const std::string color;
 };
 
 class Graph {
