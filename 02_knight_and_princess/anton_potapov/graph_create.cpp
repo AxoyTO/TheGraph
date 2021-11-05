@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-const double EPS = 1e-9;
+constexpr double DOUBLE_COMPARISON_EPS = 1e-9;
 
 enum class EdgeColor { GRAY, GREEN, BLUE, YELLOW, RED };
 
@@ -19,7 +19,8 @@ using VertexId = int;
 using EdgeId = int;
 
 bool is_lucky(const double probability) {
-  assert(probability + EPS > 0 && probability - EPS < 1 &&
+  assert(probability + DOUBLE_COMPARISON_EPS > 0 &&
+         probability - DOUBLE_COMPARISON_EPS < 1 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
