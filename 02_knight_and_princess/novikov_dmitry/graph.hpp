@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <algorithm>
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -128,7 +127,7 @@ class Graph {
   VertexId add_vertex() {
     const auto new_vertex_id = get_default_vertex_id();
     vertex_map_.insert({new_vertex_id, Vertex(new_vertex_id)});
-    get_vertices_at_depth_(DEFAULT_DEPTH).push_back(new_vertex_id);
+    get_vertices_at_depth(DEFAULT_DEPTH).push_back(new_vertex_id);
     return new_vertex_id;
   }
 
@@ -139,16 +138,16 @@ class Graph {
     assert(has_vertex(to_vertex_id) && "Vertex doesn't exists");
     assert(!check_binding(from_vertex_id, to_vertex_id) &&
            "Vertices already binded");
-    assert(check_color_valid(get_vertex_(from_vertex_id),
-                             get_vertex_(to_vertex_id), new_edge_color) &&
+    assert(check_color_valid(get_vertex(from_vertex_id),
+                             get_vertex(to_vertex_id), new_edge_color) &&
            "Not valid color");
     const auto new_edge_id = get_default_edge_id();
     const auto new_edge =
         edge_map_.insert({new_edge_id, Edge(from_vertex_id, to_vertex_id,
                                             new_edge_id, new_edge_color)});
-    get_vertex_(from_vertex_id).add_edge_id(new_edge.first->first);
+    get_vertex(from_vertex_id).add_edge_id(new_edge.first->first);
     if (from_vertex_id != to_vertex_id) {
-      get_vertex_(to_vertex_id).add_edge_id(new_edge.first->first);
+      get_vertex(to_vertex_id).add_edge_id(new_edge.first->first);
     }
     if (new_edge_color == Edge::Color::Gray) {
       set_vertex_depth(from_vertex_id, to_vertex_id);
@@ -249,19 +248,17 @@ class Graph {
 
   EdgeId get_default_edge_id() { return default_edge_id_++; }
 
-  Vertex& get_vertex_(const VertexId& id) {
-    assert(has_vertex(id) && "Vertex doesn't exist");
-    return vertex_map_.at(id);
+  Vertex& get_vertex(const VertexId& id) {
+    return const_cast<Vertex&>(static_cast<const Graph&>(*this).get_vertex(id));
   }
 
-  Edge& get_edge_(const EdgeId& id) {
-    assert(has_edge(id) && "Edge doesn't exist");
-    return edge_map_.at(id);
+  Edge& get_edge(const EdgeId& id) {
+    return const_cast<Edge&>(static_cast<const Graph&>(*this).get_edge(id));
   }
 
-  std::vector<VertexId>& get_vertices_at_depth_(const Depth& depth) {
-    assert(depth <= get_depth() && "Depth level doesn't exist");
-    return depth_map_.at(depth);
+  std::vector<VertexId>& get_vertices_at_depth(const Depth& depth) {
+    return const_cast<std::vector<VertexId>&>(
+        static_cast<const Graph&>(*this).get_vertices_at_depth(depth));
   }
 
   void set_vertex_depth(const VertexId& from_vertex_id,
@@ -275,8 +272,8 @@ class Graph {
 
     const auto new_son_vertex_depth = get_vertex(parent_vertex_id).depth + 1;
 
-    auto& son_vertex = get_vertex_(son_vertex_id);
-    auto& depth_map_son_level = get_vertices_at_depth_(son_vertex.depth);
+    auto& son_vertex = get_vertex(son_vertex_id);
+    auto& depth_map_son_level = get_vertices_at_depth(son_vertex.depth);
 
     const auto vertex_iter_at_depth_map = std::remove(
         depth_map_son_level.begin(), depth_map_son_level.end(), son_vertex.id);
@@ -286,7 +283,7 @@ class Graph {
     if (depth_map_.size() <= new_son_vertex_depth) {
       depth_map_.push_back(std::vector<VertexId>({son_vertex.id}));
     } else {
-      get_vertices_at_depth_(new_son_vertex_depth).push_back(son_vertex.id);
+      get_vertices_at_depth(new_son_vertex_depth).push_back(son_vertex.id);
     }
   }
 };
