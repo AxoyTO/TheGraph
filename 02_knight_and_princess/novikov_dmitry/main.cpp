@@ -23,7 +23,7 @@ int main() {
   std::cin >> new_vertices_num;
   while (new_vertices_num < 0) {
     std::cout << "Try to enter a natural number or zero" << std::endl;
-    std::cin >> depth;
+    std::cin >> new_vertices_num;
   }
   std::stringstream ss_filename;
   ss_filename << dafault_filename << dafault_fileformat;
