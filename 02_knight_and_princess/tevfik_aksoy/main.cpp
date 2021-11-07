@@ -147,9 +147,9 @@ class Graph {
                    const Edge::Color& color = Edge::Color::Gray) {
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
-    assert(does_color_correspond_vertices(vertices_[source],
-                                          vertices_[destination], color) &&
-           "Color is not valid!");
+    assert(does_color_match_vertices(vertices_[source], vertices_[destination],
+                                     color) &&
+           "Color does not match the vertices!");
     const int edge_id = get_new_edge_id_();
     edges_.emplace_back(source, destination, edge_id, color);
 
@@ -167,9 +167,9 @@ class Graph {
     }
   }
 
-  bool does_color_correspond_vertices(const Vertex& source,
-                                      const Vertex& destination,
-                                      const Edge::Color& color) const {
+  bool does_color_match_vertices(const Vertex& source,
+                                 const Vertex& destination,
+                                 const Edge::Color& color) const {
     switch (color) {
       case Edge::Color::Gray:
         if (destination.id == vertices_.size() - 1)
