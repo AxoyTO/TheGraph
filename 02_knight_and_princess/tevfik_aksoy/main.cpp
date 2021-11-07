@@ -1,5 +1,3 @@
-// Все комментарии удалю ближе к PR approve
-
 #include <cassert>
 #include <fstream>
 #include <iostream>
