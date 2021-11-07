@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <array>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <vector>
 class Vertex {
@@ -107,12 +108,12 @@ class Graph {
 
  private:
   Vertex& getVertex(int id) const {
-    for (const auto& vertex : vertices_) {
+    for (auto& vertex : vertices_) {
       if (vertex.id == id) {
         return (Vertex&)vertex;
       }
     }
-    return const_cast<Vertex&>(vertices_.at(-1));
+    exit(-1);
   }
   int getNextEdgeId() { return vertexIdCounter_++; }
   int getNextVertexId() { return edgeIdCounter_++; }
