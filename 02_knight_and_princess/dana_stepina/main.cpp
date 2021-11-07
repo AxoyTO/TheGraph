@@ -15,7 +15,7 @@ const bool TRUE_MEANING = true;
 const bool FALSE_MEANING = false;
 
 struct Vertex {
-  const VertexId id = 0;
+  const VertexId id = INVALID_ID;
 
   const bool& has_edge(const EdgeId& edge_id) {
     for (const auto id : edge_ids_)
@@ -36,7 +36,7 @@ struct Vertex {
   std::vector<EdgeId> edge_ids_;
 };
 struct Edge {
-  const EdgeId id = -1;
+  const EdgeId id = INVALID_ID;
   const VertexId vertex_start = 0;
   const VertexId vertex_end = 0;
 
