@@ -18,6 +18,10 @@ using VertexDepth = int;
 struct Edge;
 struct Vertex;
 
+constexpr float GREEN_EDGE_PROBABILITY = 0.1;
+constexpr float BLUE_EDGE_PROBABILITY = 0.25;
+constexpr float RED_EDGE_PROBABILITY = 0.33;
+
 namespace validation {
 bool edge_id_exists_in_vertex(const EdgeId& edge_id,
                               const vector<EdgeId>& edge_ids) {
@@ -32,45 +36,19 @@ bool edge_id_exists_in_vertex(const EdgeId& edge_id,
 bool does_vertex_exist(const VertexId& id, const vector<Vertex>& vertices);
 }  // namespace validation
 
-bool probability(float condition) {
+float get_random_probability() {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_real_distribution<float> probability(0.0, 100.0);
-  if (probability(mt) >= condition)
-    return true;
-  else
-    return false;
+  std::uniform_real_distribution<float> probability(0.0, 1);
+  return probability(mt);
 }
 
 VertexId get_random_vertex_id(const vector<VertexId>& vertices) {
   std::random_device rd;
   std::mt19937 mt(rd());
   std::uniform_int_distribution<int> random_vertex_distribution(
-      vertices[0], vertices[vertices.size() - 1]);
-  return random_vertex_distribution(mt);
-}
-
-VertexId get_random_vertex_id_between_excluding(
-    const vector<VertexId>& vertices,
-    const vector<VertexId>& filtered_vertices) {
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<int> distribution(
-      vertices[0], vertices[vertices.size() - 1]);
-
-  bool exclude_flag;
-  VertexId random_vertex_id;
-  do {
-    random_vertex_id = distribution(mt);
-    exclude_flag = false;
-    for (const auto& vertex_id : filtered_vertices) {
-      if (random_vertex_id == vertex_id) {
-        exclude_flag = true;
-      }
-    }
-  } while (!exclude_flag);
-
-  return random_vertex_id;
+      0, vertices.size() - 1);
+  return vertices[random_vertex_distribution(mt)];
 }
 
 struct Vertex {
@@ -132,8 +110,7 @@ std::string color_to_string(const Edge::Color& color) {
       return "yellow";
     case Edge::Color::Red:
       return "red";
-    default:
-      assert(false && "Color is not valid!\n");
+      assert(false && "Color is not valid!");
   }
 }
 
@@ -160,8 +137,8 @@ class Graph {
     const auto id = get_new_vertex_id_();
     vertices_.emplace_back(id);
     if (id == 0) {
-      depth_map_.resize(1);
-      depth_map_[0].push_back(id);
+      auto& first_depth_layer = depth_map_.emplace_back();
+      first_depth_layer.push_back(id);
     }
     return id;
   }
@@ -170,6 +147,9 @@ class Graph {
                    const Edge::Color& color = Edge::Color::Gray) {
     assert(!are_vertices_connected(source, destination) &&
            "Vertices are already connected!");
+    assert(does_color_correspond_vertices(vertices_[source],
+                                          vertices_[destination], color) &&
+           "Color is not valid!");
     const int edge_id = get_new_edge_id_();
     edges_.emplace_back(source, destination, edge_id, color);
 
@@ -180,30 +160,61 @@ class Graph {
         const auto depth = vertices_[source].depth + 1;
         vertices_[destination].depth = depth;
         if (depth_map_.size() == depth) {
-          depth_map_.resize(depth + 1);
+          depth_map_.emplace_back();
         }
         depth_map_[depth].emplace_back(destination);
       }
     }
   }
 
-  bool are_vertices_connected(const VertexId& source_id,
-                              const VertexId& destination_id) const {
-    assert(validation::does_vertex_exist(source_id, vertices_) &&
-           "Source vertex doesn't exist!\n");
-    assert(validation::does_vertex_exist(destination_id, vertices_) &&
+  bool does_color_correspond_vertices(const Vertex& source,
+                                      const Vertex& destination,
+                                      const Edge::Color& color) const {
+    switch (color) {
+      case Edge::Color::Gray:
+        if (destination.id == vertices_.size() - 1)
+          return true;
+        break;
+      case Edge::Color::Green:
+        if (source.id == destination.id)
+          return true;
+        break;
+      case Edge::Color::Blue:
+        if (source.depth == destination.depth)
+          return true;
+        break;
+      case Edge::Color::Yellow:
+        if (source.depth == destination.depth - 1)
+          return true;
+        break;
+      case Edge::Color::Red:
+        if (source.depth == destination.depth - 2)
+          return true;
+        break;
+    }
+    return false;
+  }
+
+  bool are_vertices_connected(const VertexId& source,
+                              const VertexId& destination) const {
+    assert(validation::does_vertex_exist(source, vertices_) &&
+           "Source vertex doesn't exist!");
+    assert(validation::does_vertex_exist(destination, vertices_) &&
            "Destination vertex doesn't exist!");
 
-    if (source_id != destination_id) {
-      for (const auto& source : vertices_[source_id].get_edge_ids()) {
-        for (const auto& destination :
-             vertices_[destination_id].get_edge_ids()) {
-          if (source == destination) {
+    const auto& source_vertex_edges = vertices_[source].get_edge_ids();
+    const auto& destination_vertex_edges =
+        vertices_[destination].get_edge_ids();
+    for (const auto& edge_of_source_vertex : source_vertex_edges)
+      if (source == destination) {
+        if (edges_[edge_of_source_vertex].source ==
+            edges_[edge_of_source_vertex].destination)
+          return true;
+      } else {
+        for (const auto& edge_of_destination_vertex : destination_vertex_edges)
+          if (edge_of_source_vertex == edge_of_destination_vertex)
             return true;
-          }
-        }
       }
-    }
     return false;
   }
 
@@ -250,48 +261,45 @@ class Graph {
 void generate_vertices_and_gray_edges(Graph& graph,
                                       const VertexDepth& max_depth,
                                       const int new_vertices_num) {
-  float condition = 0;
   graph.insert_vertex();
-  bool is_lucky_flag = true;
 
   for (VertexDepth depth = 0; depth < max_depth; depth++) {
-    if (is_lucky_flag)
-      for (const auto& source : graph.get_vertices_in_depth(depth)) {
-        for (int j = 0; j < new_vertices_num; j++) {
-          is_lucky_flag = false;
-          if (probability(condition)) {
-            is_lucky_flag = true;
-            const VertexId new_vertex = graph.insert_vertex();
-            graph.insert_edge(source, new_vertex, Edge::Color::Gray);
-          }
+    bool is_new_vertex_generated = false;
+    const float probability = (float)depth / (float)max_depth;
+    for (const auto& source : graph.get_vertices_in_depth(depth)) {
+      for (int j = 0; j < new_vertices_num; j++) {
+        if (get_random_probability() > probability) {
+          is_new_vertex_generated = true;
+          const VertexId new_vertex = graph.insert_vertex();
+          graph.insert_edge(source, new_vertex, Edge::Color::Gray);
         }
       }
-    condition += 100 / (float)max_depth;
+    }
+    if (!is_new_vertex_generated)
+      break;
   }
 
   if (max_depth != graph.depth()) {
-    std::cout << "\nMax depth couldn't be reached. Depth of final vertex: "
+    std::cout << "Max depth couldn't be reached. Depth of final vertex: "
               << graph.depth() << "\n";
   }
 }
 
 void generate_green_edges(Graph& graph) {
-  const int condition = 90;
   for (const auto& vertex : graph.get_vertices()) {
-    if (probability(condition)) {
+    if (get_random_probability() < GREEN_EDGE_PROBABILITY) {
       graph.insert_edge(vertex.id, vertex.id, Edge::Color::Green);
     }
   }
 }
 
 void generate_blue_edges(Graph& graph) {
-  const float condition = 75;
   for (int depth = 0; depth < graph.depth(); depth++) {
     const auto& vertices_in_depth = graph.get_vertices_in_depth(depth);
     for (VertexId j = 0; j < vertices_in_depth.size() - 1; j++) {
       const auto source = vertices_in_depth[j];
       const auto destination = vertices_in_depth[j + 1];
-      if (probability(condition)) {
+      if (get_random_probability() < BLUE_EDGE_PROBABILITY) {
         graph.insert_edge(source, destination, Edge::Color::Blue);
       }
     }
@@ -311,18 +319,17 @@ vector<VertexId> filter_connected_vertices(const VertexId& id,
 }
 void generate_yellow_edges(Graph& graph) {
   for (VertexDepth depth = 0; depth < graph.depth(); depth++) {
-    float condition = 100 - depth * (100 / (float)(graph.depth() - 1));
+    float probability = (float)depth / (float)graph.depth();
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 1);
     for (const auto& vertex_id : vertices) {
-      if (probability(condition)) {
+      if (get_random_probability() < probability) {
         const auto& filtered_vertex_ids =
             filter_connected_vertices(vertex_id, vertices_next, graph);
         if (filtered_vertex_ids.size() == 0) {
           continue;
         }
-        VertexId random_vertex_id = get_random_vertex_id_between_excluding(
-            vertices_next, filtered_vertex_ids);
+        VertexId random_vertex_id = get_random_vertex_id(filtered_vertex_ids);
         graph.insert_edge(vertex_id, random_vertex_id, Edge::Color::Yellow);
       }
     }
@@ -330,12 +337,11 @@ void generate_yellow_edges(Graph& graph) {
 }
 
 void generate_red_edges(Graph& graph) {
-  const float condition = 67;
   for (VertexDepth depth = 0; depth < graph.depth() - 1; depth++) {
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 2);
     for (const auto& vertex : vertices) {
-      if (probability(condition)) {
+      if (get_random_probability() < RED_EDGE_PROBABILITY) {
         graph.insert_edge(vertex, get_random_vertex_id(vertices_next),
                           Edge::Color::Red);
       }
