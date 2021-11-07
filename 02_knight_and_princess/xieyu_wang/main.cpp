@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <array>
 #include <fstream>
-#include <optional>
 #include <string>
 #include <vector>
 class Vertex {
@@ -107,7 +106,8 @@ class Graph {
   }
 
  private:
-  Vertex& getVertex(int id) const {
+  Vertex& getVertex(int id) {
+    assert(hasVertex(id) && "Vertex doesn't exist");
     for (auto& vertex : vertices_) {
       if (vertex.id == id) {
         return (Vertex&)vertex;
