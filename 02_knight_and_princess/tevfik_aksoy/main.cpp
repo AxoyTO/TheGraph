@@ -177,9 +177,12 @@ class Graph {
           return true;
       case Edge::Color::Blue:
         if (source.depth == destination.depth)
-          for (const auto& vertex : depth_map_[source.depth])
-            if (vertex == source.id && vertex + 1 == destination.id)
+          for (int i = 0; i < depth_map_[source.depth].size(); i++) {
+            if (depth_map_[source.depth].at(i) == source.id &&
+                depth_map_[destination.depth].at(i + 1) == destination.id) {
               return true;
+            }
+          }
       case Edge::Color::Yellow:
         if (source.depth == destination.depth - 1)
           return true;
