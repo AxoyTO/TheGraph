@@ -61,8 +61,7 @@ void generate_blue_edges(Graph& graph) {
   // учитывать
   for (Depth current_depth = 1; current_depth <= graph.get_depth();
        ++current_depth) {
-    const auto& vertices_at_depth =
-        static_cast<const Graph&>(graph).get_vertices_at_depth(current_depth);
+    const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     for (int idx = 0; idx < vertices_at_depth.size() - 1; ++idx) {
       if (is_lucky(probability)) {
         graph.add_edge(vertices_at_depth[idx], vertices_at_depth[idx + 1],
@@ -80,11 +79,9 @@ void generate_yellow_edges(Graph& graph) {
   //нулевой, то можно просто не рассматривать эту вершину
   for (Depth current_depth = 1; current_depth < graph.get_depth();
        ++current_depth) {
-    const auto& vertices_at_depth =
-        static_cast<const Graph&>(graph).get_vertices_at_depth(current_depth);
+    const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     const auto& vertices_at_next_depth =
-        static_cast<const Graph&>(graph).get_vertices_at_depth(current_depth +
-                                                               1);
+        graph.get_vertices_at_depth(current_depth + 1);
     for (const auto& current_vertex_id : vertices_at_depth) {
       if (is_lucky(yellow_edge_probability)) {
         std::vector<VertexId> not_binded_vertices;
@@ -108,11 +105,9 @@ void generate_red_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Red);
   for (Depth current_depth = 0; current_depth < graph.get_depth() - 1;
        ++current_depth) {
-    const auto& vertices_at_depth =
-        static_cast<const Graph&>(graph).get_vertices_at_depth(current_depth);
+    const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     const auto& vertices_at_next_depth =
-        static_cast<const Graph&>(graph).get_vertices_at_depth(current_depth +
-                                                               2);
+        graph.get_vertices_at_depth(current_depth + 2);
     for (const auto& current_vertex_id : vertices_at_depth) {
       if (is_lucky(probability)) {
         const int index = get_random_number(vertices_at_next_depth.size());
@@ -132,8 +127,7 @@ void generate_gray_edges(Graph& graph,
   for (Depth current_depth = 0;
        current_depth < depth && current_depth <= graph.get_depth();
        ++current_depth) {  //по всем уровням вершин
-    for (VertexId parent_vertex_id :
-         static_cast<const Graph&>(graph).get_vertices_at_depth(
+    for (VertexId parent_vertex_id : graph.get_vertices_at_depth(
              current_depth)) {  //по всем порождающим вершинам
       for (int i = 0; i < new_vertices_num; ++i) {
         if (is_lucky(new_vertext_probability)) {
