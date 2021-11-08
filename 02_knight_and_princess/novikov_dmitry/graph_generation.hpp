@@ -127,8 +127,11 @@ void generate_gray_edges(Graph& graph,
   for (Depth current_depth = 0;
        current_depth < depth && current_depth <= graph.get_depth();
        ++current_depth) {  //по всем уровням вершин
-    for (VertexId parent_vertex_id : graph.get_vertices_at_depth(
-             current_depth)) {  //по всем порождающим вершинам
+    const auto vertices_at_depth = graph.get_vertices_at_depth(
+        current_depth);  // копия создается, так как во время обхода в массив
+                         // добавляются новые вершины
+    for (const VertexId& parent_vertex_id :
+         vertices_at_depth) {  //по всем порождающим вершинам
       for (int i = 0; i < new_vertices_num; ++i) {
         if (is_lucky(new_vertext_probability)) {
           const VertexId& new_vertex_id =
