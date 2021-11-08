@@ -108,7 +108,6 @@ std::string color_to_string(const Edge::Color& color) {
       return "yellow";
     case Edge::Color::Red:
       return "red";
-      assert(false && "Color is not valid!");
   }
 }
 
@@ -170,25 +169,22 @@ class Graph {
                                  const Edge::Color& color) const {
     switch (color) {
       case Edge::Color::Gray:
-        if (destination.id == vertices_.size() - 1)
+        if (source.get_edge_ids().size() == 0 ||
+            destination.get_edge_ids().size() == 0)
           return true;
-        break;
       case Edge::Color::Green:
         if (source.id == destination.id)
           return true;
-        break;
       case Edge::Color::Blue:
-        if (source.depth == destination.depth)
+        if (source.depth == destination.depth &&
+            abs(source.id - destination.id) == 1)
           return true;
-        break;
       case Edge::Color::Yellow:
         if (source.depth == destination.depth - 1)
           return true;
-        break;
       case Edge::Color::Red:
         if (source.depth == destination.depth - 2)
           return true;
-        break;
     }
     return false;
   }
