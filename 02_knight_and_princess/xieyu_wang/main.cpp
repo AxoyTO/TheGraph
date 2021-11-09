@@ -110,10 +110,10 @@ class Graph {
     assert(hasVertex(id) && "Vertex doesn't exist");
     for (auto& vertex : vertices_) {
       if (vertex.id == id) {
-        return (Vertex&)vertex;
+        return vertex;
       }
     }
-    exit(-1);
+    throw std::runtime_error("Unreachable code");
   }
   int getNextEdgeId() { return vertexIdCounter_++; }
   int getNextVertexId() { return edgeIdCounter_++; }
