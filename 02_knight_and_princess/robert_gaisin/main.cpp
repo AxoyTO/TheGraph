@@ -1,6 +1,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <vector>
 
 using std::cin;
@@ -11,11 +12,32 @@ using std::vector;
 using VertexId = int;
 using EdgeId = int;
 
-const int Gray = 0;
-const int Green = 1;
-const int Blue = 2;
-const int Yellow = 3;
-const int Red = 4;
+enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
+EdgeColor Gray = EdgeColor::Gray;
+EdgeColor Green = EdgeColor::Green;
+EdgeColor Blue = EdgeColor::Blue;
+EdgeColor Yellow = EdgeColor::Yellow;
+EdgeColor Red = EdgeColor::Red;
+
+std::random_device rd;
+std::mt19937 mersenne(rd());
+
+std::string color_to_string(const EdgeColor& color) {
+  if (color == Gray) {
+    return "\"gray\"";
+  }
+  if (color == Green) {
+    return "\"green\"";
+  }
+  if (color == Blue) {
+    return "\"blue\"";
+  }
+  if (color == Yellow) {
+    return "\"yellow\"";
+  } else {
+    return "\"red\"";
+  }
+}
 
 std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
   for (auto it = int_vector.begin(); it != int_vector.end(); ++it) {
@@ -28,11 +50,13 @@ std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
 }
 
 struct Vertex {
-  Vertex(const VertexId& new_id, size_t depth_n) : id(new_id), depth(depth_n) {}
+  Vertex(const VertexId& new_id, int depth_n) : id(new_id), depth(depth_n) {}
   const VertexId id = 0;
-  size_t depth = 0;
+  int depth = 0;
+  vector<EdgeId> children_ids;
   void add_edge_id(const EdgeId& id);
   const vector<EdgeId>& edge_ids() const { return edge_ids_; }
+  //  const vector<EdgeId>& children_ids() const { return children_ids_; }
   bool has_edge_id(const EdgeId& id) const;
 
  private:
@@ -64,12 +88,12 @@ struct Edge {
   Edge(const EdgeId& new_id,
        const VertexId& begin_vertex,
        const VertexId& end_vertex,
-       const int color)
+       const EdgeColor color)
       : id(new_id), begin(begin_vertex), end(end_vertex), color(color) {}
   const EdgeId id = 0;
   const VertexId begin = 0;
   const VertexId end = 0;
-  const int color = 0;
+  const EdgeColor color = Gray;
 };
 
 std::ostream& operator<<(std::ostream& out, const Edge& edge) {
@@ -78,23 +102,7 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
   out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "],"
       << endl;
   out << "      \"color\": ";
-  switch (edge.color) {
-    case Gray:
-      out << "\"gray\"";
-      break;
-    case Green:
-      out << "\"green\"";
-      break;
-    case Blue:
-      out << "\"blue\"";
-      break;
-    case Yellow:
-      out << "\"yellow\"";
-      break;
-    case Red:
-      out << "\"red\"";
-      break;
-  }
+  out << color_to_string(edge.color);
   out << endl;
   out << "}";
   return out;
@@ -102,19 +110,22 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
 
 class Graph {
  public:
-  void add_vertex(size_t depth);
+  void add_vertex(int depth);
 
-  void add_edge(const VertexId& begin, const VertexId& end, const int color);
+  void add_edge(const VertexId& begin,
+                const VertexId& end,
+                const EdgeColor& color);
 
   int depth() const { return depth_sizes_.size(); }
   int depth_size(int depth) const { return depth_sizes_[depth]; }
-  int number_of_vertices() const { return num_of_vrt_; }
+  int number_of_vertices() const { return vertices_.size(); }
 
   const vector<Vertex>& vertices() const { return vertices_; }
   const vector<Edge>& edges() const { return edges_; }
 
   bool has_vertex(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& begin, const VertexId& end) const;
+  void add_depth(int depth);
 
  private:
   VertexId num_of_vrt_ = 0;
@@ -148,25 +159,34 @@ bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
   return false;
 }
 
-void Graph::add_vertex(size_t depth) {
+void Graph::add_depth(int depth) {
+  for (int i = depth_sizes_.size(); i <= depth; ++i)
+    depth_sizes_.push_back(0);
+}
+
+void Graph::add_vertex(int depth) {
   vertices_.emplace_back(next_vertex_id(), depth);
-  if (depth >= depth_sizes_.size())
-    for (size_t i = depth_sizes_.size(); i <= depth; ++i)
-      depth_sizes_.push_back(0);
+  if (depth >= (int)depth_sizes_.size())
+    add_depth(depth);
   ++depth_sizes_[depth];
 }
 
 void Graph::add_edge(const VertexId& begin,
                      const VertexId& end,
-                     const int color) {
+                     const EdgeColor& color) {
   assert(has_vertex(begin) && "Vertex doesn't exist");
   assert(has_vertex(end) && "Vertex doesn't exist");
-  if (is_connected(begin, end))
+  bool is_connect = is_connected(begin, end);
+  bool color_gray = color == Gray;
+  assert(!(is_connect && color_gray) && "Vertices already connected");
+  if (is_connect)
     return;
   const auto& edge = edges_.emplace_back(next_edge_id(), begin, end, color);
   vertices_[begin].add_edge_id(edge.id);
   if (begin != end)
     vertices_[end].add_edge_id(edge.id);
+  if (color_gray)
+    vertices_[begin].children_ids.push_back(end);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
@@ -202,49 +222,39 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
   return out;
 }
 
-int neighbour_choice(int rule, size_t k, size_t sub) {
+int neighbour_choice(int rule, int k, int sub) {
   switch (rule) {
     case 1:  //есть только сосед на расстоянии sub с меньшим индексом
       return k - sub;
     case 2:  //есть только сосед на расстоянии sub с большим индексом
       return k + sub;
     case 3:  //есть оба соседа, подкидывем монетку, к кому кидать ребро
-      const int coin = rand() % 2;
+      const int coin = mersenne() % 2;
       return coin * (k - sub) + (1 - coin) * (k + sub);
   }
   return -1;
 }
-
-Graph graph_generator(int graph_depth,
-                      int vrtx_on_first_lvl,
-                      int new_vertices_num) {
-  auto returned_graph = Graph();
-  //Генерация вершин первого слоя:
-  for (int i = 0; i < vrtx_on_first_lvl; ++i) {
-    //    Vertex x = {returned_graph.next_vertex_id(), 0};
-    returned_graph.add_vertex(0);
-  }
+void generate_gray_edges(int graph_depth,
+                         int new_vertices_num,
+                         Graph& returned_graph,
+                         vector<int>& offsets) {
   //Вероятность порождения вершины следующего слоя:
   int p = 100;
   //Настолько вероятность будет уменьшена для следующего слоя:
   int sub_p = p / graph_depth;
   //Генерация вершин начиная со второго слоя:
-  size_t offset = 0;
-  size_t offset_plus = 0;
-  //Вектор смещений слоев графа, локальная область видимости, т.к. вообще говоря
-  //вершины из разных слоев не обязательно должны идти подряд, но конкретно в
-  //этом генераторе это гарантируется
-  vector<size_t> offsets;
+  int offset = 0;
+  int offset_plus = 0;
+
   for (int i = 0; i < graph_depth - 1; ++i) {
     if (i >= returned_graph.depth()) {
-      cout << "Here!!!\n";
       break;
     }
     offsets.push_back(offset);
     offset_plus += returned_graph.depth_size(i);
-    for (size_t k = offset; k < offset_plus; ++k) {
+    for (int k = offset; k < offset_plus; ++k) {
       for (int c = 0; c < new_vertices_num; ++c) {
-        if (rand() % 100 + 1 <= p) {
+        if ((int)(mersenne() % 100 + 1) <= p) {
           returned_graph.add_vertex(i + 1);
           returned_graph.add_edge(k, returned_graph.number_of_vertices() - 1,
                                   Gray);
@@ -256,69 +266,109 @@ Graph graph_generator(int graph_depth,
   }
   offsets.push_back(offset_plus);
   offsets.push_back(returned_graph.number_of_vertices());
-  //Граф сгенерирован, все ребра в нем серые
+}
+void generate_blue_edges(Graph& returned_graph, vector<int>& offsets) {
+  //Значения вероятостей возникновения ребер соответствующих цветов:
+  const int p_blue = 25;
+
+  for (int i = 0; i < returned_graph.depth(); ++i) {
+    for (int k = offsets[i]; k < offsets[i + 1] - 1; ++k) {
+      if (mersenne() % 100 + 1 <= p_blue) {
+        returned_graph.add_edge(k, k + 1, Blue);
+        ++k;
+      }
+    }
+  }
+}
+
+bool is_children(VertexId& child_candidate,
+                 VertexId& parent,
+                 const Graph& graph) {
+  for (const auto& edge_id : graph.vertices()[parent].children_ids) {
+    if (child_candidate == edge_id) {
+      return true;
+    }
+  }
+  return false;
+}
+
+vector<VertexId> generate_set_vertices(VertexId& left_border,
+                                       VertexId& right_border,
+                                       VertexId& vert_id,
+                                       const Graph& graph) {
+  vector<VertexId> returned_vector;
+  for (VertexId i = left_border; i < right_border; ++i) {
+    if (is_children(i, vert_id, graph))
+      continue;
+    returned_vector.push_back(i);
+  }
+  return returned_vector;
+}
+void generate_green_edges(Graph& returned_graph, vector<int>& offsets) {
   //Значения вероятостей возникновения ребер соответствующих цветов:
   const int p_green = 10;
-  const int p_blue = 25;
+  for (int i = 0; i < returned_graph.depth(); ++i) {
+    for (int k = offsets[i]; k < offsets[i + 1]; ++k) {
+      if (mersenne() % 100 + 1 <= p_green) {
+        returned_graph.add_edge(k, k, Green);
+      }
+    }
+  }
+}
+
+void generate_yellow_edges(Graph& returned_graph, vector<int>& offsets) {
   int p_yellow = 0;
-  const int p_red = 33;
   //Настолько будет увеличиваться от слоя к слою вероятность возникновения
   //желтого ребра:
   int add_p_yellow = 100 / returned_graph.depth();
-  //Обходим граф, для каждой вершины проверяем вероятность возникновения
-  //соответствующих ребер и добавляем их к графу:
-  for (int i = 0; i < returned_graph.depth(); ++i) {
-    for (size_t k = offsets[i]; k < offsets[i + 1]; ++k) {
-      if (rand() % 100 + 1 <= p_green) {
-        returned_graph.add_edge(k, k, Green);
-      }
-      if (rand() % 100 + 1 <= p_blue) {
-        // rule - рещающее правило для передачи в neighbour_choice(), будет
-        //равно 0, если вершина одна в слое и соседа нет, 1 - если есть сосед в
-        //этом же слое с меньшим номером, 2 - если есть сосед в этом же слое с
-        //большим номером, 3 - если есть оба соседа:
-        const int rule =
-            (int)(k > offsets[i]) + 2 * (int)(k < offsets[i + 1] - 1);
-        if (rule) {
-          const int neighbour = neighbour_choice(rule, k, 1);
-          returned_graph.add_edge(k, neighbour, Blue);
-        }
-      }
-      if (i == returned_graph.depth() - 1)
-        p_yellow = 100;  //Дабы ошибки округления не сильно влияли на результат
-                         //на последнем слое вероятность появления желтого ребра
-                         //гарантировано равна 100%
-      if (rand() % 100 + 1 <= p_yellow) {
-        //По аналогии с предыдущим случаем, только работает не для вершин, а для
-        //слоев:
-        const int rule =
-            (int)(i > 0) + 2 * (int)(i < returned_graph.depth() - 1);
-        if (rule) {
-          const int neighbour_layer = neighbour_choice(rule, i, 1);
-          const int vertex_to_attach =
-              offsets[neighbour_layer] +
-              rand() % returned_graph.depth_size(neighbour_layer);
-          returned_graph.add_edge(k, vertex_to_attach, Yellow);
-        }
-      }
-      if (rand() % 100 + 1 <= p_red) {
-        //Все аналогично предыдущему, только проверяется наличие слоев
-        //находящиеся от текущего через один:
-        const int rule =
-            (int)(i > 1) + 2 * (int)(i < returned_graph.depth() - 2);
-        if (rule) {
-          const int neighbour_layer = neighbour_choice(rule, i, 2);
-          const int vertex_to_attach =
-              offsets[neighbour_layer] +
-              rand() % returned_graph.depth_size(neighbour_layer);
-          returned_graph.add_edge(k, vertex_to_attach, Red);
-        }
+
+  for (int i = 0; i < returned_graph.depth() - 1; ++i) {
+    for (int k = offsets[i]; k < offsets[i + 1]; ++k) {
+      if ((int)(mersenne() % 100 + 1) <= p_yellow) {
+        vector<VertexId> vertices_to_connect = generate_set_vertices(
+            offsets[i + 1], offsets[i + 2], k, returned_graph);
+        const int vertex_to_attach =
+            vertices_to_connect[mersenne() % vertices_to_connect.size()];
+        returned_graph.add_edge(k, vertex_to_attach, Yellow);
       }
     }
     //Увеличили вероятность появления желтых ребер
     //для следующего слоя
     p_yellow += add_p_yellow;
   }
+}
+
+void generate_red_edges(Graph& returned_graph, vector<int>& offsets) {
+  const int p_red = 33;
+  for (int i = 0; i < returned_graph.depth() - 2; ++i) {
+    for (int k = offsets[i]; k < offsets[i + 1]; ++k) {
+      if (i < returned_graph.depth() - 2) {
+        if (mersenne() % 100 + 1 <= p_red) {
+          const int vertex_to_attach =
+              offsets[i + 2] + mersenne() % returned_graph.depth_size(i + 2);
+          returned_graph.add_edge(k, vertex_to_attach, Red);
+        }
+      }
+    }
+  }
+}
+
+Graph generate_graph(int graph_depth,
+                     int vrtx_on_first_lvl,
+                     int new_vertices_num) {
+  auto returned_graph = Graph();
+  //Генерация вершин первого слоя:
+  for (int i = 0; i < vrtx_on_first_lvl; ++i) {
+    returned_graph.add_vertex(0);
+  }
+  //Вектор смещений слоев графа, используется для удобства
+  vector<int> offsets;
+
+  generate_gray_edges(graph_depth, new_vertices_num, returned_graph, offsets);
+  generate_green_edges(returned_graph, offsets);
+  generate_yellow_edges(returned_graph, offsets);
+  generate_red_edges(returned_graph, offsets);
+  generate_blue_edges(returned_graph, offsets);
   return returned_graph;
 }
 
@@ -329,10 +379,17 @@ int main() {
   cout << "Enter new vertices number: ";
   int new_vertices_num;
   cin >> new_vertices_num;
-  srand(time(0));
-  const Graph graph = graph_generator(depth, 1, new_vertices_num);
-  std::ofstream out("graph_task_03.json");
-  out << graph;
-  out.close();
-  return 0;
+  try {
+    if (depth < 0 || new_vertices_num < 0) {
+      throw "You have entered negative values";
+    }
+    const Graph graph = generate_graph(depth, 1, new_vertices_num);
+    std::ofstream out("graph_task_03.json");
+    out << graph;
+    out.close();
+    return 0;
+  } catch (const char* error) {
+    cout << error << endl;
+    return 1;
+  }
 }
