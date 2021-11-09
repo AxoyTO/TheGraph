@@ -180,7 +180,8 @@ class Graph {
           for (int i = 0; i < depth_map_[source.depth].size() - 1; i++) {
             auto first = depth_map_[source.depth][i];
             auto second = depth_map_[source.depth][i + 1];
-            if (source.id == first && destination.id == second)
+            if ((source.id == first && destination.id == second) ||
+                (destination.id == first && source.id == second))
               return true;
           }
         }
