@@ -319,11 +319,11 @@ vector<VertexId> filter_connected_vertices(const VertexId& id,
 }
 void generate_yellow_edges(Graph& graph) {
   for (VertexDepth depth = 0; depth < graph.depth(); depth++) {
-    float probability = (float)depth / (float)graph.depth();
+    float probability = 1 - depth * (1 / (float)(graph.depth() - 1));
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 1);
     for (const auto& vertex_id : vertices) {
-      if (get_random_probability() < probability) {
+      if (get_random_probability() > probability) {
         const auto& filtered_vertex_ids =
             filter_connected_vertices(vertex_id, vertices_next, graph);
         if (filtered_vertex_ids.size() == 0) {
