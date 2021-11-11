@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -12,37 +13,34 @@ using Vertex_id = int;
 using Edge_id = int;
 
 class Vertex {
- public:
+ private:
   Vertex_id id;
 
+ public:
   std::vector<Edge_id> edge_ids;
 
-  Vertex() { id = (Vertex_id)Numbers::INVALID_ID; }
+  Vertex() : id((Vertex_id)Numbers::INVALID_ID) {}
   Vertex(Vertex_id id_) : id(id_) {}
 
-  void to_string(std::ofstream& out_json) const {
-    out_json << "{\n      \"id\": " << id << ",\n      \"edge_ids\": [";
-    out_json << edge_ids[0];
-    for (auto i = edge_ids.begin() + 1; i != edge_ids.end(); i++) {
-      out_json << ", " << (*i);
-    }
-    out_json << "]\n    }";
-  }
+  Vertex_id get_id() const { return id; }
+  void set_id(Vertex_id v_id) { id = v_id; }
+
+  Edge_id get_edge_id(Edge_id i) { return edge_ids[i]; }
 };
 
 class Edge {
- public:
+ private:
   Edge_id id;
   Vertex_id v1;
   Vertex_id v2;
 
-  Edge() { id = (Edge_id)Numbers::INVALID_ID; }
+ public:
+  Edge() : id((Edge_id)Numbers::INVALID_ID) {}
   Edge(Edge_id id_, Vertex_id v1_, Vertex_id v2_) : id(id_), v1(v1_), v2(v2_) {}
 
-  void to_string(std::ofstream& out_json) const {
-    out_json << "{\n      \"id\": " << id << ",\n      \"vertex_ids\": [" << v1
-             << ", " << v2 << "]\n    }";
-  }
+  Edge_id get_id() const { return id; }
+  Vertex_id get_vertex1_id() const { return v1; }
+  Vertex_id get_vertex2_id() const { return v2; }
 };
 
 class Graph {
@@ -56,49 +54,68 @@ class Graph {
   void vert_mas_resize(int size) { vert_mas.resize(size); }
 
   // Добавляет id ребра в вершину
-  void add_edge_in_vert(Vertex& x, Edge_id i) { x.edge_ids.push_back(i); }
   void add_edge_in_vert(int num, Edge_id i) {
-    vert_mas[num].edge_ids.push_back(i);
+    vert_mas[num].edge_ids.emplace_back(i);
   }
 
   // Добавляет ребро в graph
   void add_edge(Edge_id i, Vertex_id v1, Vertex_id v2) {
-    edge_mas.push_back(Edge(i, v1, v2));
+    edge_mas.emplace_back(i, v1, v2);
+
+    add_edge_in_vert(v1, i);
+    add_edge_in_vert(v2, i);
   }
 
   // Добавляет вершину в граф
-  void add_vertex(Vertex_id vert_num) { vert_mas[(int)vert_num].id = vert_num; }
-  void add_vertex(Vertex_id vert_num, Edge_id edge_i) {
-    vert_mas[(int)vert_num].id = vert_num;
-    add_edge_in_vert((int)vert_num, edge_i);
+  void add_vertex() { vert_mas.push_back(Vertex()); }
+  void add_vertex(Vertex_id vert_num) {
+    vert_mas[(int)vert_num].set_id(vert_num);
   }
 
-  void output_graph() {
-    std::ofstream out_json("out.json");
-    out_json << "{\n  \"vertices\": [\n    ";
+  // Возврат векторов
+  const std::vector<Vertex>& get_vert_mas() const { return vert_mas; }
+  const std::vector<Edge>& get_edge_mas() const { return edge_mas; }
+};
+
+class GraphPrinter {
+ public:
+  std::string print(const Graph& graph) const {
+    std::stringstream result;
+    result << "{\n  \"vertices\": [\n    ";
     bool check_first_comma = false;
 
-    for (auto& i : vert_mas) {
+    for (auto& vertex : graph.get_vert_mas()) {
       if (check_first_comma) {
-        out_json << ",\n    ";
+        result << ",\n    ";
       }
       check_first_comma = true;
-      i.to_string(out_json);
+
+      result << "{\n      \"id\": " << vertex.get_id()
+             << ",\n      \"edge_ids\": [";
+      result << vertex.edge_ids[0];
+      for (auto i = vertex.edge_ids.begin() + 1; i != vertex.edge_ids.end();
+           i++) {
+        result << ", " << (*i);
+      }
+      result << "]\n    }";
     }
 
-    out_json << "\n  ],\n  \"edges\": [\n    ";
+    result << "\n  ],\n  \"edges\": [\n    ";
     check_first_comma = false;
 
-    for (auto& i : edge_mas) {
+    for (auto& edge : graph.get_edge_mas()) {
       if (check_first_comma) {
-        out_json << ",\n    ";
+        result << ",\n    ";
       }
       check_first_comma = true;
-      i.to_string(out_json);
+
+      result << "{\n      \"id\": " << edge.get_id()
+             << ",\n      \"vertex_ids\": [" << edge.get_vertex1_id() << ", "
+             << edge.get_vertex2_id() << "]\n    }";
     }
 
-    out_json << "\n  ]\n}\n";
-    out_json.close();
+    result << "\n  ]\n}\n";
+    return result.str();
   }
 };
 
@@ -115,17 +132,20 @@ int main() {
   Graph graph;
   graph.vert_mas_resize(numvertex);
 
-  int i = 0;
-  int curr_edge_id = 0;
+  int edge_num = 0;
 
-  for (i = 0; i < numedge; i++) {
-    graph.add_edge(i, graph_data[i].first, graph_data[i].second);
+  for (edge_num = 0; edge_num < numedge; edge_num++) {
+    graph.add_edge(edge_num, graph_data[edge_num].first,
+                   graph_data[edge_num].second);
 
-    graph.add_vertex(graph_data[i].first, i);
-    graph.add_vertex(graph_data[i].second, i);
+    graph.add_vertex(graph_data[edge_num].first);
+    graph.add_vertex(graph_data[edge_num].second);
   }
 
-  graph.output_graph();
+  GraphPrinter output_graph;
+
+  std::ofstream out_json("out.json");
+  out_json << output_graph.print(graph);
 
   return 0;
 }
