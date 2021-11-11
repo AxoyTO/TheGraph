@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <memory>
 
 constexpr int COLORS_NUMBER = 5;
 
@@ -16,16 +15,15 @@ class Logger {
     return logger;
   }
 
-  void write(std::ofstream& logfile, const std::string log) const {
-    std::cout << log << std::endl;
-    logfile << log;
+  void log(std::ofstream& logfile, const std::string text) const {
+    std::cout << text << std::endl;
+    logfile << text;
   }
 
  private:
   Logger() {}
   Logger(const Logger& root) = delete;
   Logger& operator=(const Logger&) = delete;
-  static std::shared_ptr<Logger> log;
 };
 
 void write_log(Graph& work_graph,

@@ -73,5 +73,5 @@ void write_log(Graph& work_graph,
   res += "red: " + to_string(colors[4]) + "}\n";
   res += "}\n";
 
-  logger.write(logfile, res);
+  logger.log(logfile, res);
 }
