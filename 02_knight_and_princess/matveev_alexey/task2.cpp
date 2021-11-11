@@ -12,23 +12,6 @@ struct Vertex {
   const VertexId id;
 
   explicit Vertex(const VertexId& _id) : id(_id) {}
-  /*void AddEdgeId(const EdgeId& _edge_id) {
-    assert(!HasEdge(_edge_id) && "This vertex already has this edge");
-    edge_ids_.push_back(_edge_id);
-  }
-  EdgeId IthEdgeId(int i) { return edge_ids_[i]; }
-  int ConnectedEdges() { return edge_ids_.size(); }*/
-
- private:
-  //std::vector<EdgeId> edge_ids_;
-  /*bool HasEdge(const EdgeId& _edge_id) {
-    for (const auto& edge_id : edge_ids_) {
-      if (edge_id == _edge_id) {
-        return true;
-      }
-    }
-    return false;
-  }*/
 };
 
 struct Edge {
@@ -54,37 +37,15 @@ class Graph {
     assert(HasVertex(_vertex_id1) && "Vertex1 index is out of range");
     assert(HasVertex(_vertex_id2) && "Vertex2 index is out of range");
     for (const auto& edge : edges_) {
-        if ((edge.vertex_id1 == _vertex_id1 && edge.vertex_id2 == _vertex_id2) ||
-            (edge.vertex_id1 == _vertex_id2 && edge.vertex_id2 == _vertex_id1)) {
-            return true;
-        }
+      if ((edge.vertex_id1 == _vertex_id1 && edge.vertex_id2 == _vertex_id2) ||
+          (edge.vertex_id1 == _vertex_id2 && edge.vertex_id2 == _vertex_id1)) {
+        return true;
+      }
     }
     return false;
-    /*if (_vertex_id1 == _vertex_id2) {
-      for (int i = 0; i < vertexes_[_vertex_id1].ConnectedEdges(); i++) {
-        if (edges_[vertexes_[_vertex_id1].IthEdgeId(i)].vertex_id1 ==
-                _vertex_id2 &&
-            edges_[vertexes_[_vertex_id1].IthEdgeId(i)].vertex_id2 ==
-                _vertex_id2) {
-          return true;
-        }
-      }
-      return false;
-    }
-    for (int i = 0; i < vertexes_[_vertex_id1].ConnectedEdges(); i++) {
-      for (int j = 0; j < vertexes_[_vertex_id2].ConnectedEdges(); j++) {
-        if (vertexes_[_vertex_id1].IthEdgeId(i) ==
-            vertexes_[_vertex_id2].IthEdgeId(j)) {
-          return true;
-        }
-      }
-    }
-    return false;*/
   }
 
-  void AddVertex() {
-    vertexes_.emplace_back(vertex_new_id_++);
-  }
+  void AddVertex() { vertexes_.emplace_back(vertex_new_id_++); }
 
   void AddEdge(const VertexId& _vertex_id1, const VertexId& _vertex_id2) {
     assert(HasVertex(_vertex_id1) && "Vertex1 index is out of range");
