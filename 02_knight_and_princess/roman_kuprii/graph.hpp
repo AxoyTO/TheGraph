@@ -53,10 +53,10 @@ struct Vertex {
 
   std::string to_json() const;
 
-void add_edge_id(const EdgeId& _id) {
-assert(!is_edge_id_included(_id, edges_ids_));
-edges_ids_.push_back(_id);
-}
+  void add_edge_id(const EdgeId& _id) {
+    assert(!is_edge_id_included(_id, edges_ids_));
+    edges_ids_.push_back(_id);
+  }
 
   const vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
 
@@ -101,7 +101,9 @@ class Graph {
 };
 
 void write_graph(const Graph& graph, const int& graph_num);
-void new_vertices_generation(Graph& work_graph, const int& depth, const int& new_vertices_num);
+void new_vertices_generation(Graph& work_graph,
+                             const int& depth,
+                             const int& new_vertices_num);
 
 void add_blue_edges(Graph& work_graph);
 void add_green_edges(Graph& work_graph);
