@@ -7,74 +7,72 @@
 #include <string>
 #include <vector>
 
-enum class Numbers { INVALID_ID = -1 };
+constexpr int INVALID_ID = -1;
 
-using Vertex_id = int;
-using Edge_id = int;
+using VertexId = int;
+using EdgeId = int;
 
 class Vertex {
- private:
-  Vertex_id id;
-
  public:
-  std::vector<Edge_id> edge_ids;
+  Vertex(VertexId id_ = INVALID_ID) : id(id_) {}
 
-  Vertex() : id((Vertex_id)Numbers::INVALID_ID) {}
-  Vertex(Vertex_id id_) : id(id_) {}
+  // Возврат значений
+  VertexId get_id() const { return id; }
+  EdgeId get_edge_id(EdgeId i) const { return edge_ids[i]; }
+  const std::vector<EdgeId>& get_edge_ids_vector() const { return edge_ids; }
 
-  Vertex_id get_id() const { return id; }
-  void set_id(Vertex_id v_id) { id = v_id; }
+  // Добавить id ребра в edge_ids
+  void add_edge_id(EdgeId i) { edge_ids.emplace_back(i); }
 
-  Edge_id get_edge_id(Edge_id i) { return edge_ids[i]; }
+ private:
+  VertexId id;
+  std::vector<EdgeId> edge_ids;
 };
 
 class Edge {
- private:
-  Edge_id id;
-  Vertex_id v1;
-  Vertex_id v2;
-
  public:
-  Edge() : id((Edge_id)Numbers::INVALID_ID) {}
-  Edge(Edge_id id_, Vertex_id v1_, Vertex_id v2_) : id(id_), v1(v1_), v2(v2_) {}
+  Edge() : id(INVALID_ID) {}
+  Edge(VertexId v1_, VertexId v2_, EdgeId id_ = INVALID_ID)
+      : v1(v1_), v2(v2_), id(id_) {}
 
-  Edge_id get_id() const { return id; }
-  Vertex_id get_vertex1_id() const { return v1; }
-  Vertex_id get_vertex2_id() const { return v2; }
+  // Возврат значений
+  EdgeId get_id() const { return id; }
+  VertexId get_vertex1_id() const { return v1; }
+  VertexId get_vertex2_id() const { return v2; }
+
+ private:
+  EdgeId id;
+  VertexId v1;
+  VertexId v2;
 };
 
 class Graph {
- private:
-  std::vector<Vertex> vert_mas;
-  std::vector<Edge> edge_mas;
-
  public:
-  Graph() {}
-  // Изменение размеров векторов
-  void vert_mas_resize(int size) { vert_mas.resize(size); }
-
-  // Добавляет id ребра в вершину
-  void add_edge_in_vert(int num, Edge_id i) {
-    vert_mas[num].edge_ids.emplace_back(i);
-  }
+  Graph() : vert_num(0), edge_num(0) {}
 
   // Добавляет ребро в graph
-  void add_edge(Edge_id i, Vertex_id v1, Vertex_id v2) {
-    edge_mas.emplace_back(i, v1, v2);
-
-    add_edge_in_vert(v1, i);
-    add_edge_in_vert(v2, i);
+  void add_edge(VertexId v1, VertexId v2) {
+    edge_mas.emplace_back(v1, v2, edge_num);
+    vert_mas[v1].add_edge_id(edge_num);
+    vert_mas[v2].add_edge_id(edge_num);
+    edge_num++;
   }
 
   // Добавляет вершину в граф
-  void add_vertex() { vert_mas.push_back(Vertex()); }
-  void add_vertex(Vertex_id vert_num) {
-    vert_mas[(int)vert_num].set_id(vert_num);
+  void add_vertex() {
+    vert_mas.emplace_back(vert_num);
+    vert_num++;
   }
 
   // Возврат векторов
   const std::vector<Vertex>& get_vert_mas() const { return vert_mas; }
   const std::vector<Edge>& get_edge_mas() const { return edge_mas; }
+
+ private:
+  VertexId vert_num;
+  EdgeId edge_num;
+  std::vector<Vertex> vert_mas;
+  std::vector<Edge> edge_mas;
 };
 
 class GraphPrinter {
@@ -88,16 +86,22 @@ class GraphPrinter {
       if (check_first_comma) {
         result << ",\n    ";
       }
-      check_first_comma = true;
 
       result << "{\n      \"id\": " << vertex.get_id()
              << ",\n      \"edge_ids\": [";
-      result << vertex.edge_ids[0];
-      for (auto i = vertex.edge_ids.begin() + 1; i != vertex.edge_ids.end();
-           i++) {
-        result << ", " << (*i);
+
+      check_first_comma = false;
+      for (auto& i : vertex.get_edge_ids_vector()) {
+        if (check_first_comma) {
+          result << ", ";
+        }
+        check_first_comma = true;
+        result << i;
       }
+
       result << "]\n    }";
+
+      check_first_comma = true;
     }
 
     result << "\n  ],\n  \"edges\": [\n    ";
@@ -123,29 +127,26 @@ int main() {
   const int numedge = 18, numvertex = 14;
   std::vector<Vertex> vert_mas;
   std::vector<Edge> edge_mas;
+  Graph graph;
+
+  for (int i = 0; i < numvertex; i++) {
+    graph.add_vertex();
+  }
 
   std::vector<std::pair<int, int>> graph_data{
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
 
-  Graph graph;
-  graph.vert_mas_resize(numvertex);
-
-  int edge_num = 0;
-
-  for (edge_num = 0; edge_num < numedge; edge_num++) {
-    graph.add_edge(edge_num, graph_data[edge_num].first,
-                   graph_data[edge_num].second);
-
-    graph.add_vertex(graph_data[edge_num].first);
-    graph.add_vertex(graph_data[edge_num].second);
+  for (int edge_num = 0; edge_num < numedge; edge_num++) {
+    graph.add_edge(graph_data[edge_num].first, graph_data[edge_num].second);
   }
 
   GraphPrinter output_graph;
 
   std::ofstream out_json("out.json");
   out_json << output_graph.print(graph);
+  out_json.close();
 
   return 0;
 }
