@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "logger.hpp"
 #include "graph.hpp"
+#include "logger.hpp"
 
 using std::to_string;
 

@@ -15,7 +15,7 @@ class Logger {
     return logger;
   }
 
-  void log(std::ofstream& logfile, const std::string text) const {
+  void log(std::ofstream& logfile, const std::string& text) const {
     std::cout << text << std::endl;
     logfile << text;
   }
