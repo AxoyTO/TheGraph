@@ -1,13 +1,9 @@
-#include <iostream>
-#include <stdlib.h> // rand()
-#include <utility>
-#include <fstream>
-#include <cmath>
 #include <array>
-#include <vector>
-#include <algorithm>
-#include <unordered_set>
 #include <cassert>
+#include <fstream>
+#include <iostream>
+#include <utility>
+#include <vector>
 
 using std::cout;
 using std::endl;
@@ -18,18 +14,19 @@ using EdgeId = int;
 struct Vertex {
   const VertexId id = 0;
 
-  const bool has_edge_id(const EdgeId& edge_id) {
-    for (const auto id : edge_ids_)
-      if (edge_id == id)
-        return true;
-    return false;
-  }
-  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+  explicit Vertex(const VertexId& vertex_id) : id(vertex_id) {}
+
   void add_edge_id(const EdgeId& edge_id) {
     assert(!has_edge_id(edge_id) && "Such an edge already exists!");
     edge_ids_.push_back(edge_id);
   }
-  explicit Vertex(const VertexId& id) : id(id) {}
+  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+  bool has_edge_id(const EdgeId& edge_id) {
+    for (const auto& id : edge_ids_)
+      if (edge_id == id)
+        return true;
+    return false;
+  }
 
  private:
   std::vector<EdgeId> edge_ids_;
@@ -39,8 +36,12 @@ struct Edge {
   const VertexId vertex_start = 0;
   const VertexId vertex_end = 0;
 
-  Edge(const EdgeId& id, const VertexId& vertex_start, const VertexId& vertex_end)
-      : id(id), vertex_start(vertex_start), vertex_end(vertex_end) {}
+  Edge(const EdgeId& edge_id,
+       const VertexId& vertex_connection_start,
+       const VertexId& vertex_connection_end)
+      : id(edge_id),
+        vertex_start(vertex_connection_start),
+        vertex_end(vertex_connection_end) {}
 };
 
 class Graph {
@@ -49,21 +50,22 @@ class Graph {
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
-  const bool has_vertex_id(const VertexId& vertex_id) {
-    for (const auto vertex : vertices_)
+  bool has_vertex_id(const VertexId& vertex_id) {
+    for (const auto& vertex : vertices_)
       if (vertex_id == vertex.id)
         return true;
     return false;
   }
-  const bool is_connected(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
-    for (const auto edge : edges_) 
-      if ((from_vertex_id == edge.vertex_start and to_vertex_id == edge.vertex_end) 
-           or 
-           (from_vertex_id == edge.vertex_end and to_vertex_id == edge.vertex_start))
-      return true;
+  bool is_connected(const VertexId& from_vertex_id,
+                    const VertexId& to_vertex_id) {
+    for (const auto& edge : edges_)
+      if ((from_vertex_id == edge.vertex_start &&
+           to_vertex_id == edge.vertex_end) ||
+          (from_vertex_id == edge.vertex_end &&
+           to_vertex_id == edge.vertex_start))
+        return true;
     return false;
   }
-
 
  private:
   std::vector<Vertex> vertices_;
@@ -81,11 +83,14 @@ void Graph::add_vertex() {
 void Graph::add_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) {
   assert(has_vertex_id(from_vertex_id) &&
-         "There is no such vertex (from) in the graph.");
-  assert(has_vertex_id(to_vertex_id) && "There is no such vertex (to) in the graph.");
-  assert(!is_connected(from_vertex_id, to_vertex_id) && "These vertices are already connected");
+         "There is no such vertex in the graph.");
+  assert(has_vertex_id(to_vertex_id) &&
+         "There is no such vertex in the graph.");
+  assert(!is_connected(from_vertex_id, to_vertex_id) &&
+         "These vertices are already connected");
 
-  const auto& new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id, to_vertex_id);
+  const auto& new_edge =
+      edges_.emplace_back(get_new_edge_id(), from_vertex_id, to_vertex_id);
   vertices_[from_vertex_id].add_edge_id(new_edge.id);
   vertices_[to_vertex_id].add_edge_id(new_edge.id);
 }
@@ -96,9 +101,8 @@ std::string get_vertex_string(const Vertex& vertex) {
       "\t\t{\"id\":" + std::to_string(vertex.id) + ",\"edge_ids\":[";
   for (const auto& edge_id : vertex.get_edge_ids()) {
     str_vertex += std::to_string(edge_id);
-    if (edge_id != vertex.get_edge_ids().back()) {
+    if (edge_id != vertex.get_edge_ids().back())
       str_vertex += ",";
-    }
   }
   str_vertex += "]}";
   return str_vertex;
@@ -111,24 +115,27 @@ std::string get_edge_string(const Edge& edge) {
   return str_edge;
 }
 std::string get_graph_string(const Graph& graph) {
-  std::string str_graph = "{\n\t\"vertices\": [\n";
+  std::string str_graph = "{";
 
   // write vertices
+  str_graph += "\n\t\"vertices\": [\n";
   for (const auto& vertex : graph.get_vertices()) {
-    ((vertex.id != graph.get_vertices().size() - 1)
-         ? str_graph += get_vertex_string(vertex) + ",\n"
-         : str_graph += get_vertex_string(vertex) + "\n");
+    str_graph += get_vertex_string(vertex);
+    if (vertex.id != graph.get_vertices().back().id)
+      str_graph += ",\n";
   }
+  str_graph += "\n\t\t],";
 
   // write edges
-  str_graph += "\t\t],\n\t\"edges\": [\n";
+  str_graph += "\n\t\"edges\": [\n";
   for (const auto& edge : graph.get_edges()) {
-    ((edge.id != graph.get_edges().back().id)
-         ? str_graph += get_edge_string(edge) + ",\n"
-         : str_graph += get_edge_string(edge) + "\n");
+    str_graph += get_edge_string(edge);
+    if (edge.id != graph.get_edges().back().id)
+      str_graph += ",\n";
   }
+  str_graph += "\n\t\t]";
 
-  str_graph += "\t\t]\n}\n";
+  str_graph += "\n}\n";
   return str_graph;
 }
 void write_graph_json_file(const Graph& graph) {
@@ -137,18 +144,16 @@ void write_graph_json_file(const Graph& graph) {
   out.close();
 }
 
-
 int main() {
-
   // GRAPH
   const int vertex_count = 14;
-  const std::vector<std::pair<int,int>> vertex_connections = {
+  const std::vector<std::pair<int, int>> vertex_connections = {
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13},
   };
 
-  Graph graph;
+  auto graph = Graph();
 
   for (int vertex_id = 0; vertex_id < vertex_count; vertex_id++)
     graph.add_vertex();
