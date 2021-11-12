@@ -155,8 +155,11 @@ int main() {
 
   auto graph = Graph();
 
-  for (int vertex_id = 0; vertex_id < vertex_count; vertex_id++)
+  for (VertexId vertex_id = 0; vertex_id < vertex_count; vertex_id++) {
+    assert(!graph.has_vertex_id(vertex_id) &&
+           "A vertex with this id already exists.");
     graph.add_vertex();
+  }
   for (const auto& vertex_connection : vertex_connections)
     graph.add_edge(vertex_connection.first, vertex_connection.second);
 
