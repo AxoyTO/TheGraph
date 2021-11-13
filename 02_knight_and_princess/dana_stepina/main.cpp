@@ -208,7 +208,7 @@ void write_graph_json_file(const Graph& graph) {
 
 int main() {
   const DepthGraph depth = 4;
-  const int new_vertices_num = 3;
+  const int new_vertices_num = 1;
   // GRAPH
   // const int vertex_count = 14;
   // const std::vector<std::pair<int, int>> vertex_connections = {
