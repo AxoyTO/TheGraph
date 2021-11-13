@@ -1,5 +1,9 @@
 # VSCode
 *.code-workspace
+<<<<<<< HEAD
+=======
+.vscode/
+>>>>>>> master
 
 # Xcode
 build/
