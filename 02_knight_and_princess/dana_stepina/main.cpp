@@ -53,6 +53,7 @@ struct Edge {
 class Graph {
  public:
   void increase_graph_depth() { depth_++; }
+  void decrease_graph_depth() { depth_--; }
   void add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
   const DepthGraph get_graph_depth() const { return depth_; }
@@ -126,16 +127,25 @@ void generate_graph(Graph& graph,
   graph.add_vertex();
 
   for (DepthGraph current_depth = 0; current_depth <= depth; current_depth++) {
-    if (current_depth != depth)
-      graph.increase_graph_depth();
-
     //Процент генерации вершины на текущей глубине
     percent_current_depth = floor(100 * (depth - current_depth) / depth);
     //Вектор из вершин текущей глубины
-    std::vector<Vertex> vertices_in_current_depth = {};
+    std::vector<Vertex> vertices_in_current_depth;
     for (const auto& vertex : graph.get_vertices())
       if (vertex.depth == current_depth)
         vertices_in_current_depth.push_back(vertex);
+
+    //Проверка - есть ли вершины на текущей глубине
+    if (current_depth != depth) {
+      if (vertices_in_current_depth.empty()) {
+      graph.decrease_graph_depth();
+      cout << "The depth of the generated graph is less than expected."
+              "\nDepth of the generated graph: "
+           << graph.get_graph_depth() << endl;
+      break;
+      }
+      graph.increase_graph_depth();
+    }
 
     //Создание новых вершин для каждой из вершин текущей глублины
     for (const auto& vertex : vertices_in_current_depth) {
@@ -166,10 +176,10 @@ std::string get_vertex_string(const Vertex& vertex) {
   return str_vertex;
 }
 std::string get_edge_string(const Edge& edge) {
-  std::string str_edge = "\t\t{\"id\":" + std::to_string(edge.id) +
-                         ",\"vertex_ids\":[" +
+  std::string str_edge = "\t  {\n\t\t\"id\":" + std::to_string(edge.id) +
+                         ",\n\t\t\"vertex_ids\":[" +
                          std::to_string(edge.vertex_start) + "," +
-                         std::to_string(edge.vertex_end) + "]}";
+                         std::to_string(edge.vertex_end) + "]\n\t  }";
   return str_edge;
 }
 std::string get_graph_string(const Graph& graph) {
@@ -186,7 +196,7 @@ std::string get_graph_string(const Graph& graph) {
     if (vertex.id != graph.get_vertices().back().id)
       str_graph += ",\n";
   }
-  str_graph += "\n\t\t],";
+  str_graph += "\n\t],";
 
   // write edges
   str_graph += "\n\t\"edges\": [\n";
@@ -195,7 +205,7 @@ std::string get_graph_string(const Graph& graph) {
     if (edge.id != graph.get_edges().back().id)
       str_graph += ",\n";
   }
-  str_graph += "\n\t\t]";
+  str_graph += "\n\t]";
 
   str_graph += "\n}\n";
   return str_graph;
@@ -209,23 +219,9 @@ void write_graph_json_file(const Graph& graph) {
 int main() {
   const DepthGraph depth = 4;
   const int new_vertices_num = 1;
-  // GRAPH
-  // const int vertex_count = 14;
-  // const std::vector<std::pair<int, int>> vertex_connections = {
-  //     {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-  //     {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-  //     {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13},
-  // };
 
   auto graph = Graph();
 
-  // for (VertexId vertex_id = 0; vertex_id < vertex_count; vertex_id++) {
-  //   assert(!graph.has_vertex_id(vertex_id) &&
-  //          "A vertex with this id already exists.");
-  //   graph.add_vertex();
-  // }
-  // for (const auto& vertex_connection : vertex_connections)
-  //   graph.add_edge(vertex_connection.first, vertex_connection.second);
   generate_graph(graph, depth, new_vertices_num);
   write_graph_json_file(graph);
 
