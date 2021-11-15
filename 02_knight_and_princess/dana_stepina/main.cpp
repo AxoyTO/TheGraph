@@ -50,28 +50,15 @@ class Graph {
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
-  bool has_vertex_id(const VertexId& vertex_id) {
-    for (const auto& vertex : vertices_)
-      if (vertex_id == vertex.id)
-        return true;
-    return false;
-  }
+  bool has_vertex_id(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& from_vertex_id,
-                    const VertexId& to_vertex_id) {
-    for (const auto& edge : edges_)
-      if ((from_vertex_id == edge.vertex_start &&
-           to_vertex_id == edge.vertex_end) ||
-          (from_vertex_id == edge.vertex_end &&
-           to_vertex_id == edge.vertex_start))
-        return true;
-    return false;
-  }
+                    const VertexId& to_vertex_id) const;
 
  private:
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
   EdgeId edge_id_counter_ = 0;
-  EdgeId vertex_id_counter_ = 0;
+  VertexId vertex_id_counter_ = 0;
 
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
@@ -94,6 +81,25 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   vertices_[from_vertex_id].add_edge_id(new_edge.id);
   vertices_[to_vertex_id].add_edge_id(new_edge.id);
 }
+bool Graph::has_vertex_id(const VertexId& vertex_id) const {
+    for (const auto& vertex : vertices_)
+      if (vertex_id == vertex.id)
+        return true;
+    return false;
+  }
+bool Graph::is_connected(const VertexId& from_vertex_id,
+                    const VertexId& to_vertex_id) const {            
+    assert(has_vertex_id(from_vertex_id) &&
+         "There is no such vertex in the graph.");
+    assert(has_vertex_id(to_vertex_id) &&
+         "There is no such vertex in the graph.");
+
+    for (const auto& edge_id_from_vertex : vertices_[from_vertex_id].get_edge_ids())
+      for (const auto& edge_id_to_vertex : vertices_[to_vertex_id].get_edge_ids())
+          if (edge_id_from_vertex == edge_id_to_vertex) return true;
+    return false;
+  }
+
 
 //ВЫВОД В ФАЙЛ JSON
 std::string get_vertex_string(const Vertex& vertex) {
@@ -147,7 +153,7 @@ void write_graph_json_file(const Graph& graph) {
 int main() {
   // GRAPH
   const int vertex_count = 14;
-  const std::vector<std::pair<int, int>> vertex_connections = {
+  const std::vector<std::pair<VertexId, VertexId>> vertex_connections = {
       {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
       {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
       {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13},
@@ -156,8 +162,6 @@ int main() {
   auto graph = Graph();
 
   for (VertexId vertex_id = 0; vertex_id < vertex_count; vertex_id++) {
-    assert(!graph.has_vertex_id(vertex_id) &&
-           "A vertex with this id already exists.");
     graph.add_vertex();
   }
   for (const auto& vertex_connection : vertex_connections)
