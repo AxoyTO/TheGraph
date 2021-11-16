@@ -1,97 +1,115 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
+using std::array;
+using std::string;
+using std::to_string;
 using std::vector;
-constexpr int num_of_vertices = 14;
-constexpr int num_of_edges = 18;
-constexpr int all_edges =
-    num_of_vertices * (num_of_vertices - 1) / 2 + num_of_vertices;
-vector<vector<int>> vertices = {
-    {0, 1, 2},       {0, 3, 4, 5}, {1, 6, 7}, {2, 8},      {3, 9},
-    {4, 10},         {5, 11},      {6, 12},   {7, 13},     {8, 14},
-    {9, 10, 11, 15}, {12, 13, 16}, {14, 17},  {15, 16, 17}};
-vector<vector<int>> edges = {{0, 1},   {0, 2},   {0, 3},  {1, 4},  {1, 5},
-                             {1, 6},   {2, 7},   {2, 8},  {3, 9},  {4, 10},
-                             {5, 10},  {6, 10},  {7, 11}, {8, 11}, {9, 12},
-                             {10, 13}, {11, 13}, {12, 13}};
+using VertexId = int;
+using EdgeId = int;
+constexpr int kVerticesCount = 14;
 
-struct VertexStruct {
-  int id;
-  vector<int> edgeIds;
+struct Vertex {
+  VertexId id;
+  vector<int> edge_ids;
 };
-struct EdgeStruct {
-  int id;
-  vector<int> vertexIds;
+struct Edge {
+  EdgeId id;
+  std::pair<int, int> vertex_ids;
+};
+class Graph {
+ public:
+  vector<Vertex> vertices;
+  vector<Edge> edges;
+  void add_vertex() {
+    Vertex new_vertex;
+    new_vertex.id = vertices.size();
+    new_vertex.edge_ids = {};
+    vertices.push_back(new_vertex);
+  }
+  void add_edge(const VertexId from_vertex_id, const VertexId to_vertex_id) {
+    EdgeId new_edge_id = edges.size();
+    Edge new_edge;
+    new_edge.id = new_edge_id;
+    new_edge.vertex_ids = std::make_pair(from_vertex_id, to_vertex_id);
+    edges.push_back(new_edge);
+    vertices[from_vertex_id].edge_ids.push_back(new_edge_id);
+    vertices[to_vertex_id].edge_ids.push_back(new_edge_id);
+  };
 };
 
-void print_vertices(VertexStruct v, std::ofstream& file) {
-  file << "{\n\t\t\t\"id\": " << v.id << ",\n\t\t\t\"edge_ids\": [";
-  for (auto i = v.edgeIds.begin(); i != v.edgeIds.end(); i++) {
-    int index = std::distance(v.edgeIds.begin(), i);
-    if (*i != v.edgeIds.back()) {
-      file << *i << ",";
+string print_vertex(const Vertex& vertex) {
+  string vertex_output =
+      "{\n\t\t\t\"id\": " + to_string(vertex.id) + ",\n\t\t\t\"edge_ids\": [";
+  for (const auto& edge_id : vertex.edge_ids) {
+    if (edge_id != vertex.edge_ids.back()) {
+      vertex_output = vertex_output + to_string(edge_id) + ", ";
     } else {
-      file << *i;
+      vertex_output = vertex_output + to_string(edge_id);
     }
   }
-  file << "]\n\t\t}";
+  vertex_output += "]\n\t\t}";
+  return vertex_output;
 }
-void print_edges(EdgeStruct e, std::ofstream& file) {
-  file << "{\n\t\t\t\"id\": " << e.id << ",\n\t\t\t\"vertex_ids\": [";
-  for (auto i = e.vertexIds.begin(); i != e.vertexIds.end(); i++) {
-    int index = std::distance(e.vertexIds.begin(), i);
-    if (*i != e.vertexIds.back()) {
-      file << *i << ",";
-    } else {
-      file << *i;
-    }
-  }
-  file << "]\n\t\t}";
+
+string print_edge(const Edge& edge) {
+  return "{\n\t\t\t\"id\": " + std::to_string(edge.id) +
+         ",\n\t\t\t\"vertex_ids\": [" + to_string(edge.vertex_ids.first) +
+         ", " + to_string(edge.vertex_ids.second) + "]\n\t\t}";
 }
-void print_graph(VertexStruct v[], EdgeStruct e[], std::ofstream& file) {
-  file << "{\n\t\"vertices\": [\n\t\t";
-  for (int i = 0; i < num_of_vertices; i++) {
-    print_vertices(v[i], file);
-    if (i != num_of_vertices - 1) {
-      file << ",\n\t\t";
+
+string print_graph(const Graph& graph) {
+  string graph_output = "{\n\t\"vertices\": [\n\t\t";
+  for (const auto& vertex : graph.vertices) {
+    graph_output += print_vertex(vertex);
+    if (vertex.id != graph.vertices.back().id) {
+      graph_output += ",\n\t\t";
     } else {
-      file << "\n\t";
+      graph_output += "\n\t";
     }
   }
-  file << "],\n\t\"edges\": [\n\t\t";
-  for (int i = 0; i < num_of_edges; i++) {
-    print_edges(e[i], file);
-    if (i != num_of_edges - 1) {
-      file << ",\n\t\t";
+  graph_output += "],\n\t\"edges\": [\n\t\t";
+  for (const auto& edge : graph.edges) {
+    graph_output += print_edge(edge);
+    if (edge.id != graph.edges.back().id) {
+      graph_output += ",\n\t\t";
     } else {
-      file << "\n\t";
+      graph_output += "\n\t";
     }
   }
-  file << "]\n}";
+  graph_output += "]\n}\n";
+  return graph_output;
 }
 
 int main() {
-  VertexStruct verticesArray[num_of_vertices];
-  EdgeStruct edgesArray[num_of_edges];
+  auto graph = Graph();
 
-  for (auto it = vertices.begin(); it != vertices.end(); ++it) {
-    int index = std::distance(vertices.begin(), it);
-    VertexStruct newVertexStruct;
-    newVertexStruct.id = index;
-    newVertexStruct.edgeIds = *it;
-    verticesArray[index] = newVertexStruct;
+  for (int i = 0; i < kVerticesCount; i++) {
+    graph.add_vertex();
   }
 
-  for (auto it = edges.begin(); it != edges.end(); ++it) {
-    int index = std::distance(edges.begin(), it);
-    EdgeStruct newEdgeStruct;
-    newEdgeStruct.id = index;
-    newEdgeStruct.vertexIds = *it;
-    edgesArray[index] = newEdgeStruct;
-  }
+  graph.add_edge(0, 1);
+  graph.add_edge(0, 2);
+  graph.add_edge(0, 3);
+  graph.add_edge(1, 4);
+  graph.add_edge(1, 5);
+  graph.add_edge(1, 6);
+  graph.add_edge(2, 7);
+  graph.add_edge(2, 8);
+  graph.add_edge(3, 9);
+  graph.add_edge(4, 10);
+  graph.add_edge(5, 10);
+  graph.add_edge(6, 10);
+  graph.add_edge(7, 11);
+  graph.add_edge(8, 11);
+  graph.add_edge(9, 12);
+  graph.add_edge(10, 13);
+  graph.add_edge(11, 13);
+  graph.add_edge(12, 13);
 
-  std::ofstream graphOutput;
-  graphOutput.open("graph.json");
-  print_graph(verticesArray, edgesArray, graphOutput);
+  std::ofstream graph_file;
+  graph_file.open("graph.json");
+  graph_file << print_graph(graph);
 }
