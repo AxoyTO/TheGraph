@@ -11,8 +11,8 @@ using std::endl;
 using VertexId = int;
 using EdgeId = int;
 
-constexpr VertexId VERTEX_COUNT = 14;
-constexpr EdgeId EDGES_COUNT = 18;
+constexpr int VERTEX_COUNT = 14;
+constexpr int EDGES_COUNT = 18;
 
 struct Vertex {
   const VertexId id = 0;
@@ -154,26 +154,27 @@ void write_graph_json_file(const Graph& graph) {
 
 int main() {
   // GRAPH
-  const std::array<std::pair<VertexId, VertexId>, 18> vertex_connections = {{
-      {0, 1},
-      {0, 2},
-      {0, 3},
-      {1, 4},
-      {1, 5},
-      {1, 6},
-      {2, 7},
-      {2, 8},
-      {3, 9},
-      {4, 10},
-      {5, 10},
-      {6, 10},
-      {7, 11},
-      {8, 11},
-      {9, 12},
-      {10, 13},
-      {11, 13},
-      {12, 13},
-  }};
+  const std::array<std::pair<VertexId, VertexId>, EDGES_COUNT>
+      vertex_connections = {{
+          {0, 1},
+          {0, 2},
+          {0, 3},
+          {1, 4},
+          {1, 5},
+          {1, 6},
+          {2, 7},
+          {2, 8},
+          {3, 9},
+          {4, 10},
+          {5, 10},
+          {6, 10},
+          {7, 11},
+          {8, 11},
+          {9, 12},
+          {10, 13},
+          {11, 13},
+          {12, 13},
+      }};
 
   auto graph = Graph();
 
