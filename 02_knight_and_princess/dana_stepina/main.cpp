@@ -24,7 +24,7 @@ struct Vertex {
     edge_ids_.push_back(edge_id);
   }
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-  bool has_edge_id(const EdgeId& edge_id) {
+  bool has_edge_id(const EdgeId& edge_id) const {
     for (const auto& id : edge_ids_)
       if (edge_id == id)
         return true;
