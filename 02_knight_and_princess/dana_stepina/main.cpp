@@ -11,6 +11,9 @@ using std::endl;
 using VertexId = int;
 using EdgeId = int;
 
+constexpr VertexId VERTEX_COUNT = 14;
+constexpr EdgeId EDGES_COUNT = 18;
+
 struct Vertex {
   const VertexId id = 0;
 
@@ -115,11 +118,9 @@ std::string get_vertex_string(const Vertex& vertex) {
   return str_vertex;
 }
 std::string get_edge_string(const Edge& edge) {
-  std::string str_edge = "\t\t{\"id\":" + std::to_string(edge.id) +
-                         ",\"vertex_ids\":[" +
-                         std::to_string(edge.vertex_start) + "," +
-                         std::to_string(edge.vertex_end) + "]}";
-  return str_edge;
+  return "\t\t{\"id\":" + std::to_string(edge.id) + ",\"vertex_ids\":[" +
+         std::to_string(edge.vertex_start) + "," +
+         std::to_string(edge.vertex_end) + "]}";
 }
 std::string get_graph_string(const Graph& graph) {
   std::string str_graph = "{";
@@ -153,16 +154,30 @@ void write_graph_json_file(const Graph& graph) {
 
 int main() {
   // GRAPH
-  const int vertex_count = 14;
-  const std::vector<std::pair<VertexId, VertexId>> vertex_connections = {
-      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13},
-  };
+  const std::array<std::pair<VertexId, VertexId>, 18> vertex_connections = {{
+      {0, 1},
+      {0, 2},
+      {0, 3},
+      {1, 4},
+      {1, 5},
+      {1, 6},
+      {2, 7},
+      {2, 8},
+      {3, 9},
+      {4, 10},
+      {5, 10},
+      {6, 10},
+      {7, 11},
+      {8, 11},
+      {9, 12},
+      {10, 13},
+      {11, 13},
+      {12, 13},
+  }};
 
   auto graph = Graph();
 
-  for (VertexId vertex_id = 0; vertex_id < vertex_count; vertex_id++) {
+  for (VertexId vertex_id = 0; vertex_id < VERTEX_COUNT; vertex_id++) {
     graph.add_vertex();
   }
   for (const auto& vertex_connection : vertex_connections)
