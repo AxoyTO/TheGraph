@@ -56,8 +56,7 @@ class GraphGenerator {
       const auto& same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
       for (const auto& vertex1_id : same_depth_vertices) {
         for (const auto& vertex2_id : same_depth_vertices) {
-          if (is_lucky(0.25) && !graph.is_connected(vertex1_id, vertex2_id) &&
-              graph.is_id_neighbor(vertex1_id, vertex2_id)) {
+          if (is_lucky(0.25) && !graph.is_connected(vertex1_id, vertex2_id)) {
             graph.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
           }
         }

@@ -12,7 +12,7 @@
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
 
 std::string get_edge_color_string(const EdgeColor& color) {
-  switch(color) {
+  switch (color) {
     case EdgeColor::Gray:
       return "gray";
     case EdgeColor::Green:
@@ -120,11 +120,6 @@ class Graph {
 
   bool is_vertex_exists(const VertexId& vertex_id) const {
     return vertices_.find(vertex_id) != vertices_.end();
-  }
-
-  bool is_id_neighbor(const VertexId& vertex1_id,
-                      const VertexId& vertex2_id) const {
-    return vertex1_id + 1 == vertex2_id || vertex2_id + 1 == vertex1_id;
   }
 
   bool is_connected(const VertexId& vertex1_id,
