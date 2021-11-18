@@ -9,15 +9,15 @@
 #include <string>
 #include <vector>
 
-enum class EdgeColor { GRAY, GREEN, BLUE, YELLOW, RED };
+enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
 
 std::string get_edge_color_string(const EdgeColor& color) {
   static const std::map<EdgeColor, std::string> color_string_map = {
-      {EdgeColor::GRAY, "gray"},
-      {EdgeColor::GREEN, "green"},
-      {EdgeColor::BLUE, "blue"},
-      {EdgeColor::YELLOW, "yellow"},
-      {EdgeColor::RED, "red"}};
+      {EdgeColor::Gray, "gray"},
+      {EdgeColor::Green, "green"},
+      {EdgeColor::Blue, "blue"},
+      {EdgeColor::Yellow, "yellow"},
+      {EdgeColor::Red, "red"}};
   return color_string_map.find(color)->second;
 }
 
@@ -153,7 +153,7 @@ class Graph {
 
   EdgeId add_edge(const VertexId& vertex1,
                   const VertexId& vertex2,
-                  EdgeColor edge_color = EdgeColor::GRAY) {
+                  EdgeColor edge_color = EdgeColor::Gray) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");

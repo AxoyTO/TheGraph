@@ -46,7 +46,7 @@ class GraphGenerator {
   void generate_green_edges() {
     for (auto vertex_id : graph.vertex_ids()) {
       if (is_lucky(0.1)) {
-        graph.add_edge(vertex_id, vertex_id, EdgeColor::GREEN);
+        graph.add_edge(vertex_id, vertex_id, EdgeColor::Green);
       }
     }
   }
@@ -58,7 +58,7 @@ class GraphGenerator {
         for (const auto& vertex2_id : same_depth_vertices) {
           if (is_lucky(0.25) && !graph.is_connected(vertex1_id, vertex2_id) &&
               graph.is_id_neighbor(vertex1_id, vertex2_id)) {
-            graph.add_edge(vertex1_id, vertex2_id, EdgeColor::BLUE);
+            graph.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
           }
         }
       }
@@ -84,7 +84,7 @@ class GraphGenerator {
             size_t rand_id = std::rand() % not_connected_vertices.size();
             auto rand_it = not_connected_vertices.begin();
             std::advance(rand_it, rand_id);
-            graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::YELLOW);
+            graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::Yellow);
           }
         }
       }
@@ -103,7 +103,7 @@ class GraphGenerator {
           size_t rand_id = std::rand() % next_depth_vertices.size();
           auto rand_it = next_depth_vertices.begin();
           std::advance(rand_it, rand_id);
-          graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::RED);
+          graph.add_edge(cur_vertex_id, *rand_it, EdgeColor::Red);
         }
       }
     }
