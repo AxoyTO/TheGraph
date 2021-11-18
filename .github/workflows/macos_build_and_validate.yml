@@ -32,10 +32,7 @@ jobs:
               PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
               while [ "$RESULT_DIR_NAME" != "$(dirname "$RESULT_DIR_NAME")" ]; do
                 DIR_NAME=$(basename "$RESULT_DIR_NAME");
-                if [ "$DIR_NAME" == "$BASE_DIR_NAME" ]; then
-                  FUNCTION_RESULT="$PREV_RESULT_DIR_NAME";
-                  return;
-                fi;
+                FUNCTION_RESULT="$PREV_RESULT_DIR_NAME";
                 PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
                 RESULT_DIR_NAME="$(dirname "$RESULT_DIR_NAME")";
               done;
