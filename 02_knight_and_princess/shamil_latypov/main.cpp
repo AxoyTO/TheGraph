@@ -23,11 +23,22 @@ class Vertex {
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
   // Добавить id ребра в edge_ids
-  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  void add_edge_id(const EdgeId& id) {
+    assert(has_edge_id(id) && "This edge_id has already been added\n");
+    edge_ids_.push_back(id);
+  }
 
  private:
   VertexId id_;
   std::vector<EdgeId> edge_ids_;
+
+  bool has_edge_id(const EdgeId& id) const {
+    for (const auto& edge_id : edge_ids_) {
+      if (edge_id == id)
+        return false;
+    }
+    return true;
+  }
 };
 
 class Edge {
@@ -53,32 +64,21 @@ class Graph {
     assert(has_vertex_id(v1) && "Vertex 1 doesnt exist\n");
     assert(has_vertex_id(v2) && "Vertex 2 doesnt exist\n");
     assert(vertices_connected(v1, v2) && "Vertices are connected\n");
-    const auto& new_edge = edge_mas.emplace_back(v1, v2, get_new_edge_id());
-    vert_mas[v1].add_edge_id(new_edge.get_id());
-    vert_mas[v2].add_edge_id(new_edge.get_id());
+    const auto& new_edge = edges_.emplace_back(v1, v2, get_new_edge_id());
+    vertices_[v1].add_edge_id(new_edge.get_id());
+    vertices_[v2].add_edge_id(new_edge.get_id());
   }
 
   // Добавляет вершину в граф
-  void add_vertex() { vert_mas.emplace_back(get_new_vertex_id()); }
+  void add_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
 
   // Возврат векторов
-  const std::vector<Vertex>& get_vert_mas() const { return vert_mas; }
-  const std::vector<Edge>& get_edge_mas() const { return edge_mas; }
+  const std::vector<Vertex>& get_vertices() const { return vertices_; }
+  const std::vector<Edge>& get_edges() const { return edges_; }
 
- private:
-  VertexId vert_num = 0;
-  EdgeId edge_num = 0;
-  std::vector<Vertex> vert_mas;
-  std::vector<Edge> edge_mas;
-
-  VertexId get_new_vertex_id() { return vert_num++; }
-  EdgeId get_new_edge_id() { return edge_num++; }
-
-  bool has_vertex_id(const VertexId& id) { return id < vert_mas.size(); }
-
-  bool vertices_connected(const VertexId& v1, const VertexId& v2) {
-    for (const auto& edge_id1 : vert_mas[v1].get_edge_ids()) {
-      for (const auto& edge_id2 : vert_mas[v2].get_edge_ids()) {
+  bool vertices_connected(const VertexId& v1, const VertexId& v2) const {
+    for (const auto& edge_id1 : vertices_[v1].get_edge_ids()) {
+      for (const auto& edge_id2 : vertices_[v2].get_edge_ids()) {
         if (edge_id1 == edge_id2) {
           return false;
         }
@@ -86,6 +86,17 @@ class Graph {
     }
     return true;
   }
+
+ private:
+  VertexId vert_num_ = 0;
+  EdgeId edge_num_ = 0;
+  std::vector<Vertex> vertices_;
+  std::vector<Edge> edges_;
+
+  VertexId get_new_vertex_id() { return vert_num_++; }
+  EdgeId get_new_edge_id() { return edge_num_++; }
+
+  bool has_vertex_id(const VertexId& id) const { return id < vertices_.size(); }
 };
 
 class GraphPrinter {
@@ -95,7 +106,7 @@ class GraphPrinter {
     result << "{\n  \"vertices\": [\n    ";
     bool check_first_comma = false;
 
-    for (const auto& vertex : graph.get_vert_mas()) {
+    for (const auto& vertex : graph.get_vertices()) {
       if (check_first_comma) {
         result << ",\n    ";
       }
@@ -108,7 +119,7 @@ class GraphPrinter {
     result << "\n  ],\n  \"edges\": [\n    ";
     check_first_comma = false;
 
-    for (const auto& edge : graph.get_edge_mas()) {
+    for (const auto& edge : graph.get_edges()) {
       if (check_first_comma) {
         result << ",\n    ";
       }
@@ -148,8 +159,6 @@ class GraphPrinter {
 };
 
 int main() {
-  std::vector<Vertex> vert_mas;
-  std::vector<Edge> edge_mas;
   Graph graph;
 
   for (int i = 0; i < NUM_VERTEX; i++) {
@@ -175,8 +184,8 @@ int main() {
                                                                   {11, 13},
                                                                   {12, 13}}};
 
-  for (int edge_num = 0; edge_num < NUM_EDGE; edge_num++) {
-    graph.add_edge(graph_data[edge_num].first, graph_data[edge_num].second);
+  for (const auto& connection : graph_data) {
+    graph.add_edge(connection.first, connection.second);
   }
 
   GraphPrinter output_graph;
