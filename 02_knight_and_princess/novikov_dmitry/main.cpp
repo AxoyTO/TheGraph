@@ -99,7 +99,8 @@ int main() {
               {uni_cpp_practice::Edge::Color::Red,
                graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Red)}};
       log_string << "  edges: " << graph.get_edge_map().size() << ", {";
-      for (int color_index = 0; color_index < count_edges_of_color_map.size(); ++color_index) {
+      for (int color_index = 0; color_index < count_edges_of_color_map.size();
+           ++color_index) {
         log_string << uni_cpp_practice::color_to_string(
                           count_edges_of_color_map[color_index].first)
                    << ": " << count_edges_of_color_map[color_index].second;
