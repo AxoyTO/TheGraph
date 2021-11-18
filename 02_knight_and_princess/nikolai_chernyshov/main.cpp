@@ -27,8 +27,8 @@ struct Vertex {
   explicit Vertex(const VertexId& id_max) : id(id_max) {}
 
   bool has_edge_id(const EdgeId& id) const {
-    if (!edge_ids_.empty())
-      if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
+    if (edge_ids_.empty()) return false;
+    if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
         return true;
     return false;
   }
