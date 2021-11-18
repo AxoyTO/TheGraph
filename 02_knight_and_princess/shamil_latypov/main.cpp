@@ -1,78 +1,91 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-constexpr int INVALID_ID = -1;
+constexpr int NUM_VERTEX = 14;
+constexpr int NUM_EDGE = 18;
 
 using VertexId = int;
 using EdgeId = int;
 
 class Vertex {
  public:
-  Vertex(VertexId id_ = INVALID_ID) : id(id_) {}
+  explicit Vertex(const VertexId& id) : id_(id) {}
 
   // Возврат значений
-  VertexId get_id() const { return id; }
-  EdgeId get_edge_id(EdgeId i) const { return edge_ids[i]; }
-  const std::vector<EdgeId>& get_edge_ids_vector() const { return edge_ids; }
+  VertexId get_id() const { return id_; }
+  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
   // Добавить id ребра в edge_ids
-  void add_edge_id(EdgeId i) { edge_ids.emplace_back(i); }
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
 
  private:
-  VertexId id;
-  std::vector<EdgeId> edge_ids;
+  VertexId id_;
+  std::vector<EdgeId> edge_ids_;
 };
 
 class Edge {
  public:
-  Edge() : id(INVALID_ID) {}
-  Edge(VertexId v1_, VertexId v2_, EdgeId id_ = INVALID_ID)
-      : v1(v1_), v2(v2_), id(id_) {}
+  Edge(const VertexId& v1, const VertexId& v2, const EdgeId& id)
+      : v1_(v1), v2_(v2), id_(id) {}
 
   // Возврат значений
-  EdgeId get_id() const { return id; }
-  VertexId get_vertex1_id() const { return v1; }
-  VertexId get_vertex2_id() const { return v2; }
+  EdgeId get_id() const { return id_; }
+  VertexId get_vertex1_id() const { return v1_; }
+  VertexId get_vertex2_id() const { return v2_; }
 
  private:
-  EdgeId id;
-  VertexId v1;
-  VertexId v2;
+  EdgeId id_;
+  VertexId v1_;
+  VertexId v2_;
 };
 
 class Graph {
  public:
-  Graph() : vert_num(0), edge_num(0) {}
-
   // Добавляет ребро в graph
-  void add_edge(VertexId v1, VertexId v2) {
-    edge_mas.emplace_back(v1, v2, edge_num);
-    vert_mas[v1].add_edge_id(edge_num);
-    vert_mas[v2].add_edge_id(edge_num);
-    edge_num++;
+  void add_edge(const VertexId& v1, const VertexId& v2) {
+    assert(has_vertex_id(v1) && "Vertex 1 doesnt exist\n");
+    assert(has_vertex_id(v2) && "Vertex 2 doesnt exist\n");
+    assert(vertices_connected(v1, v2) && "Vertices are connected\n");
+    const auto& new_edge = edge_mas.emplace_back(v1, v2, get_new_edge_id());
+    vert_mas[v1].add_edge_id(new_edge.get_id());
+    vert_mas[v2].add_edge_id(new_edge.get_id());
   }
 
   // Добавляет вершину в граф
-  void add_vertex() {
-    vert_mas.emplace_back(vert_num);
-    vert_num++;
-  }
+  void add_vertex() { vert_mas.emplace_back(get_new_vertex_id()); }
 
   // Возврат векторов
   const std::vector<Vertex>& get_vert_mas() const { return vert_mas; }
   const std::vector<Edge>& get_edge_mas() const { return edge_mas; }
 
  private:
-  VertexId vert_num;
-  EdgeId edge_num;
+  VertexId vert_num = 0;
+  EdgeId edge_num = 0;
   std::vector<Vertex> vert_mas;
   std::vector<Edge> edge_mas;
+
+  VertexId get_new_vertex_id() { return vert_num++; }
+  EdgeId get_new_edge_id() { return edge_num++; }
+
+  bool has_vertex_id(const VertexId& id) { return id < vert_mas.size(); }
+
+  bool vertices_connected(const VertexId& v1, const VertexId& v2) {
+    for (const auto& edge_id1 : vert_mas[v1].get_edge_ids()) {
+      for (const auto& edge_id2 : vert_mas[v2].get_edge_ids()) {
+        if (edge_id1 == edge_id2) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 };
 
 class GraphPrinter {
@@ -82,24 +95,12 @@ class GraphPrinter {
     result << "{\n  \"vertices\": [\n    ";
     bool check_first_comma = false;
 
-    for (auto& vertex : graph.get_vert_mas()) {
+    for (const auto& vertex : graph.get_vert_mas()) {
       if (check_first_comma) {
         result << ",\n    ";
       }
 
-      result << "{\n      \"id\": " << vertex.get_id()
-             << ",\n      \"edge_ids\": [";
-
-      check_first_comma = false;
-      for (auto& i : vertex.get_edge_ids_vector()) {
-        if (check_first_comma) {
-          result << ", ";
-        }
-        check_first_comma = true;
-        result << i;
-      }
-
-      result << "]\n    }";
+      result << print_vertex(vertex);
 
       check_first_comma = true;
     }
@@ -107,38 +108,74 @@ class GraphPrinter {
     result << "\n  ],\n  \"edges\": [\n    ";
     check_first_comma = false;
 
-    for (auto& edge : graph.get_edge_mas()) {
+    for (const auto& edge : graph.get_edge_mas()) {
       if (check_first_comma) {
         result << ",\n    ";
       }
       check_first_comma = true;
 
-      result << "{\n      \"id\": " << edge.get_id()
-             << ",\n      \"vertex_ids\": [" << edge.get_vertex1_id() << ", "
-             << edge.get_vertex2_id() << "]\n    }";
+      result << print_edge(edge);
     }
 
     result << "\n  ]\n}\n";
+
     return result.str();
+  }
+
+  std::string print_vertex(const Vertex& vertex) const {
+    std::stringstream ss;
+    ss << "{\n      \"id\": " << vertex.get_id() << ",\n      \"edge_ids\": [";
+
+    int check_first_comma = false;
+    for (const auto& i : vertex.get_edge_ids()) {
+      if (check_first_comma) {
+        ss << ", ";
+      }
+      check_first_comma = true;
+      ss << i;
+    }
+
+    ss << "]\n    }";
+    return ss.str();
+  }
+
+  std::string print_edge(const Edge& edge) const {
+    std::stringstream ss;
+    ss << "{\n      \"id\": " << edge.get_id() << ",\n      \"vertex_ids\": ["
+       << edge.get_vertex1_id() << ", " << edge.get_vertex2_id() << "]\n    }";
+    return ss.str();
   }
 };
 
 int main() {
-  const int numedge = 18, numvertex = 14;
   std::vector<Vertex> vert_mas;
   std::vector<Edge> edge_mas;
   Graph graph;
 
-  for (int i = 0; i < numvertex; i++) {
+  for (int i = 0; i < NUM_VERTEX; i++) {
     graph.add_vertex();
   }
 
-  std::vector<std::pair<int, int>> graph_data{
-      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
+  std::array<std::pair<VertexId, VertexId>, NUM_EDGE> graph_data{{{0, 1},
+                                                                  {0, 2},
+                                                                  {0, 3},
+                                                                  {1, 4},
+                                                                  {1, 5},
+                                                                  {1, 6},
+                                                                  {2, 7},
+                                                                  {2, 8},
+                                                                  {3, 9},
+                                                                  {4, 10},
+                                                                  {5, 10},
+                                                                  {6, 10},
+                                                                  {7, 11},
+                                                                  {8, 11},
+                                                                  {9, 12},
+                                                                  {10, 13},
+                                                                  {11, 13},
+                                                                  {12, 13}}};
 
-  for (int edge_num = 0; edge_num < numedge; edge_num++) {
+  for (int edge_num = 0; edge_num < NUM_EDGE; edge_num++) {
     graph.add_edge(graph_data[edge_num].first, graph_data[edge_num].second);
   }
 
