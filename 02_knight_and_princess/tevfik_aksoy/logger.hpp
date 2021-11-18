@@ -1,12 +1,8 @@
 #pragma once
-#ifndef _LOGGER_
-#define _LOGGER_
 
-#include <cassert>
 #include <fstream>
-#include <iostream>
+#include <optional>
 #include <string>
-#include <vector>
 
 class Logger {
  public:
@@ -15,12 +11,16 @@ class Logger {
     return instance;
   }
 
-  void set_file(std::string filename = "./temp/log.txt");
+  void set_file(const std::optional<std::string>& filename);
 
-  void log(const std::string& string) const;
+  void log(const std::string& string);
+  ~Logger() {
+    if (file_stream_->is_open())
+      file_stream_->close();
+  }
 
  private:
-  std::string logfilename;
+  std::optional<std::ofstream> file_stream_;
 
   Logger() = default;
 
@@ -28,9 +28,4 @@ class Logger {
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
-
-  void print_and_write(const std::string& str,
-                       std::ostream& output_stream,
-                       std::ofstream& file_stream) const;
 };
-#endif

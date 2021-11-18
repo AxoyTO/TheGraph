@@ -1,18 +1,23 @@
 #include "logger.hpp"
+#include <iostream>
 
-void Logger::set_file(const std::string filename) {
-  this->logfilename = filename;
+void Logger::set_file(const std::optional<std::string>& filename) {
+  if (!filename.has_value()) {
+    file_stream_->close();
+    file_stream_ = std::nullopt;
+    return;
+  }
+
+  if (file_stream_->is_open()) {
+    file_stream_->close();
+  }
+
+  file_stream_ = std::ofstream(filename.value());
+  if (!file_stream_->is_open())
+    throw std::runtime_error("Error while opening the log file!");
 }
-
-void Logger::print_and_write(const std::string& string,
-                             std::ostream& output_stream,
-                             std::ofstream& file_stream) const {
-  output_stream << string;
-  file_stream << string;
-}
-
-void Logger::log(const std::string& string) const {
-  std::ofstream logfile(logfilename, std::ofstream::app);
-  assert(logfile.is_open() && "Error while opening the log file!");
-  print_and_write(string, std::cout, logfile);
+void Logger::log(const std::string& string) {
+  if (file_stream_.has_value())
+    file_stream_.value() << string;
+  std::cout << string;
 }

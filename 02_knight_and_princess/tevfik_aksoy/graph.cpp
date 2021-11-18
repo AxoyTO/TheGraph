@@ -1,47 +1,42 @@
 #include "graph.hpp"
+#include <cassert>
 
-using namespace graph_structures;
+namespace {
+bool is_depth_valid(
+    const int depth,
+    const std::vector<std::vector<uni_cpp_practice::VertexId>>& depth_map) {
+  if (depth_map[depth].empty())
+    return false;
+  return true;
+}
+}  // namespace
 
-namespace validation {
-bool edge_id_exists_in_vertex(const EdgeId& edge_id,
-                              const std::vector<EdgeId>& edge_ids) {
-  for (const auto& edge : edge_ids) {
-    if (edge_id == edge) {
-      return true;
-    }
-  }
-  return false;
+void uni_cpp_practice::Vertex::add_edge_id(const EdgeId& id) {
+  assert(!has_edge_id(id, edge_ids_) && "Edge already exists in vertex!");
+  edge_ids_.push_back(id);
 }
 
-bool does_vertex_exist(const VertexId& id, const std::vector<Vertex>& vertices);
-}  // namespace validation
-
-void Vertex::add_edge_id(const EdgeId& _id) {
-  assert(!validation::edge_id_exists_in_vertex(_id, edge_ids_) &&
-         "Edge already exists in vertex!");
-  edge_ids_.push_back(_id);
-}
-
-const std::vector<EdgeId>& Vertex::get_edge_ids() const {
+const std::vector<uni_cpp_practice::EdgeId>&
+uni_cpp_practice::Vertex::get_edge_ids() const {
   return edge_ids_;
 }
 
-std::string color_to_string(const Edge::Color& color) {
+std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
   switch (color) {
-    case Edge::Color::Gray:
+    case uni_cpp_practice::Edge::Color::Gray:
       return "gray";
-    case Edge::Color::Green:
+    case uni_cpp_practice::Edge::Color::Green:
       return "green";
-    case Edge::Color::Blue:
+    case uni_cpp_practice::Edge::Color::Blue:
       return "blue";
-    case Edge::Color::Yellow:
+    case uni_cpp_practice::Edge::Color::Yellow:
       return "yellow";
-    case Edge::Color::Red:
+    case uni_cpp_practice::Edge::Color::Red:
       return "red";
   }
 }
 
-std::string Edge::to_JSON() const {
+std::string uni_cpp_practice::Edge::to_JSON() const {
   std::string json_string;
   json_string += "\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
                  std::to_string(source) + ", " + std::to_string(destination) +
@@ -49,7 +44,7 @@ std::string Edge::to_JSON() const {
   return json_string;
 }
 
-std::string Vertex::to_JSON() const {
+std::string uni_cpp_practice::Vertex::to_JSON() const {
   std::string json_string;
   json_string += "\t{ \"id\": " + std::to_string(id) + ", \"edge_ids\": [";
   for (int i = 0; i < edge_ids_.size(); i++) {
@@ -61,8 +56,9 @@ std::string Vertex::to_JSON() const {
   return json_string;
 }
 
-bool validation::does_vertex_exist(const VertexId& id,
-                                   const std::vector<Vertex>& vertices) {
+bool Graph::does_vertex_exist(
+    const uni_cpp_practice::VertexId& id,
+    const std::vector<uni_cpp_practice::Vertex>& vertices) const {
   for (const auto& vertex : vertices)
     if (vertex.id == id) {
       return true;
@@ -70,20 +66,20 @@ bool validation::does_vertex_exist(const VertexId& id,
   return false;
 }
 
-VertexId Graph::insert_vertex() {
+uni_cpp_practice::VertexId Graph::insert_vertex() {
   const auto id = get_new_vertex_id_();
   vertices_.emplace_back(id);
   if (id == 0) {
-    VertexDepth depth = 0;
+    uni_cpp_practice::VertexDepth depth = 0;
     depth_map_.emplace_back();
     depth_map_[depth].push_back(id);
   }
   return id;
 }
 
-void Graph::insert_edge(const VertexId& source,
-                        const VertexId& destination,
-                        const Edge::Color& color) {
+void Graph::insert_edge(const uni_cpp_practice::VertexId& source,
+                        const uni_cpp_practice::VertexId& destination,
+                        const uni_cpp_practice::Edge::Color& color) {
   assert(!are_vertices_connected(source, destination) &&
          "Vertices are already connected!");
   assert(does_color_match_vertices(vertices_[source], vertices_[destination],
@@ -93,9 +89,9 @@ void Graph::insert_edge(const VertexId& source,
   edges_.emplace_back(source, destination, edge_id, color);
 
   vertices_[source].add_edge_id(edge_id);
-  if (color != Edge::Color::Green) {
+  if (color != uni_cpp_practice::Edge::Color::Green) {
     vertices_[destination].add_edge_id(edge_id);
-    if (color == Edge::Color::Gray) {
+    if (color == uni_cpp_practice::Edge::Color::Gray) {
       const auto depth = vertices_[source].depth + 1;
       vertices_[destination].depth = depth;
       if (depth_map_.size() == depth) {
@@ -106,18 +102,19 @@ void Graph::insert_edge(const VertexId& source,
   }
 }
 
-bool Graph::does_color_match_vertices(const Vertex& source,
-                                      const Vertex& destination,
-                                      const Edge::Color& color) const {
+bool Graph::does_color_match_vertices(
+    const uni_cpp_practice::Vertex& source,
+    const uni_cpp_practice::Vertex& destination,
+    const uni_cpp_practice::Edge::Color& color) const {
   switch (color) {
-    case Edge::Color::Gray:
+    case uni_cpp_practice::Edge::Color::Gray:
       if (source.get_edge_ids().size() == 0 ||
           destination.get_edge_ids().size() == 0)
         return true;
-    case Edge::Color::Green:
+    case uni_cpp_practice::Edge::Color::Green:
       if (source.id == destination.id)
         return true;
-    case Edge::Color::Blue:
+    case uni_cpp_practice::Edge::Color::Blue:
       if (source.depth == destination.depth) {
         for (int i = 0; i < depth_map_[source.depth].size() - 1; i++) {
           auto first = depth_map_[source.depth][i];
@@ -127,21 +124,22 @@ bool Graph::does_color_match_vertices(const Vertex& source,
             return true;
         }
       }
-    case Edge::Color::Yellow:
+    case uni_cpp_practice::Edge::Color::Yellow:
       if (source.depth == destination.depth - 1)
         return true;
-    case Edge::Color::Red:
+    case uni_cpp_practice::Edge::Color::Red:
       if (source.depth == destination.depth - 2)
         return true;
   }
   return false;
 }
 
-bool Graph::are_vertices_connected(const VertexId& source,
-                                   const VertexId& destination) const {
-  assert(validation::does_vertex_exist(source, vertices_) &&
+bool Graph::are_vertices_connected(
+    const uni_cpp_practice::VertexId& source,
+    const uni_cpp_practice::VertexId& destination) const {
+  assert(does_vertex_exist(source, vertices_) &&
          "Source vertex doesn't exist!");
-  assert(validation::does_vertex_exist(destination, vertices_) &&
+  assert(does_vertex_exist(destination, vertices_) &&
          "Destination vertex doesn't exist!");
 
   const auto& source_vertex_edges = vertices_[source].get_edge_ids();
@@ -159,7 +157,8 @@ bool Graph::are_vertices_connected(const VertexId& source,
   return false;
 }
 
-int Graph::total_edges_of_color(const Edge::Color color) const {
+int Graph::total_edges_of_color(
+    const uni_cpp_practice::Edge::Color color) const {
   int total = 0;
   for (const auto& edge : edges_) {
     if (edge.color == color)
@@ -171,34 +170,15 @@ int Graph::total_edges_of_color(const Edge::Color color) const {
 int Graph::depth() const {
   return depth_map_.size() - 1;
 }
-const std::vector<Vertex>& Graph::get_vertices() const {
+const std::vector<uni_cpp_practice::Vertex>& Graph::get_vertices() const {
   return vertices_;
 }
-const std::vector<Edge>& Graph::get_edges() const {
+const std::vector<uni_cpp_practice::Edge>& Graph::get_edges() const {
   return edges_;
 }
 
-const std::vector<VertexId>& Graph::get_vertices_in_depth(
-    const VertexDepth& depth) const {
+const std::vector<uni_cpp_practice::VertexId>& Graph::get_vertices_in_depth(
+    const uni_cpp_practice::VertexDepth& depth) const {
+  assert(is_depth_valid(depth, depth_map_) && "Depth is not valid!");
   return depth_map_.at(depth);
-}
-
-std::string Graph::to_JSON() const {
-  std::string json_string;
-  json_string += "{\n\"vertices\": [\n";
-  for (int i = 0; i < vertices_.size(); i++) {
-    json_string += vertices_[i].to_JSON();
-    if (i + 1 != vertices_.size())
-      json_string += ",\n";
-  }
-  json_string += "\n  ],\n";
-
-  json_string += "\"edges\": [\n";
-  for (int i = 0; i < edges_.size(); i++) {
-    json_string += edges_[i].to_JSON();
-    if (i + 1 != edges_.size())
-      json_string += ",\n";
-  }
-  json_string += "\n  ]\n}\n";
-  return json_string;
 }
