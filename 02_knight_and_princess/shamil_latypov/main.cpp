@@ -28,10 +28,6 @@ class Vertex {
     edge_ids_.push_back(id);
   }
 
- private:
-  VertexId id_;
-  std::vector<EdgeId> edge_ids_;
-
   bool has_edge_id(const EdgeId& id) const {
     for (const auto& edge_id : edge_ids_) {
       if (edge_id == id)
@@ -39,6 +35,10 @@ class Vertex {
     }
     return true;
   }
+
+ private:
+  VertexId id_;
+  std::vector<EdgeId> edge_ids_;
 };
 
 class Edge {
@@ -87,6 +87,15 @@ class Graph {
     return true;
   }
 
+  bool has_vertex_id(const VertexId& id) const {
+    for (const auto& vertex_id : vertices_) {
+      if (vertex_id.get_id() == id) {
+        return false;
+      }
+    }
+    return true;
+  }
+
  private:
   VertexId vert_num_ = 0;
   EdgeId edge_num_ = 0;
@@ -95,8 +104,6 @@ class Graph {
 
   VertexId get_new_vertex_id() { return vert_num_++; }
   EdgeId get_new_edge_id() { return edge_num_++; }
-
-  bool has_vertex_id(const VertexId& id) const { return id < vertices_.size(); }
 };
 
 class GraphPrinter {
