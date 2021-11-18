@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -25,7 +26,17 @@ struct Vertex {
 
   explicit Vertex(const VertexId& id_max) : id(id_max) {}
 
-  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  bool has_edge_id(const EdgeId& id) const {
+    if (!edge_ids_.empty())
+      if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
+        return true;
+    return false;
+  }
+
+  void add_edge_id(const EdgeId& id) {
+    assert(!has_edge_id(id) && "Edge id already exists");
+    edge_ids_.push_back(id);
+  }
 
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
@@ -37,9 +48,11 @@ class Graph {
  public:
   bool are_connected(const VertexId& vertex1_id,
                      const VertexId& vertex2_id) const {
-    for (const auto& edge1 : vertices_[vertex1_id].get_edge_ids()) {
-      for (const auto& edge2 : vertices_[vertex2_id].get_edge_ids()) {
-        if (edge1 == edge2)
+    assert(has_vertex(vertex1_id));
+    assert(has_vertex(vertex2_id));
+    for (const auto& edge1_id : vertices_[vertex1_id].get_edge_ids()) {
+      for (const auto& edge2_id : vertices_[vertex2_id].get_edge_ids()) {
+        if (edge1_id == edge2_id)
           return true;
       }
     }
@@ -47,13 +60,16 @@ class Graph {
   }
 
   bool has_vertex(const VertexId& vertex_id) const {
-    return vertex_id < vertex_id_max_;
+    for (const auto& vertex : vertices_)
+      if (vertex.id == vertex_id)
+        return true;
+    return false;
   }
 
   void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
-    assert(!are_connected(vertex1_id, vertex2_id));
     assert(has_vertex(vertex1_id));
     assert(has_vertex(vertex2_id));
+    assert(!are_connected(vertex1_id, vertex2_id));
 
     const auto& new_edge =
         edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id());
@@ -126,12 +142,16 @@ class GraphPrinter {
     res += std::to_string(vertex.id);
     res += ",\n\t\t\t\"edge_ids\": [";
 
-    for (const auto& edge : vertex.get_edge_ids()) {
-      res += std::to_string(edge);
-      res += ", ";
+    auto edge_ids = vertex.get_edge_ids();
+
+    if (!edge_ids.empty()) {
+      for (const auto& edge_id : edge_ids) {
+        res += std::to_string(edge_id);
+        res += ", ";
+      }
+      res.pop_back();
+      res.pop_back();
     }
-    res.pop_back();
-    res.pop_back();
     res += "]\n\t\t}";
 
     return res;
@@ -155,19 +175,29 @@ class GraphPrinter {
     std::string res;
     res += "{\n\t \"vertices\": [\n\t\t";
 
-    for (const auto& vertex : graph.get_vertices()) {
-      res += vertex_to_json(vertex);
-      res += ", ";
+    auto vertices = graph.get_vertices();
+
+    if (!vertices.empty()) {
+      for (const auto& vertex : graph.get_vertices()) {
+        res += vertex_to_json(vertex);
+        res += ", ";
+      }
+      res.pop_back();
+      res.pop_back();
     }
-    res.pop_back();
-    res.pop_back();
+
     res += "\n\t],\n\t\"edges\": [\n\t\t";
 
-    for (const auto& edge : graph.get_edges()) {
-      res += edge_to_json(edge);
+    auto edges = graph.get_edges();
+
+    if (!edges.empty()) {
+      for (const auto& edge : graph.get_edges()) {
+        res += edge_to_json(edge);
+      }
+      res.pop_back();
+      res.pop_back();
     }
-    res.pop_back();
-    res.pop_back();
+
     res += "\n\t]\n}\n";
 
     return res;
