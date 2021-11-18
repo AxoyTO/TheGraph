@@ -23,8 +23,7 @@ jobs:
         run: |
           FUNCTION_RESULT="";
           find_dir_name() {
-            BASE_DIR_NAME_01="01_hello_world";
-            BASE_DIR_NAME_02="02_knight_and_princess";
+            BASE_DIR_NAME="msu_course_cpp_323";
             RESULT_DIR_NAME="";
             PREV_RESULT_DIR_NAME="";
             for FILE_NAME in ${{ steps.changed_files.outputs.all }}; do
@@ -33,7 +32,7 @@ jobs:
               PREV_RESULT_DIR_NAME="$RESULT_DIR_NAME";
               while [ "$RESULT_DIR_NAME" != "$(dirname "$RESULT_DIR_NAME")" ]; do
                 DIR_NAME=$(basename "$RESULT_DIR_NAME");
-                if [ "$DIR_NAME" == "$BASE_DIR_NAME_01" ] || [ "$DIR_NAME" == "$BASE_DIR_NAME_02" ]; then
+                if [ "$DIR_NAME" == "$BASE_DIR_NAME" ]; then
                   FUNCTION_RESULT="$PREV_RESULT_DIR_NAME";
                   return;
                 fi;
