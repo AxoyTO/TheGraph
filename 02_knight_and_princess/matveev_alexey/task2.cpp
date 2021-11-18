@@ -50,7 +50,6 @@ class Graph {
     assert(hasVertex(vertex_id2) && "Vertex2 index is out of range");
     if (vertex_id1 == vertex_id2) {
       for (const auto& edge_id : connection_list_.at(vertex_id1)) {
-        assert(hasEdge(edge_id && "Edge index is out of range"));
         const auto& edge = getEdge(edge_id);
         if (edge.vertex_id1 == vertex_id1 && edge.vertex_id2 == vertex_id1) {
           return true;
@@ -58,7 +57,6 @@ class Graph {
       }
     } else {
       for (const auto& edge_id : connection_list_.at(vertex_id1)) {
-        assert(hasEdge(edge_id && "Edge index is out of range"));
         const auto& edge = getEdge(edge_id);
         if (edge.vertex_id1 == vertex_id2 || edge.vertex_id2 == vertex_id2) {
           return true;
@@ -86,6 +84,16 @@ class Graph {
     }
   }
 
+  const Edge& getEdge(const EdgeId& edge_id) const {
+    assert(hasEdge(edge_id) && "Edge id is out of range.");
+    for (const auto& edge : edges_) {
+      if (edge.id == edge_id) {
+        return edge;
+      }
+    }
+    throw std::runtime_error("Cannot be reached.");
+  }
+
  private:
   std::vector<Vertex> vertexes_;
   std::vector<Edge> edges_;
@@ -93,15 +101,6 @@ class Graph {
   std::unordered_map<VertexId, std::vector<EdgeId>> connection_list_;
   VertexId getNewVertexId() { return vertex_new_id_++; }
   EdgeId getNewEdgeId() { return edge_new_id_++; }
-  const Edge& getEdge(EdgeId edge_id) const {
-    assert(hasEdge(edge_id));
-    for (const auto& edge : edges_) {
-      if (edge.id == edge_id) {
-        return edge;
-      }
-    }
-    throw std::runtime_error("");
-  }
 };
 
 constexpr int VERTEX_NUMBER = 14, EDGE_NUMBER = 18;
