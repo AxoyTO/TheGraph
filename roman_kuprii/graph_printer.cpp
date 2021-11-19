@@ -12,6 +12,8 @@
 
 namespace uni_cpp_practice {
 
+namespace graph_printing {
+
 using std::to_string;
 
 void write_graph(const Graph& graph, const int& graph_num) {
@@ -98,5 +100,7 @@ void write_log(Graph& work_graph,
 
   logger.log(res);
 }
+
+}  // namespace graph_printing
 
 }  // namespace uni_cpp_practice

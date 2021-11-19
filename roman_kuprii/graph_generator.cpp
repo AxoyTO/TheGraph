@@ -6,6 +6,8 @@
 
 namespace uni_cpp_practice {
 
+namespace graph_generating {
+
 using std::vector;
 
 double get_random_number() {
@@ -132,5 +134,7 @@ void paint_edges(Graph& work_graph) {
   add_red_edges(work_graph);
   add_yellow_edges(work_graph);
 }
+
+}  // namespace graph_generating
 
 }  // namespace uni_cpp_practice

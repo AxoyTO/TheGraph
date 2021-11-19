@@ -2,11 +2,13 @@
 
 namespace uni_cpp_practice {
 
+class Graph;
+
+namespace graph_generating {
+
 constexpr double GREEN_TRASHOULD = 0.1;
 constexpr double BLUE_TRASHOULD = 0.25;
 constexpr double RED_TRASHOULD = 0.33;
-
-class Graph;
 
 double get_random_number();
 
@@ -20,5 +22,7 @@ void add_red_edges(Graph& work_graph);
 void add_yellow_edges(Graph& work_graph);
 
 void paint_edges(Graph& work_graph);
+
+}  // namespace graph_generating
 
 }  // namespace uni_cpp_practice

@@ -46,10 +46,12 @@ int main() {
   for (int graph_num = 0; graph_num < graphs_quantity; graph_num++) {
     Graph my_graph;
     my_graph.add_vertex();
-    new_vertices_generation(my_graph, depth, new_vertices_num);
-    paint_edges(my_graph);
-    write_graph(my_graph, graph_num);
-    write_log(my_graph, log_stream, depth, new_vertices_num, graph_num, logger);
+    graph_generating::new_vertices_generation(my_graph, depth,
+                                              new_vertices_num);
+    graph_generating::paint_edges(my_graph);
+    graph_printing::write_graph(my_graph, graph_num);
+    graph_printing::write_log(my_graph, log_stream, depth, new_vertices_num,
+                              graph_num, logger);
   }
 
   log_stream.close();
