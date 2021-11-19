@@ -9,7 +9,7 @@ using EdgeId = int;
 using VertexId = int;
 
 namespace {
-    constexpr int INVALID_ID = -1;
+constexpr int INVALID_ID = -1;
 }
 
 enum class Color { Gray, Green, Blue, Yellow, Red };

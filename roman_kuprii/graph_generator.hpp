@@ -9,8 +9,8 @@ class Graph;
 double get_random_number();
 
 void new_vertices_generation(Graph& work_graph,
-                              const int& depth,
-                              const int& new_vertices_num);
+                             const int& depth,
+                             const int& new_vertices_num);
 
 void add_blue_edges(Graph& work_graph);
 void add_green_edges(Graph& work_graph);

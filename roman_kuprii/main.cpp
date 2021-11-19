@@ -4,9 +4,9 @@
 #include <string>
 
 #include "graph.hpp"
-#include "logger.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
+#include "logger.hpp"
 
 constexpr int GRAPH_NUMBER = 10;
 constexpr int INVALID_NEW_DEPTH = -1;

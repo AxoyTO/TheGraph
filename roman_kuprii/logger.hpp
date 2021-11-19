@@ -10,7 +10,7 @@ class Graph;
 
 class Logger {
  public:
- static Logger& get_logger(std::ofstream& f) {
+  static Logger& get_logger(std::ofstream& f) {
     static Logger logger(f);
     return logger;
   }
