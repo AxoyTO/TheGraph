@@ -1,8 +1,10 @@
-#include <time.h>
 #include <array>
+#include <chrono>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,12 +28,12 @@ void write_graph(const Graph& graph, const int& graph_num) {
 }
 
 const std::string get_datetime() {
-  time_t now = time(0);
-  struct tm tstruct;
-  char buf[80];
-  tstruct = *localtime(&now);
-  strftime(buf, sizeof(buf), "%Y.%m.%d %X", &tstruct);
-  return buf;
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
 }
 
 void write_log(Graph& work_graph,
