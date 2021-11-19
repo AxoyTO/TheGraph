@@ -36,3 +36,6 @@ Carthage/Build
 
 # Other
 ._*
+
+# Temp
+/novikov_dmitry/temp
