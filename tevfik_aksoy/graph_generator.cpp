@@ -2,15 +2,9 @@
 #include <iostream>
 #include <random>
 
-float GraphGenerator::get_random_probability() {
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_real_distribution<float> probability(0.0, 1);
-  return probability(mt);
-}
-
-uni_cpp_practice::VertexId GraphGenerator::get_random_vertex_id(
-    const std::vector<uni_cpp_practice::VertexId>& vertices) {
+namespace uni_cpp_practice {
+namespace {
+VertexId get_random_vertex_id(const std::vector<VertexId>& vertices) {
   std::random_device rd;
   std::mt19937 mt(rd());
   std::uniform_int_distribution<int> random_vertex_distribution(
@@ -18,19 +12,39 @@ uni_cpp_practice::VertexId GraphGenerator::get_random_vertex_id(
   return vertices[random_vertex_distribution(mt)];
 }
 
-void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) {
+std::vector<VertexId> filter_connected_vertices(
+    const VertexId& id,
+    const std::vector<VertexId>& vertex_ids,
+    const Graph& graph) {
+  std::vector<VertexId> result;
+  for (const auto& vertex_id : vertex_ids) {
+    if (!graph.are_vertices_connected(id, vertex_id)) {
+      result.push_back(vertex_id);
+    }
+  }
+  return result;
+}
+}  // namespace
+
+float GraphGenerator::get_random_probability() const {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_real_distribution<float> probability(0.0, 1);
+  return probability(mt);
+}
+
+void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   graph.insert_vertex();
 
-  for (uni_cpp_practice::VertexDepth depth = 0; depth < max_depth_; depth++) {
+  for (VertexDepth depth = 0; depth < max_depth_; depth++) {
     bool is_new_vertex_generated = false;
     const float probability = (float)depth / (float)max_depth_;
     for (const auto& source : graph.get_vertices_in_depth(depth)) {
       for (int j = 0; j < new_vertices_num_; j++) {
         if (get_random_probability() > probability) {
           is_new_vertex_generated = true;
-          const uni_cpp_practice::VertexId new_vertex = graph.insert_vertex();
-          graph.insert_edge(source, new_vertex,
-                            uni_cpp_practice::Edge::Color::Gray);
+          const VertexId new_vertex = graph.insert_vertex();
+          graph.insert_edge(source, new_vertex);
         }
       }
     }
@@ -44,48 +58,30 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) {
   }
 }
 
-void GraphGenerator::generate_green_edges(Graph& graph) {
+void GraphGenerator::generate_green_edges(Graph& graph) const {
   for (const auto& vertex : graph.get_vertices()) {
     if (get_random_probability() < GREEN_EDGE_PROBABILITY_) {
-      graph.insert_edge(vertex.id, vertex.id,
-                        uni_cpp_practice::Edge::Color::Green);
+      graph.insert_edge(vertex.id, vertex.id);
     }
   }
 }
 
-void GraphGenerator::generate_blue_edges(Graph& graph) {
+void GraphGenerator::generate_blue_edges(Graph& graph) const {
   for (int depth = 0; depth < graph.depth(); depth++) {
     const auto& vertices_in_depth = graph.get_vertices_in_depth(depth);
-    for (uni_cpp_practice::VertexId j = 0; j < vertices_in_depth.size() - 1;
-         j++) {
+    for (VertexId j = 0; j < vertices_in_depth.size() - 1; j++) {
       const auto source = vertices_in_depth[j];
       const auto destination = vertices_in_depth[j + 1];
       if (get_random_probability() < BLUE_EDGE_PROBABILITY_) {
-        graph.insert_edge(source, destination,
-                          uni_cpp_practice::Edge::Color::Blue);
+        graph.insert_edge(source, destination);
       }
     }
   }
 }
 
-std::vector<uni_cpp_practice::VertexId>
-GraphGenerator::filter_connected_vertices(
-    const uni_cpp_practice::VertexId& id,
-    const std::vector<uni_cpp_practice::VertexId>& vertex_ids,
-    const Graph& graph) {
-  std::vector<uni_cpp_practice::VertexId> result;
-  for (const auto& vertex_id : vertex_ids) {
-    if (!graph.are_vertices_connected(id, vertex_id)) {
-      result.push_back(vertex_id);
-    }
-  }
-  return result;
-}
-
-void GraphGenerator::generate_yellow_edges(Graph& graph) {
-  for (uni_cpp_practice::VertexDepth depth = 0; depth < graph.depth();
-       depth++) {
-    float probability = 1 - depth * (1 / (float)(graph.depth() - 1));
+void GraphGenerator::generate_yellow_edges(Graph& graph) const {
+  for (VertexDepth depth = 0; depth < graph.depth(); depth++) {
+    float probability = 1 - (float)depth * (1 / (float)(graph.depth() - 1));
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 1);
     for (const auto& vertex_id : vertices) {
@@ -95,30 +91,26 @@ void GraphGenerator::generate_yellow_edges(Graph& graph) {
         if (filtered_vertex_ids.size() == 0) {
           continue;
         }
-        uni_cpp_practice::VertexId random_vertex_id =
-            get_random_vertex_id(filtered_vertex_ids);
-        graph.insert_edge(vertex_id, random_vertex_id,
-                          uni_cpp_practice::Edge::Color::Yellow);
+        VertexId random_vertex_id = get_random_vertex_id(filtered_vertex_ids);
+        graph.insert_edge(vertex_id, random_vertex_id);
       }
     }
   }
 }
 
-void GraphGenerator::generate_red_edges(Graph& graph) {
-  for (uni_cpp_practice::VertexDepth depth = 0; depth < graph.depth() - 1;
-       depth++) {
+void GraphGenerator::generate_red_edges(Graph& graph) const {
+  for (VertexDepth depth = 0; depth < graph.depth() - 1; depth++) {
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 2);
     for (const auto& vertex : vertices) {
       if (get_random_probability() < RED_EDGE_PROBABILITY_) {
-        graph.insert_edge(vertex, get_random_vertex_id(vertices_next),
-                          uni_cpp_practice::Edge::Color::Red);
+        graph.insert_edge(vertex, get_random_vertex_id(vertices_next));
       }
     }
   }
 }
 
-const Graph GraphGenerator::generate() {
+Graph GraphGenerator::generate() const {
   Graph graph;
   generate_vertices_and_gray_edges(graph);
   generate_green_edges(graph);
@@ -128,3 +120,4 @@ const Graph GraphGenerator::generate() {
 
   return graph;
 }
+}  // namespace uni_cpp_practice

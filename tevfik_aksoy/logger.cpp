@@ -1,14 +1,17 @@
 #include "logger.hpp"
 #include <iostream>
 
+namespace uni_cpp_practice {
 void Logger::set_file(const std::optional<std::string>& filename) {
   if (!filename.has_value()) {
-    file_stream_->close();
-    file_stream_ = std::nullopt;
+    if (file_stream_.has_value()) {
+      file_stream_->close();
+      file_stream_ = std::nullopt;
+    }
     return;
   }
 
-  if (file_stream_->is_open()) {
+  if (file_stream_.has_value()) {
     file_stream_->close();
   }
 
@@ -22,3 +25,13 @@ void Logger::log(const std::string& string) {
     file_stream_.value() << string;
   std::cout << string;
 }
+
+Logger::~Logger() {
+  if (file_stream_.has_value())
+    if (file_stream_->is_open()) {
+      file_stream_->close();
+      file_stream_ = std::nullopt;
+    }
+}
+
+}  // namespace uni_cpp_practice

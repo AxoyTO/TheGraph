@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 
+namespace uni_cpp_practice {
 class Logger {
  public:
   static Logger& get_instance() {
@@ -15,21 +16,15 @@ class Logger {
 
   void log(const std::string& string);
 
-  ~Logger() {
-    if (file_stream_->is_open())
-      file_stream_->close();
-  }
+  ~Logger();
 
  private:
   std::optional<std::ofstream> file_stream_;
 
   Logger() = default;
-
   Logger(const Logger&) = delete;
-
   Logger& operator=(const Logger&) = delete;
-
   Logger(Logger&&) = delete;
-
   Logger& operator=(Logger&&) = delete;
 };
+}  // namespace uni_cpp_practice

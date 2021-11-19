@@ -1,5 +1,6 @@
 #include "graph_printer.hpp"
 
+namespace uni_cpp_practice {
 std::string GraphPrinter::print() const {
   std::string json_string;
   json_string += "{\n\"vertices\": [\n";
@@ -19,3 +20,4 @@ std::string GraphPrinter::print() const {
   json_string += "\n  ]\n}\n";
   return json_string;
 }
+}  // namespace uni_cpp_practice

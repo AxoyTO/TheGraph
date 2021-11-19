@@ -18,8 +18,7 @@ struct Vertex {
   void add_edge_id(const EdgeId& id);
   const std::vector<EdgeId>& get_edge_ids() const;
 
-  bool has_edge_id(const uni_cpp_practice::EdgeId& edge_id,
-                   const std::vector<uni_cpp_practice::EdgeId>& edge_ids) {
+  bool has_edge_id(const EdgeId& edge_id, const std::vector<EdgeId>& edge_ids) {
     for (const auto& edge : edge_ids) {
       if (edge_id == edge) {
         return true;
@@ -36,7 +35,8 @@ struct Vertex {
 
 struct Edge {
  public:
-  enum class Color { Gray, Green, Blue, Yellow, Red };
+  // unknown нужно для return val of calculate_edge_color
+  enum class Color { Gray, Green, Blue, Yellow, Red, Unknown };
   const EdgeId id{};
   const Color color{};
   const VertexId source{};
@@ -50,47 +50,37 @@ struct Edge {
 
   std::string to_JSON() const;
 };
-}  // namespace uni_cpp_practice
 
-std::string color_to_string(const uni_cpp_practice::Edge::Color& color);
+std::string color_to_string(const Edge::Color& color);
 
 class Graph {
  public:
-  uni_cpp_practice::VertexId insert_vertex();
-  void insert_edge(const uni_cpp_practice::VertexId& source,
-                   const uni_cpp_practice::VertexId& destination,
-                   const uni_cpp_practice::Edge::Color& color =
-                       uni_cpp_practice::Edge::Color::Gray);
+  VertexId insert_vertex();
+  void insert_edge(const VertexId& source_id, const VertexId& destination_id);
 
-  bool does_vertex_exist(
-      const uni_cpp_practice::VertexId& id,
-      const std::vector<uni_cpp_practice::Vertex>& vertices) const;
+  bool does_vertex_exist(const VertexId& id,
+                         const std::vector<Vertex>& vertices) const;
 
-  bool does_color_match_vertices(
-      const uni_cpp_practice::Vertex& source,
-      const uni_cpp_practice::Vertex& destination,
-      const uni_cpp_practice::Edge::Color& color) const;
+  bool are_vertices_connected(const VertexId& source,
+                              const VertexId& destination) const;
 
-  bool are_vertices_connected(
-      const uni_cpp_practice::VertexId& source,
-      const uni_cpp_practice::VertexId& destination) const;
-
-  int total_edges_of_color(const uni_cpp_practice::Edge::Color color) const;
+  int total_edges_of_color(const Edge::Color& color) const;
   int depth() const;
-  const std::vector<uni_cpp_practice::Vertex>& get_vertices() const;
-  const std::vector<uni_cpp_practice::Edge>& get_edges() const;
-  const std::vector<uni_cpp_practice::VertexId>& get_vertices_in_depth(
-      const uni_cpp_practice::VertexDepth& depth) const;
+  const std::vector<Vertex>& get_vertices() const;
+  const std::vector<Edge>& get_edges() const;
+  const std::vector<VertexId>& get_vertices_in_depth(
+      const VertexDepth& depth) const;
 
  private:
-  std::vector<uni_cpp_practice::Edge> edges_;
-  std::vector<uni_cpp_practice::Vertex> vertices_;
-  std::vector<std::vector<uni_cpp_practice::VertexId>> depth_map_;
-  uni_cpp_practice::VertexId vertex_id_counter_ = 0;
-  uni_cpp_practice::EdgeId edge_id_counter_ = 0;
+  std::vector<Edge> edges_;
+  std::vector<Vertex> vertices_;
+  std::vector<std::vector<VertexId>> depth_map_;
+  VertexId vertex_id_counter_ = 0;
+  EdgeId edge_id_counter_ = 0;
 
-  uni_cpp_practice::VertexId get_new_vertex_id_() {
-    return vertex_id_counter_++;
-  }
-  uni_cpp_practice::EdgeId get_new_edge_id_() { return edge_id_counter_++; }
+  Edge::Color calculate_color_for_edge(const Vertex& source,
+                                       const Vertex& destination) const;
+  VertexId get_new_vertex_id_() { return vertex_id_counter_++; }
+  EdgeId get_new_edge_id_() { return edge_id_counter_++; }
 };
+}  // namespace uni_cpp_practice
