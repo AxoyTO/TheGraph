@@ -4,24 +4,26 @@
 #include <iostream>
 #include <string>
 
-constexpr int COLORS_NUMBER = 5;
+constexpr int COLORS_NUMBER = 6;
 
 class Graph;
 
 class Logger {
  public:
-  static Logger& get_logger() {
-    static Logger logger;
+ static Logger& get_logger(std::ofstream& f) {
+    static Logger logger(f);
     return logger;
   }
 
-  void log(std::ofstream& logfile, const std::string& text) const {
+  void log(std::string text) const {
     std::cout << text << std::endl;
-    logfile << text;
+    logfile_ << text;
   }
 
  private:
-  Logger() {}
+  std::ofstream& logfile_;
+
+  Logger(std::ofstream& f) : logfile_(f) {}
   Logger(const Logger& root) = delete;
   Logger& operator=(const Logger&) = delete;
 };

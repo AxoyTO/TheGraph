@@ -5,16 +5,19 @@
 
 #include "graph.hpp"
 #include "logger.hpp"
+#include "graph_generator.hpp"
+#include "graph_printer.hpp"
 
 constexpr int GRAPH_NUMBER = 10;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
-const std::string LOG_FILENAME = "log.txt";
+const std::string LOG_FILENAME = "temp/log.txt";
 
 int main() {
-  const auto& logger = Logger::get_logger();
   std::ofstream log_stream;
   log_stream.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
+
+  const auto& logger = Logger::get_logger(log_stream);
 
   int depth = INVALID_NEW_DEPTH;
 

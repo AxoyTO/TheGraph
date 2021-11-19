@@ -2,32 +2,20 @@
 
 #include <array>
 #include <cassert>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <random>
 #include <string>
 #include <vector>
-
-using std::endl;
-using std::min;
-using std::shared_ptr;
-using std::to_string;
-using std::vector;
 
 using EdgeId = int;
 using VertexId = int;
 
-constexpr double GREEN_TRASHOULD = 0.1;
-constexpr double BLUE_TRASHOULD = 0.25;
-constexpr double RED_TRASHOULD = 0.33;
-constexpr int INVALID_ID = -1;
-const std::string JSON_GRAPH_FILENAME = "temp/graph_";
+namespace {
+    constexpr int INVALID_ID = -1;
+}
 
 enum class Color { Gray, Green, Blue, Yellow, Red };
 
 std::string color_to_string(const Color& color);
-double get_random_number();
+bool is_edge_id_included(const EdgeId& id, const std::vector<EdgeId>& edge_ids);
 
 struct Edge {
   const EdgeId id = INVALID_ID;
@@ -43,8 +31,6 @@ struct Edge {
   std::string to_json() const;
 };
 
-bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids);
-
 struct Vertex {
  public:
   int depth = 0;
@@ -58,13 +44,13 @@ struct Vertex {
     edges_ids_.push_back(_id);
   }
 
-  const vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
+  const std::vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
 
   const VertexId& get_id() const { return id_; }
 
  private:
   const VertexId id_ = INVALID_ID;
-  vector<EdgeId> edges_ids_;
+  std::vector<EdgeId> edges_ids_;
 };
 
 class Graph {
@@ -82,16 +68,16 @@ class Graph {
                         const VertexId& to_vertex_id,
                         const bool& initialization);
 
-  const vector<Edge>& get_edges() const { return edges_; }
-  const vector<Vertex>& get_vertices() const { return vertices_; }
+  const std::vector<Edge>& get_edges() const { return edges_; }
+  const std::vector<Vertex>& get_vertices() const { return vertices_; }
 
   int get_depth() const { return depth_; }
   int get_vertices_num() const { return vertices_.size(); }
   int get_edges_num() const { return edges_.size(); }
 
  private:
-  vector<Vertex> vertices_;
-  vector<Edge> edges_;
+  std::vector<Vertex> vertices_;
+  std::vector<Edge> edges_;
   int depth_ = 0;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
@@ -99,15 +85,3 @@ class Graph {
   VertexId get_next_vertex_id() { return vertex_id_counter_++; }
   VertexId get_next_edge_id() { return edge_id_counter_++; }
 };
-
-void write_graph(const Graph& graph, const int& graph_num);
-void new_vertices_generation(Graph& work_graph,
-                             const int& depth,
-                             const int& new_vertices_num);
-
-void add_blue_edges(Graph& work_graph);
-void add_green_edges(Graph& work_graph);
-void add_red_edges(Graph& work_graph);
-void add_yellow_edges(Graph& work_graph);
-
-void paint_edges(Graph& work_graph);
