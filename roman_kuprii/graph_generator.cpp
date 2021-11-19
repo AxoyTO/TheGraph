@@ -4,6 +4,8 @@
 #include "graph.hpp"
 #include "graph_generator.hpp"
 
+namespace uni_cpp_practice {
+
 using std::vector;
 
 double get_random_number() {
@@ -130,3 +132,5 @@ void paint_edges(Graph& work_graph) {
   add_red_edges(work_graph);
   add_yellow_edges(work_graph);
 }
+
+}  // namespace uni_cpp_practice

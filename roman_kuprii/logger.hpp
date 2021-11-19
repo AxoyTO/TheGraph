@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-constexpr int COLORS_NUMBER = 6;
+namespace uni_cpp_practice {
 
 class Graph;
 
@@ -28,9 +28,4 @@ class Logger {
   Logger& operator=(const Logger&) = delete;
 };
 
-void write_log(Graph& work_graph,
-               std::ofstream& logfile,
-               const int& depth,
-               const int& new_vertices_num,
-               const int& graph_num,
-               const Logger& logger);
+}  // namespace uni_cpp_practice

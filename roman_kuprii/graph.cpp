@@ -4,6 +4,8 @@
 
 #include "graph.hpp"
 
+namespace uni_cpp_practice {
+
 using std::min;
 using std::to_string;
 using std::vector;
@@ -163,3 +165,5 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   if (from_vertex_id != to_vertex_id)
     vertices_[to_vertex_id].add_edge_id(new_edge.id);
 }
+
+}  // namespace uni_cpp_practice

@@ -7,6 +7,8 @@
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
+using namespace uni_cpp_practice;
+
 constexpr int GRAPHS_NUMBER = 0;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;

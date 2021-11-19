@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace uni_cpp_practice {
+
 using EdgeId = int;
 using VertexId = int;
 
@@ -85,3 +87,5 @@ class Graph {
   VertexId get_next_vertex_id() { return vertex_id_counter_++; }
   VertexId get_next_edge_id() { return edge_id_counter_++; }
 };
+
+}  // namespace uni_cpp_practice
