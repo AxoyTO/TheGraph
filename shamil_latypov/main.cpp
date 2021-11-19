@@ -335,7 +335,6 @@ Graph generate_graph(int depth, int new_vertices_num) {
         // Выбираем рандомом вершину 2мя уровнями глубже
         std::uniform_int_distribution<> rand_vertex(0, (depth + 2)->size() - 1);
         int second_vert_num = rand_vertex(gen);
-
         graph.add_edge(vertex_id, (*(depth + 2))[second_vert_num], color_param);
       }
     }
