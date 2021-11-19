@@ -1,7 +1,8 @@
 #pragma once
 
 #include <fstream>
-#include <iostream>
+#include <optional>
+#include <string>
 
 namespace uni_cpp_practice {
 class Logger {
@@ -11,19 +12,21 @@ class Logger {
     return instance;
   }
 
-  void log(const std::string& string) const;
+  void log(const std::string& string);
 
-  void set_file(std::string filename);
+  void set_file(const std::optional<std::string>& filename);
+
+  ~Logger() {
+    if (file_stream_->is_open())
+      file_stream_->close();
+  }
 
  private:
-  std::string filename_;
+  std::optional<std::ofstream> file_stream_;
 
   Logger() = default;
 
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
-
-  void print_and_write(const std::string& str,
-                       std::ofstream& file_stream) const;
 };
 }  // namespace uni_cpp_practice

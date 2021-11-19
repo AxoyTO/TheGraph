@@ -1,5 +1,4 @@
-#include <sys/stat.h>
-#include <ctime>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -8,29 +7,71 @@
 #include "graph_generation.hpp"
 #include "logger.hpp"
 
-std::string get_date_and_time() {
-  // char date_and_time[100] = {0};
-  std::time_t date_time_t =
-      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  // std::strftime(date_and_time, sizeof(date_and_time), "%d.%m.%Y %T",
-  //               std::localtime(&now));
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
   std::stringstream date_time_string;
   date_time_string << std::put_time(std::localtime(&date_time_t),
-                                    "%d.%m.%Y %T");
+                                    "%Y.%m.%d %H:%M:%S");
   return date_time_string.str();
 }
 
-int main() {
-  const std::string dafault_filename = "Graph";
-  const std::string dafault_fileformat = ".json";
+namespace logger {
+std::vector<std::pair<uni_cpp_practice::Edge::Color, int>>
+set_count_edges_of_color(const uni_cpp_practice::Graph& graph) {
+  std::vector<std::pair<uni_cpp_practice::Edge::Color, int>> colors = {
+      {uni_cpp_practice::Edge::Color::Gray,
+       graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Gray)},
+      {uni_cpp_practice::Edge::Color::Green,
+       graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Green)},
+      {uni_cpp_practice::Edge::Color::Blue,
+       graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Blue)},
+      {uni_cpp_practice::Edge::Color::Yellow,
+       graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Yellow)},
+      {uni_cpp_practice::Edge::Color::Red,
+       graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Red)}};
+  return colors;
+}
 
-  int graphs_count;  // Количество генерируемых графов.
-  std::cout << "Enter the Count of new graphs" << std::endl;
-  std::cin >> graphs_count;
-  while (graphs_count <= 0) {
-    std::cout << "Try to enter a natural number" << std::endl;
-    std::cin >> graphs_count;
+const std::string start_string(int graph_numbe) {
+  std::stringstream log_string;
+  log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
+             << ", Generation Started\n";
+  return log_string.str();
+}
+
+const std::string end_string(int graph_numbe,
+                             const uni_cpp_practice::Graph& graph) {
+  std::stringstream log_string;
+  log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
+             << ", Generation Finished {  \n";
+  log_string << "  depth: " << graph.get_depth() << ",\n";
+  log_string << "  vertices: " << graph.get_vertex_map().size() << ", [";
+  for (uni_cpp_practice::Depth current_depth = 0;
+       current_depth <= graph.get_depth(); ++current_depth) {
+    log_string << graph.get_vertices_at_depth(current_depth).size();
+    if (current_depth != graph.get_depth()) {
+      log_string << ", ";
+    }
   }
+  log_string << "],\n";
+  log_string << "  edges: " << graph.get_edge_map().size() << ", {";
+  const auto& count_edges_of_color_map = set_count_edges_of_color(graph);
+  for (int color_index = 0; color_index < count_edges_of_color_map.size();
+       ++color_index) {
+    log_string << uni_cpp_practice::color_to_string(
+                      count_edges_of_color_map[color_index].first)
+               << ": " << count_edges_of_color_map[color_index].second;
+    if (color_index + 1 != count_edges_of_color_map.size()) {
+      log_string << ", ";
+    }
+  }
+  log_string << "}\n}\n";
+  return log_string.str();
+}
+}  // namespace logger
+
+const uni_cpp_practice::Depth handle_depth_input() {
   uni_cpp_practice::Depth
       depth;  //Глубина графов (int от 0 и до бесконечности).
   std::cout << "Enter the Depth of the graphs" << std::endl;
@@ -39,6 +80,9 @@ int main() {
     std::cout << "Try to enter a natural number or zero" << std::endl;
     std::cin >> depth;
   }
+  return depth;
+}
+int handle_new_vertices_num_input() {
   int new_vertices_num;  //Количество вершин, генерируемых каждой родительской
                          //вершиной.
   std::cout << "Enter the Number of new vertices from each vertex of the graphs"
@@ -48,9 +92,31 @@ int main() {
     std::cout << "Try to enter a natural number or zero" << std::endl;
     std::cin >> new_vertices_num;
   }
+  return new_vertices_num;
+}
+
+int handle_graphs_count_input() {
+  int graphs_count;  // Количество генерируемых графов.
+  std::cout << "Enter the Count of new graphs" << std::endl;
+  std::cin >> graphs_count;
+  while (graphs_count <= 0) {
+    std::cout << "Try to enter a natural number" << std::endl;
+    std::cin >> graphs_count;
+  }
+  return graphs_count;
+}
+
+int main() {
+  const std::string dafault_filename = "Graph";
+  const std::string dafault_fileformat = ".json";
+
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const int graphs_count = handle_graphs_count_input();
 
   try {
     if (!std::filesystem::create_directory("./temp")) {
+      std::cout << "A directory wasn't created\n";
     }
   } catch (const std::exception& ex) {
     std::cout << ex.what() << "\n";
@@ -68,53 +134,14 @@ int main() {
       std::cerr << "Error opening the file " << ss_filename.str();
     } else {
       std::stringstream log_string;
-      log_string << get_date_and_time() << ": Graph " << i + 1
-                 << ", Generation Started\n";
+      logger.log(logger::start_string(i));
       const auto graph = uni_cpp_practice::graph_generation::generate_graph(
           depth, new_vertices_num);
-      log_string << get_date_and_time() << ": Graph " << i + 1
-                 << ", Generation Finished {  \n";
-      log_string << "  depth: " << graph.get_depth() << ",\n";
-      log_string << "  vertices: " << graph.get_vertex_map().size() << ", [";
-      for (uni_cpp_practice::Depth current_depth = 0;
-           current_depth <= graph.get_depth(); ++current_depth) {
-        log_string << graph.get_vertices_at_depth(current_depth).size();
-        if (current_depth != graph.get_depth()) {
-          log_string << ", ";
-        }
-      }
-      log_string << "],\n";
-      std::vector<std::pair<uni_cpp_practice::Edge::Color, int>>
-          count_edges_of_color_map = {
-              {uni_cpp_practice::Edge::Color::Gray,
-               graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Gray)},
-              {uni_cpp_practice::Edge::Color::Green,
-               graph.count_edges_of_color(
-                   uni_cpp_practice::Edge::Color::Green)},
-              {uni_cpp_practice::Edge::Color::Blue,
-               graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Blue)},
-              {uni_cpp_practice::Edge::Color::Yellow,
-               graph.count_edges_of_color(
-                   uni_cpp_practice::Edge::Color::Yellow)},
-              {uni_cpp_practice::Edge::Color::Red,
-               graph.count_edges_of_color(uni_cpp_practice::Edge::Color::Red)}};
-      log_string << "  edges: " << graph.get_edge_map().size() << ", {";
-      for (int color_index = 0; color_index < count_edges_of_color_map.size();
-           ++color_index) {
-        log_string << uni_cpp_practice::color_to_string(
-                          count_edges_of_color_map[color_index].first)
-                   << ": " << count_edges_of_color_map[color_index].second;
-        if (color_index + 1 != count_edges_of_color_map.size()) {
-          log_string << ", ";
-        }
-      }
-      log_string << "}\n}\n";
-      logger.log(log_string.str());
+      logger.log(logger::end_string(i, graph));
 
       file_out << graph.to_string();
       file_out.close();
     }
   }
-
   return 0;
 }

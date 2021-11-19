@@ -7,8 +7,8 @@ namespace graph_generation {
 
 double get_color_probability(const Edge::Color& color);
 
-bool is_lucky(const double probability);
-int get_random_number(const int size);
+bool is_lucky(double probability);
+int get_random_number(int size);
 
 void generate_green_edges(Graph& graph);
 

@@ -1,6 +1,8 @@
 #include "graph.hpp"
+#include <cassert>
 
 namespace uni_cpp_practice {
+namespace {
 bool check_gray_valid(const Vertex& first_vertex, const Vertex& second_vertex) {
   if (first_vertex.get_edge_ids().size() == 0 ||
       second_vertex.get_edge_ids().size() == 0) {  //только текущее ребро
@@ -57,6 +59,7 @@ bool check_color_valid(const Vertex& first_vertex,
       return check_red_valid(first_vertex, second_vertex);
   }
 }
+}  // namespace
 
 bool Vertex::has_edge_id(const EdgeId& new_edge_id) const {
   if (std::find(edge_ids_.begin(), edge_ids_.end(), new_edge_id) !=
@@ -64,6 +67,11 @@ bool Vertex::has_edge_id(const EdgeId& new_edge_id) const {
     return true;
   }
   return false;
+}
+
+void Vertex::add_edge_id(const EdgeId& new_edge_id) {
+  assert(!has_edge_id(new_edge_id) && "Edge id already exists");
+  edge_ids_.push_back(new_edge_id);
 }
 
 std::string Vertex::to_string() const {
@@ -130,7 +138,6 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exists");
   assert(!check_binding(from_vertex_id, to_vertex_id) &&
          "Vertices already binded");
-
   assert(check_color_valid(get_vertex(from_vertex_id), get_vertex(to_vertex_id),
                            new_edge_color) &&
          "Not valid color");
@@ -208,6 +215,27 @@ int Graph::count_edges_of_color(const Edge::Color& color) const {
   return count;
 }
 
+Depth Graph::get_depth() const {
+  return (depth_map_.size() > DEFAULT_DEPTH) ? (depth_map_.size() - 1)
+                                             : DEFAULT_DEPTH;
+}
+
+const std::vector<VertexId>& Graph::get_vertices_at_depth(
+    const Depth& depth) const {
+  assert(depth <= get_depth() && "Depth level doesn't exist");
+  return depth_map_.at(depth);
+}
+
+const Vertex& Graph::get_vertex(const VertexId& id) const {
+  assert(has_vertex(id) && "Vertex doesn't exist");
+  return vertex_map_.at(id);
+}
+
+const Edge& Graph::get_edge(const EdgeId& id) const {
+  assert(has_edge(id) && "Edge doesn't exist");
+  return edge_map_.at(id);
+}
+
 void Graph::set_vertex_depth(const VertexId& from_vertex_id,
                              const VertexId& to_vertex_id) {
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exists");
@@ -234,5 +262,4 @@ void Graph::set_vertex_depth(const VertexId& from_vertex_id,
         .push_back(son_vertex.id);
   }
 }
-
 }  // namespace uni_cpp_practice

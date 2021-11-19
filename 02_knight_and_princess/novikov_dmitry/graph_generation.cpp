@@ -1,4 +1,5 @@
 #include "graph_generation.hpp"
+#include <assert.h>
 #include <limits>
 #include <random>
 
@@ -20,7 +21,7 @@ double get_color_probability(const Edge::Color& color) {
   }
 }
 
-bool is_lucky(const double probability) {
+bool is_lucky(double probability) {
   assert(probability + std::numeric_limits<double>::epsilon() > 0 &&
          probability - std::numeric_limits<double>::epsilon() < 1 &&
          "given probability is incorrect");
@@ -30,7 +31,7 @@ bool is_lucky(const double probability) {
   return bernoullu_distribution_var(rng);
 }
 
-int get_random_number(const int size) {
+int get_random_number(int size) {
   std::random_device
       rd;  // Will be used to obtain a seed for the random number engine
   std::default_random_engine gen(rd());

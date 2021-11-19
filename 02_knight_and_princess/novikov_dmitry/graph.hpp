@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assert.h>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -21,10 +20,7 @@ class Vertex {
 
   explicit Vertex(const VertexId& new_vertex_id) : id(new_vertex_id) {}
 
-  void add_edge_id(const EdgeId& new_edge_id) {
-    assert(!has_edge_id(new_edge_id) && "Edge id already exists");
-    edge_ids_.push_back(new_edge_id);
-  }
+  void add_edge_id(const EdgeId& new_edge_id);
 
   bool has_edge_id(const EdgeId& new_edge_id) const;
 
@@ -65,10 +61,6 @@ class Edge {
 
 std::string color_to_string(const Edge::Color& color);
 
-bool check_color_valid(const Vertex& first_vertex,
-                       const Vertex& second_vertex,
-                       const Edge::Color& color);
-
 class Graph {
  public:
   VertexId add_vertex();
@@ -99,25 +91,13 @@ class Graph {
 
   int count_edges_of_color(const Edge::Color& color) const;
 
-  Depth get_depth() const {
-    return (depth_map_.size() > DEFAULT_DEPTH) ? (depth_map_.size() - 1)
-                                               : DEFAULT_DEPTH;
-  }
+  Depth get_depth() const;
 
-  const std::vector<VertexId>& get_vertices_at_depth(const Depth& depth) const {
-    assert(depth <= get_depth() && "Depth level doesn't exist");
-    return depth_map_.at(depth);
-  }
+  const std::vector<VertexId>& get_vertices_at_depth(const Depth& depth) const;
 
-  const Vertex& get_vertex(const VertexId& id) const {
-    assert(has_vertex(id) && "Vertex doesn't exist");
-    return vertex_map_.at(id);
-  }
+  const Vertex& get_vertex(const VertexId& id) const;
 
-  const Edge& get_edge(const EdgeId& id) const {
-    assert(has_edge(id) && "Edge doesn't exist");
-    return edge_map_.at(id);
-  }
+  const Edge& get_edge(const EdgeId& id) const;
 
  private:
   VertexId default_vertex_id_ = 0;
