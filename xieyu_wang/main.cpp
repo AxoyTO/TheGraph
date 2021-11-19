@@ -4,7 +4,7 @@
  *  change class Edge
  *  change class Vertex
  *  change class Graph
- *  vertexGenerator
+ *  vertexGenerator done
  *  generator gray edge
  * todo:
  * redGenerator ..............todo
@@ -26,10 +26,7 @@ class Vertex {
   const int id = 0;
   const int depth = 0;
   explicit Vertex(int id, int depth) : id(id), depth(depth) {}
-  void addEdgeId(int eId) {
-    assert(!hasEdgeId(eId) && "Edge Id already exists");
-    edgeIds_.push_back(eId);
-  }
+  void addEdgeId(int eId) { edgeIds_.push_back(eId); }
   std::string toString() const {
     std::string str = "";
     str += "\t\t{\"id\":" + std::to_string(id) + ",";
@@ -122,6 +119,9 @@ class Graph {
   bool isConnected(int fromVertexId, int toVertexId) {
     assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
     assert(hasVertex(toVertexId) && "Vertex doesn't exist");
+    if (fromVertexId == toVertexId) {
+      return false;
+    }
     for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
       for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
         if (fromVertexEdgeId == toVertexEdgeId) {
@@ -179,6 +179,37 @@ class Generator {
       graph.addEdge(connection.at(0), connection.at(1), color);
     }
   }
+  void redEdgeGenerator() {}
+  void greenEdgeGenerator() {
+    int verticesSum = graph.getPresentVertexId();
+    for (int i = 0; i < verticesSum; ++i) {
+      if (specialEdgeGenerateProbabilityController("green")) {
+        graph.addEdge(i, i, "green");
+      }
+    }
+  }
+  void blueEdgeGenerator() {}
+  bool specialEdgeGenerateProbabilityController(std::string color) {
+    srand((unsigned)time(NULL));
+    int randomNum = rand() % 100 + 1;
+    if (color == "red") {
+      if (randomNum > RED_EDGE_PROBABILITY) {
+        return false;
+      }
+    } else if (color == "blue") {
+      if (randomNum > BLUE_EDGE_PROBABILITY) {
+        return false;
+      }
+    } else if (color == "green") {
+      if (randomNum > GREEN_EDGE_PROBABILITY) {
+        return false;
+      }
+    } else {
+      std::cerr << "Unknown color!!";
+      throw std::error_code();
+    }
+    return true;
+  }
   bool vertxGenerateProbabilityController(int depth) {
     float probability = (maxDeps_ - depth);
     probability = probability / maxDeps_ * 100;
@@ -212,6 +243,8 @@ int main() {
   std::cout << "VerticesGenerate..........done" << std::endl;
   generator.grayEdgeGenerator();
   std::cout << "GrayEdgeGenerate..........done" << std::endl;
+  generator.greenEdgeGenerator();
+  std::cout << "GreenEdgeGenerate.........done" << std::endl;
   std::ofstream writePT;
   writePT.open("Graph.json", std::ios::out);
   writePT << generator.getResult() << std::endl;
