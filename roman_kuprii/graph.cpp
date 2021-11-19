@@ -10,9 +10,6 @@ using std::min;
 using std::to_string;
 using std::vector;
 
-using EdgeId = int;
-using VertexId = int;
-
 std::string color_to_string(const Color& color) {
   switch (color) {
     case Color::Gray:
