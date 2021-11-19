@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <string>
 
 #include "graph.hpp"
@@ -8,7 +7,7 @@
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
-constexpr int GRAPH_NUMBER = 10;
+constexpr int GRAPHS_NUMBER = 0;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
 const std::string LOG_FILENAME = "temp/log.txt";
@@ -18,6 +17,13 @@ int main() {
   log_stream.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
 
   const auto& logger = Logger::get_logger(log_stream);
+
+  int graphs_quantity = GRAPHS_NUMBER;
+
+  do {
+    std::cout << "Enter amount of graphs to generate" << std::endl;
+    std::cin >> graphs_quantity;
+  } while (graphs_quantity < GRAPHS_NUMBER);
 
   int depth = INVALID_NEW_DEPTH;
 
@@ -35,7 +41,7 @@ int main() {
 
   std::cout << "Depth of adding vertices: " << depth << std::endl;
 
-  for (int graph_num = 0; graph_num < GRAPH_NUMBER; graph_num++) {
+  for (int graph_num = 0; graph_num < graphs_quantity; graph_num++) {
     Graph my_graph;
     my_graph.add_vertex();
     new_vertices_generation(my_graph, depth, new_vertices_num);
