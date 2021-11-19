@@ -1,3 +1,4 @@
+#include <time.h>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -22,15 +23,25 @@ void write_graph(const Graph& graph, const int& graph_num) {
   out.close();
 }
 
+const std::string get_datetime() {
+  time_t now = time(0);
+  struct tm tstruct;
+  char buf[80];
+  tstruct = *localtime(&now);
+  strftime(buf, sizeof(buf), "%Y.%m.%d %X", &tstruct);
+  return buf;
+}
+
 void write_log(Graph& work_graph,
                std::ofstream& logfile,
                const int& depth,
                const int& new_vertices_num,
                const int& graph_num,
                const Logger& logger) {
-  std::string res =
-      "time Graph " + to_string(graph_num) + ", Generation Started\n";
-  res += "time Graph " + to_string(graph_num) + ", Generation Ended {\n";
+  std::string res = get_datetime();
+  res += ": Graph " + to_string(graph_num) + ", Generation Started\n";
+  res += get_datetime() + ": Graph " + to_string(graph_num) +
+         ", Generation Ended {\n";
   res += "\tdepth: " + to_string(depth) + ",\n";
   res += "\tnew_vertices_num: " + to_string(new_vertices_num) + ",\n";
   res += "vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
