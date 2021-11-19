@@ -6,10 +6,10 @@
  *  change class Graph
  *  vertexGenerator done
  *  generator gray edge
+ *  green done
  * todo:
  * redGenerator ..............todo
  * blueGenerator..............todo
- * greenGenerator.............todo
  */
 #include <assert.h>
 #include <array>
@@ -179,7 +179,21 @@ class Generator {
       graph.addEdge(connection.at(0), connection.at(1), color);
     }
   }
+  /**
+   * to setup levels for easy create rgb edge
+   */
+  void setUpLevels() {}
+  /**
+   * connect level +2
+   * param: NULL
+   * return NULL
+   */
   void redEdgeGenerator() {}
+  /**
+   * create edge vertex self
+   * param: NULL
+   * return NULL
+   */
   void greenEdgeGenerator() {
     int verticesSum = graph.getPresentVertexId();
     for (int i = 0; i < verticesSum; ++i) {
@@ -188,6 +202,11 @@ class Generator {
       }
     }
   }
+  /**
+   * create edge at same level
+   * param: null
+   * return:null
+   **/
   void blueEdgeGenerator() {}
   bool specialEdgeGenerateProbabilityController(std::string color) {
     srand((unsigned)time(NULL));
@@ -223,6 +242,7 @@ class Generator {
   std::string getResult() { return graph.toString(); }
 
  private:
+  std::vector<std::vector<int>> levels;
   Graph graph;
   std::vector<std::vector<int>> connections_;
   int maxDeps_;
