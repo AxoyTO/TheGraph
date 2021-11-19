@@ -79,8 +79,8 @@ VertexId Graph::insert_vertex() {
   return id;
 }
 
-Edge::Color Graph::calculate_color_for_edge(const Vertex& source,
-                                            const Vertex& destination) const {
+Edge::Color Graph::calculate_color_for_edge_(const Vertex& source,
+                                             const Vertex& destination) const {
   if (source.get_edge_ids().empty() || destination.get_edge_ids().empty())
     return Edge::Color::Gray;
   if (source.id == destination.id)
@@ -107,8 +107,8 @@ void Graph::insert_edge(const VertexId& source_id,
                         const VertexId& destination_id) {
   assert(!are_vertices_connected(source_id, destination_id) &&
          "Vertices are already connected!");
-  const auto color =
-      calculate_color_for_edge(vertices_[source_id], vertices_[destination_id]);
+  const auto color = calculate_color_for_edge_(vertices_[source_id],
+                                               vertices_[destination_id]);
   const int edge_id = get_new_edge_id_();
   edges_.emplace_back(source_id, destination_id, edge_id, color);
 

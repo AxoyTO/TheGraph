@@ -78,8 +78,8 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
-  Edge::Color calculate_color_for_edge(const Vertex& source,
-                                       const Vertex& destination) const;
+  Edge::Color calculate_color_for_edge_(const Vertex& source,
+                                        const Vertex& destination) const;
   VertexId get_new_vertex_id_() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id_() { return edge_id_counter_++; }
 };
