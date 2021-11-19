@@ -1,0 +1,70 @@
+time Graph 0, Generation Started
+time Graph 0, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 4, [1, 2],
+edges: 4, {gray: 3, green: 1, blue: 0, yellow: 0, red: 0}
+}
+time Graph 1, Generation Started
+time Graph 1, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 6, [1, 2],
+edges: 7, {gray: 5, green: 0, blue: 0, yellow: 1, red: 1}
+}
+time Graph 2, Generation Started
+time Graph 2, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 4, [1, 2],
+edges: 5, {gray: 3, green: 0, blue: 1, yellow: 1, red: 0}
+}
+time Graph 3, Generation Started
+time Graph 3, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 5, [1, 2],
+edges: 7, {gray: 4, green: 1, blue: 1, yellow: 1, red: 0}
+}
+time Graph 4, Generation Started
+time Graph 4, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 5, [1, 2],
+edges: 8, {gray: 4, green: 1, blue: 1, yellow: 2, red: 0}
+}
+time Graph 5, Generation Started
+time Graph 5, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 6, [1, 2],
+edges: 6, {gray: 5, green: 0, blue: 0, yellow: 0, red: 1}
+}
+time Graph 6, Generation Started
+time Graph 6, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 4, [1, 2],
+edges: 4, {gray: 3, green: 0, blue: 0, yellow: 0, red: 1}
+}
+time Graph 7, Generation Started
+time Graph 7, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 4, [1, 2],
+edges: 4, {gray: 3, green: 1, blue: 0, yellow: 0, red: 0}
+}
+time Graph 8, Generation Started
+time Graph 8, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 6, [1, 2],
+edges: 7, {gray: 5, green: 0, blue: 0, yellow: 2, red: 0}
+}
+time Graph 9, Generation Started
+time Graph 9, Generation Ended {
+	depth: 2,
+	new_vertices_num: 2,
+vertices: 6, [1, 2],
+edges: 8, {gray: 5, green: 1, blue: 1, yellow: 1, red: 0}
+}
