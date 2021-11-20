@@ -3,6 +3,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -94,6 +95,12 @@ class Graph {
     throw std::runtime_error("Cannot be reached.");
   }
 
+  const std::vector<EdgeId> vertexConnections(VertexId id) const {
+    return connection_list_.at(id);
+  }
+  const std::vector<Vertex>& graphVertexes() const { return vertexes_; }
+  const std::vector<Edge>& graphEdges() const { return edges_; }
+
  private:
   std::vector<Vertex> vertexes_;
   std::vector<Edge> edges_;
@@ -103,9 +110,52 @@ class Graph {
   EdgeId getNewEdgeId() { return edge_new_id_++; }
 };
 
+class GraphPrinter {
+ public:
+  GraphPrinter(const Graph& graph) : graph_(graph) {}
+  std::string print() const {
+    std::string graph_table;
+    graph_table += "{\n \"vertices\": [\n  ";
+    for (const auto& vertex : graph_.graphVertexes()) {
+      graph_table += printVertex(vertex.id);
+    }
+    graph_table.pop_back();
+    graph_table.pop_back();
+    graph_table += "\n ],\n \"edges\": [\n  ";
+    for (const auto& edge : graph_.graphEdges()) {
+      graph_table += printEdge(edge);
+    }
+    graph_table.pop_back();
+    graph_table.pop_back();
+    graph_table += "\n ]\n}\n";
+    return graph_table;
+  }
+  std::string printVertex(const VertexId& id) const {
+    std::string vertex_table =
+        "{\n   \"id\": " + std::to_string(id) + ",\n   \"edge_ids\": [";
+    for (const auto& edge_id : graph_.vertexConnections(id)) {
+      vertex_table += std::to_string(edge_id) + ", ";
+    }
+    vertex_table.pop_back();
+    vertex_table.pop_back();
+    vertex_table += "]\n  }, ";
+    return vertex_table;
+  }
+  std::string printEdge(const Edge& edge) const {
+    std::string edge_table = "{\n   \"id\": " + std::to_string(edge.id);
+    edge_table += ",\n   \"vertex_ids\": [";
+    edge_table += std::to_string(edge.vertex_id1) + ", ";
+    edge_table += std::to_string(edge.vertex_id2) + "]\n  }, ";
+    return edge_table;
+  }
+
+ private:
+  const Graph& graph_;
+};
+
 constexpr int VERTEX_NUMBER = 14, EDGE_NUMBER = 18;
 
-int main() {
+const Graph generateGraph() {
   const std::array<std::pair<VertexId, VertexId>, EDGE_NUMBER> connections = {
       {{0, 1},
        {0, 2},
@@ -132,5 +182,20 @@ int main() {
   for (const auto& connection : connections) {
     graph.addEdge(connection.first, connection.second);
   }
+  return graph;
+}
+
+void write_to_file(std::string string, std::string file_name) {
+  std::ofstream file(file_name);
+  file << string;
+  file.close();
+}
+
+int main() {
+  const auto graph = generateGraph();
+  const auto graph_printer = GraphPrinter(graph);
+  const auto graph_json = graph_printer.print();
+  std::cout << graph_json << std::endl;
+  write_to_file(graph_json, "graph.json");
   return 0;
 }
