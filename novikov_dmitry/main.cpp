@@ -16,7 +16,6 @@ std::string get_current_date_time() {
   return date_time_string.str();
 }
 
-namespace logger {
 std::vector<std::pair<uni_cpp_practice::Edge::Color, int>>
 set_count_edges_of_color(const uni_cpp_practice::Graph& graph) {
   std::vector<std::pair<uni_cpp_practice::Edge::Color, int>> colors = {
@@ -69,7 +68,6 @@ const std::string end_string(int graph_numbe,
   log_string << "}\n}\n";
   return log_string.str();
 }
-}  // namespace logger
 
 const uni_cpp_practice::Depth handle_depth_input() {
   uni_cpp_practice::Depth
@@ -105,6 +103,30 @@ int handle_graphs_count_input() {
   }
   return graphs_count;
 }
+uni_cpp_practice::Logger& prepare_logger() {
+  try {
+    if (!std::filesystem::create_directory("./temp")) {
+      std::cout << "A directory wasn't created\n";
+    }
+  } catch (const std::exception& ex) {
+    std::cout << ex.what() << "\n";
+  }
+  auto& logger = uni_cpp_practice::Logger::get_instance();
+  logger.set_file("./temp/log.txt");
+  return logger;
+}
+
+void write_to_file(const std::string& graph_string,
+                   const std::string filename) {
+  std::ofstream file_out;
+  file_out.open(filename, std::fstream::out | std::fstream::trunc);
+  if (!file_out.is_open()) {
+    std::cerr << "Error opening the file " << filename;
+  } else {
+    file_out << graph_string;
+    file_out.close();
+  }
+}
 
 int main() {
   const std::string dafault_filename = "Graph";
@@ -114,34 +136,15 @@ int main() {
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
 
-  try {
-    if (!std::filesystem::create_directory("./temp")) {
-      std::cout << "A directory wasn't created\n";
-    }
-  } catch (const std::exception& ex) {
-    std::cout << ex.what() << "\n";
-  }
-
-  auto& logger = uni_cpp_practice::Logger::get_instance();
-  logger.set_file("./temp/log.txt");
+  auto& logger = prepare_logger();
   for (int i = 0; i < graphs_count; ++i) {
-    std::stringstream ss_filename;
-    ss_filename << dafault_filename << "_" << std::setfill('0') << std::setw(2)
-                << i + 1 << dafault_fileformat;
-    std::ofstream file_out;
-    file_out.open(ss_filename.str(), std::fstream::out | std::fstream::trunc);
-    if (!file_out.is_open()) {
-      std::cerr << "Error opening the file " << ss_filename.str();
-    } else {
-      std::stringstream log_string;
-      logger.log(logger::start_string(i));
-      const auto graph = uni_cpp_practice::graph_generation::generate_graph(
-          depth, new_vertices_num);
-      logger.log(logger::end_string(i, graph));
-
-      file_out << graph.to_string();
-      file_out.close();
-    }
+    logger.log(start_string(i));
+    const auto graph = uni_cpp_practice::graph_generation::generate_graph(
+        depth, new_vertices_num);
+    logger.log(end_string(i, graph));
+    write_to_file(
+        graph.to_string(),
+        dafault_filename + "_" + std::to_string(i + 1) + dafault_fileformat);
   }
   return 0;
 }

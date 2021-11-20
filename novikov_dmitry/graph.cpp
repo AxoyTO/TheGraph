@@ -1,8 +1,9 @@
 #include "graph.hpp"
 #include <cassert>
 
-namespace uni_cpp_practice {
 namespace {
+using Vertex = uni_cpp_practice::Vertex;
+using Edge = uni_cpp_practice::Edge;
 bool check_gray_valid(const Vertex& first_vertex, const Vertex& second_vertex) {
   if (first_vertex.get_edge_ids().size() == 0 ||
       second_vertex.get_edge_ids().size() == 0) {  //только текущее ребро
@@ -61,6 +62,7 @@ bool check_color_valid(const Vertex& first_vertex,
 }
 }  // namespace
 
+namespace uni_cpp_practice {
 bool Vertex::has_edge_id(const EdgeId& new_edge_id) const {
   if (std::find(edge_ids_.begin(), edge_ids_.end(), new_edge_id) !=
       edge_ids_.end()) {

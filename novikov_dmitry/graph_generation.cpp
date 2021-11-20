@@ -3,9 +3,11 @@
 #include <limits>
 #include <random>
 
-namespace uni_cpp_practice {
-namespace graph_generation {
-
+namespace {
+using Edge = uni_cpp_practice::Edge;
+using Depth = uni_cpp_practice::Depth;
+using VertexId = uni_cpp_practice::VertexId;
+using Graph = uni_cpp_practice::Graph;
 double get_color_probability(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Green:
@@ -140,6 +142,10 @@ void generate_gray_edges(Graph& graph,
     new_vertext_probability -= probability / depth;
   }
 }
+}  // namespace
+
+namespace uni_cpp_practice {
+namespace graph_generation {
 
 Graph generate_graph(const Depth& depth, int new_vertices_num) {
   auto graph = Graph();
