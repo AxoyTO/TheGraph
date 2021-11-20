@@ -12,76 +12,93 @@ using EdgeId = int;
 constexpr int kVerticesCount = 14;
 
 struct Vertex {
-  VertexId id;
-  vector<int> edge_ids;
-};
-struct Edge {
-  EdgeId id;
-  std::pair<int, int> vertex_ids;
-};
-class Graph {
+ private:
+  vector<int> edge_ids_;
+
  public:
-  vector<Vertex> vertices;
-  vector<Edge> edges;
-  void add_vertex() {
-    Vertex new_vertex;
-    new_vertex.id = vertices.size();
-    new_vertex.edge_ids = {};
-    vertices.push_back(new_vertex);
+  const VertexId id;
+
+  Vertex(const VertexId& _id) : id(_id) {}
+
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+
+  string print() const {
+    string vertex_output =
+        "{\n\t\t\t\"id\": " + to_string(id) + ",\n\t\t\t\"edge_ids\": [";
+    for (const auto& edge_id : edge_ids_) {
+      vertex_output += to_string(edge_id);
+      if (edge_id != edge_ids_.back()) {
+        vertex_output += ", ";
+      }
+    }
+    vertex_output += "]\n\t\t}";
+    return vertex_output;
   }
-  void add_edge(const VertexId from_vertex_id, const VertexId to_vertex_id) {
-    EdgeId new_edge_id = edges.size();
-    Edge new_edge;
-    new_edge.id = new_edge_id;
-    new_edge.vertex_ids = std::make_pair(from_vertex_id, to_vertex_id);
-    edges.push_back(new_edge);
-    vertices[from_vertex_id].edge_ids.push_back(new_edge_id);
-    vertices[to_vertex_id].edge_ids.push_back(new_edge_id);
-  };
 };
 
-string print_vertex(const Vertex& vertex) {
-  string vertex_output =
-      "{\n\t\t\t\"id\": " + to_string(vertex.id) + ",\n\t\t\t\"edge_ids\": [";
-  for (const auto& edge_id : vertex.edge_ids) {
-    if (edge_id != vertex.edge_ids.back()) {
-      vertex_output = vertex_output + to_string(edge_id) + ", ";
-    } else {
-      vertex_output = vertex_output + to_string(edge_id);
-    }
-  }
-  vertex_output += "]\n\t\t}";
-  return vertex_output;
-}
+struct Edge {
+ private:
+  int from_vertex_id_;
+  int to_vertex_id_;
 
-string print_edge(const Edge& edge) {
-  return "{\n\t\t\t\"id\": " + std::to_string(edge.id) +
-         ",\n\t\t\t\"vertex_ids\": [" + to_string(edge.vertex_ids.first) +
-         ", " + to_string(edge.vertex_ids.second) + "]\n\t\t}";
-}
+ public:
+  const EdgeId id;
 
-string print_graph(const Graph& graph) {
-  string graph_output = "{\n\t\"vertices\": [\n\t\t";
-  for (const auto& vertex : graph.vertices) {
-    graph_output += print_vertex(vertex);
-    if (vertex.id != graph.vertices.back().id) {
-      graph_output += ",\n\t\t";
-    } else {
-      graph_output += "\n\t";
-    }
+  Edge(const EdgeId& _id, VertexId _from_vertex_id, VertexId _to_vertex_id)
+      : id(_id),
+        from_vertex_id_(_from_vertex_id),
+        to_vertex_id_(_to_vertex_id) {}
+
+  string print() const {
+    return "{\n\t\t\t\"id\": " + std::to_string(id) +
+           ",\n\t\t\t\"vertex_ids\": [" + to_string(from_vertex_id_) + ", " +
+           to_string(to_vertex_id_) + "]\n\t\t}";
   }
-  graph_output += "],\n\t\"edges\": [\n\t\t";
-  for (const auto& edge : graph.edges) {
-    graph_output += print_edge(edge);
-    if (edge.id != graph.edges.back().id) {
-      graph_output += ",\n\t\t";
-    } else {
-      graph_output += "\n\t";
+};
+
+class Graph {
+  vector<Vertex> vertices_;
+  vector<Edge> edges_;
+  int vertex_id_counter_ = 0;
+  int edge_id_counter_ = 0;
+
+ public:
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
+
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
+
+  void add_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
+
+  void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
+    EdgeId new_edge_id = get_new_vertex_id();
+    edges_.emplace_back(new_edge_id, from_vertex_id, to_vertex_id);
+    vertices_[from_vertex_id].add_edge_id(new_edge_id);
+    vertices_[to_vertex_id].add_edge_id(new_edge_id);
+  };
+
+  string print() const {
+    string graph_output = "{\n\t\"vertices\": [\n\t\t";
+    for (const auto& vertex : vertices_) {
+      graph_output += vertex.print();
+      if (vertex.id != vertices_.back().id) {
+        graph_output += ",\n\t\t";
+      } else {
+        graph_output += "\n\t";
+      }
     }
+    graph_output += "],\n\t\"edges\": [\n\t\t";
+    for (const auto& edge : edges_) {
+      graph_output += edge.print();
+      if (edge.id != edges_.back().id) {
+        graph_output += ",\n\t\t";
+      } else {
+        graph_output += "\n\t";
+      }
+    }
+    graph_output += "]\n}\n";
+    return graph_output;
   }
-  graph_output += "]\n}\n";
-  return graph_output;
-}
+};
 
 int main() {
   auto graph = Graph();
@@ -111,5 +128,5 @@ int main() {
 
   std::ofstream graph_file;
   graph_file.open("graph.json");
-  graph_file << print_graph(graph);
+  graph_file << graph.print();
 }
