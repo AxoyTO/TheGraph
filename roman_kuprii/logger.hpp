@@ -15,7 +15,7 @@ class Logger {
     return logger;
   }
 
-  void log(std::string text) const {
+  void log(const std::string& text) const {
     std::cout << text << std::endl;
     logfile_ << text;
   }
@@ -26,6 +26,8 @@ class Logger {
   Logger(std::ofstream& f) : logfile_(f) {}
   Logger(const Logger& root) = delete;
   Logger& operator=(const Logger&) = delete;
+  Logger(Logger&&) = delete;
+  Logger& operator=(Logger&&) = delete;
 };
 
 }  // namespace uni_cpp_practice
