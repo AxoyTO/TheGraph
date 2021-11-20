@@ -1,17 +1,3 @@
-/**
- * Not done yet no need to check !!!
- * done now:
- *  change class Edge
- *  change class Vertex
- *  change class Graph
- *  vertexGenerator done
- *  generator gray edge
- *  green done
- * todo:
- * redGenerator ..............todo
- * blueGenerator..............toFix
- * yellowGenerator............todo
- */
 #include <assert.h>
 #include <array>
 #include <fstream>
@@ -182,9 +168,6 @@ class Generator {
       graph_.addEdge(connection.at(0), connection.at(1), color);
     }
   }
-  /**
-   * to setup levels for easy create rgb edge
-   */
   void setUpLevels() {
     for (int i = 0; i < maxDeps_; ++i) {
       std::vector<int> level{};
@@ -196,17 +179,32 @@ class Generator {
       levels_.push_back(level);
     }
   }
-  /**
-   * connect level +2
-   * param: NULL
-   * return NULL
-   */
-  void redEdgeGenerator() {}
-  /**
-   * create edge vertex self
-   * param: NULL
-   * return NULL
-   */
+  void redEdgeGenerator() {
+    for (auto iter = levels_.begin(); iter < levels_.end() - 2; iter++) {
+      for (const auto& fromVertex : *iter) {
+        for (const auto& toVertex : *(iter + 2)) {
+          if (specialEdgeGenerateProbabilityController("red")) {
+            graph_.addEdge(fromVertex, toVertex, "red");
+          }
+        }
+      }
+    }
+  }
+  void yellowGenerator() {
+    int depth = 0;
+    for (auto iter = levels_.begin(); iter < levels_.end() - 1; iter++) {
+      for (const auto& fromVertex : *iter) {
+        for (const auto& toVertex : *(iter + 1)) {
+          if (specialEdgeGenerateProbabilityController("yellow", depth) &&
+              !graph_.isConnected(fromVertex, toVertex)) {
+            graph_.addEdge(fromVertex, toVertex, "yellow");
+          }
+        }
+      }
+      depth++;
+    }
+  }
+
   void greenEdgeGenerator() {
     int verticesSum = graph_.getPresentVertexId();
     for (int i = 0; i < verticesSum; ++i) {
@@ -215,23 +213,18 @@ class Generator {
       }
     }
   }
-  /**
-   * create edge at same level
-   * param: null
-   * return:null
-   * bug need fix
-   **/
   void blueEdgeGenerator() {
     for (const auto& level : levels_) {
-      for (auto iter = level.begin(); iter < level.end() - 1; iter++) {
-        if (iter != level.end() &&
+      for (auto iter = level.begin(); iter < level.end(); iter++) {
+        if (*iter != level.back() &&
             specialEdgeGenerateProbabilityController("blue")) {
           graph_.addEdge(*iter, *(iter + 1), "blue");
         }
       }
     }
   }
-  bool specialEdgeGenerateProbabilityController(std::string color) {
+  bool specialEdgeGenerateProbabilityController(std::string color,
+                                                int depth = 0) {
     int randomNum = rand() % 100 + 1;
     if (color == "red") {
       if (randomNum > RED_EDGE_PROBABILITY) {
@@ -245,9 +238,12 @@ class Generator {
       if (randomNum > GREEN_EDGE_PROBABILITY) {
         return false;
       }
+    } else if (color == "yellow") {
+      if (vertxGenerateProbabilityController(depth)) {
+        return false;
+      }
     } else {
-      std::cerr << "Unknown color!!";
-      throw std::error_code();
+      throw std::runtime_error("Unreachable code");
     }
     return true;
   }
@@ -289,7 +285,11 @@ int main() {
   generator.greenEdgeGenerator();
   std::cout << "GreenEdgeGenerate.........done" << std::endl;
   generator.blueEdgeGenerator();
-  std::cout << "BlueEdgeGenerate.........done" << std::endl;
+  std::cout << "BlueEdgeGenerate..........done" << std::endl;
+  generator.yellowGenerator();
+  std::cout << "yellowEdgeGenerate........done" << std::endl;
+  generator.redEdgeGenerator();
+  std::cout << "redEdgeGenerate...........done" << std::endl;
   std::ofstream writePT;
   writePT.open("Graph.json", std::ios::out);
   writePT << generator.getResult() << std::endl;
