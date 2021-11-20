@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
+
 using std::array;
 using std::string;
 using std::to_string;
@@ -12,75 +14,67 @@ using EdgeId = int;
 constexpr int kVerticesCount = 14;
 
 struct Vertex {
- private:
-  vector<int> edge_ids_;
-
  public:
   const VertexId id;
 
-  Vertex(const VertexId& _id) : id(_id) {}
+  explicit Vertex(const VertexId& _id) : id(_id) {}
 
-  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
+  void add_edge_id(const EdgeFId& id) { edge_ids_.push_back(id); }
 
   string print() const {
     string vertex_output =
-        "{\n\t\t\t\"id\": " + to_string(id) + ",\n\t\t\t\"edge_ids\": [";
+        "\"id\": " + to_string(id) + ",\n\t\t\t\"edge_ids\": [";
     for (const auto& edge_id : edge_ids_) {
       vertex_output += to_string(edge_id);
       if (edge_id != edge_ids_.back()) {
         vertex_output += ", ";
       }
     }
-    vertex_output += "]\n\t\t}";
+    vertex_output += "]";
     return vertex_output;
   }
+
+ private:
+  vector<int> edge_ids_;
+
 };
 
 struct Edge {
- private:
-  int from_vertex_id_;
-  int to_vertex_id_;
-
- public:
+  const int from_vertex_id_;
+  const int to_vertex_id_;
   const EdgeId id;
 
-  Edge(const EdgeId& _id, VertexId _from_vertex_id, VertexId _to_vertex_id)
+  Edge(const EdgeId& _id, const VertexId& _from_vertex_id, const VertexId& _to_vertex_id)
       : id(_id),
         from_vertex_id_(_from_vertex_id),
         to_vertex_id_(_to_vertex_id) {}
 
   string print() const {
-    return "{\n\t\t\t\"id\": " + std::to_string(id) +
+    return "\"id\": " + std::to_string(id) +
            ",\n\t\t\t\"vertex_ids\": [" + to_string(from_vertex_id_) + ", " +
-           to_string(to_vertex_id_) + "]\n\t\t}";
+           to_string(to_vertex_id_) + "]";
   }
 };
 
 class Graph {
-  vector<Vertex> vertices_;
-  vector<Edge> edges_;
-  int vertex_id_counter_ = 0;
-  int edge_id_counter_ = 0;
-
  public:
-  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-
-  EdgeId get_new_edge_id() { return edge_id_counter_++; }
-
-  void add_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
+  void add_vertex() {
+    const VertexId new_vertex_id = get_new_vertex_id(); 
+    vertices_.emplace(new_vertex_id, new_vertex_id); 
+  }
 
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
-    EdgeId new_edge_id = get_new_vertex_id();
+    const EdgeId new_edge_id = get_new_edge_id();
     edges_.emplace_back(new_edge_id, from_vertex_id, to_vertex_id);
-    vertices_[from_vertex_id].add_edge_id(new_edge_id);
-    vertices_[to_vertex_id].add_edge_id(new_edge_id);
+    vertices_.at(from_vertex_id).add_edge_id(new_edge_id);
+    vertices_.at(to_vertex_id).add_edge_id(new_edge_id);
   };
 
   string print() const {
     string graph_output = "{\n\t\"vertices\": [\n\t\t";
-    for (const auto& vertex : vertices_) {
-      graph_output += vertex.print();
-      if (vertex.id != vertices_.back().id) {
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it ) {
+      graph_output += "{\n\t\t\t" + it->second.print() + "\n\t\t}";
+      if (std::next(it) != vertices_.end()) {
         graph_output += ",\n\t\t";
       } else {
         graph_output += "\n\t";
@@ -88,7 +82,7 @@ class Graph {
     }
     graph_output += "],\n\t\"edges\": [\n\t\t";
     for (const auto& edge : edges_) {
-      graph_output += edge.print();
+      graph_output += "{\n\t\t\t" + edge.print() + "\n\t\t}";
       if (edge.id != edges_.back().id) {
         graph_output += ",\n\t\t";
       } else {
@@ -98,6 +92,17 @@ class Graph {
     graph_output += "]\n}\n";
     return graph_output;
   }
+
+ private: 
+  std::unordered_map<VertexId, Vertex> vertices_;
+  vector<Edge> edges_;
+  int vertex_id_counter_ = 0;
+  int edge_id_counter_ = 0;
+
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
+
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
+
 };
 
 int main() {
