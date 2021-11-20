@@ -117,7 +117,7 @@ uni_cpp_practice::Logger& prepare_logger() {
 }
 
 void write_to_file(const std::string& graph_string,
-                   const std::string filename) {
+                   const std::string& filename) {
   std::ofstream file_out;
   file_out.open(filename, std::fstream::out | std::fstream::trunc);
   if (!file_out.is_open()) {
