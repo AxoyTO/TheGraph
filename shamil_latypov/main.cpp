@@ -55,7 +55,6 @@ class Edge {
       : v1_(v1), v2_(v2), id_(id), color_param_(color_param) {}
 
   // Возврат значений
-  int get_color() const { return color_param_; }
   EdgeId get_id() const { return id_; }
   VertexId get_vertex1_id() const { return v1_; }
   VertexId get_vertex2_id() const { return v2_; }
@@ -98,6 +97,8 @@ class Graph {
     assert(!vertices_connected(v1, v2) && "Vertices are connected\n");
 
     int color_param = 0;
+    // По логике нашей задачи, если вторая вершина не имеет присоединенных к ней
+    // рёбер, значит добавляемое ребро серое
     if (get_vertex(v2).get_edge_ids().size() == 0) {
       // vertex2.depth = vertex1.depth + 1
       get_vertex(v2).set_depth(get_vertex(v1).get_depth() + 1);
@@ -116,13 +117,13 @@ class Graph {
           break;
         }
       }
-    } else {
+    } else {  // Иначе задаем цвет ребру
       color_param = set_edge_color(v1, v2);
     }
     const auto& new_edge =
         edges_.emplace_back(v1, v2, get_new_edge_id(), color_param);
     get_vertex(v1).add_edge_id(new_edge.get_id());
-    if (v1 != v2) {
+    if (v1 != v2) {  // Чтобы id зеленых рёбер не повторялись
       get_vertex(v2).add_edge_id(new_edge.get_id());
     }
   }
@@ -162,6 +163,7 @@ class Graph {
 
   // Проверяет, что вершины уже соединены
   bool vertices_connected(const VertexId& v1_id, const VertexId& v2_id) const {
+    // Если вершины разные, то проверяются edge_ids обеих вершин
     if (v1_id != v2_id) {
       for (const auto& edge_id1 : get_vertex(v1_id).get_edge_ids()) {
         for (const auto& edge_id2 : get_vertex(v2_id).get_edge_ids()) {
@@ -170,13 +172,13 @@ class Graph {
           }
         }
       }
-    } else {
+    } else {  // Иначе ищется ребро, которое ведет из вершины в саму себя
       for (const auto& edge : edges_) {
         if (edge.get_vertex1_id() == v1_id && edge.get_vertex2_id() == v2_id) {
           return true;
         }
       }
-    }
+    }  // Иначе вершины не соединены
     return false;
   }
 
@@ -200,7 +202,8 @@ class Graph {
   VertexId get_new_vertex_id() { return vert_num_++; }
   EdgeId get_new_edge_id() { return edge_num_++; }
 
-  // Выставить цвета ребра
+  // Выставить цвет ребра
+  // Поставил в private, тк не вижу логики вызывать эту функцию извне
   int set_edge_color(const VertexId& v1, const VertexId& v2) {
     if (v1 == v2) {
       return 1;
