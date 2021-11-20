@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 using std::array;
 using std::string;
@@ -19,7 +19,7 @@ struct Vertex {
 
   explicit Vertex(const VertexId& _id) : id(_id) {}
 
-  void add_edge_id(const EdgeFId& id) { edge_ids_.push_back(id); }
+  void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
 
   string print() const {
     string vertex_output =
@@ -36,7 +36,6 @@ struct Vertex {
 
  private:
   vector<int> edge_ids_;
-
 };
 
 struct Edge {
@@ -44,23 +43,24 @@ struct Edge {
   const int to_vertex_id_;
   const EdgeId id;
 
-  Edge(const EdgeId& _id, const VertexId& _from_vertex_id, const VertexId& _to_vertex_id)
+  Edge(const EdgeId& _id,
+       const VertexId& _from_vertex_id,
+       const VertexId& _to_vertex_id)
       : id(_id),
         from_vertex_id_(_from_vertex_id),
         to_vertex_id_(_to_vertex_id) {}
 
   string print() const {
-    return "\"id\": " + std::to_string(id) +
-           ",\n\t\t\t\"vertex_ids\": [" + to_string(from_vertex_id_) + ", " +
-           to_string(to_vertex_id_) + "]";
+    return "\"id\": " + std::to_string(id) + ",\n\t\t\t\"vertex_ids\": [" +
+           to_string(from_vertex_id_) + ", " + to_string(to_vertex_id_) + "]";
   }
 };
 
 class Graph {
  public:
   void add_vertex() {
-    const VertexId new_vertex_id = get_new_vertex_id(); 
-    vertices_.emplace(new_vertex_id, new_vertex_id); 
+    const VertexId new_vertex_id = get_new_vertex_id();
+    vertices_.emplace(new_vertex_id, new_vertex_id);
   }
 
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
@@ -72,7 +72,7 @@ class Graph {
 
   string print() const {
     string graph_output = "{\n\t\"vertices\": [\n\t\t";
-    for (auto it = vertices_.begin(); it != vertices_.end(); ++it ) {
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
       graph_output += "{\n\t\t\t" + it->second.print() + "\n\t\t}";
       if (std::next(it) != vertices_.end()) {
         graph_output += ",\n\t\t";
@@ -93,7 +93,7 @@ class Graph {
     return graph_output;
   }
 
- private: 
+ private:
   std::unordered_map<VertexId, Vertex> vertices_;
   vector<Edge> edges_;
   int vertex_id_counter_ = 0;
@@ -102,7 +102,6 @@ class Graph {
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
 
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
-
 };
 
 int main() {
