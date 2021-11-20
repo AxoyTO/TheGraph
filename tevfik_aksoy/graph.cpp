@@ -1,10 +1,11 @@
 #include "graph.hpp"
 #include <cassert>
+#include <iostream>
 
-namespace uni_cpp_practice {
 namespace {
-bool is_depth_valid(int depth,
-                    const std::vector<std::vector<VertexId>>& depth_map) {
+bool is_depth_valid(
+    int depth,
+    const std::vector<std::vector<uni_cpp_practice::VertexId>>& depth_map) {
   if (depth > depth_map.size())
     return false;
   if (depth_map[depth].empty())
@@ -12,6 +13,8 @@ bool is_depth_valid(int depth,
   return true;
 }
 }  // namespace
+
+namespace uni_cpp_practice {
 
 void Vertex::add_edge_id(const EdgeId& id) {
   assert(!has_edge_id(id, edge_ids_) && "Edge already exists in vertex!");
@@ -34,29 +37,7 @@ std::string color_to_string(const Edge::Color& color) {
       return "yellow";
     case Edge::Color::Red:
       return "red";
-    case Edge::Color::Unknown:
-      return "unknown";
   }
-}
-
-std::string Edge::to_JSON() const {
-  std::string json_string;
-  json_string += "\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
-                 std::to_string(source) + ", " + std::to_string(destination) +
-                 R"(], "color": ")" + color_to_string(color) + "\" }";
-  return json_string;
-}
-
-std::string Vertex::to_JSON() const {
-  std::string json_string;
-  json_string += "\t{ \"id\": " + std::to_string(id) + ", \"edge_ids\": [";
-  for (int i = 0; i < edge_ids_.size(); i++) {
-    json_string += std::to_string(edge_ids_[i]);
-    if (i + 1 != edge_ids_.size())
-      json_string += ", ";
-  }
-  json_string += "], \"depth\": " + std::to_string(depth) + "}";
-  return json_string;
 }
 
 bool Graph::does_vertex_exist(const VertexId& id,
@@ -69,26 +50,26 @@ bool Graph::does_vertex_exist(const VertexId& id,
 }
 
 VertexId Graph::insert_vertex() {
-  const auto id = get_new_vertex_id_();
+  const auto id = get_new_vertex_id();
   vertices_.emplace_back(id);
   if (id == 0) {
-    VertexDepth depth = 0;
     depth_map_.emplace_back();
-    depth_map_[depth].push_back(id);
+    depth_map_[0].push_back(id);
   }
   return id;
 }
 
-Edge::Color Graph::calculate_color_for_edge_(const Vertex& source,
-                                             const Vertex& destination) const {
-  if (source.get_edge_ids().empty() || destination.get_edge_ids().empty())
+Edge::Color Graph::calculate_color_for_edge(const Vertex& source,
+                                            const Vertex& destination) const {
+  if (source.get_edge_ids().empty() || destination.get_edge_ids().empty()) {
     return Edge::Color::Gray;
+  }
   if (source.id == destination.id)
     return Edge::Color::Green;
   if (source.depth == destination.depth) {
     for (int i = 0; i < depth_map_[source.depth].size() - 1; i++) {
-      auto first = depth_map_[source.depth][i];
-      auto second = depth_map_[source.depth][i + 1];
+      const auto first = depth_map_[source.depth][i];
+      const auto second = depth_map_[source.depth][i + 1];
       if ((source.id == first && destination.id == second) ||
           (destination.id == first && source.id == second))
         return Edge::Color::Blue;
@@ -99,17 +80,27 @@ Edge::Color Graph::calculate_color_for_edge_(const Vertex& source,
   if (source.depth == destination.depth - 2)
     return Edge::Color::Red;
 
-  // unknown нужно для return val of calculate_edge_color
-  return Edge::Color::Unknown;
+  throw std::runtime_error("Failed to calculate edge color");
+}
+
+Vertex Graph::get_vertex(const VertexId& id) const {
+  for (const auto& vertex : vertices_) {
+    if (id == vertex.id)
+      return vertex;
+  }
+  throw std::runtime_error("Vertex not found!");
 }
 
 void Graph::insert_edge(const VertexId& source_id,
                         const VertexId& destination_id) {
   assert(!are_vertices_connected(source_id, destination_id) &&
          "Vertices are already connected!");
-  const auto color = calculate_color_for_edge_(vertices_[source_id],
-                                               vertices_[destination_id]);
-  const int edge_id = get_new_edge_id_();
+  const auto& source_vertex = get_vertex(source_id);
+  const auto& destination_vertex = get_vertex(destination_id);
+  const auto color =
+      calculate_color_for_edge(source_vertex, destination_vertex);
+  const int edge_id = get_new_edge_id();
+  colored_edges_map_[color].push_back(edge_id);
   edges_.emplace_back(source_id, destination_id, edge_id, color);
 
   vertices_[source_id].add_edge_id(edge_id);
@@ -148,13 +139,17 @@ bool Graph::are_vertices_connected(const VertexId& source,
   return false;
 }
 
+const std::vector<EdgeId>& Graph::get_colored_edges(
+    const Edge::Color& color) const {
+  return colored_edges_map_.at(color);
+}
+
 int Graph::total_edges_of_color(const Edge::Color& color) const {
-  int total = 0;
-  for (const auto& edge : edges_) {
-    if (edge.color == color)
-      total++;
+  try {
+    return get_colored_edges(color).size();
+  } catch (std::out_of_range) {
+    return 0;
   }
-  return total;
 }
 
 int Graph::depth() const {

@@ -8,6 +8,13 @@
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
+using Graph = uni_cpp_practice::Graph;
+using Vertex = uni_cpp_practice::Vertex;
+using Edge = uni_cpp_practice::Edge;
+using GraphPrinter = uni_cpp_practice::GraphPrinter;
+using GraphGenerator = uni_cpp_practice::GraphGenerator;
+using Logger = uni_cpp_practice::Logger;
+
 std::string get_date_and_time() {
   std::time_t now =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -52,30 +59,23 @@ int handle_graphs_count_input() {
   return graphs_count;
 }
 
-std::vector<std::pair<uni_cpp_practice::Edge::Color, int>> set_colors(
-    const uni_cpp_practice::Graph& graph) {
-  std::vector<std::pair<uni_cpp_practice::Edge::Color, int>> colors = {
-      {uni_cpp_practice::Edge::Color::Gray,
-       graph.total_edges_of_color(uni_cpp_practice::Edge::Color::Gray)},
-      {uni_cpp_practice::Edge::Color::Green,
-       graph.total_edges_of_color(uni_cpp_practice::Edge::Color::Green)},
-      {uni_cpp_practice::Edge::Color::Blue,
-       graph.total_edges_of_color(uni_cpp_practice::Edge::Color::Blue)},
-      {uni_cpp_practice::Edge::Color::Yellow,
-       graph.total_edges_of_color(uni_cpp_practice::Edge::Color::Yellow)},
-      {uni_cpp_practice::Edge::Color::Red,
-       graph.total_edges_of_color(uni_cpp_practice::Edge::Color::Red)}};
+std::vector<std::pair<Edge::Color, int>> set_colors(const Graph& graph) {
+  std::vector<std::pair<Edge::Color, int>> colors = {
+      {Edge::Color::Gray, graph.total_edges_of_color(Edge::Color::Gray)},
+      {Edge::Color::Green, graph.total_edges_of_color(Edge::Color::Green)},
+      {Edge::Color::Blue, graph.total_edges_of_color(Edge::Color::Blue)},
+      {Edge::Color::Yellow, graph.total_edges_of_color(Edge::Color::Yellow)},
+      {Edge::Color::Red, graph.total_edges_of_color(Edge::Color::Red)}};
 
   return colors;
 }
 
-void log_start(uni_cpp_practice::Logger& logger, const int graph_number) {
+void log_start(Logger& logger, const int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Generation Started\n");
 }
 
-void log_depth(uni_cpp_practice::Logger& logger,
-               const uni_cpp_practice::Graph& graph) {
+void log_depth(Logger& logger, const Graph& graph) {
   for (int j = 0; j <= graph.depth(); j++) {
     logger.log(std::to_string(graph.get_vertices_in_depth(j).size()));
     if (j != graph.depth())
@@ -83,9 +83,8 @@ void log_depth(uni_cpp_practice::Logger& logger,
   }
 }
 
-void log_colors(
-    uni_cpp_practice::Logger& logger,
-    const std::vector<std::pair<uni_cpp_practice::Edge::Color, int>>& colors) {
+void log_colors(Logger& logger,
+                const std::vector<std::pair<Edge::Color, int>>& colors) {
   for (int j = 0; j < colors.size(); j++) {
     logger.log(color_to_string(colors[j].first) + ": " +
                std::to_string(colors[j].second));
@@ -94,9 +93,7 @@ void log_colors(
   }
 }
 
-void log_end(uni_cpp_practice::Logger& logger,
-             const uni_cpp_practice::Graph& graph,
-             int graph_number) {
+void log_end(Logger& logger, const Graph& graph, int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Generation Finished {  \n");
   logger.log("  depth: " + std::to_string(graph.depth()) + ",\n");
@@ -110,7 +107,7 @@ void log_end(uni_cpp_practice::Logger& logger,
   logger.log("}\n}\n");
 }
 
-void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
+void write_to_file(const GraphPrinter& graph_printer,
                    const std::string& filename) {
   std::ofstream jsonfile(filename, std::ios::out);
   if (!jsonfile.is_open())
@@ -123,16 +120,15 @@ int main() {
   const int graphs_count = handle_graphs_count_input();
   const int max_depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
-  const auto graph_generator =
-      uni_cpp_practice::GraphGenerator(max_depth, new_vertices_num);
-  auto& logger = uni_cpp_practice::Logger::get_instance();
+  const auto graph_generator = GraphGenerator(max_depth, new_vertices_num);
+  auto& logger = Logger::get_instance();
   logger.set_file("./temp/log.txt");
 
   for (int i = 0; i < graphs_count; i++) {
     log_start(logger, i);
     const auto graph = graph_generator.generate();
     log_end(logger, graph, i);
-    const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
+    const auto graph_printer = GraphPrinter(graph);
     write_to_file(graph_printer, "./temp/graph_" + std::to_string(i) + ".json");
   }
   return 0;

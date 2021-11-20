@@ -2,6 +2,18 @@
 #include <iostream>
 #include <random>
 
+namespace {
+constexpr float GREEN_EDGE_PROBABILITY = 0.1;
+constexpr float BLUE_EDGE_PROBABILITY = 0.25;
+constexpr float RED_EDGE_PROBABILITY = 0.33;
+float get_random_probability() {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_real_distribution<float> probability(0.0, 1);
+  return probability(mt);
+}
+}  // namespace
+
 namespace uni_cpp_practice {
 namespace {
 VertexId get_random_vertex_id(const std::vector<VertexId>& vertices) {
@@ -25,13 +37,6 @@ std::vector<VertexId> filter_connected_vertices(
   return result;
 }
 }  // namespace
-
-float GraphGenerator::get_random_probability() const {
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_real_distribution<float> probability(0.0, 1);
-  return probability(mt);
-}
 
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   graph.insert_vertex();
@@ -60,7 +65,7 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
 
 void GraphGenerator::generate_green_edges(Graph& graph) const {
   for (const auto& vertex : graph.get_vertices()) {
-    if (get_random_probability() < GREEN_EDGE_PROBABILITY_) {
+    if (get_random_probability() < GREEN_EDGE_PROBABILITY) {
       graph.insert_edge(vertex.id, vertex.id);
     }
   }
@@ -72,7 +77,7 @@ void GraphGenerator::generate_blue_edges(Graph& graph) const {
     for (VertexId j = 0; j < vertices_in_depth.size() - 1; j++) {
       const auto source = vertices_in_depth[j];
       const auto destination = vertices_in_depth[j + 1];
-      if (get_random_probability() < BLUE_EDGE_PROBABILITY_) {
+      if (get_random_probability() < BLUE_EDGE_PROBABILITY) {
         graph.insert_edge(source, destination);
       }
     }
@@ -103,7 +108,7 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
     const auto& vertices = graph.get_vertices_in_depth(depth);
     const auto& vertices_next = graph.get_vertices_in_depth(depth + 2);
     for (const auto& vertex : vertices) {
-      if (get_random_probability() < RED_EDGE_PROBABILITY_) {
+      if (get_random_probability() < RED_EDGE_PROBABILITY) {
         graph.insert_edge(vertex, get_random_vertex_id(vertices_next));
       }
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace uni_cpp_practice {
@@ -27,8 +28,6 @@ struct Vertex {
     return false;
   }
 
-  std::string to_JSON() const;
-
  private:
   std::vector<EdgeId> edge_ids_;
 };
@@ -36,7 +35,7 @@ struct Vertex {
 struct Edge {
  public:
   // unknown нужно для return val of calculate_edge_color
-  enum class Color { Gray, Green, Blue, Yellow, Red, Unknown };
+  enum class Color { Gray, Green, Blue, Yellow, Red };
   const EdgeId id{};
   const Color color{};
   const VertexId source{};
@@ -47,8 +46,6 @@ struct Edge {
        const VertexId& _id,
        const Color& _color)
       : id(_id), color(_color), source(_source), destination(_destination) {}
-
-  std::string to_JSON() const;
 };
 
 std::string color_to_string(const Edge::Color& color);
@@ -63,7 +60,7 @@ class Graph {
 
   bool are_vertices_connected(const VertexId& source,
                               const VertexId& destination) const;
-
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
   int total_edges_of_color(const Edge::Color& color) const;
   int depth() const;
   const std::vector<Vertex>& get_vertices() const;
@@ -75,12 +72,14 @@ class Graph {
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
   std::vector<std::vector<VertexId>> depth_map_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> colored_edges_map_;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
-  Edge::Color calculate_color_for_edge_(const Vertex& source,
-                                        const Vertex& destination) const;
-  VertexId get_new_vertex_id_() { return vertex_id_counter_++; }
-  EdgeId get_new_edge_id_() { return edge_id_counter_++; }
+  Vertex get_vertex(const VertexId& id) const;
+  Edge::Color calculate_color_for_edge(const Vertex& source,
+                                       const Vertex& destination) const;
+  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
+  EdgeId get_new_edge_id() { return edge_id_counter_++; }
 };
 }  // namespace uni_cpp_practice
