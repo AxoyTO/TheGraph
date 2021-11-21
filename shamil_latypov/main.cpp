@@ -12,6 +12,8 @@ using EdgeId = int;
 constexpr int GREEN_EDGE_CHANCE = 10;
 constexpr int BLUE_EDGE_CHANCE = 25;
 constexpr int RED_EDGE_CHANCE = 33;
+constexpr int DEPTH_MIN = 0;
+constexpr int NEW_VERTICES_MIN = 0;
 
 class Vertex {
  public:
@@ -406,16 +408,16 @@ int main() {
   do {
     std::cout << "Input depth of graph:\n";
     std::cin >> depth;
-    if (depth < 0)
+    if (depth < DEPTH_MIN)
       std::cout << "Depth must be >= 0\n";
-  } while (depth < 0);
+  } while (depth < DEPTH_MIN);
   int new_vertices_num = 0;
   do {
     std::cout << "Input number of vertecies from each vertex:\n";
     std::cin >> new_vertices_num;
-    if (new_vertices_num < 0)
+    if (new_vertices_num < NEW_VERTICES_MIN)
       std::cout << "New_vertices_num must be >= 0\n";
-  } while (new_vertices_num < 0);
+  } while (new_vertices_num < NEW_VERTICES_MIN);
 
   const auto graph = generate_graph(depth, new_vertices_num);
 
