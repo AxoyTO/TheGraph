@@ -9,13 +9,16 @@
 
 using VertexId = int;
 using EdgeId = int;
+constexpr int GREEN_EDGE_CHANCE = 10;
+constexpr int BLUE_EDGE_CHANCE = 25;
+constexpr int RED_EDGE_CHANCE = 33;
 
 class Vertex {
  public:
-  Vertex(const VertexId& id) : id_(id) {}
+  explicit Vertex(const VertexId& id) : id_(id) {}
 
+  int depth;
   // Возврат значений
-  int get_depth() const { return depth_; }
   VertexId get_id() const { return id_; }
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
@@ -24,9 +27,6 @@ class Vertex {
     assert(!has_edge_id(id) && "This edge_id has already been added\n");
     edge_ids_.push_back(id);
   }
-
-  // Выставить глубину вершины
-  void set_depth(int depth) { depth_ = depth; }
 
   // Связана ли вершина с ребром
   bool has_edge_id(const EdgeId& id) const {
@@ -46,13 +46,13 @@ class Vertex {
 
 class Edge {
  public:
-  enum class Colors { Gray, Green, Blue, Yellow, Red };
+  enum class Color { Gray, Green, Blue, Yellow, Red };
 
   Edge(const VertexId& v1,
        const VertexId& v2,
        const EdgeId& id,
-       int color_param = 0)
-      : v1_(v1), v2_(v2), id_(id), color_param_(color_param) {}
+       Color color_param)
+      : v1_(v1), v2_(v2), id_(id), color_(color_param) {}
 
   // Возврат значений
   EdgeId get_id() const { return id_; }
@@ -60,16 +60,16 @@ class Edge {
   VertexId get_vertex2_id() const { return v2_; }
 
   std::string color_to_string() const {
-    switch (color_param_) {
-      case (int)Colors::Gray:
+    switch (color_) {
+      case Color::Gray:
         return "gray";
-      case (int)Colors::Green:
+      case Color::Green:
         return "green";
-      case (int)Colors::Blue:
+      case Color::Blue:
         return "blue";
-      case (int)Colors::Yellow:
+      case Color::Yellow:
         return "yellow";
-      case (int)Colors::Red:
+      case Color::Red:
         return "red";
     }
     return "gray";
@@ -79,52 +79,37 @@ class Edge {
   EdgeId id_;
   VertexId v1_;
   VertexId v2_;
-  int color_param_;
+  Color color_;
 };
 
 class Graph {
  public:
   // Возврат значений
   int get_depth() const { return depth_map_.size() - 1; }
-  int get_vertices_cnt_in_depth(int depth) const {
-    return depth_map_[depth].size();
+  const std::vector<VertexId>& get_vertices_in_depth(int depth) const {
+    return depth_map_[depth];
   }
 
   // Добавляет ребро в graph
-  void add_edge(const VertexId& v1, const VertexId& v2) {
-    assert(has_vertex_id(v1) && "Vertex 1 doesnt exist\n");
-    assert(has_vertex_id(v2) && "Vertex 2 doesnt exist\n");
-    assert(!vertices_connected(v1, v2) && "Vertices are connected\n");
+  void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
+    assert(has_vertex_id(vertex1_id) && "Vertex 1 doesnt exist\n");
+    assert(has_vertex_id(vertex2_id) && "Vertex 2 doesnt exist\n");
+    assert(!vertices_connected(vertex1_id, vertex2_id) &&
+           "Vertices are connected\n");
 
-    int color_param = 0;
-    // По логике нашей задачи, если вторая вершина не имеет присоединенных к ней
-    // рёбер, значит добавляемое ребро серое
-    if (get_vertex(v2).get_edge_ids().size() == 0) {
-      // vertex2.depth = vertex1.depth + 1
-      get_vertex(v2).set_depth(get_vertex(v1).get_depth() + 1);
+    auto& vertex1 = get_vertex(vertex1_id);
+    auto& vertex2 = get_vertex(vertex2_id);
+    const auto& color_param = set_edge_color(vertex1, vertex2);
 
-      if (depth_map_.size() <= get_vertex(v2).get_depth()) {
-        depth_map_.push_back({});
-      }
-
-      // Добавление на нужную глубину vertex2.id и удаление vertex2.id из
-      // нулевой глубины
-      depth_map_[get_vertex(v2).get_depth()].push_back(v2);
-      for (auto vertex_id_it = depth_map_[0].begin();
-           vertex_id_it != depth_map_[0].end(); vertex_id_it++) {
-        if (*vertex_id_it == v2) {
-          depth_map_[0].erase(vertex_id_it);
-          break;
-        }
-      }
-    } else {  // Иначе задаем цвет ребру
-      color_param = set_edge_color(v1, v2);
+    if (color_param == Edge::Color::Gray) {
+      update_vertex_depth(vertex1, vertex2);
     }
-    const auto& new_edge =
-        edges_.emplace_back(v1, v2, get_new_edge_id(), color_param);
-    get_vertex(v1).add_edge_id(new_edge.get_id());
-    if (v1 != v2) {  // Чтобы id зеленых рёбер не повторялись
-      get_vertex(v2).add_edge_id(new_edge.get_id());
+
+    const auto& new_edge = edges_.emplace_back(vertex1_id, vertex2_id,
+                                               get_new_edge_id(), color_param);
+    vertex1.add_edge_id(new_edge.get_id());
+    if (color_param != Edge::Color::Green) {
+      vertex2.add_edge_id(new_edge.get_id());
     }
   }
 
@@ -133,7 +118,7 @@ class Graph {
     if (depth_map_.size() == 0) {
       depth_map_.push_back({});
     }
-    Vertex new_vertex = vertices_.emplace_back(get_new_vertex_id());
+    const Vertex& new_vertex = vertices_.emplace_back(get_new_vertex_id());
     depth_map_[0].push_back(new_vertex.get_id());
   }
 
@@ -148,12 +133,13 @@ class Graph {
 
   // Возврат вершины
   const Vertex& get_vertex(const VertexId& id) const {
+    assert(has_vertex_id(id) && "Vertex doesnt exist");
     for (auto& vertex : vertices_) {
       if (vertex.get_id() == id) {
         return vertex;
       }
     }
-    return vertices_.back();
+    throw std::runtime_error("Vertex doesn't exist");
   }
   // Модификатор без const
   Vertex& get_vertex(const VertexId& id) {
@@ -161,8 +147,20 @@ class Graph {
     return const_cast<Vertex&>(const_this.get_vertex(id));
   }
 
+  // Проверка, что вершина с таким id уже существует
+  bool has_vertex_id(const VertexId& id) const {
+    for (const auto& vertex : vertices_) {
+      if (vertex.get_id() == id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Проверяет, что вершины уже соединены
   bool vertices_connected(const VertexId& v1_id, const VertexId& v2_id) const {
+    assert(has_vertex_id(v1_id) && "Vertex 1 doesnt exist");
+    assert(has_vertex_id(v2_id) && "Vertex 2 doesnt exist");
     // Если вершины разные, то проверяются edge_ids обеих вершин
     if (v1_id != v2_id) {
       for (const auto& edge_id1 : get_vertex(v1_id).get_edge_ids()) {
@@ -182,16 +180,6 @@ class Graph {
     return false;
   }
 
-  // Проверка, что вершина с таким id уже существует
-  bool has_vertex_id(const VertexId& id) const {
-    for (const auto& vertex : vertices_) {
-      if (vertex.get_id() == id) {
-        return true;
-      }
-    }
-    return false;
-  }
-
  private:
   VertexId vert_num_ = 0;
   EdgeId edge_num_ = 0;
@@ -204,17 +192,38 @@ class Graph {
 
   // Выставить цвет ребра
   // Поставил в private, тк не вижу логики вызывать эту функцию извне
-  int set_edge_color(const VertexId& v1, const VertexId& v2) {
-    if (v1 == v2) {
-      return 1;
-    } else if (get_vertex(v1).get_depth() == get_vertex(v2).get_depth()) {
-      return 2;
-    } else if (get_vertex(v1).get_depth() == get_vertex(v2).get_depth() - 1) {
-      return 3;
-    } else if (get_vertex(v1).get_depth() == get_vertex(v2).get_depth() - 2) {
-      return 4;
+  Edge::Color set_edge_color(const Vertex& vertex1, const Vertex& vertex2) {
+    if (vertex2.get_edge_ids().size() == 0) {
+      return Edge::Color::Gray;
+    } else if (vertex1.get_id() == vertex2.get_id()) {
+      return Edge::Color::Green;
+    } else if (vertex1.depth == vertex2.depth) {
+      return Edge::Color::Blue;
+    } else if (vertex1.depth == vertex2.depth - 1) {
+      return Edge::Color::Yellow;
+    } else if (vertex1.depth == vertex2.depth - 2) {
+      return Edge::Color::Red;
     }
-    return 0;
+    return Edge::Color::Gray;
+  }
+
+  void update_vertex_depth(const Vertex& vertex1, Vertex& vertex2) {
+    vertex2.depth = vertex1.depth + 1;
+
+    if (depth_map_.size() <= vertex2.depth) {
+      depth_map_.push_back({});
+    }
+
+    // Добавление на нужную глубину vertex2.id и удаление vertex2.id из
+    // нулевой глубины
+    depth_map_[vertex2.depth].push_back(vertex2.get_id());
+    for (auto vertex_id_it = depth_map_[0].begin();
+         vertex_id_it != depth_map_[0].end(); vertex_id_it++) {
+      if (*vertex_id_it == vertex2.get_id()) {
+        depth_map_[0].erase(vertex_id_it);
+        break;
+      }
+    }
   }
 };
 
@@ -226,10 +235,11 @@ class GraphPrinter {
            << ",\n  \"vertices\": [\n    ";
 
     // Вывод вершин
-    if (graph.get_vertices().size()) {
-      result << print_vertex(graph.get_vertices()[0]);
-      for (auto vertex_it = graph.get_vertices().begin() + 1;
-           vertex_it != graph.get_vertices().end(); vertex_it++) {
+    const auto& vertices = graph.get_vertices();
+    if (vertices.size()) {
+      result << print_vertex(vertices[0]);
+      for (auto vertex_it = vertices.begin() + 1; vertex_it != vertices.end();
+           vertex_it++) {
         result << ",\n    " << print_vertex(*vertex_it);
       }
     }
@@ -237,10 +247,11 @@ class GraphPrinter {
     result << "\n  ],\n  \"edges\": [\n    ";
 
     // Вывод рёбер
-    if (graph.get_edges().size()) {
-      result << print_edge(graph.get_edges()[0]);
-      for (auto edge_it = graph.get_edges().begin() + 1;
-           edge_it != graph.get_edges().end(); edge_it++) {
+    const auto& edges = graph.get_edges();
+    if (edges.size()) {
+      result << print_edge(edges[0]);
+      for (auto edge_it = edges.begin() + 1; edge_it != edges.end();
+           edge_it++) {
         result << ",\n    " << print_edge(*edge_it);
       }
     }
@@ -261,7 +272,7 @@ class GraphPrinter {
         ss << ", " << *edge_id_it;
       }
     }
-    ss << "],\n      \"depth\": " << vertex.get_depth() << "\n    }";
+    ss << "],\n      \"depth\": " << vertex.depth << "\n    }";
     return ss.str();
   }
 
@@ -274,12 +285,16 @@ class GraphPrinter {
   }
 };
 
-// Генерация серых ребер
-void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) {
+int random_number() {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> edges_chance(0, 100);
 
+  return edges_chance(gen);
+}
+
+// Генерация серых ребер
+void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) {
   double percent = 100.0 / (double)depth;
 
   VertexId curr_vert_num = 0, added_vert_num = 1;
@@ -287,11 +302,11 @@ void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) {
   graph.add_vertex();
   for (int curr_depth = 0; curr_depth <= depth; curr_depth++) {
     for (int curr_depth_vert_num = 0;
-         curr_depth_vert_num < graph.get_vertices_cnt_in_depth(curr_depth);
+         curr_depth_vert_num < graph.get_vertices_in_depth(curr_depth).size();
          curr_depth_vert_num++) {
       for (int gen_vert_num = 0; gen_vert_num < new_vertices_num;
            gen_vert_num++) {
-        if ((double)edges_chance(gen) > (double)curr_depth * percent) {
+        if ((double)random_number() > (double)curr_depth * percent) {
           graph.add_vertex();
 
           graph.add_edge(curr_vert_num, added_vert_num);
@@ -306,13 +321,8 @@ void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) {
 
 // Генерация зеленых ребер
 void generate_green_edges(Graph& graph) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> edges_chance(0, 100);
-
   for (const auto& vertex : graph.get_vertices()) {
-    int green_edge_chance = 10;
-    if (edges_chance(gen) < green_edge_chance) {
+    if (random_number() < GREEN_EDGE_CHANCE) {
       graph.add_edge(vertex.get_id(), vertex.get_id());
     }
   }
@@ -320,15 +330,10 @@ void generate_green_edges(Graph& graph) {
 
 // Генерация голубых ребер
 void generate_blue_edges(Graph& graph) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> edges_chance(0, 100);
-
   for (const auto& depth : graph.get_depth_map()) {
     for (auto vertex_id = depth.begin(); vertex_id != depth.end() - 1;
          vertex_id++) {
-      int blue_edge_chance = 25;
-      if (edges_chance(gen) < blue_edge_chance) {
+      if (random_number() < BLUE_EDGE_CHANCE) {
         graph.add_edge(*vertex_id, *(vertex_id + 1));
       }
     }
@@ -336,13 +341,11 @@ void generate_blue_edges(Graph& graph) {
 }
 
 // Генерация желтых ребер
-void generate_yellow_edges(Graph& graph, int depth) {
+void generate_yellow_edges(Graph& graph) {
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> edges_chance(0, 100);
 
-  double yellow_edge_percent = 100.0 / (double)(depth - 1);
-  int curr_depth = 0;
+  double yellow_edge_percent = 100.0 / (double)(graph.get_depth() - 1);
   for (auto depth = (graph.get_depth_map()).begin();
        depth != (graph.get_depth_map()).end() - 1; depth++) {
     for (auto& vertex_id : *depth) {
@@ -356,38 +359,33 @@ void generate_yellow_edges(Graph& graph, int depth) {
       // Проверка, что у нас есть "свободные" вершины для желтого ребра и рандом
       // выпал удачно для генерации
       if (vert_ids_depth_deeper.size() &&
-          (double)edges_chance(gen) <
-              yellow_edge_percent * (double)curr_depth) {
+          (double)random_number() <
+              yellow_edge_percent *
+                  (double)(depth - graph.get_depth_map().begin())) {
         // Выбираем вершину уровнем глубже, которая не является
         // потомком нашей вершины
         std::uniform_int_distribution<> rand_vertex(
             0, vert_ids_depth_deeper.size() - 1);
-        int second_vert_num = 0;
-        second_vert_num = rand_vertex(gen);
 
-        graph.add_edge(vertex_id, vert_ids_depth_deeper[second_vert_num]);
+        graph.add_edge(vertex_id, vert_ids_depth_deeper[rand_vertex(gen)]);
       }
     }
-    curr_depth++;
   }
 }
 
 // Генерация красных ребер
-void generate_red_edges(Graph& graph, int depth) {
+void generate_red_edges(Graph& graph) {
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> edges_chance(0, 100);
 
   for (auto depth = graph.get_depth_map().begin();
        depth != graph.get_depth_map().end() - 2; depth++) {
     for (const auto& vertex_id : *depth) {
-      double red_edge_chance = 33;
-      if (edges_chance(gen) < red_edge_chance) {
+      if (random_number() < RED_EDGE_CHANCE) {
         // Выбираем рандомом вершину 2мя уровнями глубже
         std::uniform_int_distribution<> rand_vertex(0, (depth + 2)->size() - 1);
-        int second_vert_num = rand_vertex(gen);
 
-        graph.add_edge(vertex_id, (*(depth + 2))[second_vert_num]);
+        graph.add_edge(vertex_id, (*(depth + 2))[rand_vertex(gen)]);
       }
     }
   }
@@ -400,8 +398,8 @@ Graph generate_graph(int depth, int new_vertices_num) {
   generate_grey_edges(graph, depth, new_vertices_num);
   generate_green_edges(graph);
   generate_blue_edges(graph);
-  generate_yellow_edges(graph, depth);
-  generate_red_edges(graph, depth);
+  generate_yellow_edges(graph);
+  generate_red_edges(graph);
 
   return graph;
 }
