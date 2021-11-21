@@ -48,7 +48,10 @@ class Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };
 
-  Edge(const VertexId& v1, const VertexId& v2, const EdgeId& id, const Color& color)
+  Edge(const VertexId& v1,
+       const VertexId& v2,
+       const EdgeId& id,
+       const Color& color)
       : v1_(v1), v2_(v2), id_(id), color_(color) {}
 
   // Возврат значений
