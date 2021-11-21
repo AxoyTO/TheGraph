@@ -48,7 +48,7 @@ class Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };
 
-  Edge(const VertexId& v1, const VertexId& v2, const EdgeId& id, Color color)
+  Edge(const VertexId& v1, const VertexId& v2, const EdgeId& id, const Color& color)
       : v1_(v1), v2_(v2), id_(id), color_(color) {}
 
   // Возврат значений
@@ -74,10 +74,10 @@ class Graph {
 
   // Добавляет ребро в graph
   void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
-    assert(has_vertex_id(vertex1_id) && "Vertex 1 doesnt exist\n");
-    assert(has_vertex_id(vertex2_id) && "Vertex 2 doesnt exist\n");
+    assert(has_vertex_id(vertex1_id) && "Vertex 1 doesnt exist");
+    assert(has_vertex_id(vertex2_id) && "Vertex 2 doesnt exist");
     assert(!vertices_connected(vertex1_id, vertex2_id) &&
-           "Vertices are connected\n");
+           "Vertices are connected");
 
     auto& vertex1 = get_vertex(vertex1_id);
     auto& vertex2 = get_vertex(vertex2_id);
@@ -114,13 +114,13 @@ class Graph {
 
   // Возврат вершины
   const Vertex& get_vertex(const VertexId& id) const {
-    assert(has_vertex_id(id) && "Vertex doesnt exist\n");
+    assert(has_vertex_id(id) && "Vertex doesnt exist");
     for (auto& vertex : vertices_) {
       if (vertex.get_id() == id) {
         return vertex;
       }
     }
-    throw std::runtime_error("Vertex doesn't exist\n");
+    throw std::runtime_error("Vertex doesn't exist");
   }
   // Модификатор без const
   Vertex& get_vertex(const VertexId& id) {
@@ -186,7 +186,7 @@ class Graph {
     } else if (vertex1.depth == vertex2.depth - 2) {
       return Edge::Color::Red;
     }
-    throw std::runtime_error("Failed to determine edge color\n");
+    throw std::runtime_error("Failed to determine edge color");
   }
 
   void update_vertex_depth(const Vertex& vertex1, Vertex& vertex2) {
@@ -222,7 +222,7 @@ std::string color_to_string(Edge::Color color) {
     case Edge::Color::Red:
       return "red";
   }
-  throw std::runtime_error("Invalid color value\n");
+  throw std::runtime_error("Invalid color value");
 }
 
 class GraphPrinter {
@@ -287,9 +287,17 @@ class GraphPrinter {
 int random_number() {
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> edges_chance(0, 100);
+  std::uniform_int_distribution<> random_num(0, 100);
 
-  return edges_chance(gen);
+  return random_num(gen);
+}
+
+VertexId get_random_vertex_id(const std::vector<VertexId>& vertices_ids) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> random_vertex(0, vertices_ids.size() - 1);
+
+  return vertices_ids[random_vertex(gen)];
 }
 
 // Генерация серых ребер
@@ -361,9 +369,7 @@ void generate_yellow_edges(Graph& graph) {
         // Выбираем вершину уровнем глубже, которая не является
         // потомком нашей вершины
 
-        graph.add_edge(vertex_id,
-                       vert_ids_depth_deeper[random_number() %
-                                             vert_ids_depth_deeper.size()]);
+        graph.add_edge(vertex_id, get_random_vertex_id(vert_ids_depth_deeper));
       }
     }
   }
@@ -376,8 +382,7 @@ void generate_red_edges(Graph& graph) {
     for (const auto& vertex_id : *depth) {
       if (random_number() < RED_EDGE_CHANCE) {
         // Выбираем рандомом вершину 2мя уровнями глубже
-        graph.add_edge(vertex_id,
-                       (*(depth + 2))[random_number() % (depth + 2)->size()]);
+        graph.add_edge(vertex_id, get_random_vertex_id(*(depth + 2)));
       }
     }
   }
