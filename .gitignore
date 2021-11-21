@@ -36,3 +36,6 @@ Carthage/Build
 
 # Other
 ._*
+
+# Temp
+/tevfik_aksoy/temp/
