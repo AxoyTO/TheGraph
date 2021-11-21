@@ -113,13 +113,7 @@ int main() {
   const int new_vertices_num = handle_new_vertices_num_input();
   const auto graph_generator = GraphGenerator(max_depth, new_vertices_num);
   auto& logger = Logger::get_instance();
-
-  try {
-    if (!std::filesystem::create_directory("./temp")) {
-    }
-  } catch (const std::exception& ex) {
-    std::cerr << ex.what() << "\n";
-  }
+  std::filesystem::create_directory("./temp");
 
   logger.set_file("./temp/log.txt");
 
