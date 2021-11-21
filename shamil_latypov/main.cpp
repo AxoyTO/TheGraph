@@ -48,32 +48,14 @@ class Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };
 
-  Edge(const VertexId& v1,
-       const VertexId& v2,
-       const EdgeId& id,
-       Color color_param)
-      : v1_(v1), v2_(v2), id_(id), color_(color_param) {}
+  Edge(const VertexId& v1, const VertexId& v2, const EdgeId& id, Color color)
+      : v1_(v1), v2_(v2), id_(id), color_(color) {}
 
   // Возврат значений
+  Color get_color() const { return color_; }
   EdgeId get_id() const { return id_; }
   VertexId get_vertex1_id() const { return v1_; }
   VertexId get_vertex2_id() const { return v2_; }
-
-  std::string color_to_string() const {
-    switch (color_) {
-      case Color::Gray:
-        return "gray";
-      case Color::Green:
-        return "green";
-      case Color::Blue:
-        return "blue";
-      case Color::Yellow:
-        return "yellow";
-      case Color::Red:
-        return "red";
-    }
-    return "gray";
-  }
 
  private:
   EdgeId id_;
@@ -99,17 +81,16 @@ class Graph {
 
     auto& vertex1 = get_vertex(vertex1_id);
     auto& vertex2 = get_vertex(vertex2_id);
-    const auto& color_param = set_edge_color(vertex1, vertex2);
+    const auto& color = calculate_edge_color(vertex1, vertex2);
 
-    if (color_param == Edge::Color::Gray) {
-      update_vertex_depth(vertex1, vertex2);
-    }
-
-    const auto& new_edge = edges_.emplace_back(vertex1_id, vertex2_id,
-                                               get_new_edge_id(), color_param);
+    const auto& new_edge =
+        edges_.emplace_back(vertex1_id, vertex2_id, get_new_edge_id(), color);
     vertex1.add_edge_id(new_edge.get_id());
-    if (color_param != Edge::Color::Green) {
+    if (color != Edge::Color::Green) {
       vertex2.add_edge_id(new_edge.get_id());
+    }
+    if (color == Edge::Color::Gray) {
+      update_vertex_depth(vertex1, vertex2);
     }
   }
 
@@ -133,13 +114,13 @@ class Graph {
 
   // Возврат вершины
   const Vertex& get_vertex(const VertexId& id) const {
-    assert(has_vertex_id(id) && "Vertex doesnt exist");
+    assert(has_vertex_id(id) && "Vertex doesnt exist\n");
     for (auto& vertex : vertices_) {
       if (vertex.get_id() == id) {
         return vertex;
       }
     }
-    throw std::runtime_error("Vertex doesn't exist");
+    throw std::runtime_error("Vertex doesn't exist\n");
   }
   // Модификатор без const
   Vertex& get_vertex(const VertexId& id) {
@@ -192,7 +173,8 @@ class Graph {
 
   // Выставить цвет ребра
   // Поставил в private, тк не вижу логики вызывать эту функцию извне
-  Edge::Color set_edge_color(const Vertex& vertex1, const Vertex& vertex2) {
+  Edge::Color calculate_edge_color(const Vertex& vertex1,
+                                   const Vertex& vertex2) const {
     if (vertex2.get_edge_ids().size() == 0) {
       return Edge::Color::Gray;
     } else if (vertex1.get_id() == vertex2.get_id()) {
@@ -204,7 +186,7 @@ class Graph {
     } else if (vertex1.depth == vertex2.depth - 2) {
       return Edge::Color::Red;
     }
-    return Edge::Color::Gray;
+    throw std::runtime_error("Failed to determine edge color\n");
   }
 
   void update_vertex_depth(const Vertex& vertex1, Vertex& vertex2) {
@@ -226,6 +208,22 @@ class Graph {
     }
   }
 };
+
+std::string color_to_string(Edge::Color color) {
+  switch (color) {
+    case Edge::Color::Gray:
+      return "gray";
+    case Edge::Color::Green:
+      return "green";
+    case Edge::Color::Blue:
+      return "blue";
+    case Edge::Color::Yellow:
+      return "yellow";
+    case Edge::Color::Red:
+      return "red";
+  }
+  throw std::runtime_error("Invalid color value\n");
+}
 
 class GraphPrinter {
  public:
@@ -280,7 +278,8 @@ class GraphPrinter {
     std::stringstream ss;
     ss << "{\n      \"id\": " << edge.get_id() << ",\n      \"vertex_ids\": ["
        << edge.get_vertex1_id() << ", " << edge.get_vertex2_id()
-       << "],\n      \"color\": \"" << edge.color_to_string() << "\"\n    }";
+       << "],\n      \"color\": \"" << color_to_string(edge.get_color())
+       << "\"\n    }";
     return ss.str();
   }
 };
@@ -342,9 +341,6 @@ void generate_blue_edges(Graph& graph) {
 
 // Генерация желтых ребер
 void generate_yellow_edges(Graph& graph) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-
   double yellow_edge_percent = 100.0 / (double)(graph.get_depth() - 1);
   for (auto depth = (graph.get_depth_map()).begin();
        depth != (graph.get_depth_map()).end() - 1; depth++) {
@@ -364,10 +360,10 @@ void generate_yellow_edges(Graph& graph) {
                   (double)(depth - graph.get_depth_map().begin())) {
         // Выбираем вершину уровнем глубже, которая не является
         // потомком нашей вершины
-        std::uniform_int_distribution<> rand_vertex(
-            0, vert_ids_depth_deeper.size() - 1);
 
-        graph.add_edge(vertex_id, vert_ids_depth_deeper[rand_vertex(gen)]);
+        graph.add_edge(vertex_id,
+                       vert_ids_depth_deeper[random_number() %
+                                             vert_ids_depth_deeper.size()]);
       }
     }
   }
@@ -375,17 +371,13 @@ void generate_yellow_edges(Graph& graph) {
 
 // Генерация красных ребер
 void generate_red_edges(Graph& graph) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-
   for (auto depth = graph.get_depth_map().begin();
        depth != graph.get_depth_map().end() - 2; depth++) {
     for (const auto& vertex_id : *depth) {
       if (random_number() < RED_EDGE_CHANCE) {
         // Выбираем рандомом вершину 2мя уровнями глубже
-        std::uniform_int_distribution<> rand_vertex(0, (depth + 2)->size() - 1);
-
-        graph.add_edge(vertex_id, (*(depth + 2))[rand_vertex(gen)]);
+        graph.add_edge(vertex_id,
+                       (*(depth + 2))[random_number() % (depth + 2)->size()]);
       }
     }
   }
