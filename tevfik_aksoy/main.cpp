@@ -1,5 +1,6 @@
 #include <array>
 #include <chrono>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -59,18 +60,6 @@ int handle_graphs_count_input() {
   return graphs_count;
 }
 
-std::vector<std::pair<Edge::Color, int>> get_colors(const Graph& graph) {
-  std::vector<std::pair<Edge::Color, int>> colors = {
-      {Edge::Color::Gray, graph.get_colored_edges(Edge::Color::Gray).size()},
-      {Edge::Color::Green, graph.get_colored_edges(Edge::Color::Green).size()},
-      {Edge::Color::Blue, graph.get_colored_edges(Edge::Color::Blue).size()},
-      {Edge::Color::Yellow,
-       graph.get_colored_edges(Edge::Color::Yellow).size()},
-      {Edge::Color::Red, graph.get_colored_edges(Edge::Color::Red).size()}};
-
-  return colors;
-}
-
 void log_start(Logger& logger, const int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Generation Started\n");
@@ -124,6 +113,14 @@ int main() {
   const int new_vertices_num = handle_new_vertices_num_input();
   const auto graph_generator = GraphGenerator(max_depth, new_vertices_num);
   auto& logger = Logger::get_instance();
+
+  try {
+    if (!std::filesystem::create_directory("./temp")) {
+    }
+  } catch (const std::exception& ex) {
+    std::cerr << ex.what() << "\n";
+  }
+
   logger.set_file("./temp/log.txt");
 
   for (int i = 0; i < graphs_count; i++) {
