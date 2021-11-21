@@ -355,10 +355,10 @@ void generate_yellow_edges(Graph& graph) {
   double yellow_edge_percent = 100.0 / (double)(graph.get_depth() - 1);
   for (auto depth = (graph.get_depth_map()).begin();
        depth != (graph.get_depth_map()).end() - 1; depth++) {
-    for (auto& vertex_id : *depth) {
+    for (const auto& vertex_id : *depth) {
       // Вектор вершин уровнем глубже, которые не являются потомком j вершины
       std::vector<VertexId> vert_ids_depth_deeper;
-      for (auto& vertex_id2 : *(depth + 1)) {
+      for (const auto& vertex_id2 : *(depth + 1)) {
         if (!graph.vertices_connected(vertex_id, vertex_id2)) {
           vert_ids_depth_deeper.push_back(vertex_id2);
         }
@@ -369,9 +369,6 @@ void generate_yellow_edges(Graph& graph) {
           (double)random_number() <
               yellow_edge_percent *
                   (double)(depth - graph.get_depth_map().begin())) {
-        // Выбираем вершину уровнем глубже, которая не является
-        // потомком нашей вершины
-
         graph.add_edge(vertex_id, get_random_vertex_id(vert_ids_depth_deeper));
       }
     }
@@ -406,13 +403,19 @@ Graph generate_graph(int depth, int new_vertices_num) {
 
 int main() {
   int depth = 0;
-  std::cout << "Input depth of graph:\n";
-  std::cin >> depth;
-  assert(depth >= 0 && "Depth must be >= 0");
+  do {
+    std::cout << "Input depth of graph:\n";
+    std::cin >> depth;
+    if (depth < 0)
+      std::cout << "Depth must be >= 0\n";
+  } while (depth < 0);
   int new_vertices_num = 0;
-  std::cout << "Input number of vertecies from each vertex:\n";
-  std::cin >> new_vertices_num;
-  assert(new_vertices_num >= 0 && "New_vertices_num must be >= 0");
+  do {
+    std::cout << "Input number of vertecies from each vertex:\n";
+    std::cin >> new_vertices_num;
+    if (new_vertices_num < 0)
+      std::cout << "New_vertices_num must be >= 0\n";
+  } while (new_vertices_num < 0);
 
   const auto graph = generate_graph(depth, new_vertices_num);
 
