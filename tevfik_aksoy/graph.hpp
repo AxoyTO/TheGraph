@@ -55,18 +55,17 @@ class Graph {
   VertexId insert_vertex();
   void insert_edge(const VertexId& source_id, const VertexId& destination_id);
 
-  bool does_vertex_exist(const VertexId& id,
-                         const std::vector<Vertex>& vertices) const;
+  bool does_vertex_exist(const VertexId& id) const;
 
   bool are_vertices_connected(const VertexId& source,
                               const VertexId& destination) const;
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
-  int total_edges_of_color(const Edge::Color& color) const;
   int depth() const;
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
   const std::vector<VertexId>& get_vertices_in_depth(
       const VertexDepth& depth) const;
+  Vertex& get_vertex(const VertexId& id);
 
  private:
   std::vector<Edge> edges_;
@@ -76,7 +75,6 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
-  Vertex get_vertex(const VertexId& id) const;
   Edge::Color calculate_color_for_edge(const Vertex& source,
                                        const Vertex& destination) const;
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }

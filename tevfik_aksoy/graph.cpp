@@ -40,9 +40,8 @@ std::string color_to_string(const Edge::Color& color) {
   }
 }
 
-bool Graph::does_vertex_exist(const VertexId& id,
-                              const std::vector<Vertex>& vertices) const {
-  for (const auto& vertex : vertices)
+bool Graph::does_vertex_exist(const VertexId& id) const {
+  for (const auto& vertex : vertices_)
     if (vertex.id == id) {
       return true;
     }
@@ -83,8 +82,8 @@ Edge::Color Graph::calculate_color_for_edge(const Vertex& source,
   throw std::runtime_error("Failed to calculate edge color");
 }
 
-Vertex Graph::get_vertex(const VertexId& id) const {
-  for (const auto& vertex : vertices_) {
+Vertex& Graph::get_vertex(const VertexId& id) {
+  for (auto& vertex : vertices_) {
     if (id == vertex.id)
       return vertex;
   }
@@ -93,6 +92,9 @@ Vertex Graph::get_vertex(const VertexId& id) const {
 
 void Graph::insert_edge(const VertexId& source_id,
                         const VertexId& destination_id) {
+  assert(does_vertex_exist(source_id) && "Source vertex doesn't exist!");
+  assert(does_vertex_exist(destination_id) &&
+         "Destination vertex doesn't exist!");
   assert(!are_vertices_connected(source_id, destination_id) &&
          "Vertices are already connected!");
   const auto& source_vertex = get_vertex(source_id);
@@ -119,10 +121,8 @@ void Graph::insert_edge(const VertexId& source_id,
 
 bool Graph::are_vertices_connected(const VertexId& source,
                                    const VertexId& destination) const {
-  assert(does_vertex_exist(source, vertices_) &&
-         "Source vertex doesn't exist!");
-  assert(does_vertex_exist(destination, vertices_) &&
-         "Destination vertex doesn't exist!");
+  assert(does_vertex_exist(source) && "Source vertex doesn't exist!");
+  assert(does_vertex_exist(destination) && "Destination vertex doesn't exist!");
 
   const auto& source_vertex_edges = vertices_[source].get_edge_ids();
   const auto& destination_vertex_edges = vertices_[destination].get_edge_ids();
@@ -141,15 +141,11 @@ bool Graph::are_vertices_connected(const VertexId& source,
 
 const std::vector<EdgeId>& Graph::get_colored_edges(
     const Edge::Color& color) const {
-  return colored_edges_map_.at(color);
-}
-
-int Graph::total_edges_of_color(const Edge::Color& color) const {
-  try {
-    return get_colored_edges(color).size();
-  } catch (std::out_of_range) {
-    return 0;
+  if (colored_edges_map_.find(color) == colored_edges_map_.end()) {
+    static std::vector<EdgeId> empty_result;
+    return empty_result;
   }
+  return colored_edges_map_.at(color);
 }
 
 int Graph::depth() const {

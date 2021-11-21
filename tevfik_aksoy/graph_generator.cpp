@@ -2,6 +2,9 @@
 #include <iostream>
 #include <random>
 
+using VertexId = uni_cpp_practice::VertexId;
+using Graph = uni_cpp_practice::Graph;
+
 namespace {
 constexpr float GREEN_EDGE_PROBABILITY = 0.1;
 constexpr float BLUE_EDGE_PROBABILITY = 0.25;
@@ -12,10 +15,7 @@ float get_random_probability() {
   std::uniform_real_distribution<float> probability(0.0, 1);
   return probability(mt);
 }
-}  // namespace
 
-namespace uni_cpp_practice {
-namespace {
 VertexId get_random_vertex_id(const std::vector<VertexId>& vertices) {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -38,6 +38,7 @@ std::vector<VertexId> filter_connected_vertices(
 }
 }  // namespace
 
+namespace uni_cpp_practice {
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   graph.insert_vertex();
 

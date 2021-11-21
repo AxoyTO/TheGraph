@@ -9,7 +9,6 @@
 #include "logger.hpp"
 
 using Graph = uni_cpp_practice::Graph;
-using Vertex = uni_cpp_practice::Vertex;
 using Edge = uni_cpp_practice::Edge;
 using GraphPrinter = uni_cpp_practice::GraphPrinter;
 using GraphGenerator = uni_cpp_practice::GraphGenerator;
@@ -59,13 +58,14 @@ int handle_graphs_count_input() {
   return graphs_count;
 }
 
-std::vector<std::pair<Edge::Color, int>> set_colors(const Graph& graph) {
+std::vector<std::pair<Edge::Color, int>> get_colors(const Graph& graph) {
   std::vector<std::pair<Edge::Color, int>> colors = {
-      {Edge::Color::Gray, graph.total_edges_of_color(Edge::Color::Gray)},
-      {Edge::Color::Green, graph.total_edges_of_color(Edge::Color::Green)},
-      {Edge::Color::Blue, graph.total_edges_of_color(Edge::Color::Blue)},
-      {Edge::Color::Yellow, graph.total_edges_of_color(Edge::Color::Yellow)},
-      {Edge::Color::Red, graph.total_edges_of_color(Edge::Color::Red)}};
+      {Edge::Color::Gray, graph.get_colored_edges(Edge::Color::Gray).size()},
+      {Edge::Color::Green, graph.get_colored_edges(Edge::Color::Green).size()},
+      {Edge::Color::Blue, graph.get_colored_edges(Edge::Color::Blue).size()},
+      {Edge::Color::Yellow,
+       graph.get_colored_edges(Edge::Color::Yellow).size()},
+      {Edge::Color::Red, graph.get_colored_edges(Edge::Color::Red).size()}};
 
   return colors;
 }
@@ -83,12 +83,14 @@ void log_depth(Logger& logger, const Graph& graph) {
   }
 }
 
-void log_colors(Logger& logger,
-                const std::vector<std::pair<Edge::Color, int>>& colors) {
-  for (int j = 0; j < colors.size(); j++) {
-    logger.log(color_to_string(colors[j].first) + ": " +
-               std::to_string(colors[j].second));
-    if (j + 1 != colors.size())
+void log_colors(Logger& logger, const Graph& graph) {
+  const std::array<Edge::Color, 5> colors = {
+      Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
+      Edge::Color::Yellow, Edge::Color::Red};
+  for (int i = 0; i < colors.size(); i++) {
+    logger.log(uni_cpp_practice::color_to_string(colors[i]) + ": " +
+               std::to_string(graph.get_colored_edges(colors[i]).size()));
+    if (i + 1 != colors.size())
       logger.log(", ");
   }
 }
@@ -102,8 +104,7 @@ void log_end(Logger& logger, const Graph& graph, int graph_number) {
   log_depth(logger, graph);
   logger.log("],\n  edges: " + std::to_string(graph.get_edges().size()) +
              ", {");
-  const auto colors = set_colors(graph);
-  log_colors(logger, colors);
+  log_colors(logger, graph);
   logger.log("}\n}\n");
 }
 
