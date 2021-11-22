@@ -37,11 +37,10 @@ const std::string get_datetime() {
 }
 
 void write_log(Graph& work_graph,
-               std::ofstream& logfile,
                const int& depth,
                const int& new_vertices_num,
                const int& graph_num,
-               const Logger& logger) {
+               Logger& logger) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Started\n";
   res += get_datetime() + ": Graph " + to_string(graph_num) +

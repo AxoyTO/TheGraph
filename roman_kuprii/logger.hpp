@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 
 namespace uni_cpp_practice {
@@ -10,20 +11,21 @@ class Graph;
 
 class Logger {
  public:
-  static Logger& get_logger(std::ofstream& f) {
-    static Logger logger(f);
+  static Logger& get_logger() {
+    static Logger logger;
     return logger;
   }
 
-  void log(const std::string& text) const {
-    std::cout << text << std::endl;
-    logfile_ << text;
-  }
+  void log(const std::string& text);
+
+  void set_output(const std::optional<std::string>& file_path);
+
+  ~Logger();
 
  private:
-  std::ofstream& logfile_;
+  std::optional<std::ofstream> file_stream_ = std::nullopt;
 
-  Logger(std::ofstream& f) : logfile_(f) {}
+  Logger() = default;
   Logger(const Logger& root) = delete;
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;

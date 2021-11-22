@@ -17,11 +17,10 @@ const std::string get_datetime();
 void write_graph(const Graph& graph, const int& graph_num);
 
 void write_log(Graph& work_graph,
-               std::ofstream& logfile,
                const int& depth,
                const int& new_vertices_num,
                const int& graph_num,
-               const Logger& logger);
+               Logger& logger);
 
 }  // namespace graph_printing
 
