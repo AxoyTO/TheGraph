@@ -37,4 +37,6 @@ Carthage/Build
 # Other
 ._*
 
+# Temp
+/tevfik_aksoy/temp/
 roman_kuprii/temp
