@@ -15,21 +15,6 @@ bool is_edge_id_included(
   return false;
 }
 
-std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
-  switch (color) {
-    case uni_cpp_practice::Edge::Color::Gray:
-      return "\"gray\" }";
-    case uni_cpp_practice::Edge::Color::Green:
-      return "\"green\" }";
-    case uni_cpp_practice::Edge::Color::Blue:
-      return "\"blue\" }";
-    case uni_cpp_practice::Edge::Color::Yellow:
-      return "\"yellow\" }";
-    case uni_cpp_practice::Edge::Color::Red:
-      return "\"red\" }";
-  }
-}
-
 }  // namespace
 
 namespace uni_cpp_practice {
@@ -38,64 +23,9 @@ using std::min;
 using std::to_string;
 using std::vector;
 
-std::string Edge::to_json() const {
-  std::string res;
-  res = "{ \"id\": ";
-  res += to_string(id);
-  res += ", \"vertex_ids\": [";
-  res += to_string(connected_vertices[0]);
-  res += ", ";
-  res += to_string(connected_vertices[1]);
-  res += "], \"color\": ";
-  res += color_to_string(color);
-  return res;
-}
-
-std::string Vertex::to_json() const {
-  std::string res;
-  res = "{ \"id\": ";
-  res += to_string(get_id()) + ", \"edge_ids\": [";
-  for (const auto& edge_id : edges_ids_) {
-    res += to_string(edge_id);
-    res += ", ";
-  }
-  if (edges_ids_.size() > 0) {
-    res.pop_back();
-    res.pop_back();
-  }
-  res += "] }";
-  return res;
-}
-
 void Vertex::add_edge_id(const EdgeId& _id) {
   assert(!is_edge_id_included(_id, edges_ids_));
   edges_ids_.push_back(_id);
-}
-
-std::string Graph::to_json() const {
-  std::string res;
-  res = "{ \"depth\": ";
-  res += to_string(depth_);
-  res += ", \"vertices\": [ ";
-  for (const auto& vertex : vertices_) {
-    res += vertex.to_json();
-    res += ", ";
-  }
-  if (vertices_.size()) {
-    res.pop_back();
-    res.pop_back();
-  }
-  res += " ], \"edges\": [ ";
-  for (const auto& edge : edges_) {
-    res += edge.to_json();
-    res += ", ";
-  }
-  if (edges_.size() > 0) {
-    res.pop_back();
-    res.pop_back();
-  }
-  res += " ] }\n";
-  return res;
 }
 
 bool Graph::is_vertex_exist(const VertexId& vertex_id) const {

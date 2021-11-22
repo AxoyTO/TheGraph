@@ -5,19 +5,12 @@
 namespace uni_cpp_practice {
 
 class Graph;
-class Logger;
 
 namespace graph_printing {
 
-const std::string get_datetime();
-
-void write_graph(const Graph& graph, const int& graph_num);
-
-void write_log(Graph& work_graph,
-               const int& depth,
-               const int& new_vertices_num,
-               const int& graph_num,
-               Logger& logger);
+std::string graph_to_json(const Graph& graph);
+std::string vertex_to_json(const Vertex& graph);
+std::string edge_to_json(const Graph& graph);
 
 }  // namespace graph_printing
 

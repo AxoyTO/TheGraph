@@ -1,5 +1,4 @@
 #include <array>
-#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -10,99 +9,85 @@
 
 #include "graph.hpp"
 #include "graph_printing.hpp"
-#include "logger.hpp"
+
+namespace {
+std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
+  switch (color) {
+    case uni_cpp_practice::Edge::Color::Gray:
+      return "\"gray\" }";
+    case uni_cpp_practice::Edge::Color::Green:
+      return "\"green\" }";
+    case uni_cpp_practice::Edge::Color::Blue:
+      return "\"blue\" }";
+    case uni_cpp_practice::Edge::Color::Yellow:
+      return "\"yellow\" }";
+    case uni_cpp_practice::Edge::Color::Red:
+      return "\"red\" }";
+  }
+}
+
+}  // namespace
 
 namespace uni_cpp_practice {
 
 namespace graph_printing {
 
-constexpr int COLORS_NUMBER = 6;
-const std::string JSON_GRAPH_FILENAME = "temp/graph_";
-
 using std::to_string;
+using std::vector;
 
-void write_graph(const Graph& graph, const int& graph_num) {
-  std::ofstream out;
-  const std::string filename =
-      JSON_GRAPH_FILENAME + std::to_string(graph_num) + ".json";
-  out.open(filename, std::ofstream::out | std::ofstream::trunc);
-  out << graph.to_json();
-  out.close();
+std::string edge_to_json(const Edge& edge) {
+  std::string res;
+  res = "{ \"id\": ";
+  res += to_string(edge.id);
+  res += ", \"vertex_ids\": [";
+  res += to_string(edge.connected_vertices[0]);
+  res += ", ";
+  res += to_string(edge.connected_vertices[1]);
+  res += "], \"color\": ";
+  res += color_to_string(edge.color);
+  return res;
 }
 
-const std::string get_datetime() {
-  const auto date_time = std::chrono::system_clock::now();
-  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
-  std::stringstream date_time_string;
-  date_time_string << std::put_time(std::localtime(&date_time_t),
-                                    "%Y.%m.%d %H:%M:%S");
-  return date_time_string.str();
+std::string vertex_to_json(const Vertex& vertex) {
+  std::string res;
+  res = "{ \"id\": ";
+  res += to_string(vertex.get_id()) + ", \"edge_ids\": [";
+  for (const auto& edge_id : vertex.get_edges_ids()) {
+    res += to_string(edge_id);
+    res += ", ";
+  }
+  if (vertex.get_edges_ids().size() > 0) {
+    res.pop_back();
+    res.pop_back();
+  }
+  res += "] }";
+  return res;
 }
 
-void write_log(Graph& work_graph,
-               const int& depth,
-               const int& new_vertices_num,
-               const int& graph_num,
-               Logger& logger) {
-  std::string res = get_datetime();
-  res += ": Graph " + to_string(graph_num) + ", Generation Started\n";
-  res += get_datetime() + ": Graph " + to_string(graph_num) +
-         ", Generation Ended {\n";
-  res += "\tdepth: " + to_string(depth) + ",\n";
-  res += "\tnew_vertices_num: " + to_string(new_vertices_num) + ",\n";
-  res += "vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
-
-  std::vector<int> depth_count;
-  for (int iter = 0; iter < work_graph.get_depth(); iter++)
-    depth_count.emplace_back(0);
-  for (const auto& vertex : work_graph.get_vertices()) {
-    depth_count[vertex.depth]++;
+std::string graph_to_json(const Graph& graph) {
+  std::string res;
+  res = "{ \"depth\": ";
+  res += to_string(graph.get_depth());
+  res += ", \"vertices\": [ ";
+  for (const auto& vertex : graph.get_vertices()) {
+    res += vertex_to_json(vertex);
+    res += ", ";
   }
-  for (const auto& depth : depth_count) {
-    res += to_string(depth) + ", ";
+  if (graph.get_vertices().size()) {
+    res.pop_back();
+    res.pop_back();
   }
-  res.pop_back();
-  res.pop_back();
-  res += "],\n";
-  res += "edges: " + to_string(work_graph.get_edges_num()) + ", {";
-  std::array<int, COLORS_NUMBER> colors;
-  for (int iter = 0; iter < COLORS_NUMBER; iter++)
-    colors[iter] = 0;
-  for (const auto& edge : work_graph.get_edges()) {
-    switch (edge.color) {
-      case Edge::Color::Gray: {
-        colors[0]++;
-        break;
-      }
-      case Edge::Color::Green: {
-        colors[1]++;
-        break;
-      }
-      case Edge::Color::Blue: {
-        colors[2]++;
-        break;
-      }
-      case Edge::Color::Yellow: {
-        colors[3]++;
-        break;
-      }
-      case Edge::Color::Red: {
-        colors[4]++;
-        break;
-      }
-      default:
-        break;
-    }
+  res += " ], \"edges\": [ ";
+  for (const auto& edge : graph.get_edges()) {
+    res += edge_to_json(edge);
+    res += ", ";
   }
-
-  res += "gray: " + to_string(colors[0]) + ", ";
-  res += "green: " + to_string(colors[1]) + ", ";
-  res += "blue: " + to_string(colors[2]) + ", ";
-  res += "yellow: " + to_string(colors[3]) + ", ";
-  res += "red: " + to_string(colors[4]) + "}\n";
-  res += "}\n";
-
-  logger.log(res);
+  if (graph.get_edges().size() > 0) {
+    res.pop_back();
+    res.pop_back();
+  }
+  res += " ] }\n";
+  return res;
 }
 
 }  // namespace graph_printing

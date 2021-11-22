@@ -6,6 +6,7 @@
 #include "graph_generating.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
+#include "logging_helping.hpp"
 
 using namespace uni_cpp_practice;
 
@@ -50,9 +51,9 @@ int main() {
     graph_generating::new_vertices_generation(my_graph, depth,
                                               new_vertices_num);
     graph_generating::paint_edges(my_graph);
-    graph_printing::write_graph(my_graph, graph_num);
-    graph_printing::write_log(my_graph, depth, new_vertices_num, graph_num,
-                              logger);
+    logging_helping::write_graph(my_graph, graph_num);
+    logging_helping::write_log(my_graph, depth, new_vertices_num, graph_num,
+                               logger);
   }
 
   //  log_stream.close();

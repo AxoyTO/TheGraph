@@ -24,8 +24,6 @@ struct Edge {
        const EdgeId& _id,
        const Color& _color)
       : id(_id), connected_vertices({start, end}), color(_color) {}
-
-  std::string to_json() const;
 };
 
 struct Vertex {
@@ -33,8 +31,6 @@ struct Vertex {
   int depth = 0;
 
   explicit Vertex(const VertexId& _id) : id_(_id) {}
-
-  std::string to_json() const;
 
   void add_edge_id(const EdgeId& _id);
 
@@ -49,8 +45,6 @@ struct Vertex {
 
 class Graph {
  public:
-  std::string to_json() const;
-
   void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
 
   bool is_vertex_exist(const VertexId& vertex_id) const;
