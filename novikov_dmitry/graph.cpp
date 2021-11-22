@@ -76,25 +76,6 @@ void Vertex::add_edge_id(const EdgeId& new_edge_id) {
   edge_ids_.push_back(new_edge_id);
 }
 
-std::string Vertex::to_string() const {
-  std::stringstream ss_out;
-  std::string tab_1 = "    ";
-  std::string tab_2 = tab_1 + tab_1;
-  ss_out << tab_2 << "{\n";
-  ss_out << tab_2 << tab_1 << "\"id\": " << id << ",\n";
-  ss_out << tab_2 << tab_1 << "\"edge_ids\": [";
-  for (auto it = edge_ids_.begin(); it != edge_ids_.end(); ++it) {
-    if (it != edge_ids_.begin()) {
-      ss_out << ", ";
-    }
-    ss_out << *it;
-  }
-  ss_out << "],\n";
-  ss_out << tab_2 << tab_1 << "\"depth\": " << depth << "\n";
-  ss_out << tab_2 << "}";
-  return ss_out.str();
-}
-
 std::string color_to_string(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Gray:
@@ -108,22 +89,6 @@ std::string color_to_string(const Edge::Color& color) {
     case Edge::Color::Red:
       return "red";
   }
-}
-
-std::string Edge::to_string() const {
-  std::stringstream ss_out;
-  std::string tab_1 = "    ";
-  std::string tab_2 = tab_1 + tab_1;
-  ss_out << tab_2 << "{\n";
-  ss_out << tab_2 << tab_1 << "\"id\": " << id_ << ",\n";
-  ss_out << tab_2 << tab_1 << "\"vertex_ids\": [";
-  ss_out << ver_id1_ << ", " << ver_id2_;
-  ss_out << "],\n";
-  ss_out << tab_2 << tab_1 << "\"color\": "
-         << "\"" << color_to_string(color) << "\""
-         << "\n";
-  ss_out << tab_2 << "}";
-  return ss_out.str();
 }
 
 VertexId Graph::add_vertex() {
@@ -178,33 +143,6 @@ bool Graph::check_binding(const VertexId& from_vertex_id,
     }
   }
   return false;
-}
-
-std::string Graph::to_string() const {
-  std::stringstream ss_out;
-  std::string tab_1 = "    ";
-
-  ss_out << "{\n";
-  ss_out << tab_1 << "\"depth\": " << get_depth() << ",\n";
-  ss_out << tab_1 << "\"vertices\": [\n";
-  for (auto it = vertex_map_.begin(); it != vertex_map_.end(); ++it) {
-    if (it != vertex_map_.begin()) {
-      ss_out << ", ";
-    }
-    ss_out << it->second.to_string();
-  }
-  ss_out << std::endl << tab_1 << "],\n";
-
-  ss_out << tab_1 << "\"edges\": [\n";
-  for (auto it = edge_map_.begin(); it != edge_map_.end(); ++it) {
-    if (it != edge_map_.begin()) {
-      ss_out << ", ";
-    }
-    ss_out << it->second.to_string();
-  }
-  ss_out << std::endl << tab_1 << "]\n";
-  ss_out << "}" << std::endl;
-  return ss_out.str();
 }
 
 int Graph::count_edges_of_color(const Edge::Color& color) const {

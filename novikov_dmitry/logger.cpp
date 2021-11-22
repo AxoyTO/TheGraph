@@ -8,7 +8,6 @@ Logger::~Logger() {
   if (file_stream_.has_value()) {
     if (file_stream_->is_open()) {
       file_stream_->close();
-      file_stream_ = std::nullopt;
     }
   }
 }

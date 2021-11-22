@@ -26,8 +26,6 @@ class Vertex {
 
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
-  std::string to_string() const;
-
  private:
   std::vector<EdgeId> edge_ids_;
 };
@@ -47,11 +45,11 @@ class Edge {
         ver_id2_(to_vertex_id),
         id_(new_edge_id) {}
 
-  std::pair<VertexId, VertexId> get_binded_vertices() const {
+  const std::pair<VertexId, VertexId> get_binded_vertices() const {
     return {ver_id1_, ver_id2_};
   }
 
-  std::string to_string() const;
+  const EdgeId& get_id() const { return id_; }
 
  private:
   const VertexId ver_id1_ = 0;
@@ -71,8 +69,6 @@ class Graph {
 
   bool check_binding(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) const;
-
-  std::string to_string() const;
 
   bool has_vertex(const VertexId& id) const {
     return vertex_map_.find(id) != vertex_map_.end();

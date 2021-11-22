@@ -4,7 +4,9 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include "graph.hpp"
 #include "graph_generation.hpp"
+#include "graph_printer.hpp"
 #include "logger.hpp"
 
 std::string get_current_date_time() {
@@ -116,20 +118,20 @@ uni_cpp_practice::Logger& prepare_logger() {
   return logger;
 }
 
-void write_to_file(const std::string& graph_string,
+void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
                    const std::string& filename) {
   std::ofstream file_out;
   file_out.open(filename, std::fstream::out | std::fstream::trunc);
   if (!file_out.is_open()) {
     std::cerr << "Error opening the file " << filename;
   } else {
-    file_out << graph_string;
+    file_out << graph_printer.print();
     file_out.close();
   }
 }
 
 int main() {
-  const std::string dafault_filename = "Graph";
+  const std::string dafault_filename = "./temp/Graph";
   const std::string dafault_fileformat = ".json";
 
   const int depth = handle_depth_input();
@@ -142,8 +144,9 @@ int main() {
     const auto graph = uni_cpp_practice::graph_generation::generate_graph(
         depth, new_vertices_num);
     logger.log(end_string(i, graph));
+    const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
     write_to_file(
-        graph.to_string(),
+        graph_printer,
         dafault_filename + "_" + std::to_string(i + 1) + dafault_fileformat);
   }
   return 0;
