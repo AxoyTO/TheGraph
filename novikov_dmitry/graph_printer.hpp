@@ -8,7 +8,7 @@ class GraphPrinter {
  public:
   explicit GraphPrinter(const Graph& graph) : graph_(graph){};
 
-  const std::string print() const;
+  std::string print() const;
 
  private:
   const Graph& graph_;

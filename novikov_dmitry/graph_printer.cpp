@@ -37,10 +37,11 @@ const std::string print_edge(const uni_cpp_practice::Edge& edge) {
          << "\n";
   ss_out << tab_2 << "}";
   return ss_out.str();
+}
 }  // namespace
 
 namespace uni_cpp_practice {
-const std::string GraphPrinter::print() const {
+std::string GraphPrinter::print() const {
   std::stringstream ss_out;
   std::string tab_1 = "    ";
   ss_out << "{\n";
