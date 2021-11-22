@@ -45,7 +45,7 @@ class Edge {
         ver_id2_(to_vertex_id),
         id_(new_edge_id) {}
 
-  const std::pair<VertexId, VertexId> get_binded_vertices() const {
+  std::pair<VertexId, VertexId> get_binded_vertices() const {
     return {ver_id1_, ver_id2_};
   }
 

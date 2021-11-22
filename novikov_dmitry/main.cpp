@@ -131,8 +131,9 @@ void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
 }
 
 int main() {
-  const std::string dafault_filename = "./temp/Graph";
-  const std::string dafault_fileformat = ".json";
+  const std::string temp_folder_path = "./temp";
+  const std::string filename_prefix = "Graph";
+  const std::string filename_suffix = ".json";
 
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
@@ -145,9 +146,9 @@ int main() {
         depth, new_vertices_num);
     logger.log(end_string(i, graph));
     const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
-    write_to_file(
-        graph_printer,
-        dafault_filename + "_" + std::to_string(i + 1) + dafault_fileformat);
+    write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
+                                     "_" + std::to_string(i + 1) +
+                                     filename_suffix);
   }
   return 0;
 }
