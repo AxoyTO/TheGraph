@@ -113,7 +113,7 @@ class Graph {
 
 class GraphPrinter {
  public:
-  GraphPrinter(const Graph& graph) : graph_(graph) {}
+  explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
   std::string print() const {
     std::string graph_string;
     graph_string += "{\n \"vertices\": [\n  ";
