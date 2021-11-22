@@ -6,12 +6,6 @@ class Graph;
 
 namespace graph_generating {
 
-constexpr double GREEN_TRASHOULD = 0.1;
-constexpr double BLUE_TRASHOULD = 0.25;
-constexpr double RED_TRASHOULD = 0.33;
-
-double get_random_number();
-
 void new_vertices_generation(Graph& work_graph,
                              const int& depth,
                              const int& new_vertices_num);

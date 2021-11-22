@@ -4,11 +4,7 @@
 #include "graph.hpp"
 #include "graph_generating.hpp"
 
-namespace uni_cpp_practice {
-
-namespace graph_generating {
-
-using std::vector;
+namespace {
 
 double get_random_number() {
   std::random_device rd;
@@ -16,6 +12,18 @@ double get_random_number() {
   std::uniform_real_distribution<> dis(0, 1);
   return dis(gen);
 }
+
+}  // namespace
+
+namespace uni_cpp_practice {
+
+namespace graph_generating {
+
+constexpr double GREEN_TRASHOULD = 0.1;
+constexpr double BLUE_TRASHOULD = 0.25;
+constexpr double RED_TRASHOULD = 0.33;
+
+using std::vector;
 
 void new_vertices_generation(Graph& work_graph,
                              const int& depth,

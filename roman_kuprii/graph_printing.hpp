@@ -9,9 +9,6 @@ class Logger;
 
 namespace graph_printing {
 
-constexpr int COLORS_NUMBER = 6;
-const std::string JSON_GRAPH_FILENAME = "temp/graph_";
-
 const std::string get_datetime();
 
 void write_graph(const Graph& graph, const int& graph_num);

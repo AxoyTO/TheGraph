@@ -4,26 +4,39 @@
 
 #include "graph.hpp"
 
+namespace {
+
+bool is_edge_id_included(
+    const uni_cpp_practice::EdgeId& id,
+    const std::vector<uni_cpp_practice::EdgeId>& edge_ids) {
+  for (const auto& edge_id : edge_ids)
+    if (id == edge_id)
+      return true;
+  return false;
+}
+
+std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
+  switch (color) {
+    case uni_cpp_practice::Edge::Color::Gray:
+      return "\"gray\" }";
+    case uni_cpp_practice::Edge::Color::Green:
+      return "\"green\" }";
+    case uni_cpp_practice::Edge::Color::Blue:
+      return "\"blue\" }";
+    case uni_cpp_practice::Edge::Color::Yellow:
+      return "\"yellow\" }";
+    case uni_cpp_practice::Edge::Color::Red:
+      return "\"red\" }";
+  }
+}
+
+}  // namespace
+
 namespace uni_cpp_practice {
 
 using std::min;
 using std::to_string;
 using std::vector;
-
-std::string color_to_string(const Color& color) {
-  switch (color) {
-    case Color::Gray:
-      return "\"gray\" }";
-    case Color::Green:
-      return "\"green\" }";
-    case Color::Blue:
-      return "\"blue\" }";
-    case Color::Yellow:
-      return "\"yellow\" }";
-    case Color::Red:
-      return "\"red\" }";
-  }
-}
 
 std::string Edge::to_json() const {
   std::string res;
@@ -36,13 +49,6 @@ std::string Edge::to_json() const {
   res += "], \"color\": ";
   res += color_to_string(color);
   return res;
-}
-
-bool is_edge_id_included(const EdgeId& id, const vector<EdgeId>& edge_ids) {
-  for (const auto& edge_id : edge_ids)
-    if (id == edge_id)
-      return true;
-  return false;
 }
 
 std::string Vertex::to_json() const {
@@ -59,6 +65,11 @@ std::string Vertex::to_json() const {
   }
   res += "] }";
   return res;
+}
+
+void Vertex::add_edge_id(const EdgeId& _id) {
+  assert(!is_edge_id_included(_id, edges_ids_));
+  edges_ids_.push_back(_id);
 }
 
 std::string Graph::to_json() const {
@@ -140,21 +151,21 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   const int diff =
       vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-  const Color color = [&initialization, &diff, &from_vertex_id,
-                       &to_vertex_id]() {
-    if (initialization)
-      return Color::Gray;
-    else if (from_vertex_id == to_vertex_id)
-      return Color::Green;
-    else if (diff == 0)
-      return Color::Blue;
-    else if (diff == 1)
-      return Color::Yellow;
-    else if (diff == 2)
-      return Color::Red;
-    else
-      return Color::Gray;
-  }();
+  const uni_cpp_practice::Edge::Color color =
+      [&initialization, &diff, &from_vertex_id, &to_vertex_id]() {
+        if (initialization)
+          return uni_cpp_practice::Edge::Color::Gray;
+        else if (from_vertex_id == to_vertex_id)
+          return uni_cpp_practice::Edge::Color::Green;
+        else if (diff == 0)
+          return uni_cpp_practice::Edge::Color::Blue;
+        else if (diff == 1)
+          return uni_cpp_practice::Edge::Color::Yellow;
+        else if (diff == 2)
+          return uni_cpp_practice::Edge::Color::Red;
+        else
+          return uni_cpp_practice::Edge::Color::Gray;
+      }();
 
   const auto& new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id,
                                              get_next_edge_id(), color);

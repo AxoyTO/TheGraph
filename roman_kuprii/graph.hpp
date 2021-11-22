@@ -10,16 +10,11 @@ namespace uni_cpp_practice {
 using EdgeId = int;
 using VertexId = int;
 
-namespace {
 constexpr int INVALID_ID = -1;
-}
-
-enum class Color { Gray, Green, Blue, Yellow, Red };
-
-std::string color_to_string(const Color& color);
-bool is_edge_id_included(const EdgeId& id, const std::vector<EdgeId>& edge_ids);
 
 struct Edge {
+  enum class Color { Gray, Green, Blue, Yellow, Red };
+
   const EdgeId id = INVALID_ID;
   const std::array<VertexId, 2> connected_vertices;
   const Color color = Color::Gray;
@@ -41,10 +36,7 @@ struct Vertex {
 
   std::string to_json() const;
 
-  void add_edge_id(const EdgeId& _id) {
-    assert(!is_edge_id_included(_id, edges_ids_));
-    edges_ids_.push_back(_id);
-  }
+  void add_edge_id(const EdgeId& _id);
 
   const std::vector<EdgeId>& get_edges_ids() const { return edges_ids_; }
 

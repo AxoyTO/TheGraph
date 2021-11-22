@@ -16,6 +16,9 @@ namespace uni_cpp_practice {
 
 namespace graph_printing {
 
+constexpr int COLORS_NUMBER = 6;
+const std::string JSON_GRAPH_FILENAME = "temp/graph_";
+
 using std::to_string;
 
 void write_graph(const Graph& graph, const int& graph_num) {
@@ -67,23 +70,23 @@ void write_log(Graph& work_graph,
     colors[iter] = 0;
   for (const auto& edge : work_graph.get_edges()) {
     switch (edge.color) {
-      case Color::Gray: {
+      case Edge::Color::Gray: {
         colors[0]++;
         break;
       }
-      case Color::Green: {
+      case Edge::Color::Green: {
         colors[1]++;
         break;
       }
-      case Color::Blue: {
+      case Edge::Color::Blue: {
         colors[2]++;
         break;
       }
-      case Color::Yellow: {
+      case Edge::Color::Yellow: {
         colors[3]++;
         break;
       }
-      case Color::Red: {
+      case Edge::Color::Red: {
         colors[4]++;
         break;
       }
