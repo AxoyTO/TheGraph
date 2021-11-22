@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generator.hpp"
+#include "graph_generating.hpp"
 
 namespace uni_cpp_practice {
 

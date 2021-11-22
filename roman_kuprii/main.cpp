@@ -3,8 +3,8 @@
 #include <string>
 
 #include "graph.hpp"
-#include "graph_generator.hpp"
-#include "graph_printer.hpp"
+#include "graph_generating.hpp"
+#include "graph_printing.hpp"
 #include "logger.hpp"
 
 using namespace uni_cpp_practice;

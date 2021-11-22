@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_printer.hpp"
+#include "graph_printing.hpp"
 #include "logger.hpp"
 
 namespace uni_cpp_practice {
