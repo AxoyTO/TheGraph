@@ -16,9 +16,6 @@ constexpr int INVALID_NEW_VERTICES_NUM = -1;
 const std::string LOG_FILENAME = "temp/log.txt";
 
 int main() {
-  //  std::ofstream log_stream;
-  //  log_stream.open(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
-
   auto& logger = Logger::get_logger();
   logger.set_output(LOG_FILENAME);
 
@@ -55,8 +52,6 @@ int main() {
     logging_helping::write_log(my_graph, depth, new_vertices_num, graph_num,
                                logger);
   }
-
-  //  log_stream.close();
 
   return 0;
 }
