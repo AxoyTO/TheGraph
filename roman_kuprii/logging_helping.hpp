@@ -14,7 +14,6 @@
 
 namespace {
 
-constexpr int COLORS_NUMBER = 6;
 const std::string JSON_GRAPH_FILENAME = "temp/graph_";
 
 using std::to_string;
@@ -73,41 +72,16 @@ void write_log_end(Graph& work_graph,
   res.pop_back();
   res += "],\n";
   res += "edges: " + to_string(work_graph.get_edges_num()) + ", {";
-  std::array<int, COLORS_NUMBER> colors;
-  for (int iter = 0; iter < COLORS_NUMBER; iter++)
-    colors[iter] = 0;
-  for (const auto& edge : work_graph.get_edges()) {
-    switch (edge.color) {
-      case Edge::Color::Gray: {
-        colors[0]++;
-        break;
-      }
-      case Edge::Color::Green: {
-        colors[1]++;
-        break;
-      }
-      case Edge::Color::Blue: {
-        colors[2]++;
-        break;
-      }
-      case Edge::Color::Yellow: {
-        colors[3]++;
-        break;
-      }
-      case Edge::Color::Red: {
-        colors[4]++;
-        break;
-      }
-      default:
-        break;
-    }
+
+  const auto colors = std::vector<Edge::Color>(
+      {Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
+       Edge::Color::Yellow, Edge::Color::Red});
+
+  for (const auto& color : colors) {
+    res += graph_printing::color_to_string(color) + ": " +
+           to_string(work_graph.get_edge_ids_with_color(color).size()) + ", ";
   }
 
-  res += "gray: " + to_string(colors[0]) + ", ";
-  res += "green: " + to_string(colors[1]) + ", ";
-  res += "blue: " + to_string(colors[2]) + ", ";
-  res += "yellow: " + to_string(colors[3]) + ", ";
-  res += "red: " + to_string(colors[4]) + "}\n";
   res += "}\n";
 
   logger.log(res);

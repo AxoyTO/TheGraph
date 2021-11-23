@@ -11,20 +11,6 @@
 #include "graph_printing.hpp"
 
 namespace {
-std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
-  switch (color) {
-    case uni_cpp_practice::Edge::Color::Gray:
-      return "\"gray\" }";
-    case uni_cpp_practice::Edge::Color::Green:
-      return "\"green\" }";
-    case uni_cpp_practice::Edge::Color::Blue:
-      return "\"blue\" }";
-    case uni_cpp_practice::Edge::Color::Yellow:
-      return "\"yellow\" }";
-    case uni_cpp_practice::Edge::Color::Red:
-      return "\"red\" }";
-  }
-}
 
 using std::to_string;
 using std::vector;
@@ -34,6 +20,21 @@ using std::vector;
 namespace uni_cpp_practice {
 
 namespace graph_printing {
+
+std::string color_to_string(const Edge::Color& color) {
+  switch (color) {
+    case Edge::Color::Gray:
+      return "\"gray\"";
+    case Edge::Color::Green:
+      return "\"green\"";
+    case Edge::Color::Blue:
+      return "\"blue\"";
+    case Edge::Color::Yellow:
+      return "\"yellow\"";
+    case Edge::Color::Red:
+      return "\"red\"";
+  }
+}
 
 std::string edge_to_json(const Edge& edge) {
   std::string res;
@@ -45,6 +46,7 @@ std::string edge_to_json(const Edge& edge) {
   res += to_string(edge.connected_vertices[1]);
   res += "], \"color\": ";
   res += color_to_string(edge.color);
+  res += " }";
   return res;
 }
 

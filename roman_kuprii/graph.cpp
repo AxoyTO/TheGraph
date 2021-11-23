@@ -104,4 +104,15 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
     vertices_[to_vertex_id].add_edge_id(new_edge.id);
 }
 
+const std::vector<EdgeId> Graph::get_edge_ids_with_color(
+    const Edge::Color& color) const {
+  std::vector<EdgeId> edge_ids;
+  for (const auto& edge : get_edges()) {
+    if (edge.color == color)
+      edge_ids.emplace_back(edge.id);
+  }
+
+  return edge_ids;
+}
+
 }  // namespace uni_cpp_practice
