@@ -19,32 +19,11 @@ constexpr double RED_TRASHOULD = 0.33;
 
 using std::vector;
 
-}  // namespace
-
-namespace uni_cpp_practice {
-
-namespace graph_generating {
-
-void new_vertices_generation(Graph& work_graph,
-                             const int& depth,
-                             const int& new_vertices_num) {
-  for (int current_depth = 0; current_depth <= depth; current_depth++) {
-    const double probability =
-        static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices())
-      if (vertex.depth == current_depth)
-        for (int iter = 0; iter < new_vertices_num; iter++) {
-          if (get_random_number() > probability) {
-            work_graph.add_vertex();
-            work_graph.connect_vertices(
-                vertex.get_id(),
-                work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
-                    .get_id(),
-                true);
-          }
-        }
-  }
-}
+using uni_cpp_practice::Edge;
+using uni_cpp_practice::Graph;
+using uni_cpp_practice::INVALID_ID;
+using uni_cpp_practice::Vertex;
+using uni_cpp_practice::VertexId;
 
 void add_blue_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
@@ -141,6 +120,41 @@ void paint_edges(Graph& work_graph) {
   add_green_edges(work_graph);
   add_red_edges(work_graph);
   add_yellow_edges(work_graph);
+}
+
+void new_vertices_generation(Graph& work_graph,
+                             const int& depth,
+                             const int& new_vertices_num) {
+  for (int current_depth = 0; current_depth <= depth; current_depth++) {
+    const double probability =
+        static_cast<double>(current_depth) / static_cast<double>(depth);
+    for (const auto& vertex : work_graph.get_vertices())
+      if (vertex.depth == current_depth)
+        for (int iter = 0; iter < new_vertices_num; iter++) {
+          if (get_random_number() > probability) {
+            work_graph.add_vertex();
+            work_graph.connect_vertices(
+                vertex.get_id(),
+                work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
+                    .get_id(),
+                true);
+          }
+        }
+  }
+}
+
+}  // namespace
+
+namespace uni_cpp_practice {
+
+namespace graph_generating {
+
+Graph generate(const int& depth, const int& new_vertices_num) {
+  auto work_graph = Graph();
+  work_graph.add_vertex();
+  new_vertices_generation(work_graph, depth, new_vertices_num);
+  paint_edges(work_graph);
+  return work_graph;
 }
 
 }  // namespace graph_generating

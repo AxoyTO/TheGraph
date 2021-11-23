@@ -8,15 +8,13 @@
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
-using namespace uni_cpp_practice;
-
 constexpr int GRAPHS_NUMBER = 0;
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUM = -1;
 const std::string LOG_FILENAME = "temp/log.txt";
 
 int main() {
-  auto& logger = Logger::get_logger();
+  auto& logger = uni_cpp_practice::Logger::get_logger();
   logger.set_output(LOG_FILENAME);
 
   int graphs_quantity = GRAPHS_NUMBER;
@@ -43,14 +41,11 @@ int main() {
   std::cout << "Depth of adding vertices: " << depth << std::endl;
 
   for (int graph_num = 0; graph_num < graphs_quantity; graph_num++) {
-    Graph my_graph;
-    my_graph.add_vertex();
-    graph_generating::new_vertices_generation(my_graph, depth,
-                                              new_vertices_num);
-    graph_generating::paint_edges(my_graph);
-    logging_helping::write_graph(my_graph, graph_num);
-    logging_helping::write_log(my_graph, depth, new_vertices_num, graph_num,
-                               logger);
+    auto my_graph =
+        uni_cpp_practice::graph_generating::generate(depth, new_vertices_num);
+    uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
+    uni_cpp_practice::logging_helping::write_log(
+        my_graph, depth, new_vertices_num, graph_num, logger);
   }
 
   return 0;
