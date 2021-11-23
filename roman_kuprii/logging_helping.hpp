@@ -12,23 +12,12 @@
 #include "graph_printing.hpp"
 #include "logger.hpp"
 
-namespace uni_cpp_practice {
-
-namespace logging_helping {
+namespace {
 
 constexpr int COLORS_NUMBER = 6;
 const std::string JSON_GRAPH_FILENAME = "temp/graph_";
 
 using std::to_string;
-
-void write_graph(const Graph& graph, const int& graph_num) {
-  std::ofstream out;
-  const std::string filename =
-      JSON_GRAPH_FILENAME + std::to_string(graph_num) + ".json";
-  out.open(filename, std::ofstream::out | std::ofstream::trunc);
-  out << graph_printing::graph_to_json(graph);
-  out.close();
-}
 
 const std::string get_datetime() {
   const auto date_time = std::chrono::system_clock::now();
@@ -37,6 +26,21 @@ const std::string get_datetime() {
   date_time_string << std::put_time(std::localtime(&date_time_t),
                                     "%Y.%m.%d %H:%M:%S");
   return date_time_string.str();
+}
+
+}  // namespace
+
+namespace uni_cpp_practice {
+
+namespace logging_helping {
+
+void write_graph(const Graph& graph, const int& graph_num) {
+  std::ofstream out;
+  const std::string filename =
+      JSON_GRAPH_FILENAME + std::to_string(graph_num) + ".json";
+  out.open(filename, std::ofstream::out | std::ofstream::trunc);
+  out << graph_printing::graph_to_json(graph);
+  out.close();
 }
 
 void write_log(Graph& work_graph,

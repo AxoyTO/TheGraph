@@ -26,14 +26,14 @@ std::string color_to_string(const uni_cpp_practice::Edge::Color& color) {
   }
 }
 
+using std::to_string;
+using std::vector;
+
 }  // namespace
 
 namespace uni_cpp_practice {
 
 namespace graph_printing {
-
-using std::to_string;
-using std::vector;
 
 std::string edge_to_json(const Edge& edge) {
   std::string res;

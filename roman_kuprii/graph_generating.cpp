@@ -13,17 +13,17 @@ double get_random_number() {
   return dis(gen);
 }
 
-}  // namespace
-
-namespace uni_cpp_practice {
-
-namespace graph_generating {
-
 constexpr double GREEN_TRASHOULD = 0.1;
 constexpr double BLUE_TRASHOULD = 0.25;
 constexpr double RED_TRASHOULD = 0.33;
 
 using std::vector;
+
+}  // namespace
+
+namespace uni_cpp_practice {
+
+namespace graph_generating {
 
 void new_vertices_generation(Graph& work_graph,
                              const int& depth,

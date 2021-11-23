@@ -15,13 +15,13 @@ bool is_edge_id_included(
   return false;
 }
 
-}  // namespace
-
-namespace uni_cpp_practice {
-
 using std::min;
 using std::to_string;
 using std::vector;
+
+}  // namespace
+
+namespace uni_cpp_practice {
 
 void Vertex::add_edge_id(const EdgeId& _id) {
   assert(!is_edge_id_included(_id, edges_ids_));
@@ -81,21 +81,21 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   const int diff =
       vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
 
-  const uni_cpp_practice::Edge::Color color =
-      [&initialization, &diff, &from_vertex_id, &to_vertex_id]() {
-        if (initialization)
-          return uni_cpp_practice::Edge::Color::Gray;
-        else if (from_vertex_id == to_vertex_id)
-          return uni_cpp_practice::Edge::Color::Green;
-        else if (diff == 0)
-          return uni_cpp_practice::Edge::Color::Blue;
-        else if (diff == 1)
-          return uni_cpp_practice::Edge::Color::Yellow;
-        else if (diff == 2)
-          return uni_cpp_practice::Edge::Color::Red;
-        else
-          return uni_cpp_practice::Edge::Color::Gray;
-      }();
+  const Edge::Color color = [&initialization, &diff, &from_vertex_id,
+                             &to_vertex_id]() {
+    if (initialization)
+      return Edge::Color::Gray;
+    else if (from_vertex_id == to_vertex_id)
+      return Edge::Color::Green;
+    else if (diff == 0)
+      return Edge::Color::Blue;
+    else if (diff == 1)
+      return Edge::Color::Yellow;
+    else if (diff == 2)
+      return Edge::Color::Red;
+    else
+      return Edge::Color::Gray;
+  }();
 
   const auto& new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id,
                                              get_next_edge_id(), color);
