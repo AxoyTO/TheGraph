@@ -41,11 +41,11 @@ int main() {
   std::cout << "Depth of adding vertices: " << depth << std::endl;
 
   for (int graph_num = 0; graph_num < graphs_quantity; graph_num++) {
-    uni_cpp_practice::logging_helping::write_log_start(logger, graph_num);
+    logger.log(uni_cpp_practice::logging_helping::write_log_start(graph_num));
     auto my_graph =
         uni_cpp_practice::graph_generating::generate(depth, new_vertices_num);
-    uni_cpp_practice::logging_helping::write_log_end(
-        my_graph, depth, new_vertices_num, graph_num, logger);
+    logger.log(uni_cpp_practice::logging_helping::write_log_end(
+        my_graph, depth, new_vertices_num, graph_num));
     uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
   }
 

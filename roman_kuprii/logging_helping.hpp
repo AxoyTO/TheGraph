@@ -42,17 +42,16 @@ void write_graph(const Graph& graph, const int& graph_num) {
   out.close();
 }
 
-void write_log_start(Logger& logger, const int& graph_num) {
+const std::string write_log_start(const int& graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Started";
-  logger.log(res);
+  return res;
 }
 
-void write_log_end(Graph& work_graph,
-                   const int& depth,
-                   const int& new_vertices_num,
-                   const int& graph_num,
-                   Logger& logger) {
+const std::string write_log_end(Graph& work_graph,
+                                const int& depth,
+                                const int& new_vertices_num,
+                                const int& graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "\tdepth: " + to_string(depth) + ",\n";
@@ -83,8 +82,7 @@ void write_log_end(Graph& work_graph,
   }
 
   res += "}\n";
-
-  logger.log(res);
+  return res;
 }
 
 }  // namespace logging_helping
