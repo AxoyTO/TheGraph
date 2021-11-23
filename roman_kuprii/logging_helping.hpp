@@ -18,7 +18,7 @@ const std::string JSON_GRAPH_FILENAME = "temp/graph_";
 
 using std::to_string;
 
-const std::string get_datetime() {
+std::string get_datetime() {
   const auto date_time = std::chrono::system_clock::now();
   const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
   std::stringstream date_time_string;
@@ -42,16 +42,16 @@ void write_graph(const Graph& graph, const int& graph_num) {
   out.close();
 }
 
-const std::string write_log_start(const int& graph_num) {
+std::string write_log_start(const int& graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Started";
   return res;
 }
 
-const std::string write_log_end(Graph& work_graph,
-                                const int& depth,
-                                const int& new_vertices_num,
-                                const int& graph_num) {
+std::string write_log_end(Graph& work_graph,
+                          const int& depth,
+                          const int& new_vertices_num,
+                          const int& graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "\tdepth: " + to_string(depth) + ",\n";

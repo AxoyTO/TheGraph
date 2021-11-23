@@ -63,8 +63,7 @@ class Graph {
   int get_vertices_num() const { return vertices_.size(); }
   int get_edges_num() const { return edges_.size(); }
 
-  const std::vector<EdgeId> get_edge_ids_with_color(
-      const Edge::Color& color) const;
+  std::vector<EdgeId> get_edge_ids_with_color(const Edge::Color& color) const;
 
  private:
   std::vector<Vertex> vertices_;
