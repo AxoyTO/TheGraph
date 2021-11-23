@@ -1,9 +1,12 @@
+#include <fstream>
 #include "graph.hpp"
+
+constexpr int VERTICES_NUM = 14;
 
 int main() {
   Graph graph;
 
-  for (int i = 0; i < kvertices_num; i++) {
+  for (int i = 0; i < VERTICES_NUM; i++) {
     graph.add_vertex();
   }
 

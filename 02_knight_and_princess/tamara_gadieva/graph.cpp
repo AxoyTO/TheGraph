@@ -1,4 +1,5 @@
 #include "graph.hpp"
+#include <cassert>
 
 bool Graph::has_vertex(const VertexId& id) const {
   for (const auto& vertex : vertices_)
@@ -7,14 +8,26 @@ bool Graph::has_vertex(const VertexId& id) const {
   return false;
 }
 
+bool Vertex::has_edge_id(const EdgeId& id) const {
+  for (const auto& edge_id : edge_ids_)
+    if (edge_id == id)
+      return true;
+  return false;
+}
+
+void Vertex::add_edge_id(const EdgeId& id) {
+  assert(!has_edge_id(id) && "Vertex already has this edge id");
+  edge_ids_.push_back(id);
+}
+
 void Graph::add_vertex() {
   vertices_.emplace_back(get_new_vertex_id());
 }
 
 void Graph::add_edge(const VertexId& from_vertex_id,
-                     const VertexId to_vertex_id) {
-  assert(has_vertex(from_vertex_id) && "Vertex already exists");
-  assert(has_vertex(to_vertex_id) && "Vertex already exists");
+                     const VertexId& to_vertex_id) {
+  assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
+  assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
   assert(!is_connected(from_vertex_id, to_vertex_id) &&
          "Vertices are already connected");
 
@@ -27,7 +40,9 @@ void Graph::add_edge(const VertexId& from_vertex_id,
 }
 
 bool Graph::is_connected(const VertexId& from_vertex_id,
-                         const VertexId to_vertex_id) const {
+                         const VertexId& to_vertex_id) const {
+  assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
+  assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
   const auto& from_vertex = get_vertex(from_vertex_id);
   const auto& to_vertex = get_vertex(to_vertex_id);
   const auto& from_vertex_edges = from_vertex.get_edge_ids();
@@ -39,8 +54,17 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
   return false;
 }
 
-void Vertex::add_edge_id(const EdgeId& id) {
-  edge_ids_.push_back(id);
+const Vertex& Graph::get_vertex(const VertexId& id) const {
+  assert(has_vertex(id) && "Vertex doesn't exists");
+  for (const auto& vertex : vertices_)
+    if (vertex.id == id)
+      return vertex;
+  throw std::runtime_error("Unreachable code");
+}
+
+Vertex& Graph::get_vertex(const VertexId& id) {
+  const auto& const_self = *this;
+  return const_cast<Vertex&>(const_self.get_vertex(id));
 }
 
 std::string Graph::json_string() const {
@@ -54,8 +78,9 @@ std::string Graph::json_string() const {
     if (i != vertices_.size() - 1)
       result_string += ",\n";
     else
-      result_string += "\n\t],\n";
+      result_string += "\n";
   }
+  result_string += "\t],\n";
 
   result_string += "\t\"edges\": [\n";
   for (int i = 0; i < edges_.size(); i++) {
@@ -63,8 +88,9 @@ std::string Graph::json_string() const {
     if (i != edges_.size() - 1)
       result_string += ",\n";
     else
-      result_string += "\n\t]\n";
+      result_string += "\n";
   }
+  result_string += "\t]\n";
 
   result_string += "}\n";
 
