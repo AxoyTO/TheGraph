@@ -1,6 +1,13 @@
 #include "graph.hpp"
+#include <cstdlib>  // для функций rand()
+#include <iostream>
+#include <cmath>
+
+using std::cout;
+using std::endl;
 
 //ГЕНЕРАЦИЯ ГРАФА
+
 //Шанс создания vertices_count вершин на данной глубине
 int check_number_new_vertices(const VertexId& vertices_count,
                               const int& percent) {
@@ -11,6 +18,7 @@ int check_number_new_vertices(const VertexId& vertices_count,
   else
     return check_number_new_vertices(vertices_count - 1, percent);
 }
+
 //Генератор графа
 void generate_graph(Graph& graph,
                     const DepthGraph& depth = 0,

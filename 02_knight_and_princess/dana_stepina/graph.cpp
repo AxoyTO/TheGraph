@@ -1,8 +1,33 @@
+#include <cassert>
 #include "graph.hpp"
+
+Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
+
+void Vertex::add_edge_id(const EdgeId& edge_id) {
+  assert(!has_edge_id(edge_id) && "Such an edge already exists!");
+  edge_ids_.push_back(edge_id);
+}
+
+bool Vertex::has_edge_id(const EdgeId& edge_id) const {
+    for (const auto& id : edge_ids_)
+      if (edge_id == id)
+        return true;
+    return false;
+   }
+
+
+Edge::Edge(const EdgeId& edge_id,
+       const VertexId& vertex_connection_start,
+       const VertexId& vertex_connection_end)
+      : id(edge_id),
+        vertex_start(vertex_connection_start),
+        vertex_end(vertex_connection_end) {}
+
 
 void Graph::add_vertex() {
   vertices_.emplace_back(get_new_vertex_id());
 }
+
 void Graph::add_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) {
   assert(has_vertex_id(from_vertex_id) &&
@@ -24,6 +49,7 @@ bool Graph::has_vertex_id(const VertexId& vertex_id) const {
       return true;
   return false;
 }
+
 bool Graph::is_connected(const VertexId& from_vertex_id,
                          const VertexId& to_vertex_id) const {
   assert(has_vertex_id(from_vertex_id) &&

@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
+
 #include <vector>
 
 using DepthGraph = int;
@@ -8,20 +13,16 @@ struct Vertex {
   const VertexId id = 0;
   const DepthGraph depth = 0;
 
-  explicit Vertex(const VertexId& vertex_id) : id(vertex_id) {}
+  explicit Vertex(const VertexId& vertex_id);
 
-  void add_edge_id(const EdgeId& edge_id) {
-    assert(!has_edge_id(edge_id) && "Such an edge already exists!");
-    edge_ids_.push_back(edge_id);
-  }
+  void add_edge_id(const EdgeId& edge_id);
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-  bool has_edge_id(const EdgeId& edge_id) const {
-    for (const auto& id : edge_ids_)
-      if (edge_id == id)
-        return true;
-    return false;
-   }
+  bool has_edge_id(const EdgeId& edge_id) const;
+
+  private:
+  std::vector<EdgeId> edge_ids_;
 };
+
 struct Edge {
   const EdgeId id = 0;
   const VertexId vertex_start = 0;
@@ -29,10 +30,7 @@ struct Edge {
 
   Edge(const EdgeId& edge_id,
        const VertexId& vertex_connection_start,
-       const VertexId& vertex_connection_end)
-      : id(edge_id),
-        vertex_start(vertex_connection_start),
-        vertex_end(vertex_connection_end) {}
+       const VertexId& vertex_connection_end);
 };
 
 class Graph {
@@ -59,3 +57,5 @@ private:
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
 };
+
+#endif

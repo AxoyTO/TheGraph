@@ -1,9 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstdlib>  // для функций rand()
 #include <unordered_set>
 #include <utility>
 #include <vector>
