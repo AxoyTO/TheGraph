@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <ctime>
-#include <cstdlib>
 
 using VertexId = int;
 using EdgeId = int;
@@ -27,7 +27,14 @@ struct Edge {
   const VertexId vertex_id1;
   const VertexId vertex_id2;
   const Colors color;
-  explicit Edge(const EdgeId& _id, const VertexId& _vertex_id1, const VertexId& _vertex_id2, const Colors& _color) : id(_id), vertex_id1(_vertex_id1), vertex_id2(_vertex_id2), color(_color) {}
+  explicit Edge(const EdgeId& _id,
+                const VertexId& _vertex_id1,
+                const VertexId& _vertex_id2,
+                const Colors& _color)
+      : id(_id),
+        vertex_id1(_vertex_id1),
+        vertex_id2(_vertex_id2),
+        color(_color) {}
 };
 
 class Graph {
@@ -76,7 +83,7 @@ class Graph {
     const auto& new_vertex = vertexes_.emplace_back(getNewVertexId());
     connection_list_.insert({new_vertex.id, std::vector<EdgeId>()});
     if (layers_list_[0].size() == 0) {
-        layers_list_[0].push_back(0);
+      layers_list_[0].push_back(0);
     }
   }
 
@@ -86,35 +93,37 @@ class Graph {
     assert(!areConnected(vertex_id1, vertex_id2) &&
            "These vertexes are already connected");
     Edge::Colors color;
-    if (connection_list_[vertex_id2].size() == 0 || connection_list_[vertex_id1].size() == 0) {
-        color = Edge::Colors::Grey;
-        if (vertex_id2 > vertex_id1) {
-            for (auto& vertex : vertexes_) {
-                if (vertex.id == vertex_id2) {
-                    vertex.depth = getVertex(vertex_id1).depth + 1;
-                    depth_ = std::max(depth_, vertex.depth);
-                    layers_list_[vertex.depth].push_back(vertex_id2);
-                    break;
-                }
-            }
-        } else {
-            for (auto& vertex : vertexes_) {
-                if (vertex.id == vertex_id1) {
-                    vertex.depth = getVertex(vertex_id2).depth + 1;
-                    depth_ = std::max(depth_, vertex.depth);
-                    layers_list_[vertex.depth].push_back(vertex_id1);
-                    break;
-                }
-            }
+    if (connection_list_[vertex_id2].size() == 0 ||
+        connection_list_[vertex_id1].size() == 0) {
+      color = Edge::Colors::Grey;
+      if (vertex_id2 > vertex_id1) {
+        for (auto& vertex : vertexes_) {
+          if (vertex.id == vertex_id2) {
+            vertex.depth = getVertex(vertex_id1).depth + 1;
+            depth_ = std::max(depth_, vertex.depth);
+            layers_list_[vertex.depth].push_back(vertex_id2);
+            break;
+          }
         }
+      } else {
+        for (auto& vertex : vertexes_) {
+          if (vertex.id == vertex_id1) {
+            vertex.depth = getVertex(vertex_id2).depth + 1;
+            depth_ = std::max(depth_, vertex.depth);
+            layers_list_[vertex.depth].push_back(vertex_id1);
+            break;
+          }
+        }
+      }
     } else if (vertex_id1 == vertex_id2) {
-        color = Edge::Colors::Green;
+      color = Edge::Colors::Green;
     } else if (getVertex(vertex_id2).depth == getVertex(vertex_id1).depth) {
-        color = Edge::Colors::Blue;
-    } else if (std::abs(getVertex(vertex_id2).depth - getVertex(vertex_id1).depth) == 1) {
-        color = Edge::Colors::Yellow;
+      color = Edge::Colors::Blue;
+    } else if (std::abs(getVertex(vertex_id2).depth -
+                        getVertex(vertex_id1).depth) == 1) {
+      color = Edge::Colors::Yellow;
     } else {
-        color = Edge::Colors::Red;
+      color = Edge::Colors::Red;
     }
     const auto& new_edge =
         edges_.emplace_back(getNewEdgeId(), vertex_id1, vertex_id2, color);
@@ -141,17 +150,17 @@ class Graph {
   const std::vector<Vertex>& vertexes() const { return vertexes_; }
   const std::vector<Edge>& edges() const { return edges_; }
   const std::vector<VertexId>& ithLayer(int i) const {
-      assert(i <= depth_ && "Graph is not that deep");
-      return layers_list_.at(i);
+    assert(i <= depth_ && "Graph is not that deep");
+    return layers_list_.at(i);
   }
   const int vertexIdDepth(const VertexId& vertex_id) const {
-      assert(hasVertex(vertex_id) && "Vertex id is out of range");
-      for (const auto& vertex : vertexes_) {
-          if (vertex.id == vertex_id) {
-              return vertex.depth;
-          }
+    assert(hasVertex(vertex_id) && "Vertex id is out of range");
+    for (const auto& vertex : vertexes_) {
+      if (vertex.id == vertex_id) {
+        return vertex.depth;
       }
-      throw std::runtime_error("Cannot be reached.");
+    }
+    throw std::runtime_error("Cannot be reached.");
   }
 
  private:
@@ -177,18 +186,17 @@ class Graph {
 class GraphGenerator {
  public:
   struct Params {
-    explicit Params(int _depth = 0, int _new_vertexes_num = 0) :
-      depth(_depth), new_vertexes_num(_new_vertexes_num) {}
+    explicit Params(int _depth = 0, int _new_vertexes_num = 0)
+        : depth(_depth), new_vertexes_num(_new_vertexes_num) {}
 
     const int depth;
     const int new_vertexes_num;
   };
 
-  explicit GraphGenerator(const Params& params = Params()) :
-    params_(params) {}
+  explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
 
   bool randValue(double probability) const {
-      return probability > rand() % 100;
+    return probability > rand() % 100;
   }
 
   Graph generate() const {
@@ -196,48 +204,52 @@ class GraphGenerator {
     double step = 100.0 / params_.depth;
     graph.addVertex();
     int cur_depth = 0, vertexes_on_cur_depth, vertexes_on_prev_depth = 1;
-    for (; cur_depth < params_.depth && vertexes_on_prev_depth > 0; cur_depth++) {
-        vertexes_on_cur_depth = 0;
-        for (const auto& vertex_id : graph.ithLayer(cur_depth)) {
-            for (int j = 0; j < params_.new_vertexes_num; j++) {
-                if (randValue(100.0 - step * cur_depth)) {
-                    graph.addVertex();
-                    graph.addEdge(vertex_id, graph.vertexes().back().id);
-                    vertexes_on_cur_depth++;
-                }
-            }
+    for (; cur_depth < params_.depth && vertexes_on_prev_depth > 0;
+         cur_depth++) {
+      vertexes_on_cur_depth = 0;
+      for (const auto& vertex_id : graph.ithLayer(cur_depth)) {
+        for (int j = 0; j < params_.new_vertexes_num; j++) {
+          if (randValue(100.0 - step * cur_depth)) {
+            graph.addVertex();
+            graph.addEdge(vertex_id, graph.vertexes().back().id);
+            vertexes_on_cur_depth++;
+          }
         }
-        vertexes_on_prev_depth = vertexes_on_cur_depth;
+      }
+      vertexes_on_prev_depth = vertexes_on_cur_depth;
     }
     if (cur_depth < params_.depth) {
-        std::cout << "Depth of the graph is less than given. Depth is " << cur_depth << std::endl;
+      std::cout << "Depth of the graph is less than given. Depth is "
+                << cur_depth << std::endl;
     }
     for (const auto& vertex : graph.vertexes()) {
-        if (randValue(10)) {
-            graph.addEdge(vertex.id, vertex.id);
+      if (randValue(10)) {
+        graph.addEdge(vertex.id, vertex.id);
+      }
+      if (randValue(25) && graph.hasVertex(vertex.id + 1) &&
+          graph.vertexIdDepth(vertex.id + 1) == vertex.id) {
+        graph.addEdge(vertex.id, vertex.id + 1);
+      }
+      if (vertex.depth < cur_depth &&
+          randValue(100.0 * vertex.depth / (cur_depth - 1))) {
+        std::vector<VertexId> next_layer;
+        for (const auto& vertex_id : graph.ithLayer(vertex.depth + 1)) {
+          if (!graph.areConnected(vertex.id, vertex_id)) {
+            next_layer.push_back(vertex_id);
+          }
         }
-        if (randValue(25) && graph.hasVertex(vertex.id + 1) &&
-            graph.vertexIdDepth(vertex.id + 1) == vertex.id) {
-            graph.addEdge(vertex.id, vertex.id + 1);
+        graph.addEdge(vertex.id, next_layer[rand() % next_layer.size()]);
+      }
+      if (randValue(33) && vertex.depth < (cur_depth - 1)) {
+        std::vector<VertexId> after_next_layer;
+        for (const auto& vertex_id : graph.ithLayer(vertex.depth + 2)) {
+          if (!graph.areConnected(vertex.id, vertex_id)) {
+            after_next_layer.push_back(vertex_id);
+          }
         }
-        if (vertex.depth < cur_depth && randValue(100.0 * vertex.depth / (cur_depth - 1))) {
-            std::vector<VertexId> next_layer;
-            for (const auto& vertex_id : graph.ithLayer(vertex.depth + 1)) {
-                if (!graph.areConnected(vertex.id, vertex_id)) {
-                    next_layer.push_back(vertex_id);
-                }
-            }
-            graph.addEdge(vertex.id, next_layer[rand() % next_layer.size()]);
-        }
-        if (randValue(33) && vertex.depth < (cur_depth - 1)) {
-            std::vector<VertexId> after_next_layer;
-            for (const auto& vertex_id : graph.ithLayer(vertex.depth + 2)) {
-                if (!graph.areConnected(vertex.id, vertex_id)) {
-                    after_next_layer.push_back(vertex_id);
-                }
-            }
-            graph.addEdge(vertex.id, after_next_layer[rand() % after_next_layer.size()]);
-        }
+        graph.addEdge(vertex.id,
+                      after_next_layer[rand() % after_next_layer.size()]);
+      }
     }
     return graph;
   }
@@ -245,7 +257,6 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
 };
-
 
 class GraphPrinter {
  public:
@@ -275,7 +286,9 @@ class GraphPrinter {
     }
     vertex_string.pop_back();
     vertex_string.pop_back();
-    vertex_string += "],\n   \"depth\": " + std::to_string(graph_.vertexIdDepth(id)) + "\n  }, ";
+    vertex_string +=
+        "],\n   \"depth\": " + std::to_string(graph_.vertexIdDepth(id)) +
+        "\n  }, ";
     return vertex_string;
   }
   std::string printEdge(const Edge& edge) const {
@@ -302,7 +315,7 @@ class GraphPrinter {
       case Edge::Colors::Red:
         return "\"red\"";
     }
-  }  
+  }
 };
 
 constexpr int VERTEX_NUMBER = 14, EDGE_NUMBER = 18;
@@ -330,7 +343,8 @@ int main() {
     std::cin >> new_vertexes_num;
   }
   srand(time(NULL));
-  GraphGenerator::Params params = GraphGenerator::Params(depth, new_vertexes_num);
+  GraphGenerator::Params params =
+      GraphGenerator::Params(depth, new_vertexes_num);
   Graph graph = GraphGenerator(params).generate();
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
