@@ -19,7 +19,7 @@ struct Vertex {
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
   bool has_edge_id(const EdgeId& edge_id) const;
 
-  private:
+ private:
   std::vector<EdgeId> edge_ids_;
 };
 
@@ -34,7 +34,7 @@ struct Edge {
 };
 
 class Graph {
-public:
+ public:
   void increase_graph_depth() { depth_++; }
   void decrease_graph_depth() { depth_--; }
   void add_vertex();
@@ -47,7 +47,7 @@ public:
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const;
 
-private:
+ private:
   DepthGraph depth_ = 0;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;

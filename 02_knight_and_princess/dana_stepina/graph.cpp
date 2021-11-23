@@ -1,5 +1,5 @@
-#include <cassert>
 #include "graph.hpp"
+#include <cassert>
 
 Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 
@@ -9,20 +9,18 @@ void Vertex::add_edge_id(const EdgeId& edge_id) {
 }
 
 bool Vertex::has_edge_id(const EdgeId& edge_id) const {
-    for (const auto& id : edge_ids_)
-      if (edge_id == id)
-        return true;
-    return false;
-   }
-
+  for (const auto& id : edge_ids_)
+    if (edge_id == id)
+      return true;
+  return false;
+}
 
 Edge::Edge(const EdgeId& edge_id,
-       const VertexId& vertex_connection_start,
-       const VertexId& vertex_connection_end)
-      : id(edge_id),
-        vertex_start(vertex_connection_start),
-        vertex_end(vertex_connection_end) {}
-
+           const VertexId& vertex_connection_start,
+           const VertexId& vertex_connection_end)
+    : id(edge_id),
+      vertex_start(vertex_connection_start),
+      vertex_end(vertex_connection_end) {}
 
 void Graph::add_vertex() {
   vertices_.emplace_back(get_new_vertex_id());

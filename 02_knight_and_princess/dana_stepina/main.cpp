@@ -1,26 +1,20 @@
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <unordered_set>
-#include <utility>
-#include <vector>
 #include "graph.hpp"
-#include "printer_graph.cpp"
 #include "graph_generator.cpp"
+#include "graph_printer.hpp"
+#include "print_graph_json.cpp"
 
-using std::cout;
-using std::endl;
+// #include <iostream>
+// #include <algorithm>
+// #include <unordered_set>
+// #include <utility>
+// #include <vector>
 
-//ВЫВОД В ФАЙЛ JSON
-void write_graph_json_file(const Graph& graph) {
-  std::ofstream out("graph.json");
-  out << get_graph_string(graph);
-  out.close();
-}
+// using std::cout;
+// using std::endl;
 
 int main() {
   const DepthGraph depth = 4;
-  const int new_vertices_num = 1;
+  const int new_vertices_num = 3;
 
   auto graph = Graph();
 

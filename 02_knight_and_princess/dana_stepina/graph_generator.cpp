@@ -1,7 +1,7 @@
-#include "graph.hpp"
+#include <cmath>
 #include <cstdlib>  // для функций rand()
 #include <iostream>
-#include <cmath>
+#include "graph.hpp"
 
 using std::cout;
 using std::endl;
@@ -40,11 +40,11 @@ void generate_graph(Graph& graph,
     //Проверка - есть ли вершины на текущей глубине
     if (current_depth != depth) {
       if (vertices_in_current_depth.empty()) {
-      graph.decrease_graph_depth();
-      cout << "The depth of the generated graph is less than expected."
-              "\nDepth of the generated graph: "
-           << graph.get_graph_depth() << endl;
-      break;
+        graph.decrease_graph_depth();
+        cout << "The depth of the generated graph is less than expected."
+                "\nDepth of the generated graph: "
+             << graph.get_graph_depth() << endl;
+        break;
       }
       graph.increase_graph_depth();
     }
