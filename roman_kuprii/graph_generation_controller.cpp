@@ -37,7 +37,6 @@ GraphGenerationController::GraphGenerationController(
 void GraphGenerationController::new_generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
-
   for (int i = 0; i < graphs_count_; i++) {
     jobs_.emplace_back([=]() {
       gen_started_callback(i);
