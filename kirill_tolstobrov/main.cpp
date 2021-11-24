@@ -8,13 +8,17 @@
 #include <random>
 #include <vector>
 
+constexpr float GREEN_PROB = 0.1;
+constexpr float BLUE_PROB = 0.25;
+constexpr float RED_PROB = 0.33;
+
 using VertexId = int;
 using EdgeId = int;
 
 class Vertex {
  public:
   explicit Vertex(const VertexId& init_id = 0) : id(init_id), depth(0) {}
-  const std::vector<EdgeId>& get_edges() const { return edge_ids_; }
+  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
   bool check_edge_presence(const EdgeId& edge_id) const {
     for (const auto& id : edge_ids_) {
       if (edge_id == id) {
@@ -67,25 +71,19 @@ class Edge {
         color(color_init){};
 
   std::string color_to_string() const {
-    std::string result = "";
     switch (color) {
       case Color::Grey:
-        result = "grey";
-        break;
+        return "grey";
       case Color::Green:
-        result = "green";
-        break;
+        return "green";
       case Color::Blue:
-        result = "blue";
-        break;
+        return "blue";
       case Color::Yellow:
-        result = "yellow";
-        break;
+        return "yellow";
       case Color::Red:
-        result = "red";
-        break;
+        return "red";
     }
-    return result;
+    return "";
   };
   operator std::string() const {
     std::string result = "";
@@ -109,14 +107,17 @@ class Edge {
 
 class Graph {
  public:
-  Graph() : depth(0) { depths_map_.emplace_back(); }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   const std::vector<Edge>& get_edges() const { return edges_; }
 
-  void add_new_vertex() {
-    VertexId new_id = get_new_vertex_id();
+  VertexId add_new_vertex() {
+    if (vertices_.size() == 0) {
+      depths_map_.emplace_back();
+    }
+    const VertexId new_id = get_new_vertex_id();
     vertices_.emplace_back(new_id);
     depths_map_[0].push_back(new_id);
+    return new_id;
   }
 
   bool check_vertex_existence(const VertexId& vertex_id) const {
@@ -133,10 +134,8 @@ class Graph {
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
            "Attemptig to access to nonexistent vertex: Error.");
-    if (connections_map_.find(id1) == connections_map_.end()) {
-      return false;
-    }
-    if (connections_map_.find(id2) == connections_map_.end()) {
+    if (connections_map_.find(id1) == connections_map_.end() ||
+        connections_map_.find(id2) == connections_map_.end()) {
       return false;
     }
     for (const auto& edge_id : connections_map_.at(id1)) {
@@ -150,7 +149,8 @@ class Graph {
     return false;
   }
 
-  Edge::Color get_binding_color(const VertexId& id1, const VertexId& id2) {
+  Edge::Color get_binding_color(const VertexId& id1,
+                                const VertexId& id2) const {
     assert(check_vertex_existence(id1) &&
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
@@ -160,10 +160,11 @@ class Graph {
       return Edge::Color::Green;
     }
 
-    auto& vertex1 = vertices_[id1];
-    auto& vertex2 = vertices_[id2];
+    const auto& vertex1 = vertices_[id1];
+    const auto& vertex2 = vertices_[id2];
 
-    if (vertex1.get_edges().size() == 0 || vertex2.get_edges().size() == 0) {
+    if (vertex1.get_edge_ids().size() == 0 ||
+        vertex2.get_edge_ids().size() == 0) {
       return Edge::Color::Grey;
     } else if (vertex1.depth - vertex2.depth == 0) {
       return Edge::Color::Blue;
@@ -174,45 +175,45 @@ class Graph {
                vertex1.depth - vertex2.depth == -2) {
       return Edge::Color::Red;
     }
-    return Edge::Color::Grey;
+
+    throw std::runtime_error("Can't get binding color");
   }
 
   void bind_vertices(const VertexId& id1, const VertexId& id2) {
-    Edge::Color edge_color = get_binding_color(id1, id2);
+    assert(check_vertex_existence(id1) &&
+           "Attemptig to access to nonexistent vertex: Error.");
+    assert(check_vertex_existence(id2) &&
+           "Attemptig to access to nonexistent vertex: Error.");
     assert(!are_vertices_connected(id1, id2) &&
            "Attemptig to connect connected vertices: Error.");
+    Edge::Color edge_color = get_binding_color(id1, id2);
 
     if (edge_color == Edge::Color::Grey) {
-      if (vertices_[id2].get_edges().size() == 0) {
-        vertices_[id2].depth = vertices_[id1].depth + 1;
-        if (depth < vertices_[id2].depth) {
-          depth = vertices_[id2].depth;
-          depths_map_.emplace_back();
-        }
-        depths_map_[0].erase(
-            std::remove(depths_map_[0].begin(), depths_map_[0].end(), id2),
-            depths_map_[0].end());
-        depths_map_[depth].push_back(id2);
-      } else {
-        vertices_[id1].depth = vertices_[id2].depth + 1;
-        if (depth < vertices_[id1].depth) {
-          depth = vertices_[id1].depth;
-          depths_map_.emplace_back();
-        }
-        depths_map_[0].erase(
-            std::remove(depths_map_[0].begin(), depths_map_[0].end(), id1),
-            depths_map_[0].end());
-        depths_map_[depth].push_back(id1);
+      VertexId to_id = id1;
+      VertexId from_id = id2;
+      if (vertices_[id2].get_edge_ids().size() == 0) {
+        VertexId temp = from_id;
+        from_id = to_id;
+        to_id = temp;
       }
+      vertices_[to_id].depth = vertices_[from_id].depth + 1;
+      if (depths_map_.size() - 1 < vertices_[to_id].depth) {
+        depths_map_.emplace_back();
+      }
+      depths_map_[0].erase(
+          std::remove(depths_map_[0].begin(), depths_map_[0].end(), to_id),
+          depths_map_[0].end());
+      depths_map_[depths_map_.size() - 1].push_back(to_id);
     }
 
     const auto& edge =
         edges_.emplace_back(get_new_edge_id(), id1, id2, edge_color);
     connections_map_[id1].push_back(edge.id);
-    connections_map_[id2].push_back(edge.id);
     vertices_[id1].add_edge_id(edge.id);
-    if (id1 != id2)
+    if (id1 != id2) {
+      connections_map_[id2].push_back(edge.id);
       vertices_[id2].add_edge_id(edge.id);
+    }
     colors_map_[edge_color].push_back(edge.id);
   }
 
@@ -237,7 +238,6 @@ class Graph {
     return result;
   }
 
-  int depth;
   std::vector<std::vector<VertexId>> depths_map_;
 
  private:
@@ -258,18 +258,18 @@ class Graph {
 class GraphGenerator {
  public:
   struct Params {
-    explicit Params(int depth = 0, int new_vertices_num = 0)
-        : depth_(depth), new_vertices_num_(new_vertices_num) {}
+    explicit Params(int init_depth = 0, int init_new_vertices_num = 0)
+        : depth(init_depth), new_vertices_num(init_new_vertices_num) {}
 
-    const int depth_ = 0;
-    const int new_vertices_num_ = 0;
+    const int depth = 0;
+    const int new_vertices_num = 0;
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
 
   Graph generate_random_graph() const {
-    int depth = params_.depth_;
-    int new_vertices_num = params_.new_vertices_num_;
+    const int depth = params_.depth;
+    const int new_vertices_num = params_.new_vertices_num;
     Graph graph = Graph();
     graph.add_new_vertex();
 
@@ -285,11 +285,19 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
 
-  bool random_bool(double true_prob) const {
+  bool random_bool(float true_prob) const {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution d(true_prob);
     return d(gen);
+  }
+
+  VertexId random_vertex_id(const std::vector<VertexId>& vertex_ids) const {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> random_index(
+        0, vertex_ids.size() - 1);
+    return vertex_ids[random_index(rng)];
   }
 
   void generate_grey_edges(Graph& graph,
@@ -297,43 +305,38 @@ class GraphGenerator {
                            int new_vertices_num) const {
     const float probability_decreasement = 1.0 / depth;
     float new_vertex_prob = 1.0;
-    for (int i = 0; i < depth; i++) {
-      if (graph.depth < i) {
+    for (int cur_depth = 0; cur_depth < depth; cur_depth++) {
+      if (graph.depths_map_.size() - 1 < cur_depth) {
         return;
       }
-      for (int j = graph.depths_map_[i][0];
-           j <= graph.depths_map_[i][graph.depths_map_[i].size() - 1]; j++) {
+      const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
+      for (VertexId cur_vertex_id : vertex_ids_at_depth) {
         for (int k = 0; k < new_vertices_num; k++) {
           if (random_bool(new_vertex_prob)) {
-            graph.add_new_vertex();
-            graph.bind_vertices(j, graph.get_vertices().size() - 1);
+            const auto new_vertex_id = graph.add_new_vertex();
+            graph.bind_vertices(cur_vertex_id, new_vertex_id);
           }
         }
       }
-
       new_vertex_prob -= probability_decreasement;
     }
   }
 
   void generate_green_edges(Graph& graph) const {
-    constexpr float GREEN_PROB = 0.1;
-    int vertices_amount = graph.get_vertices().size();
-    for (int cur_id = 0; cur_id < vertices_amount - 1; cur_id++) {
+    for (auto& cur_vertex : graph.get_vertices()) {
       if (random_bool(GREEN_PROB)) {
-        graph.bind_vertices(cur_id, cur_id);
+        graph.bind_vertices(cur_vertex.id, cur_vertex.id);
       }
     }
   }
 
   void generate_blue_edges(Graph& graph) const {
-    constexpr float BLUE_PROB = 0.25;
     int vertices_amount = graph.get_vertices().size();
-    for (int cur_depth = 0; cur_depth <= graph.depth; cur_depth++) {
-      int last_id =
-          graph.depths_map_[cur_depth][graph.depths_map_[cur_depth].size() - 1];
-      for (int cur_id = graph.depths_map_[cur_depth][0]; cur_id < last_id;
-           cur_id++) {
-        if (random_bool(BLUE_PROB)) {
+    for (int cur_depth = 0; cur_depth < graph.depths_map_.size(); cur_depth++) {
+      const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
+      int last_id = vertex_ids_at_depth[vertex_ids_at_depth.size() - 1];
+      for (VertexId cur_id : vertex_ids_at_depth) {
+        if (cur_id != last_id && random_bool(BLUE_PROB)) {
           graph.bind_vertices(cur_id, cur_id + 1);
         }
       }
@@ -341,32 +344,23 @@ class GraphGenerator {
   }
 
   void generate_yellow_edges(Graph& graph) const {
-    std::random_device dev;
-    std::mt19937 rng(dev());
     float yellow_probability = 0;
-    const float probability_increasement = 1.0 / graph.depth;
-    int vertices_amount = graph.get_vertices().size();
-    for (int cur_depth = 0; cur_depth <= graph.depth - 1; cur_depth++) {
-      int last_id =
-          graph.depths_map_[cur_depth][graph.depths_map_[cur_depth].size() - 1];
-      int next_depth_start = graph.depths_map_[cur_depth + 1][0];
-      int next_depth_finish =
-          graph.depths_map_[cur_depth + 1]
-                           [graph.depths_map_[cur_depth + 1].size() - 1];
-      for (int cur_id = graph.depths_map_[cur_depth][0]; cur_id <= last_id;
-           cur_id++) {
+    const float probability_increasement = 1.0 / (graph.depths_map_.size() - 1);
+    for (int cur_depth = 0; cur_depth < graph.depths_map_.size() - 1;
+         cur_depth++) {
+      const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
+      const auto& vertex_ids_at_next_depth = graph.depths_map_[cur_depth + 1];
+      for (VertexId cur_id : vertex_ids_at_depth) {
         if (random_bool(yellow_probability)) {
           std::vector<VertexId> possible_connections;
-          for (int k = next_depth_start; k <= next_depth_finish; k++) {
-            if (!graph.are_vertices_connected(cur_id, k)) {
-              possible_connections.push_back(k);
+          for (VertexId next_id : vertex_ids_at_next_depth) {
+            if (!graph.are_vertices_connected(cur_id, next_id)) {
+              possible_connections.push_back(next_id);
             }
           }
           if (possible_connections.size() > 0) {
-            std::uniform_int_distribution<std::mt19937::result_type>
-                random_target(0, possible_connections.size() - 1);
-            int binding_target = random_target(rng);
-            graph.bind_vertices(cur_id, possible_connections[binding_target]);
+            VertexId binding_id = random_vertex_id(possible_connections);
+            graph.bind_vertices(cur_id, binding_id);
           }
         }
       }
@@ -375,23 +369,14 @@ class GraphGenerator {
   }
 
   void generate_red_edges(Graph& graph) const {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    constexpr float RED_PROB = 0.33;
     int vertices_amount = graph.get_vertices().size();
-    for (int cur_depth = 0; cur_depth <= graph.depth - 2; cur_depth++) {
-      int last_id =
-          graph.depths_map_[cur_depth][graph.depths_map_[cur_depth].size() - 1];
-      int next_next_depth_start = graph.depths_map_[cur_depth + 2][0];
-      int next_next_depth_finish =
-          graph.depths_map_[cur_depth + 2]
-                           [graph.depths_map_[cur_depth + 2].size() - 1];
-      for (int cur_id = graph.depths_map_[cur_depth][0]; cur_id <= last_id;
-           cur_id++) {
+    for (int cur_depth = 0; cur_depth < graph.depths_map_.size() - 2;
+         cur_depth++) {
+      const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
+      for (VertexId cur_id : vertex_ids_at_depth) {
         if (random_bool(RED_PROB)) {
-          std::uniform_int_distribution<std::mt19937::result_type> random_id(
-              next_next_depth_start, next_next_depth_finish);
-          int binding_id = random_id(rng);
+          VertexId binding_id =
+              random_vertex_id(graph.depths_map_[cur_depth + 2]);
           graph.bind_vertices(cur_id, binding_id);
         }
       }
@@ -422,8 +407,8 @@ int main() {
     std::cin >> new_vertices_num;
   }
 
-  GraphGenerator::Params params(depth, new_vertices_num);
-  GraphGenerator generator(params);
+  const GraphGenerator::Params params(depth, new_vertices_num);
+  const GraphGenerator generator(params);
 
   const Graph graph = generator.generate_random_graph();
 
