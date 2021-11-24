@@ -1,5 +1,5 @@
 #include "logger.hpp"
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 namespace uni_cpp_practice {
