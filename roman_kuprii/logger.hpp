@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -24,6 +25,7 @@ class Logger {
 
  private:
   std::optional<std::ofstream> file_stream_ = std::nullopt;
+  std::mutex mtx_;
 
   Logger() = default;
   Logger(const Logger& root) = delete;
