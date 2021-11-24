@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-
 class Vertex {
  public:
   Vertex(int id);
@@ -35,15 +34,13 @@ class Graph {
   std::string to_string() const;
   bool is_vertex_exists(int id) const;
   bool is_edge_exists(int id) const;
-	int get_new_vertex_id() const;
-	int get_new_edge_id() const;
-	
+  int get_new_vertex_id() const;
+  int get_new_edge_id() const;
+
  private:
   std::vector<Vertex> _vertices;
   std::vector<Edge> _edges;
 };
-
-
 
 int Vertex::get_id() const {
   return _id;
@@ -60,28 +57,26 @@ int Edge::get_second_id() const {
   return _second_vertex_id;
 }
 
-Edge::Edge(int id, int first_vertex_id, int second_vertex_id){
-	_id = id;
-	_first_vertex_id = first_vertex_id;
-	_second_vertex_id = second_vertex_id;
+Edge::Edge(int id, int first_vertex_id, int second_vertex_id) {
+  _id = id;
+  _first_vertex_id = first_vertex_id;
+  _second_vertex_id = second_vertex_id;
 }
 
-Vertex::Vertex(int id){
-	_id = id;
+Vertex::Vertex(int id) {
+  _id = id;
 }
 
 void Graph::add_vertex() {
   _vertices.emplace_back(get_new_vertex_id());
 }
 
-int Graph::get_new_vertex_id() const{
-	return _vertices.size();
+int Graph::get_new_vertex_id() const {
+  return _vertices.size();
 }
-int Graph::get_new_edge_id() const{
-	return _edges.size();
+int Graph::get_new_edge_id() const {
+  return _edges.size();
 }
-
-
 
 void Graph::add_edge(int first, int second) {
   for (int j = 0; j < _vertices.size(); ++j) {
@@ -96,12 +91,12 @@ void Graph::add_edge(int first, int second) {
 }
 
 Graph generate_graph() {
-	Graph g;
-	const int VERTICES_COUNT = 14;
-	
-	for (int i = 0; i < VERTICES_COUNT; ++i){
-		g.add_vertex();
-	}
+  Graph g;
+  const int VERTICES_COUNT = 14;
+
+  for (int i = 0; i < VERTICES_COUNT; ++i) {
+    g.add_vertex();
+  }
 
   g.add_edge(0, 1);
   g.add_edge(0, 2);
@@ -121,7 +116,7 @@ Graph generate_graph() {
   g.add_edge(10, 13);
   g.add_edge(11, 13);
   g.add_edge(12, 13);
-  
+
   return g;
 }
 
