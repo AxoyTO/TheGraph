@@ -227,7 +227,7 @@ void generate_gray_edges(int graph_depth,  //наибольшая возможн
   //Генерация вершин начиная со второго слоя:
   int offset = 0;
   int offset_plus = 0;
-  
+
   for (int i = 0; i < graph_depth - 1; ++i) {
     if (i >= returned_graph.depth()) {
       break;
