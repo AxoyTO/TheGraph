@@ -91,7 +91,7 @@ int main() {
 
   //    logger.log(uni_cpp_practice::logging_helping::write_log_end(
   //        my_graph, depth, new_vertices_num, graph_num));
-
+//FIXME!
   uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
   }
   */

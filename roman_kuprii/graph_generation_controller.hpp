@@ -26,6 +26,9 @@ class GraphGenerationController {
     void start();
     void stop();
 
+    // FIXME
+    bool should_terminate() { return false; }
+
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;

@@ -5,6 +5,8 @@
 #include <thread>
 #include <vector>
 
+#include <iostream>
+
 #include "graph.hpp"
 #include "graph_generation.hpp"
 #include "graph_generation_controller.hpp"
@@ -22,10 +24,10 @@ GraphGenerationController::GraphGenerationController(
   graphs_count_ = graphs_count;
 
   for (int iter = 0; iter < threads_count; iter++) {
-    workers_.emplace_back([=]() -> std::optional<JobCallback> {
+    workers_.emplace_back([&]() -> std::optional<JobCallback> {
       if (jobs_.empty())
         return std::nullopt;
-      const auto& job = jobs_.front();
+      const auto job = jobs_.front();
       jobs_.pop_front();
       return job;
     });
@@ -35,10 +37,6 @@ GraphGenerationController::GraphGenerationController(
 void GraphGenerationController::new_generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
-  for (auto& worker : workers_) {
-    worker.start();
-  }
-
   for (int i = 0; i < graphs_count_; i++) {
     jobs_.emplace_back([=]() {
       gen_started_callback(i);
@@ -46,22 +44,31 @@ void GraphGenerationController::new_generate(
       gen_finished_callback(std::move(graph), i);
     });
   }
+
+  for (auto& worker : workers_) {
+    worker.start();
+  }
 }
 
 void GraphGenerationController::Worker::start() {
   thread_ = std::thread([=]() {
     while (true) {
-      //                if (should_terminate()) {
-      //                    return;
-      //                }
+      if (should_terminate()) {  // when jobs_.is_empty()
+        return;
+      }
       const auto job_optional = get_job_callback_();
       if (job_optional.has_value()) {
-        const auto job_callback = job_optional.value();
-        job_callback();
-      }
+        job_optional.value()();
+      } else
+        return;
     }
   });
-  // ...
+
+  thread_.join();
+}
+
+void GraphGenerationController::Worker::stop() {
+  ///
 }
 
 }  // namespace graph_generation_controller

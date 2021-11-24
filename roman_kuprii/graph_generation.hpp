@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 namespace uni_cpp_practice {
 
 class Graph;
@@ -13,6 +15,11 @@ struct Params {
 
   Params(const Params& _params)
       : depth(_params.depth), new_vertices_num(_params.new_vertices_num){};
+
+  void print() const {
+    std::cout << "depth: " << depth << " vertices: " << new_vertices_num
+              << std::endl;
+  }
 
   int depth = 0;
   int new_vertices_num = 0;

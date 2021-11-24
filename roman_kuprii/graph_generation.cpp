@@ -126,24 +126,28 @@ void paint_edges(Graph& work_graph) {
   add_yellow_edges(work_graph);
 }
 
-void new_vertices_generation(Graph& work_graph,
-                             int depth,
-                             int new_vertices_num) {
+void new_vertices_generation(
+    Graph& work_graph,
+    uni_cpp_practice::graph_generation::Params params) {
+  int depth = params.depth;
+  int new_vertices_num = params.new_vertices_num;
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices())
+    for (const auto& vertex : work_graph.get_vertices()) {
+      VertexId vertex_id = vertex.get_id();
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (get_real_random_number() > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
-                vertex.get_id(),
+                vertex_id,
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
                     .get_id(),
                 true);
           }
         }
+    }
   }
 }
 
@@ -154,13 +158,11 @@ namespace uni_cpp_practice {
 namespace graph_generation {
 
 Graph generate(Params params) {
-  int depth = params.depth;
-  int new_vertices_num = params.new_vertices_num;
-  auto work_graph = Graph();
-  work_graph.add_vertex();
-  new_vertices_generation(work_graph, depth, new_vertices_num);
-  paint_edges(work_graph);
-  return work_graph;
+  auto graph = Graph();
+  graph.add_vertex();
+  new_vertices_generation(graph, params);
+  paint_edges(graph);
+  return graph;
 }
 
 }  // namespace graph_generation
