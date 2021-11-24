@@ -75,7 +75,7 @@ jobs:
       run: |
         clang++ --version;
         echo "Compile directory with changes: ${{ needs.get_changed_files.outputs.directory }}";
-        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -Werror;
+        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -pthread -Werror;
     # - name: Install include-what-you-use
     #   run: brew install iwyu;
     # - name: Validate "#include" preprocessors
