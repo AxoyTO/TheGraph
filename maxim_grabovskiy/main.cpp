@@ -1,8 +1,5 @@
 #include <iostream>
-#include <sstream>
-#include <string>
 #include <vector>
-using std::string;
 using std::vector;
 using VertexId = int;
 using EdgeId = int;
