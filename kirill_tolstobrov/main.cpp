@@ -17,7 +17,7 @@ using EdgeId = int;
 
 class Vertex {
  public:
-  explicit Vertex(const VertexId& init_id = 0) : id(init_id), depth(0) {}
+  explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
   bool check_edge_presence(const EdgeId& edge_id) const {
     for (const auto& id : edge_ids_) {
@@ -51,7 +51,7 @@ class Vertex {
   }
 
   const VertexId id;
-  int depth;
+  int depth = 0;
 
  private:
   std::vector<EdgeId> edge_ids_;
@@ -70,34 +70,7 @@ class Edge {
         vertex2_id(v2_init),
         color(color_init){};
 
-  std::string color_to_string() const {
-    switch (color) {
-      case Color::Grey:
-        return "grey";
-      case Color::Green:
-        return "green";
-      case Color::Blue:
-        return "blue";
-      case Color::Yellow:
-        return "yellow";
-      case Color::Red:
-        return "red";
-    }
-    return "";
-  };
-  operator std::string() const {
-    std::string result = "";
-    result += "{\n\"id\": " + std::to_string(id);
-    result += ",\n\"vertex_ids\": ";
-
-    result += "[" + std::to_string(vertex1_id);
-    result += ", " + std::to_string(vertex2_id);
-    result += "],\n\"color\": \"";
-    result += color_to_string();
-    result += "\"\n}";
-
-    return result;
-  }
+  operator std::string() const;
 
   const EdgeId id;
   const VertexId vertex1_id;
@@ -105,10 +78,49 @@ class Edge {
   const Color color;
 };
 
+std::string color_to_string(Edge::Color color) {
+  switch (color) {
+    case Edge::Color::Grey:
+      return "grey";
+    case Edge::Color::Green:
+      return "green";
+    case Edge::Color::Blue:
+      return "blue";
+    case Edge::Color::Yellow:
+      return "yellow";
+    case Edge::Color::Red:
+      return "red";
+  }
+  throw std::runtime_error("Nonexistent color");
+}
+
+Edge::operator std::string() const {
+  std::string result = "";
+  result += "{\n\"id\": " + std::to_string(id);
+  result += ",\n\"vertex_ids\": ";
+
+  result += "[" + std::to_string(vertex1_id);
+  result += ", " + std::to_string(vertex2_id);
+  result += "],\n\"color\": \"";
+  result += color_to_string(color);
+  result += "\"\n}";
+
+  return result;
+}
+
 class Graph {
  public:
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   const std::vector<Edge>& get_edges() const { return edges_; }
+
+  Vertex& get_vertex(const VertexId& id) {
+    for (Vertex& vertex : vertices_) {
+      if (vertex.id == id) {
+        return vertex;
+      }
+    }
+    throw std::runtime_error("Can't get vertex by id");
+  }
 
   VertexId add_new_vertex() {
     if (vertices_.size() == 0) {
@@ -149,8 +161,7 @@ class Graph {
     return false;
   }
 
-  Edge::Color get_binding_color(const VertexId& id1,
-                                const VertexId& id2) const {
+  Edge::Color get_binding_color(const VertexId& id1, const VertexId& id2) {
     assert(check_vertex_existence(id1) &&
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
@@ -160,8 +171,8 @@ class Graph {
       return Edge::Color::Green;
     }
 
-    const auto& vertex1 = vertices_[id1];
-    const auto& vertex2 = vertices_[id2];
+    const auto& vertex1 = get_vertex(id1);
+    const auto& vertex2 = get_vertex(id2);
 
     if (vertex1.get_edge_ids().size() == 0 ||
         vertex2.get_edge_ids().size() == 0) {
@@ -191,13 +202,13 @@ class Graph {
     if (edge_color == Edge::Color::Grey) {
       VertexId to_id = id1;
       VertexId from_id = id2;
-      if (vertices_[id2].get_edge_ids().size() == 0) {
+      if (get_vertex(id2).get_edge_ids().size() == 0) {
         VertexId temp = from_id;
         from_id = to_id;
         to_id = temp;
       }
-      vertices_[to_id].depth = vertices_[from_id].depth + 1;
-      if (depths_map_.size() - 1 < vertices_[to_id].depth) {
+      get_vertex(to_id).depth = get_vertex(from_id).depth + 1;
+      if (depths_map_.size() - 1 < get_vertex(to_id).depth) {
         depths_map_.emplace_back();
       }
       depths_map_[0].erase(
@@ -209,10 +220,10 @@ class Graph {
     const auto& edge =
         edges_.emplace_back(get_new_edge_id(), id1, id2, edge_color);
     connections_map_[id1].push_back(edge.id);
-    vertices_[id1].add_edge_id(edge.id);
+    get_vertex(id1).add_edge_id(edge.id);
     if (id1 != id2) {
       connections_map_[id2].push_back(edge.id);
-      vertices_[id2].add_edge_id(edge.id);
+      get_vertex(id2).add_edge_id(edge.id);
     }
     colors_map_[edge_color].push_back(edge.id);
   }
@@ -268,12 +279,10 @@ class GraphGenerator {
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
 
   Graph generate_random_graph() const {
-    const int depth = params_.depth;
-    const int new_vertices_num = params_.new_vertices_num;
     Graph graph = Graph();
     graph.add_new_vertex();
 
-    generate_grey_edges(graph, depth, new_vertices_num);
+    generate_grey_edges(graph, params_.depth, params_.new_vertices_num);
     generate_green_edges(graph);
     generate_blue_edges(graph);
     generate_yellow_edges(graph);
@@ -310,7 +319,7 @@ class GraphGenerator {
         return;
       }
       const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
-      for (VertexId cur_vertex_id : vertex_ids_at_depth) {
+      for (const VertexId cur_vertex_id : vertex_ids_at_depth) {
         for (int k = 0; k < new_vertices_num; k++) {
           if (random_bool(new_vertex_prob)) {
             const auto new_vertex_id = graph.add_new_vertex();
@@ -323,7 +332,7 @@ class GraphGenerator {
   }
 
   void generate_green_edges(Graph& graph) const {
-    for (auto& cur_vertex : graph.get_vertices()) {
+    for (const auto& cur_vertex : graph.get_vertices()) {
       if (random_bool(GREEN_PROB)) {
         graph.bind_vertices(cur_vertex.id, cur_vertex.id);
       }
@@ -331,11 +340,10 @@ class GraphGenerator {
   }
 
   void generate_blue_edges(Graph& graph) const {
-    int vertices_amount = graph.get_vertices().size();
     for (int cur_depth = 0; cur_depth < graph.depths_map_.size(); cur_depth++) {
       const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
-      int last_id = vertex_ids_at_depth[vertex_ids_at_depth.size() - 1];
-      for (VertexId cur_id : vertex_ids_at_depth) {
+      const int last_id = vertex_ids_at_depth[vertex_ids_at_depth.size() - 1];
+      for (const VertexId cur_id : vertex_ids_at_depth) {
         if (cur_id != last_id && random_bool(BLUE_PROB)) {
           graph.bind_vertices(cur_id, cur_id + 1);
         }
@@ -350,16 +358,16 @@ class GraphGenerator {
          cur_depth++) {
       const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
       const auto& vertex_ids_at_next_depth = graph.depths_map_[cur_depth + 1];
-      for (VertexId cur_id : vertex_ids_at_depth) {
+      for (const VertexId cur_id : vertex_ids_at_depth) {
         if (random_bool(yellow_probability)) {
           std::vector<VertexId> possible_connections;
-          for (VertexId next_id : vertex_ids_at_next_depth) {
+          for (const VertexId next_id : vertex_ids_at_next_depth) {
             if (!graph.are_vertices_connected(cur_id, next_id)) {
               possible_connections.push_back(next_id);
             }
           }
           if (possible_connections.size() > 0) {
-            VertexId binding_id = random_vertex_id(possible_connections);
+            const VertexId binding_id = random_vertex_id(possible_connections);
             graph.bind_vertices(cur_id, binding_id);
           }
         }
@@ -369,13 +377,12 @@ class GraphGenerator {
   }
 
   void generate_red_edges(Graph& graph) const {
-    int vertices_amount = graph.get_vertices().size();
     for (int cur_depth = 0; cur_depth < graph.depths_map_.size() - 2;
          cur_depth++) {
       const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
-      for (VertexId cur_id : vertex_ids_at_depth) {
+      for (const VertexId cur_id : vertex_ids_at_depth) {
         if (random_bool(RED_PROB)) {
-          VertexId binding_id =
+          const VertexId binding_id =
               random_vertex_id(graph.depths_map_[cur_depth + 2]);
           graph.bind_vertices(cur_id, binding_id);
         }
