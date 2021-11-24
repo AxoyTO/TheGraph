@@ -7,8 +7,10 @@ void Graph::add_vertex() {
 
 void Graph::add_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) {
-  assert((from_vertex_id > -1) && "The from_vertex_id should be more then -1.");
-  assert((to_vertex_id > -1) && "The to_vertex_id should be more then -1.");
+  assert((from_vertex_id >= 0) &&
+         "The from_vertex_id should be greater or equal to 0.");
+  assert((to_vertex_id >= 0) &&
+         "The to_vertex_id should be greater or equal to 0.");
 
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");

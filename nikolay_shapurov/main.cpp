@@ -1,5 +1,5 @@
 #include "graph.hpp"
-#include "graphprinter.hpp"
+#include "graph_printer.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -40,6 +40,7 @@ void write_to_file(const std::string& graph_json,
   std::ofstream ofs(file_name);
   if (ofs.is_open()) {
     ofs << graph_json;
+    ofs.close();
   }
 }
 
@@ -49,5 +50,6 @@ int main() {
   const auto graph_json = graph_printer.print();
   std::cout << graph_json << std::endl;
   write_to_file(graph_json, "graph.json");
+
   return 0;
 }

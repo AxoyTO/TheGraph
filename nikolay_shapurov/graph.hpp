@@ -27,8 +27,8 @@ class Graph {
   void add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
 
-  const std::vector<Vertex> vertices() const { return vertices_; }
-  const std::vector<Edge> edges() const { return edges_; }
+  const std::vector<Vertex>& vertices() const { return vertices_; }
+  const std::vector<Edge>& edges() const { return edges_; }
 
  private:
   VertexId vertex_id_counter_ = 0;
