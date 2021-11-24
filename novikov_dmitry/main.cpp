@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "graph.hpp"
-#include "graph_generation.hpp"
+#include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
@@ -140,10 +140,11 @@ int main() {
   const int graphs_count = handle_graphs_count_input();
 
   auto& logger = prepare_logger();
+  const auto graph_generator =
+      uni_cpp_practice::GraphGenerator(depth, new_vertices_num);
   for (int i = 0; i < graphs_count; ++i) {
     logger.log(start_string(i));
-    const auto graph = uni_cpp_practice::graph_generation::generate_graph(
-        depth, new_vertices_num);
+    const auto graph = graph_generator.generate();
     logger.log(end_string(i, graph));
     const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
     write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
