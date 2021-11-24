@@ -33,7 +33,7 @@ namespace uni_cpp_practice {
 
 namespace logging_helping {
 
-void write_graph(const Graph& graph, const int& graph_num) {
+void write_graph(const Graph& graph, int graph_num) {
   std::ofstream out;
   const std::string filename =
       JSON_GRAPH_FILENAME + std::to_string(graph_num) + ".json";
@@ -42,16 +42,16 @@ void write_graph(const Graph& graph, const int& graph_num) {
   out.close();
 }
 
-std::string write_log_start(const int& graph_num) {
+std::string write_log_start(int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Started";
   return res;
 }
 
 std::string write_log_end(Graph& work_graph,
-                          const int& depth,
-                          const int& new_vertices_num,
-                          const int& graph_num) {
+                          int depth,
+                          int new_vertices_num,
+                          int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "\tdepth: " + to_string(depth) + ",\n";
