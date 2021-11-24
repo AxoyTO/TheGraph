@@ -123,8 +123,8 @@ void paint_edges(Graph& work_graph) {
 }
 
 void new_vertices_generation(Graph& work_graph,
-                             const int& depth,
-                             const int& new_vertices_num) {
+                             int depth,
+                             int new_vertices_num) {
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
@@ -149,7 +149,7 @@ namespace uni_cpp_practice {
 
 namespace graph_generating {
 
-Graph generate(const int& depth, const int& new_vertices_num) {
+Graph generate(int depth, int new_vertices_num) {
   auto work_graph = Graph();
   work_graph.add_vertex();
   new_vertices_generation(work_graph, depth, new_vertices_num);

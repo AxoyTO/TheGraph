@@ -6,7 +6,7 @@ class Graph;
 
 namespace graph_generating {
 
-Graph generate(const int& depth, const int& new_vertices_num);
+Graph generate(int depth, int new_vertices_num);
 
 }  // namespace graph_generating
 
