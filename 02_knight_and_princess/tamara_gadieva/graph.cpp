@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include <cassert>
+#include <stdexcept>
 
 bool Graph::has_vertex(const VertexId& id) const {
   for (const auto& vertex : vertices_)
@@ -76,21 +77,19 @@ std::string Graph::json_string() const {
   for (int i = 0; i < vertices_.size(); i++) {
     result_string += vertices_[i].json_string();
     if (i != vertices_.size() - 1)
-      result_string += ",\n";
-    else
-      result_string += "\n";
+      result_string += ",";
+    result_string += "\n";
   }
-  result_string += "\t],\n";
+  result_string += "\n\t],\n";
 
   result_string += "\t\"edges\": [\n";
   for (int i = 0; i < edges_.size(); i++) {
     result_string += edges_[i].json_string();
     if (i != edges_.size() - 1)
-      result_string += ",\n";
-    else
-      result_string += "\n";
+      result_string += ",";
+    result_string += "\n";
   }
-  result_string += "\t]\n";
+  result_string += "\n\t]\n";
 
   result_string += "}\n";
 
