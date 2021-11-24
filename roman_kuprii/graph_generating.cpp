@@ -6,10 +6,17 @@
 
 namespace {
 
-double get_random_number() {
+double get_real_random_number() {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0, 1);
+  return dis(gen);
+}
+
+int get_int_random_number(int upper_bound) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, upper_bound);
   return dis(gen);
 }
 
@@ -41,7 +48,7 @@ void add_blue_edges(Graph& work_graph) {
         adjacent_vertices[1] = vertex.get_id();
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (get_random_number() < BLUE_TRASHOULD)
+          if (get_real_random_number() < BLUE_TRASHOULD)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
       } else {
@@ -49,7 +56,7 @@ void add_blue_edges(Graph& work_graph) {
         adjacent_vertices[1] = vertex.get_id();
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (get_random_number() < BLUE_TRASHOULD)
+          if (get_real_random_number() < BLUE_TRASHOULD)
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
       }
@@ -60,17 +67,15 @@ void add_blue_edges(Graph& work_graph) {
 void add_green_edges(Graph& work_graph) {
   for (const auto& start_vertex : work_graph.get_vertices())
     if (!work_graph.is_connected(start_vertex.get_id(), start_vertex.get_id()))
-      if (get_random_number() < GREEN_TRASHOULD)
+      if (get_real_random_number() < GREEN_TRASHOULD)
         work_graph.connect_vertices(start_vertex.get_id(),
                                     start_vertex.get_id(), false);
 }
 
 void add_red_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
-  std::random_device rd;
-  std::mt19937 gen(rd());
   for (const auto& start_vertex : work_graph.get_vertices()) {
-    if (get_random_number() < RED_TRASHOULD) {
+    if (get_real_random_number() < RED_TRASHOULD) {
       if (start_vertex.depth + 2 <= graph_depth) {
         vector<VertexId> red_vertices_ids;
         for (const auto& end_vertex : work_graph.get_vertices()) {
@@ -80,9 +85,10 @@ void add_red_edges(Graph& work_graph) {
               red_vertices_ids.emplace_back(end_vertex.get_id());
         }
         if (red_vertices_ids.size() > 0) {
-          std::uniform_int_distribution<> distr(0, red_vertices_ids.size() - 1);
           work_graph.connect_vertices(start_vertex.get_id(),
-                                      red_vertices_ids[distr(gen)], false);
+                                      red_vertices_ids[get_int_random_number(
+                                          red_vertices_ids.size() - 1)],
+                                      false);
         }
       }
     }
@@ -91,12 +97,10 @@ void add_red_edges(Graph& work_graph) {
 
 void add_yellow_edges(Graph& work_graph) {
   const int graph_depth = work_graph.get_depth();
-  std::random_device rd;
-  std::mt19937 gen(rd());
   for (const auto& start_vertex : work_graph.get_vertices()) {
     const double probability = static_cast<double>(start_vertex.depth) /
                                static_cast<double>(graph_depth);
-    if (get_random_number() < probability) {
+    if (get_real_random_number() < probability) {
       vector<VertexId> yellow_vertices_ids;
       for (const auto& end_vertex : work_graph.get_vertices()) {
         if (end_vertex.depth == start_vertex.depth + 1) {
@@ -106,10 +110,10 @@ void add_yellow_edges(Graph& work_graph) {
         }
       }
       if (yellow_vertices_ids.size() > 0) {
-        std::uniform_int_distribution<> distr(0,
-                                              yellow_vertices_ids.size() - 1);
         work_graph.connect_vertices(start_vertex.get_id(),
-                                    yellow_vertices_ids[distr(gen)], false);
+                                    yellow_vertices_ids[get_int_random_number(
+                                        yellow_vertices_ids.size() - 1)],
+                                    false);
       }
     }
   }
@@ -131,7 +135,7 @@ void new_vertices_generation(Graph& work_graph,
     for (const auto& vertex : work_graph.get_vertices())
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
-          if (get_random_number() > probability) {
+          if (get_real_random_number() > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
                 vertex.get_id(),

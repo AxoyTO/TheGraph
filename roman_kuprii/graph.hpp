@@ -54,7 +54,7 @@ class Graph {
 
   void connect_vertices(const VertexId& from_vertex_id,
                         const VertexId& to_vertex_id,
-                        const bool& initialization);
+                        bool initialization);
 
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }

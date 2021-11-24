@@ -59,7 +59,7 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
 
 void Graph::connect_vertices(const VertexId& from_vertex_id,
                              const VertexId& to_vertex_id,
-                             const bool& initialization) {
+                             bool initialization) {
   assert(is_vertex_exist(from_vertex_id));
   assert(is_vertex_exist(to_vertex_id));
   assert(!is_connected(from_vertex_id, to_vertex_id));
