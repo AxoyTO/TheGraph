@@ -2,6 +2,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 using VertexId = int;
 using EdgeId = int;
