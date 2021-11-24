@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generating.hpp"
+#include "graph_generation.hpp"
 
 namespace {
 
@@ -151,9 +151,11 @@ void new_vertices_generation(Graph& work_graph,
 
 namespace uni_cpp_practice {
 
-namespace graph_generating {
+namespace graph_generation {
 
-Graph generate(int depth, int new_vertices_num) {
+Graph generate(Params params) {
+  int depth = params.depth;
+  int new_vertices_num = params.new_vertices_num;
   auto work_graph = Graph();
   work_graph.add_vertex();
   new_vertices_generation(work_graph, depth, new_vertices_num);
@@ -161,6 +163,6 @@ Graph generate(int depth, int new_vertices_num) {
   return work_graph;
 }
 
-}  // namespace graph_generating
+}  // namespace graph_generation
 
 }  // namespace uni_cpp_practice

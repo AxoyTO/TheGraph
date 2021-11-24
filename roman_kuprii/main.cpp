@@ -1,53 +1,99 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include "graph.hpp"
-#include "graph_generating.hpp"
+#include "graph_generation.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
 constexpr int GRAPHS_NUMBER = 0;
 constexpr int INVALID_NEW_DEPTH = -1;
-constexpr int INVALID_NEW_VERTICES_NUM = -1;
+constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
+constexpr int INVALID_THREADS_NUMBER = 0;
 const std::string LOG_FILENAME = "temp/log.txt";
+
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+
+int handle_graphs_number_input() {
+  int graphs_quantity = GRAPHS_NUMBER;
+  do {
+    std::cout << "Enter amount of graphs to generate" << std::endl;
+    std::cin >> graphs_quantity;
+  } while (graphs_quantity < GRAPHS_NUMBER);
+  return graphs_quantity;
+}
+
+int handle_depth_input() {
+  int depth = INVALID_NEW_DEPTH;
+  do {
+    std::cout << "Enter generate graph depth from zero" << std::endl;
+    std::cin >> depth;
+  } while (depth <= INVALID_NEW_DEPTH);
+  return depth;
+}
+
+int handle_vertices_number_input() {
+  int new_vertices_num = INVALID_NEW_VERTICES_NUMBER;
+  do {
+    std::cout << "Enter new_vertices_num from zero" << std::endl;
+    std::cin >> new_vertices_num;
+  } while (new_vertices_num < INVALID_NEW_VERTICES_NUMBER);
+  return new_vertices_num;
+}
+
+int handle_threads_number_input() {
+  int threads_count = INVALID_THREADS_NUMBER;
+  do {
+    std::cout << "Enter threads number from zero" << std::endl;
+    std::cin >> threads_count;
+  } while (threads_count <= INVALID_THREADS_NUMBER &&
+           threads_count < MAX_THREADS_COUNT);
+  return threads_count;
+}
 
 int main() {
   auto& logger = uni_cpp_practice::Logger::get_logger();
   logger.set_output(LOG_FILENAME);
 
-  int graphs_quantity = GRAPHS_NUMBER;
+  const int graphs_count = handle_graphs_number_input();
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_vertices_number_input();
+  const int threads_count = handle_threads_number_input();
 
-  do {
-    std::cout << "Enter amount of graphs to generate" << std::endl;
-    std::cin >> graphs_quantity;
-  } while (graphs_quantity < GRAPHS_NUMBER);
+  const auto params =
+      uni_cpp_practice::graph_generation::Params(depth, new_vertices_num);
+  auto generation_controller =
+      uni_cpp_practice::graph_generation_controller::GraphGenerationController(
+          threads_count, graphs_count, params);
 
-  int depth = INVALID_NEW_DEPTH;
+  auto graphs = std::vector<uni_cpp_practice::Graph>();
+  graphs.reserve(graphs_count);
 
-  do {
-    std::cout << "Enter generate graph depth from zero" << std::endl;
-    std::cin >> depth;
-  } while (depth <= INVALID_NEW_DEPTH);
+  generation_controller.new_generate(
+      [&logger](int index) {
+        logger.log(uni_cpp_practice::logging_helping::write_log_start(index));
+      },
+      [&logger, &graphs](uni_cpp_practice::Graph graph, int index) {
+        logger.log(
+            uni_cpp_practice::logging_helping::write_log_end(graph, index));
+        graphs.push_back(graph);
+      });
 
-  int new_vertices_num = INVALID_NEW_VERTICES_NUM;
+  /*
+  for (int graph_num = 0; graph_num < graphs_count; graph_num++) {
+  logger.log(uni_cpp_practice::logging_helping::write_log_start(graph_num));
 
-  do {
-    std::cout << "Enter new_vertices_num from zero" << std::endl;
-    std::cin >> new_vertices_num;
-  } while (new_vertices_num < INVALID_NEW_VERTICES_NUM);
+  auto my_graph = uni_cpp_practice::graph_generation::generate(params);
 
-  std::cout << "Depth of adding vertices: " << depth << std::endl;
+  //    logger.log(uni_cpp_practice::logging_helping::write_log_end(
+  //        my_graph, depth, new_vertices_num, graph_num));
 
-  for (int graph_num = 0; graph_num < graphs_quantity; graph_num++) {
-    logger.log(uni_cpp_practice::logging_helping::write_log_start(graph_num));
-    auto my_graph =
-        uni_cpp_practice::graph_generating::generate(depth, new_vertices_num);
-    logger.log(uni_cpp_practice::logging_helping::write_log_end(
-        my_graph, depth, new_vertices_num, graph_num));
-    uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
+  uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
   }
-
+  */
   return 0;
 }

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "graph.hpp"
+#include "graph_generation.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
 
@@ -48,14 +49,10 @@ std::string write_log_start(int graph_num) {
   return res;
 }
 
-std::string write_log_end(Graph& work_graph,
-                          int depth,
-                          int new_vertices_num,
-                          int graph_num) {
+std::string write_log_end(Graph& work_graph, int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
-  res += "\tdepth: " + to_string(depth) + ",\n";
-  res += "\tnew_vertices_num: " + to_string(new_vertices_num) + ",\n";
+  res += "\tdepth: " + to_string(work_graph.get_depth()) + ",\n";
   res += "vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
 
   std::vector<int> depth_count;
