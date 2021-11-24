@@ -113,13 +113,18 @@ class Graph {
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   const std::vector<Edge>& get_edges() const { return edges_; }
 
-  Vertex& get_vertex(const VertexId& id) {
-    for (Vertex& vertex : vertices_) {
+  const Vertex& get_vertex(const VertexId& id) const {
+    for (const Vertex& vertex : vertices_) {
       if (vertex.id == id) {
         return vertex;
       }
     }
     throw std::runtime_error("Can't get vertex by id");
+  }
+
+  Vertex& get_vertex(const VertexId& id) {
+    const auto& const_this = *this;
+    return const_cast<Vertex&>(const_this.get_vertex(id));
   }
 
   VertexId add_new_vertex() {
@@ -161,7 +166,8 @@ class Graph {
     return false;
   }
 
-  Edge::Color get_binding_color(const VertexId& id1, const VertexId& id2) {
+  Edge::Color get_binding_color(const VertexId& id1,
+                                const VertexId& id2) const {
     assert(check_vertex_existence(id1) &&
            "Attemptig to access to nonexistent vertex: Error.");
     assert(check_vertex_existence(id2) &&
