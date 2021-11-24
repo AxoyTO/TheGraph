@@ -183,6 +183,9 @@ class Graph {
   }
 };
 
+constexpr int Green_probability = 10, Blue_probability = 25,
+              Red_probability = 33;
+
 class GraphGenerator {
  public:
   struct Params {
@@ -223,10 +226,10 @@ class GraphGenerator {
                 << cur_depth << std::endl;
     }
     for (const auto& vertex : graph.vertexes()) {
-      if (randValue(10)) {
+      if (randValue(Green_probability)) {
         graph.addEdge(vertex.id, vertex.id);
       }
-      if (randValue(25) && graph.hasVertex(vertex.id + 1) &&
+      if (randValue(Blue_probability) && graph.hasVertex(vertex.id + 1) &&
           graph.vertexIdDepth(vertex.id + 1) == vertex.id) {
         graph.addEdge(vertex.id, vertex.id + 1);
       }
@@ -240,7 +243,7 @@ class GraphGenerator {
         }
         graph.addEdge(vertex.id, next_layer[rand() % next_layer.size()]);
       }
-      if (randValue(33) && vertex.depth < (cur_depth - 1)) {
+      if (randValue(Red_probability) && vertex.depth < (cur_depth - 1)) {
         std::vector<VertexId> after_next_layer;
         for (const auto& vertex_id : graph.ithLayer(vertex.depth + 2)) {
           if (!graph.areConnected(vertex.id, vertex_id)) {
