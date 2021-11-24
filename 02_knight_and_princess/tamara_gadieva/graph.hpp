@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 using VertexId = int;
 using EdgeId = int;
