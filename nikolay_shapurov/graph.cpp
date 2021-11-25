@@ -1,11 +1,11 @@
 #include "graph.hpp"
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
 
 void Graph::add_vertex() {
   const VertexId new_vertex_id = get_new_vertex_id();
   vertices_.emplace_back(new_vertex_id);
-  adjacency_map_.emplace(std::make_pair(new_vertex_id, std::vector<EdgeId>()));
+  adjacency_map_[new_vertex_id] = {};
 }
 
 void Graph::add_edge(const VertexId& from_vertex_id,
@@ -28,7 +28,7 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   adjacency_map_[to_vertex_id].emplace_back(new_edge_id);
 }
 
-const std::vector<EdgeId>& Graph::get_edges(const VertexId& id) const {
+const std::vector<EdgeId>& Graph::get_edge_ids(const VertexId& id) const {
   return adjacency_map_.at(id);
 }
 
@@ -43,13 +43,12 @@ bool Graph::has_vertex(const VertexId& id) const {
 
 bool Graph::has_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) const {
-  const std::vector<EdgeId>& from_vertex_edges = adjacency_map_[from_vertex_id];
-  const std::vector<EdgeId>& to_vertex_edges = adjacency_map_[to_vertex_id];
-  if (to_vertex_edges.empty() || from_vertex_edges.empty()) {
-    return false;
+  for (const auto& from_edge_id : adjacency_map_.at(from_vertex_id)) {
+    for (const auto& to_edge_id : adjacency_map_.at(to_vertex_id)) {
+      if (from_edge_id == to_edge_id) {
+        return true;
+      }
+    }
   }
-
-  return (from_vertex_edges.end() !=
-          std::search(from_vertex_edges.begin(), from_vertex_edges.end(),
-                      to_vertex_edges.begin(), to_vertex_edges.end()));
+  return false;
 }

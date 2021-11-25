@@ -27,7 +27,7 @@ std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
   result += ",\"edge_ids\":[";
 
   std::string vertex_edges_json;
-  for (const EdgeId& edgeId : graph_.get_edges(vertex.id)) {
+  for (const EdgeId& edgeId : graph_.get_edge_ids(vertex.id)) {
     vertex_edges_json += std::to_string(edgeId) + ",";
   }
   if (!vertex_edges_json.empty()) {

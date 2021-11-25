@@ -30,7 +30,7 @@ class Graph {
 
   const std::vector<Vertex>& vertices() const { return vertices_; }
   const std::vector<Edge>& edges() const { return edges_; }
-  const std::vector<EdgeId>& get_edges(const VertexId& id) const;
+  const std::vector<EdgeId>& get_edge_ids(const VertexId& id) const;
 
  private:
   VertexId vertex_id_counter_ = 0;
@@ -46,5 +46,5 @@ class Graph {
  private:
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
-  mutable std::unordered_map<VertexId, std::vector<EdgeId>> adjacency_map_;
+  std::unordered_map<VertexId, std::vector<EdgeId>> adjacency_map_;
 };
