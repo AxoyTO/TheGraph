@@ -18,6 +18,10 @@ const std::string LOG_FILENAME = "temp/log.txt";
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
+using uni_cpp_practice::Logger;
+using uni_cpp_practice::graph_generation::Params;
+using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
+
 int handle_graphs_number_input() {
   int graphs_quantity = GRAPHS_NUMBER;
   do {
@@ -48,7 +52,8 @@ int handle_vertices_number_input() {
 int handle_threads_number_input() {
   int threads_count = INVALID_THREADS_NUMBER;
   do {
-    std::cout << "Enter threads number from zero" << std::endl;
+    std::cout << "Enter threads number from zero to max_threads: "
+              << MAX_THREADS_COUNT << std::endl;
     std::cin >> threads_count;
   } while (threads_count <= INVALID_THREADS_NUMBER &&
            threads_count < MAX_THREADS_COUNT);
@@ -56,7 +61,7 @@ int handle_threads_number_input() {
 }
 
 int main() {
-  auto& logger = uni_cpp_practice::Logger::get_logger();
+  auto& logger = Logger::get_logger();
   logger.set_output(LOG_FILENAME);
 
   const int graphs_count = handle_graphs_number_input();
@@ -64,11 +69,9 @@ int main() {
   const int new_vertices_num = handle_vertices_number_input();
   const int threads_count = handle_threads_number_input();
 
-  const auto params =
-      uni_cpp_practice::graph_generation::Params(depth, new_vertices_num);
+  const auto params = Params(depth, new_vertices_num);
   auto generation_controller =
-      uni_cpp_practice::graph_generation_controller::GraphGenerationController(
-          threads_count, graphs_count, params);
+      GraphGenerationController(threads_count, graphs_count, params);
 
   auto graphs = std::vector<uni_cpp_practice::Graph>();
   graphs.reserve(graphs_count);
@@ -83,17 +86,8 @@ int main() {
         graphs.push_back(graph);
       });
 
-  /*
-  for (int graph_num = 0; graph_num < graphs_count; graph_num++) {
-  logger.log(uni_cpp_practice::logging_helping::write_log_start(graph_num));
+  // FIXME!
+  //  uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
 
-  auto my_graph = uni_cpp_practice::graph_generation::generate(params);
-
-  //    logger.log(uni_cpp_practice::logging_helping::write_log_end(
-  //        my_graph, depth, new_vertices_num, graph_num));
-//FIXME!
-  uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
-  }
-  */
   return 0;
 }
