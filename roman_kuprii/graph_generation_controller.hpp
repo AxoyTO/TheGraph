@@ -29,16 +29,12 @@ class GraphGenerationController {
     void start();
     void stop();
 
-    bool should_terminate() const {
-      return state_flag == State::ShouldTerminate;
-    }
-
     ~Worker();
 
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_flag = State::Idle;
+    State state_flag_ = State::Idle;
   };
 
   GraphGenerationController(

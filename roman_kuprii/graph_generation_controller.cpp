@@ -66,24 +66,25 @@ GraphGenerationController::Worker::~Worker() {
 }
 
 void GraphGenerationController::Worker::start() {
-  assert(state_flag != State::Working);
-  state_flag = State::Working;
-  thread_ = std::thread([=]() {
-    while (true) {
-      if (should_terminate()) {
-        return;
-      }
-      const auto job_optional = get_job_callback_();
-      if (job_optional.has_value()) {
-        job_optional.value()();
-      }
-    }
-  });
+  assert(state_flag_ != State::Working);
+  state_flag_ = State::Working;
+  thread_ = std::thread(
+      [&state_flag_ = state_flag_, &get_job_callback_ = get_job_callback_]() {
+        while (true) {
+          if (state_flag_ == State::ShouldTerminate) {
+            return;
+          }
+          const auto job_optional = get_job_callback_();
+          if (job_optional.has_value()) {
+            job_optional.value()();
+          }
+        }
+      });
 }
 
 void GraphGenerationController::Worker::stop() {
-  assert(state_flag == State::Working);
-  state_flag = State::ShouldTerminate;
+  assert(state_flag_ == State::Working);
+  state_flag_ = State::ShouldTerminate;
 }
 
 }  // namespace graph_generation_controller
