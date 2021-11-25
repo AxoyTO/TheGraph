@@ -277,14 +277,12 @@ class Graph {
 
   VertexId get_next_vertex_id() {
     const VertexId new_vertex_id = next_vertex_id_;
-    ++next_vertex_id_;
-    return new_vertex_id;
+    return next_vertex_id_++;
   }
 
   EdgeId get_next_edge_id() {
     const EdgeId new_edge_id = next_edge_id_;
-    ++next_edge_id_;
-    return new_edge_id;
+    return next_edge_id_++;
   }
 
   std::string get_json_string_private() const {
