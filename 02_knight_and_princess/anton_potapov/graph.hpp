@@ -4,6 +4,7 @@
 #include <cassert>
 #include <map>
 #include <queue>
+#include <random>
 #include <set>
 #include <sstream>
 #include <string>
@@ -294,3 +295,16 @@ class Graph {
     return json_stringstream.str();
   }
 };
+
+VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
+  int range_start = 0;
+  int range_end = (int)vertex_id_set.size() - 1;
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dist(range_start, range_end);
+  size_t rand_int = dist(gen);
+  size_t rand_id = rand_int % vertex_id_set.size();
+  auto rand_it = vertex_id_set.begin();
+  std::advance(rand_it, rand_id);
+  return *rand_it;
+}

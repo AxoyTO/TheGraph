@@ -65,9 +65,10 @@ class GraphGenerator {
   }
 
   void generate_blue_edges() {
-   for (int cur_depth = 0; cur_depth <= graph_.max_depth(); ++cur_depth) {
+    for (int cur_depth = 0; cur_depth <= graph_.max_depth(); ++cur_depth) {
       const auto& same_depth_vertices = graph_.get_vertices_at_depth(cur_depth);
-      for (auto it = same_depth_vertices.begin(); std::next(it) != same_depth_vertices.end(); ++it) {
+      for (auto it = same_depth_vertices.begin();
+           std::next(it) != same_depth_vertices.end(); ++it) {
         const auto& vertex1_id = *it;
         const auto& vertex2_id = *std::next(it);
         if (is_lucky(BLUE_EDGE_PROB) &&
@@ -93,10 +94,9 @@ class GraphGenerator {
             }
           }
           if (!not_connected_vertices.empty()) {
-            size_t rand_id = std::rand() % not_connected_vertices.size();
-            auto rand_it = not_connected_vertices.begin();
-            std::advance(rand_it, rand_id);
-            graph_.add_edge(cur_vertex_id, *rand_it, EdgeColor::Yellow);
+            graph_.add_edge(cur_vertex_id,
+                            get_random_vertex_id(not_connected_vertices),
+                            EdgeColor::Yellow);
           }
         }
       }
@@ -111,10 +111,9 @@ class GraphGenerator {
           initial_depth_distribution_.find(cur_depth + 2)->second;
       for (const auto& cur_vertex_id : cur_depth_vertices) {
         if (is_lucky(RED_EDGE_PROB) && !next_depth_vertices.empty()) {
-          size_t rand_id = std::rand() % next_depth_vertices.size();
-          auto rand_it = next_depth_vertices.begin();
-          std::advance(rand_it, rand_id);
-          graph_.add_edge(cur_vertex_id, *rand_it, EdgeColor::Red);
+          graph_.add_edge(cur_vertex_id,
+                          get_random_vertex_id(next_depth_vertices),
+                          EdgeColor::Red);
         }
       }
     }
