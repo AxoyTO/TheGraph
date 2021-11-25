@@ -17,27 +17,23 @@ namespace graph_generation_controller {
 GraphGenerationController::GraphGenerationController(
     int threads_count,
     int graphs_count,
-    uni_cpp_practice::graph_generation::Params graph_generator_params) {
-  params_ = graph_generator_params;
-  threads_count_ = threads_count;
-  graphs_count_ = graphs_count;
-
+    const uni_cpp_practice::graph_generation::Params& graph_generator_params)
+    : graphs_count_(graphs_count), params_(graph_generator_params) {
   for (int iter = 0; iter < threads_count; iter++) {
-    workers_.emplace_back([&]() -> std::optional<JobCallback> {
-      mtx.lock();
-      if (jobs_.empty()) {
-        mtx.unlock();
-        return std::nullopt;
-      }
-      const auto job = jobs_.front();
-      jobs_.pop_front();
-      mtx.unlock();
-      return job;
-    });
+    workers_.emplace_back(
+        [&jobs_ = jobs_, &mutex_ = mutex_]() -> std::optional<JobCallback> {
+          const std::lock_guard lock(mutex_);
+          if (jobs_.empty()) {
+            return std::nullopt;
+          }
+          const auto job = jobs_.front();
+          jobs_.pop_front();
+          return job;
+        });
   }
 }
 
-void GraphGenerationController::new_generate(
+void GraphGenerationController::generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
   for (auto& worker : workers_) {
@@ -45,13 +41,16 @@ void GraphGenerationController::new_generate(
   }
 
   for (int i = 0; i < graphs_count_; i++) {
-    jobs_.emplace_back([=]() {
+    jobs_.emplace_back([gen_started_callback, gen_finished_callback, i,
+                        &mutex_ = mutex_, &params_ = params_]() {
       gen_started_callback(i);
       auto graph = uni_cpp_practice::graph_generation::generate(params_);
-      mtx.lock();
+      const std::lock_guard lock(mutex_);
       gen_finished_callback(std::move(graph), i);
-      mtx.unlock();
     });
+  }
+
+  while (!jobs_.empty()) {
   }
 }
 
@@ -61,22 +60,30 @@ GraphGenerationController::~GraphGenerationController() {
   }
 }
 
+GraphGenerationController::Worker::~Worker() {
+  if (thread_.joinable())
+    thread_.join();
+}
+
 void GraphGenerationController::Worker::start() {
+  assert(state_flag != State::Working);
+  state_flag = State::Working;
   thread_ = std::thread([=]() {
     while (true) {
+      if (should_terminate()) {
+        return;
+      }
       const auto job_optional = get_job_callback_();
       if (job_optional.has_value()) {
         job_optional.value()();
-      } else if (should_terminate())
-        return;
+      }
     }
   });
 }
 
 void GraphGenerationController::Worker::stop() {
-  finish_flag = true;
-  if (thread_.joinable())
-    thread_.join();
+  assert(state_flag == State::Working);
+  state_flag = State::ShouldTerminate;
 }
 
 }  // namespace graph_generation_controller

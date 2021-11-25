@@ -25,7 +25,7 @@ class Logger {
 
  private:
   std::optional<std::ofstream> file_stream_ = std::nullopt;
-  std::mutex mtx_;
+  std::mutex mutex_;
 
   Logger() = default;
   Logger(const Logger& root) = delete;

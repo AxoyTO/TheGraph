@@ -24,34 +24,37 @@ class GraphGenerationController {
     explicit Worker(const GetJobCallback& get_job_callback)
         : get_job_callback_(get_job_callback){};
 
+    enum class State { Idle, Working, ShouldTerminate };
+
     void start();
     void stop();
 
-    bool should_terminate() { return finish_flag; }
+    bool should_terminate() { return state_flag == State::ShouldTerminate; }
+
+    ~Worker();
 
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    bool finish_flag = false;
+    State state_flag = State::Idle;
   };
 
   GraphGenerationController(
       int threads_count,
       int graphs_count,
-      uni_cpp_practice::graph_generation::Params graph_generator_params);
+      const uni_cpp_practice::graph_generation::Params& graph_generator_params);
 
-  void new_generate(const GenStartedCallback& gen_started_callback,
-                    const GenFinishedCallback& gen_finished_callback);
+  void generate(const GenStartedCallback& gen_started_callback,
+                const GenFinishedCallback& gen_finished_callback);
 
   ~GraphGenerationController();
 
  private:
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
-  int threads_count_;
   int graphs_count_;
   uni_cpp_practice::graph_generation::Params params_;
-  std::mutex mtx;
+  std::mutex mutex_;
 };
 
 }  // namespace graph_generation_controller

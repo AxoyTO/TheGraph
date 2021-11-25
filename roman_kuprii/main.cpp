@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <thread>
 
 #include "graph.hpp"
 #include "graph_generation.hpp"
@@ -76,7 +75,7 @@ int main() {
   auto graphs = std::vector<uni_cpp_practice::Graph>();
   graphs.reserve(graphs_count);
 
-  generation_controller.new_generate(
+  generation_controller.generate(
       [&logger](int index) {
         logger.log(uni_cpp_practice::logging_helping::write_log_start(index));
       },
