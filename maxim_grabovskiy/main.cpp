@@ -21,25 +21,25 @@ class Graph {
     Edge(EdgeId _id, VertexId _fromVertexId, VertexId _toVertexId)
         : id(_id), fromVertexId(_fromVertexId), toVertexId(_toVertexId) {}
   };
-
   struct Vertex {
     const VertexId id;
     explicit Vertex(VertexId _id) : id(_id) {}
   };
-  vector<Vertex> vertexes;
-  vector<Edge> edges;
-  map<VertexId, vector<EdgeId>> edgeConectionMap;
+  vector<EdgeId> getConnectionsVector(VertexId vertexId) const {
+    return edgeConectionMap.at(vertexId);
+  }
+  vector<Vertex> getVertexesVector() const { return vertexes; }
+  vector<Edge> getEdgesVector() const { return edges; }
   void addEdge(VertexId fromVertexId, VertexId toVertexId) {
-    EdgeId tempEdgeId = getNewEdgeId();
-    edgeConectionMap[fromVertexId].push_back(tempEdgeId);
-    edgeConectionMap[toVertexId].push_back(tempEdgeId);
-    edges.emplace_back(tempEdgeId, fromVertexId, toVertexId);
+    EdgeId newEdgeId = getNewEdgeId();
+    edgeConectionMap[fromVertexId].push_back(newEdgeId);
+    edgeConectionMap[toVertexId].push_back(newEdgeId);
+    edges.emplace_back(newEdgeId, fromVertexId, toVertexId);
   }
   VertexId addVertex() {
-    vector<EdgeId> newEdgeIdVector;
     VertexId newVertexId = getNewVertexId();
     vertexes.emplace_back(newVertexId);
-    edgeConectionMap.insert(make_pair(newVertexId, newEdgeIdVector));
+    edgeConectionMap[newVertexId] = {};
     return newVertexId;
   }
   VertexId spawnVertex(VertexId parentId) {
@@ -49,6 +49,9 @@ class Graph {
   }
 
  private:
+  vector<Vertex> vertexes;
+  vector<Edge> edges;
+  map<VertexId, vector<EdgeId>> edgeConectionMap;
   VertexId vertexIdCounter_ = 0;
   EdgeId edgeIdCounter_ = 0;
   VertexId getNewVertexId() { return vertexIdCounter_++; }
@@ -56,20 +59,19 @@ class Graph {
 };
 class GraphPrinter {
  public:
-  GraphPrinter(const Graph& graph) : graph_(graph) {}
+  explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
   string print_vertex(const Graph::Vertex& vertex) const {
     std::stringstream vertexOutput;
     vertexOutput << "\t{ \"id\": " << vertex.id << ", \"edge_ids\":[";
-    for (int i = 0;
-         i < ((int)(graph_.edgeConectionMap.at(vertex.id).size() - 1)); i++) {
-      vertexOutput << graph_.edgeConectionMap.at(vertex.id)[i] << ", ";
+    const auto& edgeIds = graph_.getConnectionsVector(vertex.id);
+    for (int i = 0; i < edgeIds.size(); i++) {
+      vertexOutput
+          << graph_.getConnectionsVector(vertex.id)[i]
+          << ((i != ((int)(graph_.getConnectionsVector(vertex.id).size() - 1)))
+                  ? ", "
+                  : "]");
     }
-    vertexOutput
-        << graph_.edgeConectionMap.at(
-               vertex.id)[graph_.edgeConectionMap.at(vertex.id).size() - 1]
-        << "] }";
-    vertexOutput << ((vertex.id == (int)graph_.vertexes.size() - 1) ? "\n"
-                                                                    : ",\n");
+    vertexOutput << " }";
     return vertexOutput.str();
   }
 
@@ -77,22 +79,25 @@ class GraphPrinter {
     std::stringstream edgeOutput;
     edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
                << edge.fromVertexId << ", " << edge.toVertexId << "] }";
-    edgeOutput << ((edge.id == (int)graph_.edges.size() - 1) ? "\n ]\n}\n"
-                                                             : ",\n");
     return edgeOutput.str();
   }
 
   string print() const {
     std::stringstream printOutput;
     printOutput << "{\n\"vertices\": [\n";
-    for (auto const vertex : graph_.vertexes) {
+    for (auto const vertex : graph_.getVertexesVector()) {
       printOutput << print_vertex(vertex);
+      printOutput << ",\n";
     }
-    printOutput << "\t],\n "
+    printOutput.seekp(-2, std::ios_base::end);
+    printOutput << "\n\t],\n "
                 << "\"edges\": [\n";
-    for (auto const edge : graph_.edges) {
+    for (auto const edge : graph_.getEdgesVector()) {
       printOutput << print_edge(edge);
+      printOutput << ",\n";
     }
+    printOutput.seekp(-2, std::ios_base::end);
+    printOutput << "\n\t]\n}\n";
     string s = printOutput.str();
     return printOutput.str();
   }
@@ -100,10 +105,12 @@ class GraphPrinter {
  private:
   const Graph& graph_;
 };
-void write_to_file(string output, string filename) {
+
+void write_to_file(string const& output, string const& filename) {
   ofstream fileToWrite(filename);
   fileToWrite << output;
 }
+
 int main() {
   Graph graph;
   graph.addVertex();
