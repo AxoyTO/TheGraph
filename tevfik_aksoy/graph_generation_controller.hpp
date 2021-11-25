@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <list>
+#include <mutex>
 #include <thread>
 #include "graph_generator.hpp"
 
@@ -9,10 +10,7 @@ class GraphGenerationController {
  public:
   GraphGenerationController(int threads_count,
                             int graphs_count,
-                            GraphGenerator::Params graph_generator_params)
-      : threads_count_(threads_count),
-        graphs_count_(graphs_count),
-        params_(graph_generator_params) {}
+                            GraphGenerator::Params graph_generator_params);
   class Worker {
    public:
     using JobCallback = std::function<void()>;
@@ -28,18 +26,21 @@ class GraphGenerationController {
 
    private:
     std::thread thread_;
+    bool terminate_flag = false;
     GetJobCallback get_job_callback_;
   };
 
   void generate(const Worker::GenerateStartedCallback& gen_started_callback,
                 const Worker::GenerateFinishedCallback& gen_finished_callback);
 
+  ~GraphGenerationController();
+
  private:
-  int threads_count_;
   int graphs_count_;
   GraphGenerator::Params params_;
   GraphGenerator graph_generator_;
   std::list<Worker> workers_;
   std::list<Worker::JobCallback> jobs_;
+  std::mutex mutex_;
 };
 }  // namespace uni_cpp_practice

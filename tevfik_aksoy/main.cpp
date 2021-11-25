@@ -7,7 +7,6 @@
 #include <string>
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
-#include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
