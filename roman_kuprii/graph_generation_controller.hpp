@@ -29,7 +29,9 @@ class GraphGenerationController {
     void start();
     void stop();
 
-    bool should_terminate() { return state_flag == State::ShouldTerminate; }
+    bool should_terminate() const {
+      return state_flag == State::ShouldTerminate;
+    }
 
     ~Worker();
 
