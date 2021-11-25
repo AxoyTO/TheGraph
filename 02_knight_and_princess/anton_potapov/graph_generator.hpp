@@ -11,7 +11,7 @@
 
 constexpr double DOUBLE_COMPARISON_EPS = 1e-9;
 
-bool is_lucky(const double probability) {
+bool is_lucky(double probability) {
   assert(probability + DOUBLE_COMPARISON_EPS > 0 &&
          probability - DOUBLE_COMPARISON_EPS < 1 &&
          "given probability is incorrect");
