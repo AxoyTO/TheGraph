@@ -6,12 +6,13 @@
 #include <random>
 #include <set>
 #include <utility>
+#include <limits>
 
 #include "graph.hpp"
 
-constexpr double DOUBLE_COMPARISON_EPS = 1e-9;
+constexpr float DOUBLE_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
 
-bool is_lucky(double probability) {
+bool is_lucky(float probability) {
   assert(probability + DOUBLE_COMPARISON_EPS > 0 &&
          probability - DOUBLE_COMPARISON_EPS < 1 &&
          "given probability is incorrect");
