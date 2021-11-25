@@ -23,8 +23,6 @@ std::string get_edge_color_string(const EdgeColor& color) {
       return "yellow";
     case EdgeColor::Red:
       return "red";
-    default:
-      return "unknown_color";
   }
 }
 
@@ -98,6 +96,35 @@ class Edge {
 
 class Graph {
  public:
+  Graph() = default;
+
+  Graph& operator=(const Graph&) = delete;
+
+  Graph& operator=(Graph&& other_graph) {
+    other_graph.update_vertices_depth();
+    this->vertices_ = std::move(other_graph.vertices_);
+    this->edges_ = std::move(other_graph.edges_);
+    this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
+    this->next_edge_id_ = std::move(other_graph.next_edge_id_);
+    this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
+    this->max_depth_ = std::move(other_graph.max_depth_);
+    return *this;
+  }
+
+  Graph(const Graph&) = delete;
+
+  Graph(Graph&& other_graph) {
+    other_graph.update_vertices_depth();
+    this->vertices_ = std::move(other_graph.vertices_);
+    this->edges_ = std::move(other_graph.edges_);
+    this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
+    this->next_edge_id_ = std::move(other_graph.next_edge_id_);
+    this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
+    this->max_depth_ = std::move(other_graph.max_depth_);
+  }
+
+  virtual ~Graph() = default;
+
   size_t max_depth() const { return max_depth_; }
 
   std::set<VertexId> vertex_ids() const {
@@ -113,8 +140,16 @@ class Graph {
     return vertices_at_depth_[depth];
   }
 
+  const std::set<VertexId>& get_vertices_at_depth(size_t depth) const {
+    return vertices_at_depth_.at(depth);
+  }
+
   const std::map<size_t, std::set<VertexId>>& depth_distribution() {
     update_vertices_depth();
+    return vertices_at_depth_;
+  }
+
+  const std::map<size_t, std::set<VertexId>>& depth_distribution() const {
     return vertices_at_depth_;
   }
 
@@ -127,18 +162,17 @@ class Graph {
     assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
     if (vertex1_id == vertex2_id) {
-      auto vertex_pair_iterator = vertices_.find(vertex1_id);
-      for (const auto& vertex_edge_id :
-           vertex_pair_iterator->second.connected_edges()) {
-        const auto& vertex_edge = edges_.find(vertex_edge_id)->second;
+      for (auto& vertex_edge_id :
+           this->get_vertex(vertex1_id).connected_edges()) {
+        auto& vertex_edge = this->get_edge(vertex_edge_id);
         if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
           return true;
         }
       }
       return false;
     } else {
-      for (const auto& vertex1_edge_id :
-           vertices_.find(vertex1_id)->second.connected_edges()) {
+      for (auto& vertex1_edge_id :
+           this->get_vertex(vertex1_id).connected_edges()) {
         if (vertices_.find(vertex2_id)->second.has_edge_id(vertex1_edge_id)) {
           return true;
         }
@@ -176,44 +210,11 @@ class Graph {
 
   std::string get_json_string() {
     update_vertices_depth();
-    std::stringstream json_stringstream;
-    json_stringstream << "{\"depth\":" << max_depth_ << ",";
-    json_stringstream << "\"vertices\":[";
-    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
-      json_stringstream << it->second.get_json_string();
-      if (std::next(it) != vertices_.end()) {
-        json_stringstream << ",";
-      }
-    }
-    json_stringstream << "],\"edges\":[";
-    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
-      json_stringstream << it->second.get_json_string();
-      if (std::next(it) != edges_.end()) {
-        json_stringstream << ",";
-      }
-    }
-    json_stringstream << "]}";
-    return json_stringstream.str();
+    return this->get_json_string_private();
   }
 
- private:
-  VertexId next_vertex_id_{};
-  EdgeId next_edge_id_{};
-  std::map<VertexId, Vertex> vertices_;
-  std::map<EdgeId, Edge> edges_;
-  std::map<size_t, std::set<VertexId>> vertices_at_depth_;
-  size_t max_depth_;
-
-  VertexId get_next_vertex_id() {
-    const VertexId new_vertex_id = next_vertex_id_;
-    ++next_vertex_id_;
-    return new_vertex_id;
-  }
-
-  EdgeId get_next_edge_id() {
-    const EdgeId new_edge_id = next_edge_id_;
-    ++next_edge_id_;
-    return new_edge_id;
+  std::string get_json_string() const {
+    return this->get_json_string_private();
   }
 
   void update_vertices_depth() {
@@ -256,5 +257,53 @@ class Graph {
     for (const auto& [vertex_id, depth] : depths) {
       vertices_at_depth_[depth].insert(vertex_id);
     }
+  }
+
+ private:
+  VertexId next_vertex_id_{};
+  EdgeId next_edge_id_{};
+  std::map<VertexId, Vertex> vertices_;
+  std::map<EdgeId, Edge> edges_;
+  std::map<size_t, std::set<VertexId>> vertices_at_depth_;
+  size_t max_depth_;
+
+  const Vertex& get_vertex(const VertexId& id) const {
+    return vertices_.find(id)->second;
+  }
+  const Edge& get_edge(const EdgeId& id) const {
+    return edges_.find(id)->second;
+  }
+
+  VertexId get_next_vertex_id() {
+    const VertexId new_vertex_id = next_vertex_id_;
+    ++next_vertex_id_;
+    return new_vertex_id;
+  }
+
+  EdgeId get_next_edge_id() {
+    const EdgeId new_edge_id = next_edge_id_;
+    ++next_edge_id_;
+    return new_edge_id;
+  }
+
+  std::string get_json_string_private() const {
+    std::stringstream json_stringstream;
+    json_stringstream << "{\"depth\":" << max_depth_ << ",";
+    json_stringstream << "\"vertices\":[";
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
+      json_stringstream << it->second.get_json_string();
+      if (std::next(it) != vertices_.end()) {
+        json_stringstream << ",";
+      }
+    }
+    json_stringstream << "],\"edges\":[";
+    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
+      json_stringstream << it->second.get_json_string();
+      if (std::next(it) != edges_.end()) {
+        json_stringstream << ",";
+      }
+    }
+    json_stringstream << "]}";
+    return json_stringstream.str();
   }
 };

@@ -15,17 +15,13 @@ Graph task_03_get_graph(const int depth, const int new_vertices_num) {
   }
 
   GraphGenerator graph_generator(depth, new_vertices_num);
-  graph_generator.generate_vertices();
-  graph_generator.generate_green_edges();
-  graph_generator.generate_blue_edges();
-  graph_generator.generate_yellow_edges();
-  graph_generator.generate_red_edges();
+  Graph ans = std::move(graph_generator.generate());
 
-  if (graph_generator.graph.max_depth() < (size_t)depth) {
-    std::cerr << "generated graph's depth=" << graph_generator.graph.max_depth()
+  if (ans.max_depth() < (size_t)depth) {
+    std::cerr << "generated graph's depth=" << ans.max_depth()
               << " is less than specified one =" << depth << std::endl;
   }
-  return graph_generator.graph;
+  return ans;
 }
 
 int main() {
