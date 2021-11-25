@@ -190,7 +190,7 @@ class Graph {
 
   EdgeId add_edge(const VertexId& vertex1,
                   const VertexId& vertex2,
-                  EdgeColor edge_color = EdgeColor::Gray) {
+                  const EdgeColor edge_color = EdgeColor::Gray) {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
