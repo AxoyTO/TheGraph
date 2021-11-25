@@ -4,11 +4,11 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <random>
 
 using VertexId = int;
 using EdgeId = int;
@@ -86,33 +86,35 @@ class Graph {
     return new_vertex.id;
   }
 
-  Edge::Colors calculateEdgeColor(const VertexId& vertex_id1, const VertexId& vertex_id2) const  {
-      if (connection_list_.at(vertex_id2).size() == 0 ||
+  Edge::Colors calculateEdgeColor(const VertexId& vertex_id1,
+                                  const VertexId& vertex_id2) const {
+    if (connection_list_.at(vertex_id2).size() == 0 ||
         connection_list_.at(vertex_id1).size() == 0) {
-          return Edge::Colors::Grey;
-      } else if (vertex_id1 == vertex_id2) {
+      return Edge::Colors::Grey;
+    } else if (vertex_id1 == vertex_id2) {
       return Edge::Colors::Green;
     } else if (vertexDepth(vertex_id2) == vertexDepth(vertex_id1)) {
       return Edge::Colors::Blue;
-    } else if (std::abs(vertexDepth(vertex_id2) -
-                        vertexDepth(vertex_id1)) == 1) {
+    } else if (std::abs(vertexDepth(vertex_id2) - vertexDepth(vertex_id1)) ==
+               1) {
       return Edge::Colors::Yellow;
     } else {
       return Edge::Colors::Red;
     }
   }
 
-  void greyEdgeInitialization(const VertexId& vertex_id1, const VertexId& vertex_id2) {
+  void greyEdgeInitialization(const VertexId& vertex_id1,
+                              const VertexId& vertex_id2) {
     int new_depth = vertexes_depths_[std::min(vertex_id1, vertex_id2)] + 1;
     vertexes_depths_[std::max(vertex_id1, vertex_id2)] = new_depth;
     depth_ = std::max(depth_, new_depth);
     layers_list_[new_depth].push_back(std::max(vertex_id1, vertex_id2));
     for (auto it = layers_list_[0].begin(); it != layers_list_[0].end(); it++) {
-        if (*it == std::max(vertex_id1, vertex_id2)) {
-            layers_list_[0].erase(it);
-            break;
-        }
+      if (*it == std::max(vertex_id1, vertex_id2)) {
+        layers_list_[0].erase(it);
+        break;
       }
+    }
   }
 
   void addEdge(const VertexId& vertex_id1, const VertexId& vertex_id2) {
@@ -122,7 +124,7 @@ class Graph {
            "These vertexes are already connected");
     auto color = calculateEdgeColor(vertex_id1, vertex_id2);
     if (color == Edge::Colors::Grey) {
-        greyEdgeInitialization(vertex_id1, vertex_id2);
+      greyEdgeInitialization(vertex_id1, vertex_id2);
     }
     const auto& new_edge =
         edges_.emplace_back(getNewEdgeId(), vertex_id1, vertex_id2, color);
@@ -156,9 +158,7 @@ class Graph {
     assert(hasVertex(vertex_id) && "Vertex id is out of range");
     return vertexes_depths_.at(vertex_id);
   }
-  int depth() const {
-      return depth_;
-  }
+  int depth() const { return depth_; }
 
  private:
   std::vector<Vertex> vertexes_;
@@ -173,7 +173,7 @@ class Graph {
 };
 
 constexpr float GREEN_PROBABILITY = 0.1, BLUE_PROBABILITY = 0.25,
-              RED_PROBABILITY = 0.33;
+                RED_PROBABILITY = 0.33;
 
 class GraphGenerator {
  public:
@@ -191,9 +191,10 @@ class GraphGenerator {
     Graph graph;
     double step = 1.0 / params_.depth;
     graph.addVertex();
-    for (int current_depth = 0; current_depth < params_.depth; current_depth++) {
-    bool vertexes_generated = false;
-    const auto previous_layer = graph.vertexIdsAtLayer(current_depth);
+    for (int current_depth = 0; current_depth < params_.depth;
+         current_depth++) {
+      bool vertexes_generated = false;
+      const auto previous_layer = graph.vertexIdsAtLayer(current_depth);
       for (const auto& vertex_id : previous_layer) {
         for (int j = 0; j < params_.new_vertexes_num; j++) {
           if (randomValue(1.0 - step * current_depth)) {
@@ -202,7 +203,9 @@ class GraphGenerator {
           }
         }
       }
-      if (!vertexes_generated) { break;}
+      if (!vertexes_generated) {
+        break;
+      }
     }
     if (graph.depth() < params_.depth) {
       std::cout << "Depth of the graph is less than given. Depth is "
@@ -221,17 +224,27 @@ class GraphGenerator {
         graph.addEdge(vertex.id, vertex.id + 1);
       }
       if (graph.vertexDepth(vertex.id) < graph.depth() &&
-          randomValue(1.0 * graph.vertexDepth(vertex.id) / (graph.depth() - 1))) {
+          randomValue(1.0 * graph.vertexDepth(vertex.id) /
+                      (graph.depth() - 1))) {
         std::vector<VertexId> next_layer;
-        for (const auto& vertex_id : graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 1)) {
+        for (const auto& vertex_id :
+             graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 1)) {
           if (!graph.areConnected(vertex.id, vertex_id)) {
             next_layer.push_back(vertex_id);
           }
         }
-        graph.addEdge(vertex.id, next_layer.at(randomNumber(next_layer.size() - 1)));
+        graph.addEdge(vertex.id,
+                      next_layer.at(randomNumber(next_layer.size() - 1)));
       }
-      if (randomValue(RED_PROBABILITY) && graph.vertexDepth(vertex.id) < (graph.depth() - 1)) {
-        graph.addEdge(vertex.id, graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 2)[randomNumber(graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 2).size() - 1)]);
+      if (randomValue(RED_PROBABILITY) &&
+          graph.vertexDepth(vertex.id) < (graph.depth() - 1)) {
+        graph.addEdge(
+            vertex.id,
+            graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) +
+                                   2)[randomNumber(
+                graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 2)
+                    .size() -
+                1)]);
       }
     }
   }
@@ -245,16 +258,16 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
   bool randomValue(float probability) const {
-      std::random_device rd;
-      std::mt19937 gen(rd());
-      std::bernoulli_distribution distribution(probability);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::bernoulli_distribution distribution(probability);
     return distribution(gen);
   }
   int randomNumber(int max_number) const {
-      std::random_device rd;
-      std::mt19937 gen(rd());
-      std::uniform_int_distribution<> random_number(0, max_number);
-      return random_number(gen);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> random_number(0, max_number);
+    return random_number(gen);
   }
 };
 
@@ -268,16 +281,16 @@ class GraphPrinter {
       graph_string += printVertex(vertex.id);
     }
     if (graph_.vertexes().size() > 0) {
-        graph_string.pop_back();
-        graph_string.pop_back();
+      graph_string.pop_back();
+      graph_string.pop_back();
     }
     graph_string += "\n ],\n \"edges\": [\n  ";
     for (const auto& edge : graph_.edges()) {
       graph_string += printEdge(edge);
     }
     if (graph_.edges().size() > 0) {
-        graph_string.pop_back();
-        graph_string.pop_back();
+      graph_string.pop_back();
+      graph_string.pop_back();
     }
     graph_string += "\n ]\n}\n";
     return graph_string;
@@ -289,8 +302,8 @@ class GraphPrinter {
       vertex_string += std::to_string(edge_id) + ", ";
     }
     if (graph_.vertexConnections(id).size() > 0) {
-        vertex_string.pop_back();
-        vertex_string.pop_back();
+      vertex_string.pop_back();
+      vertex_string.pop_back();
     }
     vertex_string +=
         "],\n   \"depth\": " + std::to_string(graph_.vertexDepth(id)) +
