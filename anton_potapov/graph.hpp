@@ -104,11 +104,11 @@ class Graph {
 
   Graph& operator=(Graph&& other_graph) {
     other_graph.update_vertices_depth();
-    this->vertices_ = std::move(other_graph.vertices_);
-    this->edges_ = std::move(other_graph.edges_);
-    this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
-    this->next_edge_id_ = std::move(other_graph.next_edge_id_);
-    this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
+    vertices_ = std::move(other_graph.vertices_);
+    edges_ = std::move(other_graph.edges_);
+    next_vertex_id_ = std::move(other_graph.next_vertex_id_);
+    next_edge_id_ = std::move(other_graph.next_edge_id_);
+    vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
     return *this;
   }
 
@@ -116,26 +116,26 @@ class Graph {
 
   Graph(Graph&& other_graph) {
     other_graph.update_vertices_depth();
-    this->vertices_ = std::move(other_graph.vertices_);
-    this->edges_ = std::move(other_graph.edges_);
-    this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
-    this->next_edge_id_ = std::move(other_graph.next_edge_id_);
-    this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
+    vertices_ = std::move(other_graph.vertices_);
+    edges_ = std::move(other_graph.edges_);
+    next_vertex_id_ = std::move(other_graph.next_vertex_id_);
+    next_edge_id_ = std::move(other_graph.next_edge_id_);
+    vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
   }
 
   virtual ~Graph() = default;
 
   int max_depth() {
-    this->update_vertices_depth();
-    return std::max((int)this->vertices_at_depth_.size() - 1, 0);
+    update_vertices_depth();
+    return std::max((int)vertices_at_depth_.size() - 1, 0);
   }
 
-  int max_depth() const { return this->vertices_at_depth_.size(); }
+  int max_depth() const { return vertices_at_depth_.size(); }
 
-  const std::map<VertexId, Vertex>& vertices() const { return this->vertices_; }
+  const std::map<VertexId, Vertex>& vertices() const { return vertices_; }
 
   const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
-    this->update_vertices_depth();
+    update_vertices_depth();
     return vertices_at_depth_.at(depth);
   }
 
@@ -144,7 +144,7 @@ class Graph {
   }
 
   const std::map<int, std::set<VertexId>>& depth_distribution() {
-    this->update_vertices_depth();
+    update_vertices_depth();
     return vertices_at_depth_;
   }
 
@@ -161,17 +161,15 @@ class Graph {
     assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
     if (vertex1_id == vertex2_id) {
-      for (auto& vertex_edge_id :
-           this->get_vertex(vertex1_id).connected_edges()) {
-        auto& vertex_edge = this->get_edge(vertex_edge_id);
+      for (auto& vertex_edge_id : get_vertex(vertex1_id).connected_edges()) {
+        auto& vertex_edge = get_edge(vertex_edge_id);
         if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
           return true;
         }
       }
       return false;
     } else {
-      for (auto& vertex1_edge_id :
-           this->get_vertex(vertex1_id).connected_edges()) {
+      for (auto& vertex1_edge_id : get_vertex(vertex1_id).connected_edges()) {
         if (vertices_.find(vertex2_id)->second.has_edge_id(vertex1_edge_id)) {
           return true;
         }
@@ -208,11 +206,11 @@ class Graph {
 
   std::string get_json_string() {
     update_vertices_depth();
-    return this->get_json_string_private();
+    return get_json_string_private();
   }
 
   std::string get_json_string() const {
-    return this->get_json_string_private();
+    return get_json_string_private();
   }
 
   void update_vertices_depth() {
@@ -276,7 +274,7 @@ class Graph {
 
   std::string get_json_string_private() const {
     std::stringstream json_stringstream;
-    json_stringstream << "{\"depth\":" << this->max_depth() << ",";
+    json_stringstream << "{\"depth\":" << max_depth() << ",";
     json_stringstream << "\"vertices\":[";
     for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
       json_stringstream << it->second.get_json_string();

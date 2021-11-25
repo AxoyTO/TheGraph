@@ -31,12 +31,12 @@ class GraphGenerator {
       : depth_(depth), new_vertices_num_(new_vertices_num) {}
 
   Graph& generate_graph() {
-    this->generate_vertices();
-    this->generate_green_edges();
-    this->generate_blue_edges();
-    this->generate_yellow_edges();
-    this->generate_red_edges();
-    return this->graph_;
+    generate_vertices();
+    generate_green_edges();
+    generate_blue_edges();
+    generate_yellow_edges();
+    generate_red_edges();
+    return graph_;
   }
 
  private:
