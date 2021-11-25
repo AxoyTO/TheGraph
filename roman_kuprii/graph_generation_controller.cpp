@@ -24,9 +24,11 @@ GraphGenerationController::GraphGenerationController(
 
   for (int iter = 0; iter < threads_count; iter++) {
     workers_.emplace_back([&]() -> std::optional<JobCallback> {
-      if (jobs_.empty())
-        return std::nullopt;
       mtx.lock();
+      if (jobs_.empty()) {
+        mtx.unlock();
+        return std::nullopt;
+      }
       const auto job = jobs_.front();
       jobs_.pop_front();
       mtx.unlock();
@@ -46,7 +48,9 @@ void GraphGenerationController::new_generate(
     jobs_.emplace_back([=]() {
       gen_started_callback(i);
       auto graph = uni_cpp_practice::graph_generation::generate(params_);
+      mtx.lock();
       gen_finished_callback(std::move(graph), i);
+      mtx.unlock();
     });
   }
 }
