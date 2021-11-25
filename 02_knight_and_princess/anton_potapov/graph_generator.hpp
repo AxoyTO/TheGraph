@@ -11,6 +11,9 @@
 #include "graph.hpp"
 
 constexpr float DOUBLE_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
+constexpr float GREEN_EDGE_PROB = 0.1;
+constexpr float BLUE_EDGE_PROB = 0.25;
+constexpr float RED_EDGE_PROB = 0.33;
 
 bool is_lucky(float probability) {
   assert(probability + DOUBLE_COMPARISON_EPS > 0 &&
@@ -55,7 +58,7 @@ class GraphGenerator {
 
   void generate_green_edges() {
     for (const auto& [vertex_id, vertex] : graph_.vertices()) {
-      if (is_lucky(0.1)) {
+      if (is_lucky(GREEN_EDGE_PROB)) {
         graph_.add_edge(vertex_id, vertex_id, EdgeColor::Green);
       }
     }
@@ -66,7 +69,8 @@ class GraphGenerator {
       const auto& same_depth_vertices = graph_.get_vertices_at_depth(cur_depth);
       for (const auto& vertex1_id : same_depth_vertices) {
         for (const auto& vertex2_id : same_depth_vertices) {
-          if (is_lucky(0.25) && !graph_.is_connected(vertex1_id, vertex2_id)) {
+          if (is_lucky(BLUE_EDGE_PROB) &&
+              !graph_.is_connected(vertex1_id, vertex2_id)) {
             graph_.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
           }
         }
@@ -75,8 +79,7 @@ class GraphGenerator {
   }
 
   void generate_yellow_edges() {
-    for (int cur_depth = 0; cur_depth + 1 <= graph_.max_depth();
-         ++cur_depth) {
+    for (int cur_depth = 0; cur_depth + 1 <= graph_.max_depth(); ++cur_depth) {
       const auto& cur_depth_vertices =
           initial_depth_distribution_.find(cur_depth)->second;
       const auto& next_depth_vertices =
@@ -101,14 +104,13 @@ class GraphGenerator {
   }
 
   void generate_red_edges() {
-    for (int cur_depth = 0; cur_depth + 2 <= graph_.max_depth();
-         ++cur_depth) {
+    for (int cur_depth = 0; cur_depth + 2 <= graph_.max_depth(); ++cur_depth) {
       const auto& cur_depth_vertices =
           initial_depth_distribution_.find(cur_depth)->second;
       const auto& next_depth_vertices =
           initial_depth_distribution_.find(cur_depth + 2)->second;
       for (const auto& cur_vertex_id : cur_depth_vertices) {
-        if (is_lucky(0.33) && !next_depth_vertices.empty()) {
+        if (is_lucky(RED_EDGE_PROB) && !next_depth_vertices.empty()) {
           size_t rand_id = std::rand() % next_depth_vertices.size();
           auto rand_it = next_depth_vertices.begin();
           std::advance(rand_it, rand_id);
