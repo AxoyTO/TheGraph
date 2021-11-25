@@ -4,27 +4,42 @@
 #include <string>
 #include <vector>
 
+using VertexId = int;
+using EdgeId = int;
+
+constexpr int VERTICES_COUNT() {
+  return 14;
+}
+
 class Vertex {
  public:
-  Vertex(int id);
-  int get_id() const;
-  std::vector<int> connected_edges;
+  explicit Vertex(VertexId id) : id_(id) {}
+  VertexId get_id() const;
+  bool operator==(const Vertex& right_edge) const;
+  EdgeId get_connected_edge_id(int idx) const;
+  void add_connected_edge_id(EdgeId id);
+  int get_connected_edges_count() const;
 
  private:
-  int _id = 0;
+  VertexId id_ = 0;
+  std::vector<EdgeId> connected_edge_ids_;
 };
 
 struct Edge {
  public:
-  Edge(int id, int first_vertex_id, int second_vertex_id);
-  int get_id() const;
-  int get_first_id() const;
-  int get_second_id() const;
+  Edge(EdgeId id, VertexId first_vertex_id, VertexId second_vertex_id)
+      : id_(id),
+        first_vertex_id_(first_vertex_id),
+        second_vertex_id_(second_vertex_id) {}
+  EdgeId get_id() const;
+  VertexId get_first_id() const;
+  VertexId get_second_id() const;
+  bool operator==(const Edge& right_edge) const;
 
  private:
-  int _id = 0;
-  int _first_vertex_id = 0;
-  int _second_vertex_id = 0;
+  EdgeId id_ = 0;
+  VertexId first_vertex_id_ = 0;
+  VertexId second_vertex_id_ = 0;
 };
 
 class Graph {
@@ -32,92 +47,121 @@ class Graph {
   void add_vertex();
   void add_edge(int first_vertex_id, int second_vertex_id);
   std::string to_string() const;
-  bool is_vertex_exists(int id) const;
-  bool is_edge_exists(int id) const;
-  int get_new_vertex_id() const;
-  int get_new_edge_id() const;
 
  private:
-  std::vector<Vertex> _vertices;
-  std::vector<Edge> _edges;
+  std::vector<Vertex> vertices_;
+  std::vector<Edge> edges_;
+
+  bool is_vertex_exists(int id) const;
+  bool is_edge_exists(EdgeId id) const;
+  VertexId get_new_vertex_id() const;
+  EdgeId get_new_edge_id() const;
+
+  Vertex& get_vertex(const VertexId& id);
+
+  VertexId vertex_id_counter_ = 0;
+  EdgeId edge_id_counter_ = 0;
 };
 
-int Vertex::get_id() const {
-  return _id;
+VertexId Vertex::get_id() const {
+  return id_;
 }
-int Edge::get_id() const {
-  return _id;
-}
-
-int Edge::get_first_id() const {
-  return _first_vertex_id;
+EdgeId Edge::get_id() const {
+  return id_;
 }
 
-int Edge::get_second_id() const {
-  return _second_vertex_id;
+VertexId Edge::get_first_id() const {
+  return first_vertex_id_;
 }
 
-Edge::Edge(int id, int first_vertex_id, int second_vertex_id) {
-  _id = id;
-  _first_vertex_id = first_vertex_id;
-  _second_vertex_id = second_vertex_id;
+VertexId Edge::get_second_id() const {
+  return second_vertex_id_;
 }
 
-Vertex::Vertex(int id) {
-  _id = id;
+bool Edge::operator==(const Edge& right_edge) const {
+  if (this->get_id() == right_edge.get_id()) {
+    return true;
+  }
+  return false;
+}
+
+bool Vertex::operator==(const Vertex& right_edge) const {
+  if (this->get_id() == right_edge.get_id()) {
+    return true;
+  }
+  return false;
 }
 
 void Graph::add_vertex() {
-  _vertices.emplace_back(get_new_vertex_id());
+  vertices_.emplace_back(get_new_vertex_id());
+  vertex_id_counter_++;
 }
 
-int Graph::get_new_vertex_id() const {
-  return _vertices.size();
+VertexId Graph::get_new_vertex_id() const {
+  return vertex_id_counter_;
 }
-int Graph::get_new_edge_id() const {
-  return _edges.size();
+EdgeId Graph::get_new_edge_id() const {
+  return edge_id_counter_;
 }
 
-void Graph::add_edge(int first, int second) {
-  for (int j = 0; j < _vertices.size(); ++j) {
-    if (_vertices[j].get_id() == first) {
-      _vertices[j].connected_edges.push_back(get_new_edge_id());
-    }
-    if (_vertices[j].get_id() == second) {
-      _vertices[j].connected_edges.push_back(get_new_edge_id());
+Vertex& Graph::get_vertex(const VertexId& id) {
+  for (auto& vertex : vertices_) {
+    if (vertex.get_id() == id) {
+      return vertex;
     }
   }
-  _edges.emplace_back(get_new_edge_id(), first, second);
+  throw std::runtime_error("Vertex not found!\n");
+}
+
+EdgeId Vertex::get_connected_edge_id(int idx) const {
+  return connected_edge_ids_[idx];
+}
+
+void Vertex::add_connected_edge_id(EdgeId id) {
+  connected_edge_ids_.push_back(id);
+}
+int Vertex::get_connected_edges_count() const {
+  return connected_edge_ids_.size();
+}
+
+void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
+  const auto& new_edge =
+      edges_.emplace_back(get_new_edge_id(), first_vertex_id, second_vertex_id);
+  auto& first_vertex = get_vertex(first_vertex_id);
+  first_vertex.add_connected_edge_id(new_edge.get_id());
+  auto& second_vertex = get_vertex(second_vertex_id);
+  second_vertex.add_connected_edge_id(new_edge.get_id());
+
+  edge_id_counter_++;
 }
 
 Graph generate_graph() {
-  Graph g;
-  const int VERTICES_COUNT = 14;
+  Graph graph;
 
-  for (int i = 0; i < VERTICES_COUNT; ++i) {
-    g.add_vertex();
+  for (int i = 0; i < VERTICES_COUNT(); ++i) {
+    graph.add_vertex();
   }
 
-  g.add_edge(0, 1);
-  g.add_edge(0, 2);
-  g.add_edge(0, 3);
-  g.add_edge(1, 4);
-  g.add_edge(1, 5);
-  g.add_edge(1, 6);
-  g.add_edge(2, 7);
-  g.add_edge(2, 8);
-  g.add_edge(3, 9);
-  g.add_edge(4, 10);
-  g.add_edge(5, 10);
-  g.add_edge(6, 10);
-  g.add_edge(7, 11);
-  g.add_edge(8, 11);
-  g.add_edge(9, 12);
-  g.add_edge(10, 13);
-  g.add_edge(11, 13);
-  g.add_edge(12, 13);
+  graph.add_edge(0, 1);
+  graph.add_edge(0, 2);
+  graph.add_edge(0, 3);
+  graph.add_edge(1, 4);
+  graph.add_edge(1, 5);
+  graph.add_edge(1, 6);
+  graph.add_edge(2, 7);
+  graph.add_edge(2, 8);
+  graph.add_edge(3, 9);
+  graph.add_edge(4, 10);
+  graph.add_edge(5, 10);
+  graph.add_edge(6, 10);
+  graph.add_edge(7, 11);
+  graph.add_edge(8, 11);
+  graph.add_edge(9, 12);
+  graph.add_edge(10, 13);
+  graph.add_edge(11, 13);
+  graph.add_edge(12, 13);
 
-  return g;
+  return graph;
 }
 
 std::string Graph::to_string() const {
@@ -125,31 +169,31 @@ std::string Graph::to_string() const {
 
   json << "{" << std::endl << "	\"vertices\": [" << std::endl;
 
-  for (int i = 0; i < _vertices.size(); ++i) {
-    json << "		{\n			\"id\": "
-         << _vertices[i].get_id() << "," << std::endl
+  for (const auto& vertex : vertices_) {
+    json << "		{\n			\"id\": " << vertex.get_id()
+         << "," << std::endl
          << "			\"edge_ids\": [";
-    for (int j = 0; j < _vertices[i].connected_edges.size(); ++j) {
-      json << _vertices[i].connected_edges[j];
-      if (j < _vertices[i].connected_edges.size() - 1) {
+    for (int j = 0; j < vertex.get_connected_edges_count(); ++j) {
+      json << vertex.get_connected_edge_id(j);
+      if (j < vertex.get_connected_edges_count() - 1) {
         json << ", ";
       } else {
         json << "]" << std::endl;
       }
     }
     json << "		}";
-    if (i < _vertices.size() - 1) {
+    if (vertex == vertices_[vertices_.size() - 1]) {
       json << ",\n";
     } else {
       json << "\n	],\n	\"edges\": [\n";
     }
   }
-  for (int i = 0; i < _edges.size(); ++i) {
-    json << "		{\n			\"id\": " << _edges[i].get_id()
+  for (const auto& edge : edges_) {
+    json << "		{\n			\"id\": " << edge.get_id()
          << ",\n			\"vertex_ids\": ["
-         << _edges[i].get_first_id() << ", " << _edges[i].get_second_id()
+         << edge.get_first_id() << ", " << edge.get_second_id()
          << "]\n		}";
-    if (i < _edges.size() - 1) {
+    if (edge == edges_.back()) {
       json << ",\n";
     } else {
       json << "\n	]\n}\n";
@@ -169,8 +213,8 @@ void json_to_file(std::string str) {
   json.close();
 }
 
-bool Graph::is_vertex_exists(int id) const {
-  for (const auto& vertex : _vertices) {
+bool Graph::is_vertex_exists(VertexId id) const {
+  for (const auto& vertex : vertices_) {
     if (vertex.get_id() == id) {
       return true;
     }
@@ -178,8 +222,8 @@ bool Graph::is_vertex_exists(int id) const {
   return false;
 }
 
-bool Graph::is_edge_exists(int id) const {
-  for (const auto& edge : _edges) {
+bool Graph::is_edge_exists(EdgeId id) const {
+  for (const auto& edge : edges_) {
     if (edge.get_id() == id) {
       return true;
     }
