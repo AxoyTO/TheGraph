@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -35,16 +36,16 @@ class Graph {
     edges.emplace_back(tempEdgeId, fromVertexId, toVertexId);
   }
   VertexId addVertex() {
-    vector<EdgeId> tempEdgeIdVector;
-    VertexId tempVertexId = getNewVertexId();
-    vertexes.emplace_back(tempVertexId);
-    edgeConectionMap.insert(make_pair(tempVertexId, tempEdgeIdVector));
-    return tempVertexId;
+    vector<EdgeId> newEdgeIdVector;
+    VertexId newVertexId = getNewVertexId();
+    vertexes.emplace_back(newVertexId);
+    edgeConectionMap.insert(make_pair(newVertexId, newEdgeIdVector));
+    return newVertexId;
   }
   VertexId spawnVertex(VertexId parentId) {
-    VertexId tempVertexId = addVertex();
-    addEdge(parentId, tempVertexId);
-    return tempVertexId;
+    VertexId newVertexId = addVertex();
+    addEdge(parentId, newVertexId);
+    return newVertexId;
   }
 
  private:
@@ -100,9 +101,8 @@ class GraphPrinter {
   const Graph& graph_;
 };
 void write_to_file(string output, string filename) {
-  freopen("graph.json", "w", stdout);
-
-  cout << output;
+  ofstream fileToWrite(filename);
+  fileToWrite << output;
 }
 int main() {
   Graph graph;
