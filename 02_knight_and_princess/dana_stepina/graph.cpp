@@ -1,6 +1,7 @@
 #include "graph.hpp"
 #include <cassert>
 
+// VERTEX
 Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 
 void Vertex::add_edge_id(const EdgeId& edge_id) {
@@ -15,6 +16,7 @@ bool Vertex::has_edge_id(const EdgeId& edge_id) const {
   return false;
 }
 
+// EDGE
 Edge::Edge(const EdgeId& edge_id,
            const VertexId& vertex_connection_start,
            const VertexId& vertex_connection_end)
@@ -22,8 +24,13 @@ Edge::Edge(const EdgeId& edge_id,
       vertex_start(vertex_connection_start),
       vertex_end(vertex_connection_end) {}
 
-void Graph::add_vertex() {
-  vertices_.emplace_back(get_new_vertex_id());
+// GRAPH
+Vertex& Graph::add_vertex() {
+  return vertices_.emplace_back(get_new_vertex_id());
+
+  if (!depth_map_.empty())
+    depth_map_.emplace_back();
+  depth_map_.front().push_back(get_vertex_id_counter());
 }
 
 void Graph::add_edge(const VertexId& from_vertex_id,
@@ -39,6 +46,28 @@ void Graph::add_edge(const VertexId& from_vertex_id,
       edges_.emplace_back(get_new_edge_id(), from_vertex_id, to_vertex_id);
   vertices_[from_vertex_id].add_edge_id(new_edge.id);
   vertices_[to_vertex_id].add_edge_id(new_edge.id);
+
+  //добавить глубину в вершину
+  vertices_[to_vertex_id].depth = vertices_[from_vertex_id].depth + 1;
+
+  //добавить вершину в карту глубины
+  // auto& depth_zero = depth_map_.front();
+  // const auto new_end =
+  //     std::remove(depth_zero.begin(), depth_zero.end(), from_vertex_id);
+  // depth_zero.erase(new_end);
+
+  // if (depth_map_.size() - 1 == vertices_[from_vertex_id].depth)
+  //   depth_map_.push_back({});
+  // depth_map_.back().push_back(to_vertex_id);
+}
+
+std::vector<VertexId> Graph::get_vertex_ids_at(const Depth& depth) const {
+  std::vector<VertexId> vertex_ids;
+  for (const auto& vertex : vertices_)
+    if (vertex.depth == depth)
+      vertex_ids.push_back(vertex.id);
+
+  return vertex_ids;
 }
 
 bool Graph::has_vertex_id(const VertexId& vertex_id) const {

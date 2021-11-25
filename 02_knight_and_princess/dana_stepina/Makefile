@@ -1,10 +1,10 @@
 CC = clang++
-CCFLAGS = -Wall -std=c++17 -g
+CCFLAGS = -Werror -std=c++17 -g
 
 all: clean main format
 
 main:
-	$(CC) $(CCFLAGS) main.cpp graph.cpp graph_printer.cpp -o main
+	$(CC) $(CCFLAGS) *.cpp -o main
 
 format:
 	clang-format -i -style=Chromium *.hpp

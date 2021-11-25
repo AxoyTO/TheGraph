@@ -1,17 +1,17 @@
 #pragma once
 
-#ifndef GRAPH_HPP
-#define GRAPH_HPP
-
+#include <algorithm>
 #include <vector>
 
-using DepthGraph = int;
+using Depth = int;
 using VertexId = int;
 using EdgeId = int;
 
 struct Vertex {
+  enum class Color { Grey, Green, Blue, Yellow, Red };
+
   const VertexId id = 0;
-  const DepthGraph depth = 0;
+  Depth depth = 0;
 
   explicit Vertex(const VertexId& vertex_id);
 
@@ -35,27 +35,31 @@ struct Edge {
 
 class Graph {
  public:
-  void increase_graph_depth() { depth_++; }
-  void decrease_graph_depth() { depth_--; }
-  void add_vertex();
+  Vertex& add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
-  const DepthGraph get_graph_depth() const { return depth_; }
+
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   const VertexId& get_vertex_id_counter() const { return vertex_id_counter_; }
+  std::vector<VertexId> get_vertex_ids_at(const Depth& depth) const;
+
   bool has_vertex_id(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const;
 
  private:
-  DepthGraph depth_ = 0;
+  std::vector<std::vector<VertexId>> depth_map_;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
+
   EdgeId edge_id_counter_ = 0;
   VertexId vertex_id_counter_ = 0;
 
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
-};
 
-#endif
+  void add_vertex_id_to_depth_map() {
+    depth_map_[depth_map_.size() - 1].push_back(vertex_id_counter_);
+  }
+  void change_size_depth_map() { depth_map_.resize(depth_map_.size() + 1); }
+};
