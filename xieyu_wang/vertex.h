@@ -1,8 +1,8 @@
 #ifndef TASK_04_VERTEX_H
 #define TASK_04_VERTEX_H
+#include <assert.h>
 #include <string>
 #include <vector>
-#include <assert.h>
 class Vertex {
  public:
   int depth = 0;
