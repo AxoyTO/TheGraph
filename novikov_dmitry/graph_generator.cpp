@@ -4,10 +4,12 @@
 #include <random>
 
 namespace {
-using Edge = uni_cpp_practice::Edge;
-using Depth = uni_cpp_practice::Depth;
-using VertexId = uni_cpp_practice::VertexId;
-using Graph = uni_cpp_practice::Graph;
+using uni_cpp_practice::Depth;
+using uni_cpp_practice::Edge;
+using uni_cpp_practice::Graph;
+using uni_cpp_practice::Vertex;
+using uni_cpp_practice::VertexId;
+
 double get_color_probability(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Green:
@@ -40,10 +42,8 @@ int get_random_number(int size) {
   std::uniform_int_distribution<int> distrib(0, size - 1);
   return distrib(gen);
 }
-}  // namespace
 
-namespace uni_cpp_practice {
-void GraphGenerator::generate_green_edges(Graph& graph) const {
+void generate_green_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Green);
   for (const auto& [current_vertex_id, current_vertex] :
        graph.get_vertex_map()) {
@@ -53,7 +53,7 @@ void GraphGenerator::generate_green_edges(Graph& graph) const {
   }
 }
 
-void GraphGenerator::generate_blue_edges(Graph& graph) const {
+void generate_blue_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Blue);
   // так как на нулевом уровне только одна вершина == нулевая, нет смысла ее
   // учитывать
@@ -69,7 +69,7 @@ void GraphGenerator::generate_blue_edges(Graph& graph) const {
   }
 }
 
-void GraphGenerator::generate_yellow_edges(Graph& graph) const {
+void generate_yellow_edges(Graph& graph) {
   double probability =
       get_color_probability(Edge::Color::Yellow) / (graph.get_depth() - 1);
   double yellow_edge_probability = probability;
@@ -99,7 +99,7 @@ void GraphGenerator::generate_yellow_edges(Graph& graph) const {
   }
 }
 
-void GraphGenerator::generate_red_edges(Graph& graph) const {
+void generate_red_edges(Graph& graph) {
   const double probability = get_color_probability(Edge::Color::Red);
   for (Depth current_depth = 0; current_depth < graph.get_depth() - 1;
        ++current_depth) {
@@ -116,19 +116,19 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
   }
 }
 
-void GraphGenerator::generate_gray_edges(Graph& graph) const {
+using Params = uni_cpp_practice::GraphGenerator::Params;
+void generate_gray_edges(Graph& graph, const Params& params) {
   double probability = get_color_probability(Edge::Color::Gray);
   double new_vertext_probability = probability;
-
   for (Depth current_depth = 0;
-       current_depth < max_depth_ && current_depth <= graph.get_depth();
+       current_depth < params.depth && current_depth <= graph.get_depth();
        ++current_depth) {  //по всем уровням вершин
     const auto vertices_at_depth = graph.get_vertices_at_depth(
         current_depth);  // копия создается, так как во время обхода в массив
                          // добавляются новые вершины
     for (const VertexId& parent_vertex_id :
          vertices_at_depth) {  //по всем порождающим вершинам
-      for (int i = 0; i < new_vertices_num_; ++i) {
+      for (int i = 0; i < params.new_vertices_num; ++i) {
         if (is_lucky(new_vertext_probability)) {
           const VertexId& new_vertex_id =
               graph.add_vertex();  //добавляю новую вершину в граф
@@ -139,14 +139,17 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
         }
       }
     }
-    new_vertext_probability -= probability / max_depth_;
+    new_vertext_probability -= probability / params.depth;
   }
 }
+}  // namespace
+
+namespace uni_cpp_practice {
 
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   graph.add_vertex();
-  generate_gray_edges(graph);
+  generate_gray_edges(graph, this->params_);
   generate_green_edges(graph);
   generate_blue_edges(graph);
   generate_yellow_edges(graph);
