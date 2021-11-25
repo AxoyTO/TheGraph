@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <list>
+#include <mutex>
 #include <optional>
 #include <thread>
 
@@ -26,12 +27,12 @@ class GraphGenerationController {
     void start();
     void stop();
 
-    // FIXME
-    bool should_terminate() { return false; }
+    bool should_terminate() { return finish_flag; }
 
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
+    bool finish_flag = false;
   };
 
   GraphGenerationController(
@@ -42,12 +43,15 @@ class GraphGenerationController {
   void new_generate(const GenStartedCallback& gen_started_callback,
                     const GenFinishedCallback& gen_finished_callback);
 
+  ~GraphGenerationController();
+
  private:
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   int threads_count_;
   int graphs_count_;
   uni_cpp_practice::graph_generation::Params params_;
+  std::mutex mtx;
 };
 
 }  // namespace graph_generation_controller

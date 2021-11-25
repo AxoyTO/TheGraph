@@ -1,11 +1,10 @@
 #include <functional>
 #include <list>
+#include <mutex>
 #include <optional>
 #include <random>
 #include <thread>
 #include <vector>
-
-#include <iostream>
 
 #include "graph.hpp"
 #include "graph_generation.hpp"
@@ -27,8 +26,10 @@ GraphGenerationController::GraphGenerationController(
     workers_.emplace_back([&]() -> std::optional<JobCallback> {
       if (jobs_.empty())
         return std::nullopt;
+      mtx.lock();
       const auto job = jobs_.front();
       jobs_.pop_front();
+      mtx.unlock();
       return job;
     });
   }
@@ -37,6 +38,10 @@ GraphGenerationController::GraphGenerationController(
 void GraphGenerationController::new_generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
+  for (auto& worker : workers_) {
+    worker.start();
+  }
+
   for (int i = 0; i < graphs_count_; i++) {
     jobs_.emplace_back([=]() {
       gen_started_callback(i);
@@ -44,44 +49,30 @@ void GraphGenerationController::new_generate(
       gen_finished_callback(std::move(graph), i);
     });
   }
+}
 
-  std::cout << "after distribution" << std::endl;
-
-  for (auto& worker : workers_) {
-    worker.start();
-  }
-
+GraphGenerationController::~GraphGenerationController() {
   for (auto& worker : workers_) {
     worker.stop();
   }
-
-  std::cout << "after stopping" << std::endl;
 }
 
 void GraphGenerationController::Worker::start() {
   thread_ = std::thread([=]() {
     while (true) {
-      if (should_terminate()) {  // when jobs_.is_empty()
-        return;
-      }
       const auto job_optional = get_job_callback_();
       if (job_optional.has_value()) {
         job_optional.value()();
-      }  // else return;
+      } else if (should_terminate())
+        return;
     }
   });
-
-  //  thread_.join();
-  //  thread_.detach();
 }
 
 void GraphGenerationController::Worker::stop() {
-  if (thread_.joinable()) {
-    std::cout << "joinable!" << std::endl;
+  finish_flag = true;
+  if (thread_.joinable())
     thread_.join();
-  } else {
-    std::cout << "not joinable!" << std::endl;
-  }
 }
 
 }  // namespace graph_generation_controller
