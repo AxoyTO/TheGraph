@@ -129,17 +129,9 @@ class Graph {
     return this->vertices_at_depth_.size();
   }
 
-  size_t max_depth() const {
-    return this->vertices_at_depth_.size();
-  }
+  size_t max_depth() const { return this->vertices_at_depth_.size(); }
 
-  std::set<VertexId> vertex_ids() const {
-    std::set<VertexId> vertex_ids;
-    std::transform(vertices_.begin(), vertices_.end(),
-                   std::inserter(vertex_ids, vertex_ids.end()),
-                   [](auto pair) { return pair.first; });
-    return vertex_ids;
-  }
+  const std::map<VertexId, Vertex>& vertices() const { return this->vertices_; }
 
   const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
     update_vertices_depth();
@@ -277,15 +269,9 @@ class Graph {
     return edges_.find(id)->second;
   }
 
-  VertexId get_next_vertex_id() {
-    const VertexId new_vertex_id = next_vertex_id_;
-    return next_vertex_id_++;
-  }
+  VertexId get_next_vertex_id() { return next_vertex_id_++; }
 
-  EdgeId get_next_edge_id() {
-    const EdgeId new_edge_id = next_edge_id_;
-    return next_edge_id_++;
-  }
+  EdgeId get_next_edge_id() { return next_edge_id_++; }
 
   std::string get_json_string_private() const {
     std::stringstream json_stringstream;

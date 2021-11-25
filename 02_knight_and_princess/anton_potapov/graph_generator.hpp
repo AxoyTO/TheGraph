@@ -53,7 +53,7 @@ class GraphGenerator {
   }
 
   void generate_green_edges() {
-    for (auto vertex_id : graph_.vertex_ids()) {
+    for (const auto& [vertex_id, vertex] : graph_.vertices()) {
       if (is_lucky(0.1)) {
         graph_.add_edge(vertex_id, vertex_id, EdgeColor::Green);
       }
