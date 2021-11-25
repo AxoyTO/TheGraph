@@ -51,10 +51,10 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   vertices_[to_vertex_id].depth = vertices_[from_vertex_id].depth + 1;
 
   //добавить вершину в карту глубины
-  // auto& depth_zero = depth_map_.front();
-  // const auto new_end =
-  //     std::remove(depth_zero.begin(), depth_zero.end(), from_vertex_id);
-  // depth_zero.erase(new_end);
+  auto& depth_zero = depth_map_.front();
+  const auto new_end =
+      std::remove(depth_zero.begin(), depth_zero.end(), to_vertex_id);
+  depth_zero.erase(new_end);
 
   // if (depth_map_.size() - 1 == vertices_[from_vertex_id].depth)
   //   depth_map_.push_back({});
