@@ -14,7 +14,7 @@
 	{ "id": 11, "edge_ids":[10, 15, 16] },
 	{ "id": 12, "edge_ids":[11, 17] },
 	{ "id": 13, "edge_ids":[12, 16, 17] }
- ],
+	],
  "edges": [
 	{ "id": 0, "vertex_ids":[0, 1] },
 	{ "id": 1, "vertex_ids":[0, 2] },
