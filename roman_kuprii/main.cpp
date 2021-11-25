@@ -84,10 +84,8 @@ int main() {
         logger.log(
             uni_cpp_practice::logging_helping::write_log_end(graph, index));
         graphs.push_back(graph);
+        uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
-
-  // FIXME!
-  //  uni_cpp_practice::logging_helping::write_graph(my_graph, graph_num);
 
   return 0;
 }
