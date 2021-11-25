@@ -189,15 +189,16 @@ class GraphGenerator {
 
   Graph generateMainBody() const {
     Graph graph;
-    double step = 1.0 / params_.depth;
+    float step = 1.0 / params_.depth;
     graph.addVertex();
     for (int current_depth = 0; current_depth < params_.depth;
          current_depth++) {
       bool vertexes_generated = false;
-      const auto previous_layer = graph.vertexIdsAtLayer(current_depth);
+      const auto previous_layer = graph.vertexIdsAtLayer(
+          current_depth);  //ссылка ломается при вызове addVertex()
       for (const auto& vertex_id : previous_layer) {
         for (int j = 0; j < params_.new_vertexes_num; j++) {
-          if (randomValue(1.0 - step * current_depth)) {
+          if (randomValue(getGreyProbability(step, current_depth))) {
             graph.addEdge(vertex_id, graph.addVertex());
             vertexes_generated = true;
           }
@@ -216,35 +217,28 @@ class GraphGenerator {
 
   void generateColorEdges(Graph& graph) const {
     for (const auto& vertex : graph.vertexes()) {
+      int vertex_depth = graph.vertexDepth(vertex.id);
       if (randomValue(GREEN_PROBABILITY)) {
         graph.addEdge(vertex.id, vertex.id);
       }
-      if (randomValue(BLUE_PROBABILITY) && graph.hasVertex(vertex.id + 1) &&
-          graph.vertexDepth(vertex.id + 1) == vertex.id) {
-        graph.addEdge(vertex.id, vertex.id + 1);
+      const auto& next_vertex_id = vertex.id + 1;
+      if (randomValue(BLUE_PROBABILITY) && graph.hasVertex(next_vertex_id) &&
+          graph.vertexDepth(next_vertex_id) == vertex_depth) {
+        graph.addEdge(vertex.id, next_vertex_id);
       }
-      if (graph.vertexDepth(vertex.id) < graph.depth() &&
-          randomValue(1.0 * graph.vertexDepth(vertex.id) /
-                      (graph.depth() - 1))) {
+      if (vertex_depth < graph.depth() &&
+          randomValue(getYellowProbability(graph, vertex.id))) {
         std::vector<VertexId> next_layer;
-        for (const auto& vertex_id :
-             graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 1)) {
+        for (const auto& vertex_id : graph.vertexIdsAtLayer(vertex_depth + 1)) {
           if (!graph.areConnected(vertex.id, vertex_id)) {
             next_layer.push_back(vertex_id);
           }
         }
-        graph.addEdge(vertex.id,
-                      next_layer.at(randomNumber(next_layer.size() - 1)));
+        graph.addEdge(vertex.id, getRandomVertexId(next_layer));
       }
-      if (randomValue(RED_PROBABILITY) &&
-          graph.vertexDepth(vertex.id) < (graph.depth() - 1)) {
-        graph.addEdge(
-            vertex.id,
-            graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) +
-                                   2)[randomNumber(
-                graph.vertexIdsAtLayer(graph.vertexDepth(vertex.id) + 2)
-                    .size() -
-                1)]);
+      if (randomValue(RED_PROBABILITY) && vertex_depth < (graph.depth() - 1)) {
+        graph.addEdge(vertex.id, getRandomVertexId(
+                                     graph.vertexIdsAtLayer(vertex_depth + 2)));
       }
     }
   }
@@ -263,11 +257,18 @@ class GraphGenerator {
     std::bernoulli_distribution distribution(probability);
     return distribution(gen);
   }
-  int randomNumber(int max_number) const {
+  int getRandomVertexId(const std::vector<VertexId> vertex_ids) const {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> random_number(0, max_number);
-    return random_number(gen);
+    std::uniform_int_distribution<> random_number(0, vertex_ids.size() - 1);
+    return vertex_ids.at(random_number(gen));
+  }
+  float getGreyProbability(float step, int depth) const {
+    return 1.0 - step * depth;
+  }
+  float getYellowProbability(const Graph& graph,
+                             const VertexId& vertex_id) const {
+    return 1.0 * graph.vertexDepth(vertex_id) / (graph.depth() - 1);
   }
 };
 
@@ -359,10 +360,9 @@ int main() {
               << std::endl;
     std::cin >> new_vertexes_num;
   }
-  srand(time(NULL));
   const GraphGenerator::Params params =
       GraphGenerator::Params(depth, new_vertexes_num);
-  Graph graph = GraphGenerator(params).generate();
+  const Graph graph = GraphGenerator(params).generate();
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
   std::cout << graph_json << std::endl;
