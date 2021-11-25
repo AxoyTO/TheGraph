@@ -1,8 +1,6 @@
 #ifndef TASK_04_EDGE_H
 #define TASK_04_EDGE_H
-
 #include <string>
-
 class Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };

@@ -1,7 +1,4 @@
 #include "vertex.h"
-#include <assert.h>
-#include <string>
-#include <vector>
 Vertex::Vertex(int id) : id(id){};
 void Vertex::addEdgeId(int eId) {
   assert(!hasEdgeId(eId) && "Edge Id already exists");

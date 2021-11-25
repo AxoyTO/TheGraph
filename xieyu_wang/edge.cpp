@@ -1,5 +1,4 @@
 #include "edge.h"
-#include <string>
 Edge::Edge(int id, int fromVertexId, int toVertexId, Color color = Color::Gray)
     : id(id),
       fromVertexId(fromVertexId),

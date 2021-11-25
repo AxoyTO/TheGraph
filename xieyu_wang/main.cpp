@@ -1,7 +1,6 @@
 #include <fstream>
 #include <string>
 #include "generator.h"
-#include "graph.h"
 int main() {
   int maxDepth = 0, newVerticesNum = 0;
   std::cout << "Enter Max Depth:";
