@@ -108,7 +108,6 @@ class Graph {
     this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
     this->next_edge_id_ = std::move(other_graph.next_edge_id_);
     this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
-    this->max_depth_ = std::move(other_graph.max_depth_);
     return *this;
   }
 
@@ -121,12 +120,18 @@ class Graph {
     this->next_vertex_id_ = std::move(other_graph.next_vertex_id_);
     this->next_edge_id_ = std::move(other_graph.next_edge_id_);
     this->vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
-    this->max_depth_ = std::move(other_graph.max_depth_);
   }
 
   virtual ~Graph() = default;
 
-  size_t max_depth() const { return max_depth_; }
+  size_t max_depth() {
+    this->update_vertices_depth();
+    return this->vertices_at_depth_.size();
+  }
+
+  size_t max_depth() const {
+    return this->vertices_at_depth_.size();
+  }
 
   std::set<VertexId> vertex_ids() const {
     std::set<VertexId> vertex_ids;
@@ -198,7 +203,7 @@ class Graph {
     const EdgeId new_edge_id = get_next_edge_id();
     edges_.emplace(new_edge_id,
                    Edge(new_edge_id, vertex1, vertex2, edge_color));
-                   
+
     auto it_vertex1 = vertices_.find(vertex1);
     it_vertex1->second.add_edge(new_edge_id);
     auto it_vertex2 = vertices_.find(vertex2);
@@ -253,7 +258,6 @@ class Graph {
         new_max_depth = depth;
       }
     }
-    max_depth_ = new_max_depth;
     for (const auto& [vertex_id, depth] : depths) {
       vertices_at_depth_[depth].insert(vertex_id);
     }
@@ -265,7 +269,6 @@ class Graph {
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
   std::map<size_t, std::set<VertexId>> vertices_at_depth_;
-  size_t max_depth_;
 
   const Vertex& get_vertex(const VertexId& id) const {
     return vertices_.find(id)->second;
@@ -286,7 +289,7 @@ class Graph {
 
   std::string get_json_string_private() const {
     std::stringstream json_stringstream;
-    json_stringstream << "{\"depth\":" << max_depth_ << ",";
+    json_stringstream << "{\"depth\":" << this->max_depth() << ",";
     json_stringstream << "\"vertices\":[";
     for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
       json_stringstream << it->second.get_json_string();
