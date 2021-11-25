@@ -26,6 +26,7 @@ class GraphGenerationController {
 
    private:
     std::thread thread_;
+    std::mutex mutex_;
     bool terminate_flag = false;
     GetJobCallback get_job_callback_;
   };

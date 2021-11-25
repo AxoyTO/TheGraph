@@ -42,19 +42,19 @@ void GraphGenerationController::generate(
 void GraphGenerationController::Worker::start() {
   thread_ = std::thread([this]() {
     while (true) {
-      if (terminate_flag) {
-        return;
-      }
       const auto job_optional = get_job_callback_();
       if (job_optional.has_value()) {
         const auto job_callback = job_optional.value();
         job_callback();
+      } else if (terminate_flag) {
+        return;
       }
     }
   });
 }
 
 void GraphGenerationController::Worker::stop() {
+  const std::lock_guard lock(mutex_);
   terminate_flag = true;
   if (thread_.joinable())
     thread_.join();
