@@ -65,14 +65,14 @@ class GraphGenerator {
   }
 
   void generate_blue_edges() {
-    for (int cur_depth = 0; cur_depth <= graph_.max_depth(); ++cur_depth) {
+   for (int cur_depth = 0; cur_depth <= graph_.max_depth(); ++cur_depth) {
       const auto& same_depth_vertices = graph_.get_vertices_at_depth(cur_depth);
-      for (const auto& vertex1_id : same_depth_vertices) {
-        for (const auto& vertex2_id : same_depth_vertices) {
-          if (is_lucky(BLUE_EDGE_PROB) &&
-              !graph_.is_connected(vertex1_id, vertex2_id)) {
-            graph_.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
-          }
+      for (auto it = same_depth_vertices.begin(); std::next(it) != same_depth_vertices.end(); ++it) {
+        const auto& vertex1_id = *it;
+        const auto& vertex2_id = *std::next(it);
+        if (is_lucky(BLUE_EDGE_PROB) &&
+            !graph_.is_connected(vertex1_id, vertex2_id)) {
+          graph_.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
         }
       }
     }
