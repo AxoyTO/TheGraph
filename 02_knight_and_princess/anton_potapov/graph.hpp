@@ -7,6 +7,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
