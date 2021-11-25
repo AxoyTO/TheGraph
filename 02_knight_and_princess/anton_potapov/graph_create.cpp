@@ -25,7 +25,7 @@ int main() {
   GraphGenerator graph_generator(depth, new_vertices_num);
   Graph graph = std::move(graph_generator.generate_graph());
 
-  if (graph.max_depth() < (size_t)depth) {
+  if (graph.max_depth() < depth) {
     std::cerr << "generated graph's depth=" << graph.max_depth()
               << " is less than specified one =" << depth << std::endl;
   }

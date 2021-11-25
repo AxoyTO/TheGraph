@@ -2,11 +2,11 @@
 
 #include <cassert>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <random>
 #include <set>
 #include <utility>
-#include <limits>
 
 #include "graph.hpp"
 
@@ -39,7 +39,7 @@ class GraphGenerator {
  private:
   void generate_vertices() {
     graph_.add_vertex();
-    for (int i = 0; i <= depth_; ++i) {
+    for (int i = 0; i <= graph_.max_depth(); ++i) {
       auto same_depth_vertices = graph_.get_vertices_at_depth(i);
       for (const auto& current_vertex_id : same_depth_vertices) {
         for (int j = 0; j < new_vertices_num_; ++j) {
@@ -62,7 +62,7 @@ class GraphGenerator {
   }
 
   void generate_blue_edges() {
-    for (size_t cur_depth = 0; cur_depth < graph_.max_depth(); ++cur_depth) {
+    for (int cur_depth = 0; cur_depth <= graph_.max_depth(); ++cur_depth) {
       const auto& same_depth_vertices = graph_.get_vertices_at_depth(cur_depth);
       for (const auto& vertex1_id : same_depth_vertices) {
         for (const auto& vertex2_id : same_depth_vertices) {
@@ -75,7 +75,7 @@ class GraphGenerator {
   }
 
   void generate_yellow_edges() {
-    for (size_t cur_depth = 0; cur_depth + 1 < graph_.max_depth();
+    for (int cur_depth = 0; cur_depth + 1 <= graph_.max_depth();
          ++cur_depth) {
       const auto& cur_depth_vertices =
           initial_depth_distribution_.find(cur_depth)->second;
@@ -101,7 +101,7 @@ class GraphGenerator {
   }
 
   void generate_red_edges() {
-    for (size_t cur_depth = 0; cur_depth + 2 < graph_.max_depth();
+    for (int cur_depth = 0; cur_depth + 2 <= graph_.max_depth();
          ++cur_depth) {
       const auto& cur_depth_vertices =
           initial_depth_distribution_.find(cur_depth)->second;
@@ -121,5 +121,5 @@ class GraphGenerator {
   Graph graph_;
   const int depth_;
   const int new_vertices_num_;
-  std::map<size_t, std::set<VertexId>> initial_depth_distribution_;
+  std::map<int, std::set<VertexId>> initial_depth_distribution_;
 };

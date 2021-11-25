@@ -124,30 +124,30 @@ class Graph {
 
   virtual ~Graph() = default;
 
-  size_t max_depth() {
+  int max_depth() {
     this->update_vertices_depth();
-    return this->vertices_at_depth_.size();
+    return std::max((int)this->vertices_at_depth_.size() - 1, 0);
   }
 
-  size_t max_depth() const { return this->vertices_at_depth_.size(); }
+  int max_depth() const { return this->vertices_at_depth_.size(); }
 
   const std::map<VertexId, Vertex>& vertices() const { return this->vertices_; }
 
   const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
-    update_vertices_depth();
-    return vertices_at_depth_[depth];
+    this->update_vertices_depth();
+    return vertices_at_depth_.at(depth);
   }
 
   const std::set<VertexId>& get_vertices_at_depth(size_t depth) const {
     return vertices_at_depth_.at(depth);
   }
 
-  const std::map<size_t, std::set<VertexId>>& depth_distribution() {
-    update_vertices_depth();
+  const std::map<int, std::set<VertexId>>& depth_distribution() {
+    this->update_vertices_depth();
     return vertices_at_depth_;
   }
 
-  const std::map<size_t, std::set<VertexId>>& depth_distribution() const {
+  const std::map<int, std::set<VertexId>>& depth_distribution() const {
     return vertices_at_depth_;
   }
 
@@ -217,7 +217,7 @@ class Graph {
   void update_vertices_depth() {
     const VertexId first_vertex_id = vertices_.begin()->first;
 
-    std::map<VertexId, size_t> depths;
+    std::map<VertexId, int> depths;
     depths.emplace(first_vertex_id, 0);
 
     std::queue<VertexId> bfs_queue;
@@ -243,7 +243,7 @@ class Graph {
         }
       }
     }
-    size_t new_max_depth = 0;
+    int new_max_depth = 0;
     for (const auto& [vertex_id, depth] : depths) {
       vertices_.find(vertex_id)->second.depth = depth;
       if (depth > new_max_depth) {
@@ -260,7 +260,7 @@ class Graph {
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
-  std::map<size_t, std::set<VertexId>> vertices_at_depth_;
+  std::map<int, std::set<VertexId>> vertices_at_depth_;
 
   const Vertex& get_vertex(const VertexId& id) const {
     return vertices_.find(id)->second;
