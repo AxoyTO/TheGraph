@@ -196,16 +196,15 @@ class Graph {
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
 
     const EdgeId new_edge_id = get_next_edge_id();
-
+    edges_.emplace(new_edge_id,
+                   Edge(new_edge_id, vertex1, vertex2, edge_color));
+                   
     auto it_vertex1 = vertices_.find(vertex1);
     it_vertex1->second.add_edge(new_edge_id);
     auto it_vertex2 = vertices_.find(vertex2);
     if (it_vertex1 != it_vertex2) {
       it_vertex2->second.add_edge(new_edge_id);
     }
-
-    edges_.emplace(new_edge_id,
-                   Edge(new_edge_id, vertex1, vertex2, edge_color));
     return new_edge_id;
   }
 
