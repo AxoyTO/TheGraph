@@ -12,15 +12,18 @@ int main() {
   while (true) {
     std::cout << "Input the depth parameter: " << std::flush;
     std::cin >> depth;
-    std::cout << "Input the amount of new vertices: " << std::flush;
-    std::cin >> new_vertices_num;
-    if (depth < 0 || new_vertices_num < 0) {
-      std::cout << (depth < 0 ? "depth should be > 0"
-                              : "new vertices num should be > 0")
-                << " ,please, redo the input:" << std::endl;
-    } else {
+    if (depth >= 0) {
       break;
     }
+    std::cout << "depth should be > 0, please, redo the input:" << std::endl;
+  }
+  while (true) {
+    std::cout << "Input the amount of new vertices: " << std::flush;
+    std::cin >> new_vertices_num;
+    if (new_vertices_num >= 0) {
+      break;
+    }
+    std::cout << "new vertices num should be > 0, please, redo the input:" << std::endl;
   }
   GraphGenerator graph_generator(depth, new_vertices_num);
   Graph graph = std::move(graph_generator.generate_graph());
