@@ -4,12 +4,13 @@
 #include <string>
 
 class Edge {
-public:
-    const int id = 0;
-    const int fromVertexId = 0;
-    const int toVertexId = 0;
-    const std::string color;
-    Edge(int id, int fromVertexId, int toVertexId,const std::string color);
-    std::string toString() const;
+ public:
+  enum class Color { Gray, Green, Blue, Yellow, Red };
+  const int id = 0;
+  const int fromVertexId = 0;
+  const int toVertexId = 0;
+  const Color color = Color::Gray;
+  Edge(int id, int fromVertexId, int toVertexId, Color color);
+  std::string toString() const;
 };
-#endif //TASK_04_EDGE_H
+#endif  // TASK_04_EDGE_H
