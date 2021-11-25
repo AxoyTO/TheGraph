@@ -56,7 +56,7 @@ std::string write_log_end(Graph& work_graph, int graph_num) {
   res += "vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
 
   std::vector<int> depth_count;
-  for (int iter = 0; iter < work_graph.get_depth(); iter++)
+  for (int iter = 0; iter <= work_graph.get_depth(); iter++)
     depth_count.emplace_back(0);
   for (const auto& vertex : work_graph.get_vertices()) {
     depth_count[vertex.depth]++;
