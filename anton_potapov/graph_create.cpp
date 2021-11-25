@@ -23,10 +23,14 @@ int main() {
     if (new_vertices_num >= 0) {
       break;
     }
-    std::cout << "new vertices num should be > 0, please, redo the input:" << std::endl;
+    std::cout << "new vertices num should be > 0, please, redo the input:"
+              << std::endl;
   }
-  GraphGenerator graph_generator(depth, new_vertices_num);
-  Graph graph = std::move(graph_generator.generate_graph());
+
+  const auto graph_generator_params =
+      GraphGenerator::Params(depth, new_vertices_num);
+  const auto graph_generator = GraphGenerator(graph_generator_params);
+  const auto graph = graph_generator.generate_graph();
 
   if (graph.max_depth() < depth) {
     std::cerr << "generated graph's depth=" << graph.max_depth()
