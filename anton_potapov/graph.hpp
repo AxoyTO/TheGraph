@@ -136,7 +136,8 @@ class Graph {
 
   const std::set<VertexId>& get_vertices_at_depth(int depth) {
     update_vertices_depth();
-    return vertices_at_depth_.at(depth);
+    const auto& const_this = *this;
+    return const_this.get_vertices_at_depth(depth);
   }
 
   const std::set<VertexId>& get_vertices_at_depth(int depth) const {
@@ -145,7 +146,8 @@ class Graph {
 
   const std::map<int, std::set<VertexId>>& depth_distribution() {
     update_vertices_depth();
-    return vertices_at_depth_;
+    const auto& const_this = *this;
+    return const_this.depth_distribution();
   }
 
   const std::map<int, std::set<VertexId>>& depth_distribution() const {
