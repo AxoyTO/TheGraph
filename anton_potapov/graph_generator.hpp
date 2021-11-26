@@ -68,9 +68,8 @@ void generate_yellow_edges(
     int depth,
     const std::map<int, std::set<VertexId> >& depth_distribution) {
   for (int cur_depth = 0; cur_depth + 1 <= graph.max_depth(); ++cur_depth) {
-    const auto& cur_depth_vertices = depth_distribution.find(cur_depth)->second;
-    const auto& next_depth_vertices =
-        depth_distribution.find(cur_depth + 1)->second;
+    const auto& cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+    const auto& next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (depth > 1 && is_lucky((double)cur_depth / (depth - 1))) {
         std::set<VertexId> not_connected_vertices;

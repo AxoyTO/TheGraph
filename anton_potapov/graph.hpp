@@ -163,7 +163,8 @@ class Graph {
     assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
     if (vertex1_id == vertex2_id) {
-      for (const auto& vertex_edge_id : get_vertex(vertex1_id).connected_edges()) {
+      for (const auto& vertex_edge_id :
+           get_vertex(vertex1_id).connected_edges()) {
         const auto& vertex_edge = get_edge(vertex_edge_id);
         if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
           return true;
@@ -171,7 +172,8 @@ class Graph {
       }
       return false;
     } else {
-      for (const auto& vertex1_edge_id : get_vertex(vertex1_id).connected_edges()) {
+      for (const auto& vertex1_edge_id :
+           get_vertex(vertex1_id).connected_edges()) {
         if (vertices_.find(vertex2_id)->second.has_edge_id(vertex1_edge_id)) {
           return true;
         }
