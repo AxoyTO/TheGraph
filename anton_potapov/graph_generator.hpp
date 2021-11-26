@@ -10,14 +10,14 @@
 
 #include "graph.hpp"
 
-constexpr float DOUBLE_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
+constexpr float FLOAT_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
 constexpr float GREEN_EDGE_PROB = 0.1;
 constexpr float BLUE_EDGE_PROB = 0.25;
 constexpr float RED_EDGE_PROB = 0.33;
 
 bool is_lucky(float probability) {
-  assert(probability + DOUBLE_COMPARISON_EPS > 0 &&
-         probability - DOUBLE_COMPARISON_EPS < 1 &&
+  assert(probability + FLOAT_COMPARISON_EPS > 0 &&
+         probability - FLOAT_COMPARISON_EPS < 1 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
