@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -14,6 +15,7 @@ constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
 constexpr int INVALID_THREADS_NUMBER = 0;
 const std::string LOG_FILENAME = "temp/log.txt";
+const std::string DIRECTORY_NAME = "temp";
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
@@ -62,6 +64,17 @@ int handle_threads_number_input() {
 
 int main() {
   auto& logger = Logger::get_logger();
+
+  if (!std::filesystem::exists(DIRECTORY_NAME) ||
+      (std::filesystem::status(DIRECTORY_NAME).type() !=
+       std::filesystem::file_type::directory)) {
+    try {
+      std::filesystem::create_directory(DIRECTORY_NAME);
+    } catch (const std::exception& ex) {
+      std::cout << ex.what() << "\n";
+    }
+  }
+
   logger.set_output(LOG_FILENAME);
 
   const int graphs_count = handle_graphs_number_input();
