@@ -33,7 +33,7 @@ using EdgeId = int;
 
 class Vertex {
  public:
-  size_t depth;
+  int depth;
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
 
@@ -134,12 +134,12 @@ class Graph {
 
   const std::map<VertexId, Vertex>& vertices() const { return vertices_; }
 
-  const std::set<VertexId>& get_vertices_at_depth(size_t depth) {
+  const std::set<VertexId>& get_vertices_at_depth(int depth) {
     update_vertices_depth();
     return vertices_at_depth_.at(depth);
   }
 
-  const std::set<VertexId>& get_vertices_at_depth(size_t depth) const {
+  const std::set<VertexId>& get_vertices_at_depth(int depth) const {
     return vertices_at_depth_.at(depth);
   }
 
