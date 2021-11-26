@@ -1,3 +1,4 @@
+#include <atomic>
 #include <functional>
 #include <list>
 #include <mutex>
@@ -37,32 +38,40 @@ GraphGenerationController::GraphGenerationController(
 void GraphGenerationController::generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
-  int completed_jobs = 0;
+  std::atomic<int> completed_jobs = 0;
 
   for (auto& worker : workers_) {
     worker.start();
   }
 
-  for (int i = 0; i < graphs_count_; i++) {
-    jobs_.emplace_back([&gen_started_callback = gen_started_callback,
-                        &gen_finished_callback = gen_finished_callback, i,
-                        &finish_callback_mutex_ = finish_callback_mutex_,
-                        &start_callback_mutex_ = start_callback_mutex_,
-                        &params_ = params_,
-                        &completed_jobs = completed_jobs]() {
-      {
-        const std::lock_guard lock(start_callback_mutex_);
-        gen_started_callback(i);
-      }
+  {
+    std::lock_guard lock(get_job_mutex_);
+    for (int i = 0; i < graphs_count_; i++) {
+      jobs_.emplace_back([&gen_started_callback = gen_started_callback,
+                          &gen_finished_callback = gen_finished_callback, i,
+                          &finish_callback_mutex_ = finish_callback_mutex_,
+                          &start_callback_mutex_ = start_callback_mutex_,
+                          &params_ = params_,
+                          &completed_jobs = completed_jobs]() {
+        {
+          const std::lock_guard lock(start_callback_mutex_);
+          gen_started_callback(i);
+        }
 
-      auto graph = graph_generation::generate(params_);
-      const std::lock_guard lock(finish_callback_mutex_);
-      gen_finished_callback(std::move(graph), i);
-      completed_jobs++;
-    });
+        auto graph = graph_generation::generate(params_);
+        {
+          const std::lock_guard lock(finish_callback_mutex_);
+          gen_finished_callback(std::move(graph), i);
+        }
+        completed_jobs++;
+      });
+    }
+  }
+  while (completed_jobs != graphs_count_) {
   }
 
-  while (completed_jobs != graphs_count_) {
+  for (auto& worker : workers_) {
+    worker.stop();
   }
 }
 
