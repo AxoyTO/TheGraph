@@ -212,6 +212,8 @@ class Graph {
   std::string get_json_string() const { return get_json_string_private(); }
 
   void update_vertices_depth() {
+    vertices_at_depth_.clear();
+
     const VertexId first_vertex_id = vertices_.begin()->first;
 
     std::map<VertexId, int> depths;
