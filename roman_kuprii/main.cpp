@@ -62,31 +62,30 @@ int handle_threads_number_input() {
   return threads_count;
 }
 
-int main() {
+Logger& get_logger() {
   auto& logger = Logger::get_logger();
-
   if (!std::filesystem::exists(DIRECTORY_NAME) ||
       (std::filesystem::status(DIRECTORY_NAME).type() !=
        std::filesystem::file_type::directory)) {
-    try {
-      std::filesystem::create_directory(DIRECTORY_NAME);
-    } catch (const std::exception& ex) {
-      std::cout << ex.what() << "\n";
-    }
+    std::filesystem::create_directory(DIRECTORY_NAME);
   }
-
   logger.set_output(LOG_FILENAME);
+  return logger;
+}
+
+int main() {
+  auto& logger = get_logger();
 
   const int graphs_count = handle_graphs_number_input();
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_vertices_number_input();
   const int threads_count = handle_threads_number_input();
-
   const auto params = Params(depth, new_vertices_num);
+
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
-
   auto graphs = std::vector<Graph>();
+
   graphs.reserve(graphs_count);
 
   generation_controller.generate(
@@ -99,6 +98,5 @@ int main() {
         graphs.push_back(graph);
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
-
   return 0;
 }
