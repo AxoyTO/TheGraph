@@ -39,15 +39,15 @@ set_count_edges_of_color(const uni_cpp_practice::Graph& graph) {
   return colors;
 }
 
-const std::string gen_started_string(int graph_numbe) {
+std::string gen_started_string(int graph_numbe) {
   std::stringstream log_string;
   log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
              << ", Generation Started\n";
   return log_string.str();
 }
 
-const std::string gen_finished_string(int graph_numbe,
-                                      const uni_cpp_practice::Graph& graph) {
+std::string gen_finished_string(int graph_numbe,
+                                const uni_cpp_practice::Graph& graph) {
   std::stringstream log_string;
   log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
              << ", Generation Finished {  \n";
@@ -76,7 +76,7 @@ const std::string gen_finished_string(int graph_numbe,
   return log_string.str();
 }
 
-const uni_cpp_practice::Depth handle_depth_input() {
+uni_cpp_practice::Depth handle_depth_input() {
   uni_cpp_practice::Depth
       depth;  //Глубина графов (int от 0 и до бесконечности).
   std::cout << "Enter the Depth of the graphs" << std::endl;
