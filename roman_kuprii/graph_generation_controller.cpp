@@ -47,9 +47,14 @@ void GraphGenerationController::generate(
     jobs_.emplace_back([&gen_started_callback = gen_started_callback,
                         &gen_finished_callback = gen_finished_callback, i,
                         &finish_callback_mutex_ = finish_callback_mutex_,
+                        &start_callback_mutex_ = start_callback_mutex_,
                         &params_ = params_,
                         &completed_jobs = completed_jobs]() {
-      gen_started_callback(i);
+      {
+        const std::lock_guard lock(start_callback_mutex_);
+        gen_started_callback(i);
+      }
+
       auto graph = graph_generation::generate(params_);
       const std::lock_guard lock(finish_callback_mutex_);
       gen_finished_callback(std::move(graph), i);

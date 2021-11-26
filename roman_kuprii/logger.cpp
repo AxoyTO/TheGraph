@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-#include <mutex>
 #include <optional>
 #include <string>
 
@@ -29,7 +28,6 @@ void Logger::set_output(const std::optional<std::string>& file_path) {
 }
 
 void Logger::log(const std::string& text) {
-  const std::lock_guard<std::mutex> lock(mutex_);
   std::cout << text << std::endl;
   if (file_stream_.has_value())
     file_stream_.value() << text << std::endl;

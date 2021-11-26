@@ -51,6 +51,7 @@ class GraphGenerationController {
   std::list<JobCallback> jobs_;
   int graphs_count_;
   graph_generation::Params params_;
+  std::mutex start_callback_mutex_;
   std::mutex finish_callback_mutex_;
   std::mutex get_job_mutex_;
 };
