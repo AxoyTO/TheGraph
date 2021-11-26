@@ -206,10 +206,30 @@ class Graph {
 
   std::string get_json_string() {
     update_vertices_depth();
-    return get_json_string_private();
+    const auto& const_this = *this;
+    return const_this.get_json_string();
   }
 
-  std::string get_json_string() const { return get_json_string_private(); }
+  std::string get_json_string() const {
+    std::stringstream json_stringstream;
+    json_stringstream << "{\"depth\":" << max_depth() << ",";
+    json_stringstream << "\"vertices\":[";
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
+      json_stringstream << it->second.get_json_string();
+      if (std::next(it) != vertices_.end()) {
+        json_stringstream << ",";
+      }
+    }
+    json_stringstream << "],\"edges\":[";
+    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
+      json_stringstream << it->second.get_json_string();
+      if (std::next(it) != edges_.end()) {
+        json_stringstream << ",";
+      }
+    }
+    json_stringstream << "]}";
+    return json_stringstream.str();  
+  }
 
   void update_vertices_depth() {
     vertices_at_depth_.clear();
@@ -271,27 +291,6 @@ class Graph {
   VertexId get_next_vertex_id() { return next_vertex_id_++; }
 
   EdgeId get_next_edge_id() { return next_edge_id_++; }
-
-  std::string get_json_string_private() const {
-    std::stringstream json_stringstream;
-    json_stringstream << "{\"depth\":" << max_depth() << ",";
-    json_stringstream << "\"vertices\":[";
-    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
-      json_stringstream << it->second.get_json_string();
-      if (std::next(it) != vertices_.end()) {
-        json_stringstream << ",";
-      }
-    }
-    json_stringstream << "],\"edges\":[";
-    for (auto it = edges_.begin(); it != edges_.end(); ++it) {
-      json_stringstream << it->second.get_json_string();
-      if (std::next(it) != edges_.end()) {
-        json_stringstream << ",";
-      }
-    }
-    json_stringstream << "]}";
-    return json_stringstream.str();
-  }
 };
 
 VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
