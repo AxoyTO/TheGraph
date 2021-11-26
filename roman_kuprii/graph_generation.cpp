@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generating.hpp"
+#include "graph_generation.hpp"
 
 namespace {
 
@@ -126,24 +126,27 @@ void paint_edges(Graph& work_graph) {
   add_yellow_edges(work_graph);
 }
 
-void new_vertices_generation(Graph& work_graph,
-                             int depth,
-                             int new_vertices_num) {
+void generate_new_vertices(Graph& work_graph,
+                           uni_cpp_practice::graph_generation::Params params) {
+  int depth = params.depth;
+  int new_vertices_num = params.new_vertices_num;
   for (int current_depth = 0; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices())
+    for (const auto& vertex : work_graph.get_vertices()) {
+      const VertexId vertex_id = vertex.get_id();
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (get_real_random_number() > probability) {
             work_graph.add_vertex();
             work_graph.connect_vertices(
-                vertex.get_id(),
+                vertex_id,
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
                     .get_id(),
                 true);
           }
         }
+    }
   }
 }
 
@@ -151,16 +154,16 @@ void new_vertices_generation(Graph& work_graph,
 
 namespace uni_cpp_practice {
 
-namespace graph_generating {
+namespace graph_generation {
 
-Graph generate(int depth, int new_vertices_num) {
-  auto work_graph = Graph();
-  work_graph.add_vertex();
-  new_vertices_generation(work_graph, depth, new_vertices_num);
-  paint_edges(work_graph);
-  return work_graph;
+Graph generate(const Params& params) {
+  auto graph = Graph();
+  graph.add_vertex();
+  generate_new_vertices(graph, params);
+  paint_edges(graph);
+  return graph;
 }
 
-}  // namespace graph_generating
+}  // namespace graph_generation
 
 }  // namespace uni_cpp_practice
