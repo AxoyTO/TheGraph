@@ -20,17 +20,17 @@ class GraphGenerationController {
     explicit Worker(const GetJobCallback& get_job_callback)
         : get_job_callback_(get_job_callback){};
 
+    enum class State { Idle, Working, ShouldTerminate };
+
     void start();
     void stop();
-
-    bool should_terminate() const { return flag_ == 2; }
 
     ~Worker();
 
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    int flag_ = 0;
+    State state_flag_ = State::Idle;
   };
 
   GraphGenerationController(
