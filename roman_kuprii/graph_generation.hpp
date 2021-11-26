@@ -12,9 +12,6 @@ struct Params {
   Params(int _depth, int _new_vertices_num)
       : depth(_depth), new_vertices_num(_new_vertices_num){};
 
-  //  Params(const Params& _params)
-  //      : depth(_params.depth), new_vertices_num(_params.new_vertices_num){};
-
   void print() const {
     std::cout << "depth: " << depth << " vertices: " << new_vertices_num
               << std::endl;

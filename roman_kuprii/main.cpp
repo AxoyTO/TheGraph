@@ -17,6 +17,7 @@ const std::string LOG_FILENAME = "temp/log.txt";
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
+using uni_cpp_practice::Graph;
 using uni_cpp_practice::Logger;
 using uni_cpp_practice::graph_generation::Params;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
@@ -72,7 +73,7 @@ int main() {
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
 
-  auto graphs = std::vector<uni_cpp_practice::Graph>();
+  auto graphs = std::vector<Graph>();
   graphs.reserve(graphs_count);
 
   generation_controller.generate(

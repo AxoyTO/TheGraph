@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <list>
 #include <mutex>
@@ -34,25 +35,24 @@ class GraphGenerationController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_flag_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   GraphGenerationController(
       int threads_count,
       int graphs_count,
-      const uni_cpp_practice::graph_generation::Params& graph_generator_params);
+      const graph_generation::Params& graph_generator_params);
 
   void generate(const GenStartedCallback& gen_started_callback,
                 const GenFinishedCallback& gen_finished_callback);
-
-  ~GraphGenerationController();
 
  private:
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   int graphs_count_;
-  uni_cpp_practice::graph_generation::Params params_;
-  std::mutex mutex_;
+  graph_generation::Params params_;
+  std::mutex finish_callback_mutex_;
+  std::mutex get_job_mutex_;
 };
 
 }  // namespace graph_generation_controller
