@@ -27,7 +27,8 @@ bool is_lucky(float probability) {
 
 void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
   graph.add_vertex();
-  for (int current_depth = 0; current_depth <= graph.max_depth();
+  for (int current_depth = 0;
+       current_depth <= graph.max_depth() && current_depth < depth;
        ++current_depth) {
     auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
     for (const auto& current_vertex_id : same_depth_vertices) {
