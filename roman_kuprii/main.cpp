@@ -62,19 +62,14 @@ int handle_threads_number_input() {
   return threads_count;
 }
 
-Logger& get_logger() {
-  auto& logger = Logger::get_logger();
-  if (!std::filesystem::exists(DIRECTORY_NAME) ||
-      (std::filesystem::status(DIRECTORY_NAME).type() !=
-       std::filesystem::file_type::directory)) {
-    std::filesystem::create_directory(DIRECTORY_NAME);
-  }
-  logger.set_output(LOG_FILENAME);
-  return logger;
+void prepare_temp_directory() {
+  std::filesystem::create_directory(DIRECTORY_NAME);
 }
 
 int main() {
-  auto& logger = get_logger();
+  auto& logger = Logger::get_logger();
+  prepare_temp_directory();
+  logger.set_output(LOG_FILENAME);
 
   const int graphs_count = handle_graphs_number_input();
   const int depth = handle_depth_input();
