@@ -27,11 +27,12 @@ bool is_lucky(float probability) {
 
 void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
   graph.add_vertex();
-  for (int i = 0; i <= graph.max_depth(); ++i) {
-    auto same_depth_vertices = graph.get_vertices_at_depth(i);
+  for (int current_depth = 0; current_depth <= graph.max_depth();
+       ++current_depth) {
+    auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
     for (const auto& current_vertex_id : same_depth_vertices) {
-      for (int j = 0; j < new_vertices_num; ++j) {
-        if (depth > 0 && is_lucky(1.0 - (double)i / depth)) {
+      for (int i = 0; i < new_vertices_num; ++i) {
+        if (depth > 0 && is_lucky(1.0 - (double)current_depth / depth)) {
           VertexId new_vertex = graph.add_vertex();
           graph.add_edge(current_vertex_id, new_vertex);
         }
@@ -69,7 +70,8 @@ void generate_yellow_edges(
     const std::map<int, std::set<VertexId> >& depth_distribution) {
   for (int cur_depth = 0; cur_depth + 1 <= graph.max_depth(); ++cur_depth) {
     const auto& cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
-    const auto& next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
+    const auto& next_depth_vertices =
+        graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (depth > 1 && is_lucky((double)cur_depth / (depth - 1))) {
         std::set<VertexId> not_connected_vertices;
