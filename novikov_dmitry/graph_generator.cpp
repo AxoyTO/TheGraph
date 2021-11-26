@@ -27,7 +27,7 @@ double get_color_probability(const Edge::Color& color) {
 
 bool is_lucky(double probability) {
   assert(probability + std::numeric_limits<double>::epsilon() > 0 &&
-         probability - std::numeric_limits<double>::epsilon() < 1 &&
+         probability - std::numeric_limits<double>::epsilon() < 1.0 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
@@ -149,7 +149,7 @@ namespace uni_cpp_practice {
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   graph.add_vertex();
-  generate_gray_edges(graph, this->params_);
+  generate_gray_edges(graph, params_);
   generate_green_edges(graph);
   generate_blue_edges(graph);
   generate_yellow_edges(graph);
