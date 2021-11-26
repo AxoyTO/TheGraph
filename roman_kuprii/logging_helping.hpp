@@ -52,8 +52,8 @@ std::string write_log_start(int graph_num) {
 std::string write_log_end(Graph& work_graph, int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
-  res += "\tdepth: " + to_string(work_graph.get_depth()) + ",\n";
-  res += "vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
+  res += "  depth: " + to_string(work_graph.get_depth()) + ",\n";
+  res += "  vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
 
   std::vector<int> depth_count;
   for (int iter = 0; iter <= work_graph.get_depth(); iter++)
@@ -67,7 +67,7 @@ std::string write_log_end(Graph& work_graph, int graph_num) {
   res.pop_back();
   res.pop_back();
   res += "],\n";
-  res += "edges: " + to_string(work_graph.get_edges_num()) + ", {";
+  res += "  edges: " + to_string(work_graph.get_edges_num()) + ", {";
 
   const auto colors = std::vector<Edge::Color>(
       {Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
@@ -77,8 +77,8 @@ std::string write_log_end(Graph& work_graph, int graph_num) {
     res += graph_printing::color_to_string(color) + ": " +
            to_string(work_graph.get_edge_ids_with_color(color).size()) + ", ";
   }
-
-  res += "}\n";
+  res.pop_back();
+  res += "\n}\n";
   return res;
 }
 
