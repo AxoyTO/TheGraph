@@ -30,12 +30,12 @@ void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
   for (int current_depth = 0;
        current_depth <= graph.max_depth() && current_depth < depth;
        ++current_depth) {
-    auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
+    const auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
     for (const auto& current_vertex_id : same_depth_vertices) {
       for (int i = 0; i < new_vertices_num; ++i) {
         if (depth > 0 && is_lucky(1.0 - (float)current_depth / depth)) {
-          VertexId new_vertex = graph.add_vertex();
-          graph.add_edge(current_vertex_id, new_vertex);
+          const VertexId new_vertex_id = graph.add_vertex();
+          graph.add_edge(current_vertex_id, new_vertex_id);
         }
       }
     }
@@ -52,7 +52,7 @@ void generate_green_edges(Graph& graph) {
 
 void generate_blue_edges(Graph& graph) {
   for (int cur_depth = 0; cur_depth <= graph.max_depth(); ++cur_depth) {
-    const auto& same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+    const auto same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     for (auto it = same_depth_vertices.begin();
          std::next(it) != same_depth_vertices.end(); ++it) {
       const auto& vertex1_id = *it;
@@ -67,9 +67,8 @@ void generate_blue_edges(Graph& graph) {
 
 void generate_yellow_edges(Graph& graph, int depth) {
   for (int cur_depth = 0; cur_depth + 1 <= graph.max_depth(); ++cur_depth) {
-    const auto& cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
-    const auto& next_depth_vertices =
-        graph.get_vertices_at_depth(cur_depth + 1);
+    const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+    const auto next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (depth > 1 && is_lucky((float)cur_depth / (depth - 1))) {
         std::set<VertexId> not_connected_vertices;
@@ -90,16 +89,15 @@ void generate_yellow_edges(Graph& graph, int depth) {
 
 void generate_red_edges(Graph& graph) {
   for (int cur_depth = 0; cur_depth + 2 <= graph.max_depth(); ++cur_depth) {
-    const auto& cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+    const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (cur_depth + 2 > graph.max_depth()) {
         break;
       }
-      const auto& next_depth_vertices =
+      const auto next_depth_vertices =
           graph.get_vertices_at_depth(cur_depth + 2);
       if (is_lucky(RED_EDGE_PROB) && !next_depth_vertices.empty()) {
-        const auto& chosen_vertex_id =
-            get_random_vertex_id(next_depth_vertices);
+        const auto chosen_vertex_id = get_random_vertex_id(next_depth_vertices);
         graph.add_edge(cur_vertex_id, chosen_vertex_id, EdgeColor::Red);
       }
     }
