@@ -139,16 +139,9 @@ int main() {
       [&logger, &graphs](int index, Graph graph) {
         log_end(logger, graph, index);
         graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter(graph);
+        write_to_file(graph_printer,
+                      "./temp/graph_" + std::to_string(index) + ".json");
       });
-
-  /*
-  for (int i = 0; i < graphs_count; i++) {
-    log_start(logger, i);
-    const auto graph = graph_generator.generate();
-    log_end(logger, graph, i);
-    const auto graph_printer = GraphPrinter(graph);
-    write_to_file(graph_printer, "./temp/graph_" + std::to_string(i) + ".json");
-  }
-   */
   return 0;
 }

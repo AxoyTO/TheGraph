@@ -10,12 +10,8 @@ class GraphGenerator {
     explicit Params(int depth = 0, int _new_vertices_num = 0)
         : max_depth(depth), new_vertices_num(_new_vertices_num) {}
 
-    Params(const Params& params)
-        : max_depth(params.max_depth),
-          new_vertices_num(params.new_vertices_num) {}
-
-    int max_depth = 0;
-    int new_vertices_num = 0;
+    const int max_depth = 0;
+    const int new_vertices_num = 0;
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
