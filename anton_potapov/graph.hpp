@@ -31,9 +31,11 @@ std::string get_edge_color_string(const EdgeColor& color) {
 using VertexId = int;
 using EdgeId = int;
 
+constexpr int UNREACHABLE_DEPTH = -1;
+
 class Vertex {
  public:
-  int depth;
+  int depth = UNREACHABLE_DEPTH;
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
 
@@ -176,7 +178,6 @@ class Graph {
   }
 
   VertexId add_vertex() {
-    something_changed = true;
     const VertexId new_vertex_id = get_next_vertex_id();
     vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
@@ -192,8 +193,6 @@ class Graph {
     assert(new_edge_color_is_correct(vertex1_id, vertex2_id, edge_color) &&
            "the new edge's color is incorrect");
 
-    something_changed = true;
-
     const EdgeId new_edge_id = get_next_edge_id();
     edges_.emplace(new_edge_id,
                    Edge(new_edge_id, vertex1_id, vertex2_id, edge_color));
@@ -202,6 +201,13 @@ class Graph {
     if (vertex1_id != vertex2_id) {
       get_vertex(vertex2_id).add_edge(new_edge_id);
     }
+
+    something_changed = true;
+    if (minimum_updated_depth != UNREACHABLE_DEPTH) {
+      minimum_updated_depth = std::min(minimum_updated_depth,
+                                       get_new_depth(vertex1_id, vertex2_id));
+    }
+
     return new_edge_id;
   }
 
@@ -236,20 +242,28 @@ class Graph {
     if (!something_changed) {
       return;
     }
-    something_changed = false;
-
-    vertices_at_depth_.clear();
-
-    const VertexId first_vertex_id = vertices_.begin()->first;
-
     std::map<VertexId, int> depths;
-    depths.emplace(first_vertex_id, 0);
-
     std::queue<VertexId> bfs_queue;
-    bfs_queue.push(first_vertex_id);
-
     std::set<VertexId> used;
-    used.insert(first_vertex_id);
+    if (minimum_updated_depth == UNREACHABLE_DEPTH) {
+      const VertexId first_vertex_id = vertices_.begin()->first;
+      depths.emplace(first_vertex_id, 0);
+      bfs_queue.push(first_vertex_id);
+      used.insert(first_vertex_id);
+    } else {
+      int max_correct_depth = minimum_updated_depth - 1;
+      for (const auto& vertex_id : vertices_at_depth_.at(max_correct_depth)) {
+        depths.emplace(vertex_id, max_correct_depth);
+        bfs_queue.push(vertex_id);
+        used.insert(vertex_id);
+      }
+      if (max_correct_depth > 0) {
+        for (const auto& vertex_id :
+             vertices_at_depth_.at(max_correct_depth - 1)) {
+          used.insert(vertex_id);
+        }
+      }
+    }
 
     while (!bfs_queue.empty()) {
       const VertexId current_vertex_id = bfs_queue.front();
@@ -268,20 +282,25 @@ class Graph {
         }
       }
     }
-    int new_max_depth = 0;
-    for (const auto& [vertex_id, depth] : depths) {
-      vertices_.find(vertex_id)->second.depth = depth;
-      if (depth > new_max_depth) {
-        new_max_depth = depth;
+
+    if (minimum_updated_depth == UNREACHABLE_DEPTH) {
+      vertices_at_depth_.clear();
+    } else {
+      for (int invalid_depth = minimum_updated_depth;
+           invalid_depth < (int)vertices_at_depth_.size(); ++invalid_depth) {
+        vertices_at_depth_.erase(invalid_depth);
       }
     }
     for (const auto& [vertex_id, depth] : depths) {
+      vertices_.find(vertex_id)->second.depth = depth;
       vertices_at_depth_[depth].insert(vertex_id);
     }
+    something_changed = false;
   }
 
  private:
   bool something_changed = true;
+  int minimum_updated_depth = UNREACHABLE_DEPTH;
   VertexId next_vertex_id_{};
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
@@ -307,6 +326,23 @@ class Graph {
   VertexId get_next_vertex_id() { return next_vertex_id_++; }
 
   EdgeId get_next_edge_id() { return next_edge_id_++; }
+
+  int get_new_depth(const VertexId& vertex1_id,
+                    const VertexId& vertex2_id) const {
+    const auto vertex1_depth = get_vertex(vertex1_id).depth;
+    const auto vertex2_depth = get_vertex(vertex2_id).depth;
+    if (vertex1_depth == UNREACHABLE_DEPTH &&
+        vertex2_depth == UNREACHABLE_DEPTH) {
+      return UNREACHABLE_DEPTH;
+    }
+    if (vertex1_depth == UNREACHABLE_DEPTH) {
+      return vertex2_depth + 1;
+    } else if (vertex2_depth == UNREACHABLE_DEPTH) {
+      return vertex1_depth + 1;
+    } else {
+      return std::min(vertex1_depth, vertex2_depth) + 1;
+    }
+  }
 
   bool new_edge_color_is_correct(const VertexId& vertex1_id,
                                  const VertexId& vertex2_id,
