@@ -1,5 +1,7 @@
 #include "graph_generator.hpp"
+#include <atomic>
 #include <iostream>
+#include <mutex>
 #include <random>
 
 using VertexId = uni_cpp_practice::VertexId;
@@ -9,6 +11,8 @@ namespace {
 constexpr float GREEN_EDGE_PROBABILITY = 0.1;
 constexpr float BLUE_EDGE_PROBABILITY = 0.25;
 constexpr float RED_EDGE_PROBABILITY = 0.33;
+constexpr int MAX_THREADS_COUNT = 4;
+
 float get_random_probability() {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -40,9 +44,12 @@ std::vector<VertexId> filter_connected_vertices(
 
 namespace uni_cpp_practice {
 
-void generate_gray_branch(...) {
+void generate_gray_branch() {
+  std::cout << "grbr\n";
+  // if(current_depth == max_depth)
+  //   return;
   // рекурсивно вызывает сам себя
-  generate_gray_branch(...);
+  // generate_gray_branch(...);
 }
 
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
@@ -51,29 +58,39 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
 
+  // std::mutex mutex;
+  std::atomic<int> jobs_count = 0;
+  enum class State { Idle, Working, ShouldTerminate };
+  State state = State::Idle;
+
+  const auto threads_count = params_.new_vertices_num >= MAX_THREADS_COUNT
+                                 ? MAX_THREADS_COUNT
+                                 : params_.new_vertices_num;
+
   // Заполняем список работ для воркеров
-  for (int i = 0; i < params_.new_vertices_num; i++) {
-    jobs.emplace_back([]() { generate_gray_branch(); });
+  for (int i = 0; i < threads_count; i++) {
+    jobs.push_back([]() { generate_gray_branch(); });
   }
 
   // Создаем воркера,
   // который в бесконечном цикле проверяет,
   // есть ли работа, и выполняет её
-  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
-    auto thread = std::thread();
+  auto worker = [&state, &jobs]() {
     while (true) {
       // Проверка флага, должны ли мы остановить поток
-      if (should_terminate) {
+      if (state == State::ShouldTerminate) {
+        state = State::Idle;
         return;
       }
       // Проверяем, есть ли для нас работа
-      const auto job_optional = [...]() -> std::optional<JobCallback> {
-        if (has_job()) {
-          return get_job();
+      const auto job_optional = [&jobs]() -> std::optional<JobCallback> {
+        if (jobs.empty()) {
+          return std::nullopt;
         }
-        return std::nullopt;
+        const auto first_job = jobs.front();
+        jobs.pop_front();
+        return first_job;
       }();
-      const auto job_optional = JobCallback;
       if (job_optional.has_value()) {
         // Работа есть, выполняем её
         const auto& job = job_optional.value();
@@ -85,13 +102,12 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   // Создаем и запускаем потоки с воркерами
   // MAX_THREADS_COUNT = 4
   auto threads = std::array<std::thread, MAX_THREADS_COUNT>();
-
+  worker();
   // Ждем, когда все ветви будут сгенерированы
-  while (...) {
+  while (jobs_count < params_.max_depth) {
   }
-
   // Останавливем всех воркеров и потоки
-  should_terminate = true;
+  // state = State::ShouldTerminate;
   for (auto& thread : threads) {
     thread.join();
   }
@@ -179,9 +195,9 @@ Graph GraphGenerator::generate() const {
   generate_yellow_edges(graph);
   generate_red_edges(graph);
 
-  green_thread.join();
-  yellow_thread.join();
-  red_thread.join();
+  // green_thread.join();
+  // yellow_thread.join();
+  // red_thread.join();
 
   return graph;
 }
