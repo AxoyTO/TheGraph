@@ -39,7 +39,63 @@ std::vector<VertexId> filter_connected_vertices(
 }  // namespace
 
 namespace uni_cpp_practice {
+
+void generate_gray_branch(...) {
+  // рекурсивно вызывает сам себя
+  generate_gray_branch(...);
+}
+
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
+  // Job - это lambda функция,
+  // которая энкапсулирует в себе генерацию одной ветви
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
+
+  // Заполняем список работ для воркеров
+  for (int i = 0; i < params_.new_vertices_num; i++) {
+    jobs.emplace_back([]() { generate_gray_branch(); });
+  }
+
+  // Создаем воркера,
+  // который в бесконечном цикле проверяет,
+  // есть ли работа, и выполняет её
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    auto thread = std::thread();
+    while (true) {
+      // Проверка флага, должны ли мы остановить поток
+      if (should_terminate) {
+        return;
+      }
+      // Проверяем, есть ли для нас работа
+      const auto job_optional = [...]() -> std::optional<JobCallback> {
+        if (has_job()) {
+          return get_job();
+        }
+        return std::nullopt;
+      }();
+      const auto job_optional = JobCallback;
+      if (job_optional.has_value()) {
+        // Работа есть, выполняем её
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  // Создаем и запускаем потоки с воркерами
+  // MAX_THREADS_COUNT = 4
+  auto threads = std::array<std::thread, MAX_THREADS_COUNT>();
+
+  // Ждем, когда все ветви будут сгенерированы
+  while (...) {
+  }
+
+  // Останавливем всех воркеров и потоки
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
   for (VertexDepth depth = 0; depth < params_.max_depth; depth++) {
     bool is_new_vertex_generated = false;
     const float probability = (float)depth / (float)params_.max_depth;
@@ -122,6 +178,10 @@ Graph GraphGenerator::generate() const {
   generate_blue_edges(graph);
   generate_yellow_edges(graph);
   generate_red_edges(graph);
+
+  green_thread.join();
+  yellow_thread.join();
+  red_thread.join();
 
   return graph;
 }
