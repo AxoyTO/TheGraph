@@ -147,16 +147,6 @@ class Graph {
     return vertices_at_depth_.at(depth);
   }
 
-  std::map<int, std::set<VertexId>> depth_distribution() {
-    update_vertices_depth();
-    const auto& const_this = *this;
-    return const_this.depth_distribution();
-  }
-
-  std::map<int, std::set<VertexId>> depth_distribution() const {
-    return vertices_at_depth_;
-  }
-
   bool is_vertex_exists(const VertexId& vertex_id) const {
     return vertices_.find(vertex_id) != vertices_.end();
   }
@@ -186,6 +176,7 @@ class Graph {
   }
 
   VertexId add_vertex() {
+    something_changed = true;
     const VertexId new_vertex_id = get_next_vertex_id();
     vertices_.emplace(new_vertex_id, new_vertex_id);
     return new_vertex_id;
@@ -200,6 +191,8 @@ class Graph {
            "Vertices already connected");
     assert(new_edge_color_is_correct(vertex1_id, vertex2_id, edge_color) &&
            "the new edge's color is incorrect");
+
+    something_changed = true;
 
     const EdgeId new_edge_id = get_next_edge_id();
     edges_.emplace(new_edge_id,
@@ -240,6 +233,11 @@ class Graph {
   }
 
   void update_vertices_depth() {
+    if (!something_changed) {
+      return;
+    }
+    something_changed = false;
+
     vertices_at_depth_.clear();
 
     const VertexId first_vertex_id = vertices_.begin()->first;
@@ -283,6 +281,7 @@ class Graph {
   }
 
  private:
+  bool something_changed = true;
   VertexId next_vertex_id_{};
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
