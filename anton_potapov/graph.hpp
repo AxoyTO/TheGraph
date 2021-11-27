@@ -127,30 +127,33 @@ class Graph {
 
   int max_depth() {
     update_vertices_depth();
+    const auto& const_this = *this;
+    return const_this.max_depth();
+  }
+
+  int max_depth() const {
     return std::max((int)vertices_at_depth_.size() - 1, 0);
   }
 
-  int max_depth() const { return vertices_at_depth_.size(); }
-
   const std::map<VertexId, Vertex>& vertices() const { return vertices_; }
 
-  const std::set<VertexId>& get_vertices_at_depth(int depth) {
+  std::set<VertexId> get_vertices_at_depth(int depth) {
     update_vertices_depth();
     const auto& const_this = *this;
     return const_this.get_vertices_at_depth(depth);
   }
 
-  const std::set<VertexId>& get_vertices_at_depth(int depth) const {
+  std::set<VertexId> get_vertices_at_depth(int depth) const {
     return vertices_at_depth_.at(depth);
   }
 
-  const std::map<int, std::set<VertexId>>& depth_distribution() {
+  std::map<int, std::set<VertexId>> depth_distribution() {
     update_vertices_depth();
     const auto& const_this = *this;
     return const_this.depth_distribution();
   }
 
-  const std::map<int, std::set<VertexId>>& depth_distribution() const {
+  std::map<int, std::set<VertexId>> depth_distribution() const {
     return vertices_at_depth_;
   }
 
@@ -194,6 +197,8 @@ class Graph {
     assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
     assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
+    assert(new_edge_color_is_correct(vertex1, vertex2, edge_color) &&
+           "the new edge's color is incorrect");
 
     const EdgeId new_edge_id = get_next_edge_id();
     edges_.emplace(new_edge_id,
@@ -295,6 +300,28 @@ class Graph {
   VertexId get_next_vertex_id() { return next_vertex_id_++; }
 
   EdgeId get_next_edge_id() { return next_edge_id_++; }
+
+  bool new_edge_color_is_correct(const VertexId& vertex1_id,
+                                 const VertexId& vertex2_id,
+                                 const EdgeColor& color) {
+    update_vertices_depth();
+    switch (color) {
+      case EdgeColor::Gray:
+        return vertices_.at(vertex1_id).connected_edges().empty() ||
+               vertices_.at(vertex2_id).connected_edges().empty();
+      case EdgeColor::Green:
+        return vertex1_id == vertex2_id;
+      case EdgeColor::Blue:
+        return get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
+      case EdgeColor::Yellow:
+        return (std::abs(get_vertex(vertex1_id).depth -
+                         get_vertex(vertex2_id).depth) == 1) &&
+               !is_connected(vertex1_id, vertex2_id);
+      case EdgeColor::Red:
+        return std::abs(get_vertex(vertex1_id).depth -
+                        get_vertex(vertex2_id).depth) == 2;
+    }
+  }
 };
 
 VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
