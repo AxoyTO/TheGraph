@@ -40,7 +40,6 @@ std::vector<VertexId> filter_connected_vertices(
 
 namespace uni_cpp_practice {
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
-  graph.insert_vertex();
   for (VertexDepth depth = 0; depth < params_.max_depth; depth++) {
     bool is_new_vertex_generated = false;
     const float probability = (float)depth / (float)params_.max_depth;
@@ -117,6 +116,7 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
 
 Graph GraphGenerator::generate() const {
   Graph graph;
+  graph.insert_vertex();
   generate_vertices_and_gray_edges(graph);
   generate_green_edges(graph);
   generate_blue_edges(graph);
