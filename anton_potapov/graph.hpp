@@ -196,7 +196,8 @@ class Graph {
                   const EdgeColor& edge_color = EdgeColor::Gray) {
     assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
     assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
-    assert(!is_connected(vertex1_id, vertex2_id) && "Vertices already connected");
+    assert(!is_connected(vertex1_id, vertex2_id) &&
+           "Vertices already connected");
     assert(new_edge_color_is_correct(vertex1_id, vertex2_id, edge_color) &&
            "the new edge's color is incorrect");
 
@@ -297,9 +298,7 @@ class Graph {
     return const_cast<Vertex&>(const_this.get_vertex(id));
   }
 
-  const Edge& get_edge(const EdgeId& id) const {
-    return edges_.at(id);
-  }
+  const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
 
   Edge& get_edge(const EdgeId& id) {
     const auto& const_this = *this;
