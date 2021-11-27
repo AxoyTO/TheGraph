@@ -191,24 +191,22 @@ class Graph {
     return new_vertex_id;
   }
 
-  EdgeId add_edge(const VertexId& vertex1,
-                  const VertexId& vertex2,
+  EdgeId add_edge(const VertexId& vertex1_id,
+                  const VertexId& vertex2_id,
                   const EdgeColor& edge_color = EdgeColor::Gray) {
-    assert(is_vertex_exists(vertex1) && "Vertex 1 doesn't exist");
-    assert(is_vertex_exists(vertex2) && "Vertex 2 doesn't exist");
-    assert(!is_connected(vertex1, vertex2) && "Vertices already connected");
-    assert(new_edge_color_is_correct(vertex1, vertex2, edge_color) &&
+    assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
+    assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
+    assert(!is_connected(vertex1_id, vertex2_id) && "Vertices already connected");
+    assert(new_edge_color_is_correct(vertex1_id, vertex2_id, edge_color) &&
            "the new edge's color is incorrect");
 
     const EdgeId new_edge_id = get_next_edge_id();
     edges_.emplace(new_edge_id,
-                   Edge(new_edge_id, vertex1, vertex2, edge_color));
+                   Edge(new_edge_id, vertex1_id, vertex2_id, edge_color));
 
-    auto it_vertex1 = vertices_.find(vertex1);
-    it_vertex1->second.add_edge(new_edge_id);
-    auto it_vertex2 = vertices_.find(vertex2);
-    if (it_vertex1 != it_vertex2) {
-      it_vertex2->second.add_edge(new_edge_id);
+    get_vertex(vertex1_id).add_edge(new_edge_id);
+    if (vertex1_id != vertex2_id) {
+      get_vertex(vertex2_id).add_edge(new_edge_id);
     }
     return new_edge_id;
   }
@@ -291,10 +289,21 @@ class Graph {
   std::map<int, std::set<VertexId>> vertices_at_depth_;
 
   const Vertex& get_vertex(const VertexId& id) const {
-    return vertices_.find(id)->second;
+    return vertices_.at(id);
   }
+
+  Vertex& get_vertex(const VertexId& id) {
+    const auto& const_this = *this;
+    return const_cast<Vertex&>(const_this.get_vertex(id));
+  }
+
   const Edge& get_edge(const EdgeId& id) const {
-    return edges_.find(id)->second;
+    return edges_.at(id);
+  }
+
+  Edge& get_edge(const EdgeId& id) {
+    const auto& const_this = *this;
+    return const_cast<Edge&>(const_this.get_edge(id));
   }
 
   VertexId get_next_vertex_id() { return next_vertex_id_++; }
