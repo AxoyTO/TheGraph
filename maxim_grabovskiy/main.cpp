@@ -63,13 +63,14 @@ class GraphPrinter {
   string print_vertex(Graph::Vertex const& vertex) const {
     std::stringstream vertexOutput;
     vertexOutput << "\t{ \"id\": " << vertex.id << ", \"edge_ids\":[";
-    const auto& connectionsVector=graph_.getConnectionsVector(vertex.id);
+    const auto& connectionsVector = graph_.getConnectionsVector(vertex.id);
     for (int i = 0; i < (int)connectionsVector.size(); i++) {
-      vertexOutput
-          << connectionsVector[i];
-        if (i != ((int)(connectionsVector.size() - 1))) vertexOutput<<", ";
+      vertexOutput << connectionsVector[i];
+      if (i != ((int)(connectionsVector.size() - 1)))
+        vertexOutput << ", ";
     }
-    vertexOutput <<"]"<<" }";
+    vertexOutput << "]"
+                 << " }";
     return vertexOutput.str();
   }
 
@@ -87,14 +88,16 @@ class GraphPrinter {
       printOutput << print_vertex(vertex);
       printOutput << ",\n";
     }
-    if (graph_.getVertexesVector().size()!=0) printOutput.seekp(-2, std::ios_base::end);
+    if (graph_.getVertexesVector().size() != 0)
+      printOutput.seekp(-2, std::ios_base::end);
     printOutput << "\n\t],\n "
                 << "\"edges\": [\n";
     for (auto const edge : graph_.getEdgesVector()) {
       printOutput << print_edge(edge);
       printOutput << ",\n";
     }
-    if (graph_.getEdgesVector().size()!=0) printOutput.seekp(-2, std::ios_base::end);
+    if (graph_.getEdgesVector().size() != 0)
+      printOutput.seekp(-2, std::ios_base::end);
     printOutput << "\n\t]\n}\n";
     string s = printOutput.str();
     return printOutput.str();
