@@ -8,22 +8,22 @@
 	  },
 	  {
 		"id":1,
-		"edge_ids":[0,3],
+		"edge_ids":[0,3,4,5],
 		"depth":1
 	  },
 	  {
 		"id":2,
-		"edge_ids":[1,4,5],
+		"edge_ids":[1,6],
 		"depth":1
 	  },
 	  {
 		"id":3,
-		"edge_ids":[2,6,7,8],
+		"edge_ids":[2,7,8,9],
 		"depth":1
 	  },
 	  {
 		"id":4,
-		"edge_ids":[3,9,10,11],
+		"edge_ids":[3,10,11],
 		"depth":2
 	  },
 	  {
@@ -33,28 +33,28 @@
 	  },
 	  {
 		"id":6,
-		"edge_ids":[5,14,15],
+		"edge_ids":[5],
 		"depth":2
 	  },
 	  {
 		"id":7,
-		"edge_ids":[6,16],
+		"edge_ids":[6],
 		"depth":2
 	  },
 	  {
 		"id":8,
-		"edge_ids":[7,17,18],
+		"edge_ids":[7,14],
 		"depth":2
 	  },
 	  {
 		"id":9,
-		"edge_ids":[8,19,20],
+		"edge_ids":[8,15,16],
 		"depth":2
 	  },
 	  {
 		"id":10,
-		"edge_ids":[9],
-		"depth":3
+		"edge_ids":[9,17],
+		"depth":2
 	  },
 	  {
 		"id":11,
@@ -63,97 +63,57 @@
 	  },
 	  {
 		"id":12,
-		"edge_ids":[11,21,22],
+		"edge_ids":[11],
 		"depth":3
 	  },
 	  {
 		"id":13,
-		"edge_ids":[12,23],
+		"edge_ids":[12],
 		"depth":3
 	  },
 	  {
 		"id":14,
-		"edge_ids":[13],
+		"edge_ids":[13,18],
 		"depth":3
 	  },
 	  {
 		"id":15,
-		"edge_ids":[14,24,25],
+		"edge_ids":[14],
 		"depth":3
 	  },
 	  {
 		"id":16,
-		"edge_ids":[15,26],
+		"edge_ids":[15,19],
 		"depth":3
 	  },
 	  {
 		"id":17,
-		"edge_ids":[16],
+		"edge_ids":[16,20],
 		"depth":3
 	  },
 	  {
 		"id":18,
-		"edge_ids":[17,27],
+		"edge_ids":[17,21],
 		"depth":3
 	  },
 	  {
 		"id":19,
 		"edge_ids":[18],
-		"depth":3
+		"depth":4
 	  },
 	  {
 		"id":20,
 		"edge_ids":[19],
-		"depth":3
+		"depth":4
 	  },
 	  {
 		"id":21,
-		"edge_ids":[20,28,29],
-		"depth":3
+		"edge_ids":[20],
+		"depth":4
 	  },
 	  {
 		"id":22,
 		"edge_ids":[21],
-		"depth":4
-	  },
-	  {
-		"id":23,
-		"edge_ids":[22],
-		"depth":4
-	  },
-	  {
-		"id":24,
-		"edge_ids":[23],
-		"depth":4
-	  },
-	  {
-		"id":25,
-		"edge_ids":[24],
-		"depth":4
-	  },
-	  {
-		"id":26,
-		"edge_ids":[25],
-		"depth":4
-	  },
-	  {
-		"id":27,
-		"edge_ids":[26],
-		"depth":4
-	  },
-	  {
-		"id":28,
-		"edge_ids":[27],
-		"depth":4
-	  },
-	  {
-		"id":29,
-		"edge_ids":[28],
-		"depth":4
-	  },
-	  {
-		"id":30,
-		"edge_ids":[29],
 		"depth":4
 	  }
 	],
@@ -176,15 +136,15 @@
 	  },
 	  {
 		"id":4,
-		"vertex_ids":[2,5]
+		"vertex_ids":[1,5]
 	  },
 	  {
 		"id":5,
-		"vertex_ids":[2,6]
+		"vertex_ids":[1,6]
 	  },
 	  {
 		"id":6,
-		"vertex_ids":[3,7]
+		"vertex_ids":[2,7]
 	  },
 	  {
 		"id":7,
@@ -196,7 +156,7 @@
 	  },
 	  {
 		"id":9,
-		"vertex_ids":[4,10]
+		"vertex_ids":[3,10]
 	  },
 	  {
 		"id":10,
@@ -216,67 +176,35 @@
 	  },
 	  {
 		"id":14,
-		"vertex_ids":[6,15]
+		"vertex_ids":[8,15]
 	  },
 	  {
 		"id":15,
-		"vertex_ids":[6,16]
+		"vertex_ids":[9,16]
 	  },
 	  {
 		"id":16,
-		"vertex_ids":[7,17]
+		"vertex_ids":[9,17]
 	  },
 	  {
 		"id":17,
-		"vertex_ids":[8,18]
+		"vertex_ids":[10,18]
 	  },
 	  {
 		"id":18,
-		"vertex_ids":[8,19]
+		"vertex_ids":[14,19]
 	  },
 	  {
 		"id":19,
-		"vertex_ids":[9,20]
+		"vertex_ids":[16,20]
 	  },
 	  {
 		"id":20,
-		"vertex_ids":[9,21]
+		"vertex_ids":[17,21]
 	  },
 	  {
 		"id":21,
-		"vertex_ids":[12,22]
-	  },
-	  {
-		"id":22,
-		"vertex_ids":[12,23]
-	  },
-	  {
-		"id":23,
-		"vertex_ids":[13,24]
-	  },
-	  {
-		"id":24,
-		"vertex_ids":[15,25]
-	  },
-	  {
-		"id":25,
-		"vertex_ids":[15,26]
-	  },
-	  {
-		"id":26,
-		"vertex_ids":[16,27]
-	  },
-	  {
-		"id":27,
-		"vertex_ids":[18,28]
-	  },
-	  {
-		"id":28,
-		"vertex_ids":[21,29]
-	  },
-	  {
-		"id":29,
-		"vertex_ids":[21,30]
+		"vertex_ids":[18,22]
 	  }
 	]
 }

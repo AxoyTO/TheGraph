@@ -26,11 +26,12 @@ Edge::Edge(const EdgeId& edge_id,
 
 // GRAPH
 Vertex& Graph::add_vertex() {
-  return vertices_.emplace_back(get_new_vertex_id());
+  //добавить id новой вершины в дефолтную нулевую глубину
+  if (depth_map_.empty())
+    depth_map_.push_back({});
+  depth_map_.front().push_back(get_vertex_id_counter() + 1);
 
-  if (!depth_map_.empty())
-    depth_map_.emplace_back();
-  depth_map_.front().push_back(get_vertex_id_counter());
+  return vertices_.emplace_back(get_new_vertex_id());
 }
 
 void Graph::add_edge(const VertexId& from_vertex_id,
@@ -47,18 +48,19 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   vertices_[from_vertex_id].add_edge_id(new_edge.id);
   vertices_[to_vertex_id].add_edge_id(new_edge.id);
 
-  //добавить глубину в вершину
+  //добавить глубину в новую вершину
   vertices_[to_vertex_id].depth = vertices_[from_vertex_id].depth + 1;
 
-  //добавить вершину в карту глубины
+  //удалить id вершины из девфолтной нулевой вершины
   auto& depth_zero = depth_map_.front();
   const auto new_end =
       std::remove(depth_zero.begin(), depth_zero.end(), to_vertex_id);
   depth_zero.erase(new_end);
 
-  // if (depth_map_.size() - 1 == vertices_[from_vertex_id].depth)
-  //   depth_map_.push_back({});
-  // depth_map_.back().push_back(to_vertex_id);
+  //добавить id вершины в карту глубины
+  if (depth_map_.size() - 1 == vertices_[from_vertex_id].depth)
+    depth_map_.push_back({});
+  depth_map_.back().push_back(to_vertex_id);
 }
 
 std::vector<VertexId> Graph::get_vertex_ids_at(const Depth& depth) const {

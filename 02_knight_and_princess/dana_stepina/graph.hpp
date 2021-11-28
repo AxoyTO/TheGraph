@@ -7,8 +7,10 @@ using Depth = int;
 using VertexId = int;
 using EdgeId = int;
 
+constexpr float GREEN_PROBABILITY = 0.1, 
+                RED_PROBABILITY = 0.33;
+
 struct Vertex {
-  enum class Color { Grey, Green, Blue, Yellow, Red };
 
   const VertexId id = 0;
   Depth depth = 0;
@@ -21,12 +23,16 @@ struct Vertex {
 
  private:
   std::vector<EdgeId> edge_ids_;
+
 };
 
 struct Edge {
+  enum class Color { Grey, Green, Blue, Yellow, Red };
+
   const EdgeId id = 0;
   const VertexId vertex_start = 0;
   const VertexId vertex_end = 0;
+  Color color = Color::Grey;
 
   Edge(const EdgeId& edge_id,
        const VertexId& vertex_connection_start,
