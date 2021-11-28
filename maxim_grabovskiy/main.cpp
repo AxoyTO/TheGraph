@@ -25,33 +25,33 @@ class Graph {
     const VertexId id;
     explicit Vertex(VertexId _id) : id(_id) {}
   };
-  vector<EdgeId> getConnectionsVector(VertexId vertexId) const {
-    return edgeConectionMap.at(vertexId);
+  vector<EdgeId> const& getConnectionsVector(VertexId vertexId) const {
+    return edgeConectionMap_.at(vertexId);
   }
-  vector<Vertex> getVertexesVector() const { return vertexes; }
-  vector<Edge> getEdgesVector() const { return edges; }
+  vector<Vertex> getVertexesVector() const { return vertexes_; }
+  vector<Edge> getEdgesVector() const { return edges_; }
   void addEdge(VertexId fromVertexId, VertexId toVertexId) {
-    EdgeId newEdgeId = getNewEdgeId();
-    edgeConectionMap[fromVertexId].push_back(newEdgeId);
-    edgeConectionMap[toVertexId].push_back(newEdgeId);
-    edges.emplace_back(newEdgeId, fromVertexId, toVertexId);
+    const EdgeId newEdgeId = getNewEdgeId();
+    edgeConectionMap_[fromVertexId].push_back(newEdgeId);
+    edgeConectionMap_[toVertexId].push_back(newEdgeId);
+    edges_.emplace_back(newEdgeId, fromVertexId, toVertexId);
   }
   VertexId addVertex() {
-    VertexId newVertexId = getNewVertexId();
-    vertexes.emplace_back(newVertexId);
-    edgeConectionMap[newVertexId] = {};
+    const VertexId newVertexId = getNewVertexId();
+    vertexes_.emplace_back(newVertexId);
+    edgeConectionMap_[newVertexId] = {};
     return newVertexId;
   }
   VertexId spawnVertex(VertexId parentId) {
-    VertexId newVertexId = addVertex();
+    const VertexId newVertexId = addVertex();
     addEdge(parentId, newVertexId);
     return newVertexId;
   }
 
  private:
-  vector<Vertex> vertexes;
-  vector<Edge> edges;
-  map<VertexId, vector<EdgeId>> edgeConectionMap;
+  vector<Vertex> vertexes_;
+  vector<Edge> edges_;
+  map<VertexId, vector<EdgeId>> edgeConectionMap_;
   VertexId vertexIdCounter_ = 0;
   EdgeId edgeIdCounter_ = 0;
   VertexId getNewVertexId() { return vertexIdCounter_++; }
@@ -59,23 +59,21 @@ class Graph {
 };
 class GraphPrinter {
  public:
-  explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
-  string print_vertex(const Graph::Vertex& vertex) const {
+  explicit GraphPrinter(Graph const& graph) : graph_(graph) {}
+  string print_vertex(Graph::Vertex const& vertex) const {
     std::stringstream vertexOutput;
     vertexOutput << "\t{ \"id\": " << vertex.id << ", \"edge_ids\":[";
-    const auto& edgeIds = graph_.getConnectionsVector(vertex.id);
-    for (int i = 0; i < edgeIds.size(); i++) {
+    const auto& connectionsVector=graph_.getConnectionsVector(vertex.id);
+    for (int i = 0; i < (int)connectionsVector.size(); i++) {
       vertexOutput
-          << graph_.getConnectionsVector(vertex.id)[i]
-          << ((i != ((int)(graph_.getConnectionsVector(vertex.id).size() - 1)))
-                  ? ", "
-                  : "]");
+          << connectionsVector[i];
+        if (i != ((int)(connectionsVector.size() - 1))) vertexOutput<<", ";
     }
-    vertexOutput << " }";
+    vertexOutput <<"]"<<" }";
     return vertexOutput.str();
   }
 
-  string print_edge(const Graph::Edge& edge) const {
+  string print_edge(Graph::Edge const& edge) const {
     std::stringstream edgeOutput;
     edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
                << edge.fromVertexId << ", " << edge.toVertexId << "] }";
@@ -89,21 +87,21 @@ class GraphPrinter {
       printOutput << print_vertex(vertex);
       printOutput << ",\n";
     }
-    printOutput.seekp(-2, std::ios_base::end);
+    if (graph_.getVertexesVector().size()!=0) printOutput.seekp(-2, std::ios_base::end);
     printOutput << "\n\t],\n "
                 << "\"edges\": [\n";
     for (auto const edge : graph_.getEdgesVector()) {
       printOutput << print_edge(edge);
       printOutput << ",\n";
     }
-    printOutput.seekp(-2, std::ios_base::end);
+    if (graph_.getEdgesVector().size()!=0) printOutput.seekp(-2, std::ios_base::end);
     printOutput << "\n\t]\n}\n";
     string s = printOutput.str();
     return printOutput.str();
   }
 
  private:
-  const Graph& graph_;
+  Graph const& graph_;
 };
 
 void write_to_file(string const& output, string const& filename) {
