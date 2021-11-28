@@ -59,7 +59,7 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   auto jobs = std::list<JobCallback>();
 
   // std::mutex mutex;
-  std::atomic<int> jobs_count = 0;
+
   enum class State { Idle, Working, ShouldTerminate };
   State state = State::Idle;
 
@@ -68,13 +68,19 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
                                  : params_.new_vertices_num;
 
   // Заполняем список работ для воркеров
-  for (int i = 0; i < threads_count; i++) {
-    jobs.push_back([]() { generate_gray_branch(); });
+  std::atomic<int> jobs_count = 0;
+  {
+    for (int i = 0; i < threads_count; i++) {
+      jobs.push_back([]() { generate_gray_branch(); });
+      ++jobs_count;
+    }
   }
+  std::cout << "\n----\n";
 
   // Создаем воркера,
   // который в бесконечном цикле проверяет,
   // есть ли работа, и выполняет её
+
   auto worker = [&state, &jobs]() {
     while (true) {
       // Проверка флага, должны ли мы остановить поток
@@ -98,16 +104,18 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
       }
     }
   };
-
   // Создаем и запускаем потоки с воркерами
   // MAX_THREADS_COUNT = 4
   auto threads = std::array<std::thread, MAX_THREADS_COUNT>();
+  std::cout << "A\n";
+  state = State::Working;
   worker();
+  std::cout << "B\n";
   // Ждем, когда все ветви будут сгенерированы
-  while (jobs_count < params_.max_depth) {
+  while (jobs_count < 3) {
   }
   // Останавливем всех воркеров и потоки
-  // state = State::ShouldTerminate;
+  state = State::ShouldTerminate;
   for (auto& thread : threads) {
     thread.join();
   }
