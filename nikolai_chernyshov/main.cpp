@@ -5,8 +5,8 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
-#include <vector>
 #include <random>
+#include <vector>
 
 using VertexId = int;
 using EdgeId = int;
@@ -30,7 +30,6 @@ const VertexId& get_random_vertex_id(const std::vector<VertexId>& vertex_ids) {
   return vertex_ids[random_vertex(gen)];
 }
 
-
 struct Edge {
   enum class Color { Gray, Green, Yellow, Red };
 
@@ -38,9 +37,14 @@ struct Edge {
   const VertexId vertex1_id, vertex2_id;
   const Color color;
 
-
-  Edge(const VertexId& _vertex1_id, const VertexId& _vertex2_id, const EdgeId& _id, const Color& _color = Color::Gray)
-      : id(_id), vertex1_id(_vertex1_id), vertex2_id(_vertex2_id), color(_color) {}
+  Edge(const VertexId& _vertex1_id,
+       const VertexId& _vertex2_id,
+       const EdgeId& _id,
+       const Color& _color = Color::Gray)
+      : id(_id),
+        vertex1_id(_vertex1_id),
+        vertex2_id(_vertex2_id),
+        color(_color) {}
 };
 
 struct Vertex {
@@ -88,33 +92,33 @@ class Graph {
         if (edge1_id == edge2_id) {
           if (vertex1_id != vertex2_id) {
             return true;
-          }
-          else for (const auto& edge_id : get_vertex(vertex1_id).get_edge_ids()) {
-            const Edge& edge = get_edge(edge_id);
-            if (edge.vertex1_id == edge.vertex2_id)
-              return true;
-          }
+          } else
+            for (const auto& edge_id : get_vertex(vertex1_id).get_edge_ids()) {
+              const Edge& edge = get_edge(edge_id);
+              if (edge.vertex1_id == edge.vertex2_id)
+                return true;
+            }
         }
     return false;
   }
 
   bool has_vertex(const VertexId& vertex_id) const {
     for (const auto& vertex : vertices_)
-      if (vertex.id == vertex_id) 
+      if (vertex.id == vertex_id)
         return true;
     return false;
   }
 
   const Edge& get_edge(const EdgeId& edge_id) const {
-    for (const auto& edge : edges_) 
-      if (edge.id == edge_id) 
+    for (const auto& edge : edges_)
+      if (edge.id == edge_id)
         return edge;
     throw std::runtime_error("Edge with such id doesn't exist");
   }
 
   const Vertex& get_vertex(const VertexId& vertex_id) const {
-    for (const auto& vertex : vertices_) 
-      if (vertex.id == vertex_id) 
+    for (const auto& vertex : vertices_)
+      if (vertex.id == vertex_id)
         return vertex;
     throw std::runtime_error("Vertex with such id doesn't exist");
   }
@@ -127,8 +131,7 @@ class Graph {
     const Edge::Color color = ([&]() {
       if (vertex1_id > vertex2_id) {
         return calculate_edge_color(vertex2_id, vertex1_id);
-      }
-      else {
+      } else {
         return calculate_edge_color(vertex1_id, vertex2_id);
       }
     })();
@@ -141,24 +144,29 @@ class Graph {
     }
 
     if (color == Edge::Color::Gray) {
-      if (vertex1_id > vertex2_id) set_vertex_depth(vertex1_id, get_vertex(vertex2_id).get_depth() + 1);
-      else set_vertex_depth(vertex2_id, get_vertex(vertex1_id).get_depth() + 1);
+      if (vertex1_id > vertex2_id)
+        set_vertex_depth(vertex1_id, get_vertex(vertex2_id).get_depth() + 1);
+      else
+        set_vertex_depth(vertex2_id, get_vertex(vertex1_id).get_depth() + 1);
     }
   }
 
   void add_vertex() {
     vertices_.emplace_back(get_max_vertex_id());
-    if (depth_map_.size() == 0) depth_map_.push_back({});
+    if (depth_map_.size() == 0)
+      depth_map_.push_back({});
     depth_map_[0].push_back(vertices_.back().id);
   }
 
-  void add_edge_to_required_graph(const VertexId& vertex1_id, const VertexId& vertex2_id) {
+  void add_edge_to_required_graph(const VertexId& vertex1_id,
+                                  const VertexId& vertex2_id) {
     assert(has_vertex(vertex1_id));
     assert(has_vertex(vertex2_id));
-    assert(!are_connected(vertex1_id, vertex2_id));;
+    assert(!are_connected(vertex1_id, vertex2_id));
+    ;
 
-    const auto& new_edge =
-        edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id(), Edge::Color::Gray);
+    const auto& new_edge = edges_.emplace_back(
+        vertex1_id, vertex2_id, get_max_edge_id(), Edge::Color::Gray);
     vertices_[vertex1_id].add_edge_id(new_edge.id);
     if (vertex1_id != vertex2_id) {
       vertices_[vertex2_id].add_edge_id(new_edge.id);
@@ -169,12 +177,15 @@ class Graph {
 
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
 
-  const std::vector<VertexId>& get_vertices_in_depth(int depth) const { return depth_map_[depth]; }
+  const std::vector<VertexId>& get_vertices_in_depth(int depth) const {
+    return depth_map_[depth];
+  }
 
-  const std::vector<std::vector<VertexId>>& get_depth_map() const { return depth_map_; }
+  const std::vector<std::vector<VertexId>>& get_depth_map() const {
+    return depth_map_;
+  }
 
   const int get_depth() const { return depth_map_.size() - 1; }
-
 
  private:
   std::vector<Edge> edges_;
@@ -192,7 +203,8 @@ class Graph {
     }
     depth_map_[depth].push_back(vertex_id);
     for (auto vertex_id_on_zero_depth = depth_map_[0].begin();
-         vertex_id_on_zero_depth != depth_map_[0].end(); vertex_id_on_zero_depth++) {
+         vertex_id_on_zero_depth != depth_map_[0].end();
+         vertex_id_on_zero_depth++) {
       if (*vertex_id_on_zero_depth == vertex.id) {
         depth_map_[0].erase(vertex_id_on_zero_depth);
         break;
@@ -200,7 +212,8 @@ class Graph {
     }
   }
 
-  const Edge::Color calculate_edge_color(const VertexId& vertex1_id, const VertexId& vertex2_id) const {
+  const Edge::Color calculate_edge_color(const VertexId& vertex1_id,
+                                         const VertexId& vertex2_id) const {
     if (vertex1_id == vertex2_id) {
       return Edge::Color::Green;
     }
@@ -208,18 +221,16 @@ class Graph {
     const auto& vertex1 = get_vertex(vertex1_id);
     const auto& vertex2 = get_vertex(vertex2_id);
     auto depth_difference = vertex1.get_depth() - vertex2.get_depth();
-    if (depth_difference < 0) depth_difference *= -1;
+    if (depth_difference < 0)
+      depth_difference *= -1;
 
     if (vertex2.get_edge_ids().size() == 0) {
       return Edge::Color::Gray;
-    }
-    else if (depth_difference == 1) {
+    } else if (depth_difference == 1) {
       return Edge::Color::Yellow;
-    }
-    else if (depth_difference == 2) {
+    } else if (depth_difference == 2) {
       return Edge::Color::Red;
-    }
-    else {
+    } else {
       throw std::runtime_error("Can't calculate edge color");
     }
   }
@@ -240,15 +251,15 @@ class Graph {
 class GraphGenerator {
  public:
   struct Params {
-    explicit Params(const int _depth = 0, const int _new_vertices_num = 0) :
-      depth(_depth), new_vertices_num(_new_vertices_num) {}
+    explicit Params(const int _depth = 0, const int _new_vertices_num = 0)
+        : depth(_depth), new_vertices_num(_new_vertices_num) {}
 
     const int depth = 0;
     const int new_vertices_num = 0;
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
-  
+
   Graph generate() const {
     Graph graph;
 
@@ -266,9 +277,11 @@ class GraphGenerator {
 
     graph.add_vertex();
     for (int depth = 0; depth < params_.depth; depth++) {
-      for (int vertex_num = 0; vertex_num < graph.get_vertices_in_depth(depth).size(); vertex_num++) {
-        for (int generate_try_num = 0; generate_try_num < params_.new_vertices_num;
-            generate_try_num++) {
+      for (int vertex_num = 0;
+           vertex_num < graph.get_vertices_in_depth(depth).size();
+           vertex_num++) {
+        for (int generate_try_num = 0;
+             generate_try_num < params_.new_vertices_num; generate_try_num++) {
           if (get_random_boolean(1 - (double)depth * proba_step)) {
             graph.add_vertex();
             graph.add_edge(current_vertex_num, added_vertex_num);
@@ -287,10 +300,11 @@ class GraphGenerator {
   }
 
   void add_yellow_edges(Graph& graph) const {
-    if (graph.get_depth() < 2) return;
+    if (graph.get_depth() < 2)
+      return;
     double proba_step = 1.0 / (double)(graph.get_depth() - 1);
     for (auto depth = (graph.get_depth_map()).begin();
-        depth != graph.get_depth_map().end() - 1; depth++) {
+         depth != graph.get_depth_map().end() - 1; depth++) {
       for (const auto& vertex_id : *depth) {
         std::vector<VertexId> vertex_ids_on_next_depth;
         for (const auto& vertex_id_on_next_depth : *(depth + 1)) {
@@ -298,16 +312,21 @@ class GraphGenerator {
             vertex_ids_on_next_depth.push_back(vertex_id_on_next_depth);
           }
         }
-        if (vertex_ids_on_next_depth.size() && get_random_boolean(proba_step * (double)(depth - graph.get_depth_map().begin()))) {
-          graph.add_edge(vertex_id, get_random_vertex_id(vertex_ids_on_next_depth));
+        if (vertex_ids_on_next_depth.size() &&
+            get_random_boolean(
+                proba_step * (double)(depth - graph.get_depth_map().begin()))) {
+          graph.add_edge(vertex_id,
+                         get_random_vertex_id(vertex_ids_on_next_depth));
         }
       }
     }
   };
 
   void add_red_edges(Graph& graph) const {
-    if (graph.get_depth() < 2) return;
-    for (auto depth = graph.get_depth_map().begin(); depth != graph.get_depth_map().end() - 2; depth++)
+    if (graph.get_depth() < 2)
+      return;
+    for (auto depth = graph.get_depth_map().begin();
+         depth != graph.get_depth_map().end() - 2; depth++)
       for (const auto& vertex_id : *depth)
         if (get_random_boolean(RED_EDGE_PROBA))
           graph.add_edge(vertex_id, get_random_vertex_id(*(depth + 2)));
@@ -441,7 +460,8 @@ const int handle_depth_input() {
 
   std::cout << "Input depth:" << std::endl;
   while (!(std::cin >> depth) || (depth < MIN_DEPTH)) {
-    std::cout << "Invalid value, please input natural number or zero:" << std::endl;
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
     if (!std::cin) {
       std::cin.clear();
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -454,7 +474,8 @@ const int handle_new_vertices_num_input() {
   int vertices_num;
   std::cout << "Input vertices num:" << std::endl;
   while (!(std::cin >> vertices_num) || (vertices_num < MIN_NEW_VERTICES_NUM)) {
-    std::cout << "Invalid value, please input natural number or zero:" << std::endl;
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
     if (!std::cin) {
       std::cin.clear();
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
