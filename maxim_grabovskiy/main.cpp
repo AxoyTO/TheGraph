@@ -132,8 +132,8 @@ int main() {
   graph.addEdge(8, 11);
   graph.addEdge(11, 13);
   graph.addEdge(12, 13);
-  const auto graph_printer = GraphPrinter(graph);
-  const auto graph_json = graph_printer.print();
+  auto const graph_printer = GraphPrinter(graph);
+  auto const graph_json = graph_printer.print();
   cout << graph_json;
   write_to_file(graph_json, "graph.json");
   return 0;
