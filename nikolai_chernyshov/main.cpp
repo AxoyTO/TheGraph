@@ -15,7 +15,7 @@ constexpr double RED_EDGE_PROBA = 0.33;
 constexpr int MIN_DEPTH = 0;
 constexpr int MIN_NEW_VERTICES_NUM = 0;
 
-const bool get_random_boolean(const double proba) {
+bool get_random_boolean(double proba) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::bernoulli_distribution random_boolean(proba);
@@ -115,7 +115,6 @@ class Graph {
     throw std::runtime_error("Vertex with such id doesn't exist");
   }
 
-  // not const
   Vertex& get_vertex(const VertexId& vertex_id) {
     const auto& const_this = *this;
     return const_cast<Vertex&>(const_this.get_vertex(vertex_id));
@@ -126,8 +125,10 @@ class Graph {
     assert(has_vertex(vertex2_id));
     assert(!are_connected(vertex1_id, vertex2_id));
 
-    const auto color = calculate_edge_color(std::min(vertex1_id, vertex2_id),
-                                            std::max(vertex1_id, vertex2_id));
+    const auto less_vertex_id = std::min(vertex1_id, vertex2_id);
+    const auto greater_vertex_id = std::max(vertex1_id, vertex2_id);
+
+    const auto color = calculate_edge_color(less_vertex_id, greater_vertex_id);
 
     const auto& new_edge =
         edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id(), color);
@@ -140,34 +141,13 @@ class Graph {
     }
 
     if (color == Edge::Color::Gray) {
-      set_vertex_depth(std::max(vertex1_id, vertex2_id),
-                       get_vertex(std::min(vertex1_id, vertex2_id)).depth + 1);
+      set_vertex_depth(greater_vertex_id, get_vertex(less_vertex_id).depth + 1);
     }
   }
 
   const VertexId& add_vertex() {
     vertices_.emplace_back(get_max_vertex_id());
-    if (depth_map_.size() == 0)
-      depth_map_.push_back({0});
     return vertices_.back().id;
-  }
-
-  void add_edge_to_required_graph(const VertexId& vertex1_id,
-                                  const VertexId& vertex2_id) {
-    assert(has_vertex(vertex1_id));
-    assert(has_vertex(vertex2_id));
-    assert(!are_connected(vertex1_id, vertex2_id));
-    ;
-
-    const auto& new_edge = edges_.emplace_back(
-        vertex1_id, vertex2_id, get_max_edge_id(), Edge::Color::Gray);
-
-    Vertex& vertex1 = get_vertex(vertex1_id);
-    vertex1.add_edge_id(new_edge.id);
-    if (vertex1_id != vertex2_id) {
-      Vertex& vertex2 = get_vertex(vertex2_id);
-      vertex2.add_edge_id(new_edge.id);
-    }
   }
 
   const std::vector<Edge>& get_edges() const { return edges_; }
@@ -187,16 +167,15 @@ class Graph {
  private:
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
-  std::vector<std::vector<VertexId>> depth_map_;
+  std::vector<std::vector<VertexId>> depth_map_{{0}}; 
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
 
   void set_vertex_depth(const VertexId& vertex_id, const int depth) {
     Vertex& vertex = get_vertex(vertex_id);
     vertex.depth = depth;
-    const int depth_map_size = depth_map_.size();
 
-    for (int iter = 0; iter <= depth - depth_map_size; iter++) {
+    while (depth_map_.size() <= depth) {
       depth_map_.push_back({});
     }
     depth_map_[depth].push_back(vertex_id);
@@ -210,13 +189,13 @@ class Graph {
 
     const auto& vertex1 = get_vertex(std::min(vertex1_id, vertex2_id));
     const auto& vertex2 = get_vertex(std::max(vertex1_id, vertex2_id));
-    auto depth_difference = vertex1.depth - vertex2.depth;
+    auto depth_difference = std::abs(vertex1.depth - vertex2.depth);
 
-    if (vertex2.get_edge_ids().size() == 0) {
+    if (vertex2.depth == 0) {
       return Edge::Color::Gray;
-    } else if (std::abs(depth_difference) == 1) {
+    } else if (depth_difference == 1) {
       return Edge::Color::Yellow;
-    } else if (std::abs(depth_difference) == 2) {
+    } else if (depth_difference == 2) {
       return Edge::Color::Red;
     } else {
       throw std::runtime_error("Can't calculate edge color");
@@ -265,6 +244,9 @@ class GraphGenerator {
     graph.add_vertex();
     for (int depth = 0; depth < params_.depth; depth++) {
       const auto vertex_ids = graph.get_vertex_ids_in_depth(depth);
+      // создал копию, чтобы не итерироваться по изменяемому массиву
+      // т.к. при создании серых граней у новых вершин пересчитывается глубина
+
       for (const auto& vertex_id : vertex_ids) {
         for (int generate_try_num = 0;
              generate_try_num < params_.new_vertices_num; generate_try_num++) {
@@ -284,25 +266,30 @@ class GraphGenerator {
   }
 
   void add_yellow_edges(Graph& graph) const {
-    if (graph.get_depth() < 1)
-      return;
+    if (graph.get_depth() < 2) return;
+    // поставил 2 вместо 1, потому что с глубины 0 желтая грань не может начинаться
+    // иначе она будет идти к потомку корневой вершины, что противоречит условию
+    // работало бы и в случае 1, но тогда производились бы лишние вычисления
+
     double proba_step = 1.0 / (double)(graph.get_depth() - 1);
-    for (auto vertex_ids_in_depth = (graph.get_depth_map()).begin();
-         vertex_ids_in_depth != graph.get_depth_map().end() - 1;
+    const auto& depth_map = graph.get_depth_map();
+
+    for (auto vertex_ids_in_depth = depth_map.begin();
+         vertex_ids_in_depth != depth_map.end() - 1;
          vertex_ids_in_depth++) {
       for (const auto& vertex_id : *vertex_ids_in_depth) {
-        std::vector<VertexId> vertex_ids_in_next_depth;
-        for (const auto& vertex_id_on_next_depth : *(vertex_ids_in_depth + 1)) {
-          if (!graph.are_connected(vertex_id, vertex_id_on_next_depth)) {
-            vertex_ids_in_next_depth.push_back(vertex_id_on_next_depth);
+        std::vector<VertexId> unconnected_vertex_ids;
+        for (const auto& vertex_id_in_next_depth : *(vertex_ids_in_depth + 1)) {
+          if (!graph.are_connected(vertex_id, vertex_id_in_next_depth)) {
+            unconnected_vertex_ids.push_back(vertex_id_in_next_depth);
           }
         }
-        if (vertex_ids_in_next_depth.size() &&
+        if (unconnected_vertex_ids.size() &&
             get_random_boolean(proba_step *
                                (double)(vertex_ids_in_depth -
-                                        graph.get_depth_map().begin()))) {
+                                        depth_map.begin()))) {
           graph.add_edge(vertex_id,
-                         get_random_vertex_id(vertex_ids_in_next_depth));
+                         get_random_vertex_id(unconnected_vertex_ids));
         }
       }
     }
