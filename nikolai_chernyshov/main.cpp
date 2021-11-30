@@ -130,24 +130,28 @@ class Graph {
 
     const auto color = calculate_edge_color(less_vertex_id, greater_vertex_id);
 
-    const auto& new_edge =
-        edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id(), color);
+    const auto& new_edge = edges_.emplace_back(
+        less_vertex_id, greater_vertex_id, get_max_edge_id(), color);
 
-    Vertex& vertex1 = get_vertex(vertex1_id);
+    Vertex& vertex1 = get_vertex(less_vertex_id);
     vertex1.add_edge_id(new_edge.id);
-    if (vertex1_id != vertex2_id) {
-      Vertex& vertex2 = get_vertex(vertex2_id);
+    if (less_vertex_id != greater_vertex_id) {
+      Vertex& vertex2 = get_vertex(greater_vertex_id);
       vertex2.add_edge_id(new_edge.id);
     }
 
     if (color == Edge::Color::Gray) {
-      set_vertex_depth(greater_vertex_id, get_vertex(less_vertex_id).depth + 1);
+      set_vertex_depth(greater_vertex_id, vertex1.depth + 1);
     }
   }
 
   const VertexId& add_vertex() {
-    vertices_.emplace_back(get_max_vertex_id());
-    return vertices_.back().id;
+    const auto& new_vertex = vertices_.emplace_back(get_max_vertex_id());
+    if (depth_map_.size() == 0)
+      depth_map_.push_back({new_vertex.id});
+    else
+      depth_map_[0].push_back(new_vertex.id);
+    return new_vertex.id;
   }
 
   const std::vector<Edge>& get_edges() const { return edges_; }
@@ -167,7 +171,7 @@ class Graph {
  private:
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
-  std::vector<std::vector<VertexId>> depth_map_{{0}};
+  std::vector<std::vector<VertexId>> depth_map_;
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
 
@@ -179,6 +183,15 @@ class Graph {
       depth_map_.push_back({});
     }
     depth_map_[depth].push_back(vertex_id);
+
+    for (auto vertex_id_on_zero_depth = depth_map_[0].begin();
+         vertex_id_on_zero_depth != depth_map_[0].end();
+         vertex_id_on_zero_depth++) {
+      if (*vertex_id_on_zero_depth == vertex.id) {
+        depth_map_[0].erase(vertex_id_on_zero_depth);
+        break;
+      }
+    }
   }
 
   const Edge::Color calculate_edge_color(const VertexId& vertex1_id,
@@ -191,7 +204,8 @@ class Graph {
     const auto& vertex2 = get_vertex(std::max(vertex1_id, vertex2_id));
     auto depth_difference = std::abs(vertex1.depth - vertex2.depth);
 
-    if (vertex2.depth == 0) {
+    if ((vertex1.get_edge_ids().size() == 0) ||
+        (vertex2.get_edge_ids().size() == 0)) {
       return Edge::Color::Gray;
     } else if (depth_difference == 1) {
       return Edge::Color::Yellow;
@@ -243,9 +257,9 @@ class GraphGenerator {
 
     graph.add_vertex();
     for (int depth = 0; depth < params_.depth; depth++) {
-      const auto vertex_ids = graph.get_vertex_ids_in_depth(depth);
       // создал копию, чтобы не итерироваться по изменяемому массиву
       // т.к. при создании серых граней у новых вершин пересчитывается глубина
+      const auto vertex_ids = graph.get_vertex_ids_in_depth(depth);
 
       for (const auto& vertex_id : vertex_ids) {
         for (int generate_try_num = 0;
@@ -266,12 +280,12 @@ class GraphGenerator {
   }
 
   void add_yellow_edges(Graph& graph) const {
-    if (graph.get_depth() < 2)
-      return;
     // поставил 2 вместо 1, потому что с глубины 0 желтая грань не может
     // начинаться иначе она будет идти к потомку корневой вершины, что
     // противоречит условию работало бы и в случае 1, но тогда производились бы
     // лишние вычисления
+    if (graph.get_depth() < 2)
+      return;
 
     double proba_step = 1.0 / (double)(graph.get_depth() - 1);
     const auto& depth_map = graph.get_depth_map();
