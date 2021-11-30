@@ -57,7 +57,7 @@ void GraphGenerationController::generate(
 }
 
 void GraphGenerationController::Worker::start() {
-  assert(state_ != State::Working && "Worker is already working!");
+  assert(state_ == State::Idle && "Worker is not in idle state!");
   state_ = State::Working;
   thread_ =
       std::thread([&state_ = state_, &get_job_callback_ = get_job_callback_]() {
