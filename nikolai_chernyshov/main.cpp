@@ -12,7 +12,6 @@ using VertexId = int;
 using EdgeId = int;
 constexpr double GREEN_EDGE_PROBA = 0.1;
 constexpr double RED_EDGE_PROBA = 0.33;
-constexpr int VERTICES_COUNT = 14;
 constexpr int MIN_DEPTH = 0;
 constexpr int MIN_NEW_VERTICES_NUM = 0;
 
@@ -320,35 +319,6 @@ class GraphGenerator {
           graph.add_edge(vertex_id,
                          get_random_vertex_id(*(vertex_ids_in_depth + 2)));
   };
-
-  Graph build_required_graph() const {
-    Graph graph;
-
-    for (int i = 0; i < VERTICES_COUNT; i++) {
-      graph.add_vertex();
-    }
-
-    graph.add_edge_to_required_graph(0, 1);
-    graph.add_edge_to_required_graph(0, 2);
-    graph.add_edge_to_required_graph(0, 3);
-    graph.add_edge_to_required_graph(1, 4);
-    graph.add_edge_to_required_graph(1, 5);
-    graph.add_edge_to_required_graph(1, 6);
-    graph.add_edge_to_required_graph(2, 7);
-    graph.add_edge_to_required_graph(2, 8);
-    graph.add_edge_to_required_graph(3, 9);
-    graph.add_edge_to_required_graph(4, 10);
-    graph.add_edge_to_required_graph(5, 10);
-    graph.add_edge_to_required_graph(6, 10);
-    graph.add_edge_to_required_graph(7, 11);
-    graph.add_edge_to_required_graph(8, 11);
-    graph.add_edge_to_required_graph(9, 12);
-    graph.add_edge_to_required_graph(10, 13);
-    graph.add_edge_to_required_graph(11, 13);
-    graph.add_edge_to_required_graph(12, 13);
-
-    return graph;
-  }
 
  private:
   const Params params_ = Params();
