@@ -167,7 +167,7 @@ class Graph {
  private:
   std::vector<Edge> edges_;
   std::vector<Vertex> vertices_;
-  std::vector<std::vector<VertexId>> depth_map_{{0}}; 
+  std::vector<std::vector<VertexId>> depth_map_{{0}};
   VertexId vertex_id_max_ = 0;
   EdgeId edge_id_max_ = 0;
 
@@ -266,17 +266,18 @@ class GraphGenerator {
   }
 
   void add_yellow_edges(Graph& graph) const {
-    if (graph.get_depth() < 2) return;
-    // поставил 2 вместо 1, потому что с глубины 0 желтая грань не может начинаться
-    // иначе она будет идти к потомку корневой вершины, что противоречит условию
-    // работало бы и в случае 1, но тогда производились бы лишние вычисления
+    if (graph.get_depth() < 2)
+      return;
+    // поставил 2 вместо 1, потому что с глубины 0 желтая грань не может
+    // начинаться иначе она будет идти к потомку корневой вершины, что
+    // противоречит условию работало бы и в случае 1, но тогда производились бы
+    // лишние вычисления
 
     double proba_step = 1.0 / (double)(graph.get_depth() - 1);
     const auto& depth_map = graph.get_depth_map();
 
     for (auto vertex_ids_in_depth = depth_map.begin();
-         vertex_ids_in_depth != depth_map.end() - 1;
-         vertex_ids_in_depth++) {
+         vertex_ids_in_depth != depth_map.end() - 1; vertex_ids_in_depth++) {
       for (const auto& vertex_id : *vertex_ids_in_depth) {
         std::vector<VertexId> unconnected_vertex_ids;
         for (const auto& vertex_id_in_next_depth : *(vertex_ids_in_depth + 1)) {
@@ -285,9 +286,8 @@ class GraphGenerator {
           }
         }
         if (unconnected_vertex_ids.size() &&
-            get_random_boolean(proba_step *
-                               (double)(vertex_ids_in_depth -
-                                        depth_map.begin()))) {
+            get_random_boolean(proba_step * (double)(vertex_ids_in_depth -
+                                                     depth_map.begin()))) {
           graph.add_edge(vertex_id,
                          get_random_vertex_id(unconnected_vertex_ids));
         }
