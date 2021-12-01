@@ -3,6 +3,7 @@
 #include <iostream>
 #include <mutex>
 #include <random>
+#include <thread>
 
 using VertexId = uni_cpp_practice::VertexId;
 using Graph = uni_cpp_practice::Graph;

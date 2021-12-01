@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <list>
-#include <thread>
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
