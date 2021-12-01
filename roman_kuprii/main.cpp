@@ -4,8 +4,8 @@
 #include <string>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
 #include "graph_generation_controller.hpp"
+#include "graph_generator.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
@@ -20,6 +20,7 @@ const std::string DIRECTORY_NAME = "temp";
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
 using uni_cpp_practice::Graph;
+using uni_cpp_practice::GraphGenerator;
 using uni_cpp_practice::Logger;
 using uni_cpp_practice::graph_generation::Params;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
@@ -75,7 +76,10 @@ int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_vertices_number_input();
   const int threads_count = handle_threads_number_input();
-  const auto params = Params(depth, new_vertices_num);
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+
+  auto generator = GraphGenerator(params);
+  generator.generate();
 
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);

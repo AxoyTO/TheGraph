@@ -1,8 +1,13 @@
+#include <atomic>
+#include <functional>
+#include <list>
+#include <mutex>
 #include <random>
+#include <thread>
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
+#include "graph_generator.hpp"
 
 namespace {
 
@@ -23,6 +28,8 @@ int get_int_random_number(int upper_bound) {
 constexpr double GREEN_TRASHOULD = 0.1;
 constexpr double BLUE_TRASHOULD = 0.25;
 constexpr double RED_TRASHOULD = 0.33;
+
+constexpr int MAX_THREADS_COUNT = 4;
 
 using std::vector;
 
@@ -126,19 +133,26 @@ void paint_edges(Graph& work_graph) {
   add_yellow_edges(work_graph);
 }
 
-void generate_new_vertices(Graph& work_graph,
-                           uni_cpp_practice::graph_generation::Params params) {
+void generate_gray_branch(Graph& work_graph,
+                          uni_cpp_practice::GraphGenerator::Params params,
+                          std::mutex& modify_mutex) {
   int depth = params.depth;
   int new_vertices_num = params.new_vertices_num;
-  for (int current_depth = 0; current_depth <= depth; current_depth++) {
+
+  auto vertices = work_graph.get_vertices();
+
+  for (int current_depth = 1; current_depth <= depth; current_depth++) {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
-    for (const auto& vertex : work_graph.get_vertices()) {
+
+    for (const auto& vertex : vertices) {
       const VertexId vertex_id = vertex.get_id();
       if (vertex.depth == current_depth)
         for (int iter = 0; iter < new_vertices_num; iter++) {
           if (get_real_random_number() > probability) {
+            const std::lock_guard lock(modify_mutex);
             work_graph.add_vertex();
+            vertices.emplace_back(work_graph.get_vertices().back().get_id());
             work_graph.connect_vertices(
                 vertex_id,
                 work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
@@ -150,20 +164,67 @@ void generate_new_vertices(Graph& work_graph,
   }
 }
 
+void generate_new_vertices(Graph& graph,
+                           uni_cpp_practice::GraphGenerator::Params& params) {
+  int new_vertices_num = params.new_vertices_num;
+  std::list<std::function<void()>> jobs;
+  std::atomic<int> completed_jobs = 0;
+  std::mutex modify_mutex;
+  for (int i = 0; i < new_vertices_num; i++)
+    jobs.emplace_back([&graph, &params, &completed_jobs, &modify_mutex]() {
+      generate_gray_branch(graph, params, modify_mutex);
+      // add mutex
+      completed_jobs++;
+    });
+
+  std::atomic<bool> should_terminate = false;
+  std::mutex jobs_mutex;
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional =
+          [&jobs_mutex, &jobs]() -> std::optional<std::function<void()>> {
+        const std::lock_guard lock(jobs_mutex);
+        if (jobs.empty()) {
+          return std::nullopt;
+        }
+        const auto job = jobs.front();
+        jobs.pop_front();
+        return job;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  auto threads = std::array<std::thread, MAX_THREADS_COUNT>();
+  for (int i = 0; i < MAX_THREADS_COUNT; ++i) {
+    threads[i] = std::thread(worker);
+  }
+
+  while (completed_jobs != new_vertices_num) {
+  }
+
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+}
+
 }  // namespace
 
 namespace uni_cpp_practice {
 
-namespace graph_generation {
-
-Graph generate(const Params& params) {
+Graph GraphGenerator::generate() {
   auto graph = Graph();
   graph.add_vertex();
-  generate_new_vertices(graph, params);
+  generate_new_vertices(graph, params_);
   paint_edges(graph);
   return graph;
 }
-
-}  // namespace graph_generation
 
 }  // namespace uni_cpp_practice
