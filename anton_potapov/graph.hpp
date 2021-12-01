@@ -202,10 +202,10 @@ class Graph {
       get_vertex(vertex2_id).add_edge(new_edge_id);
     }
 
-    is_depth_dirty = true;
-    if (minimum_updated_depth != UNREACHABLE_DEPTH) {
-      minimum_updated_depth = std::min(minimum_updated_depth,
-                                       get_new_depth(vertex1_id, vertex2_id));
+    is_depth_dirty_ = true;
+    if (updated_depth_ != UNREACHABLE_DEPTH) {
+      updated_depth_ =
+          std::min(updated_depth_, get_new_depth(vertex1_id, vertex2_id));
     }
 
     return new_edge_id;
@@ -239,19 +239,19 @@ class Graph {
   }
 
   void update_vertices_depth() {
-    if (!is_depth_dirty) {
+    if (!is_depth_dirty_) {
       return;
     }
     std::map<VertexId, int> depths;
     std::queue<VertexId> bfs_queue;
     std::set<VertexId> used;
-    if (minimum_updated_depth == UNREACHABLE_DEPTH) {
+    if (updated_depth_ == UNREACHABLE_DEPTH) {
       const VertexId first_vertex_id = vertices_.begin()->first;
       depths.emplace(first_vertex_id, 0);
       bfs_queue.push(first_vertex_id);
       used.insert(first_vertex_id);
     } else {
-      int max_correct_depth = minimum_updated_depth - 1;
+      int max_correct_depth = updated_depth_ - 1;
       for (const auto& vertex_id : vertices_at_depth_.at(max_correct_depth)) {
         depths.emplace(vertex_id, max_correct_depth);
         bfs_queue.push(vertex_id);
@@ -283,10 +283,10 @@ class Graph {
       }
     }
 
-    if (minimum_updated_depth == UNREACHABLE_DEPTH) {
+    if (updated_depth_ == UNREACHABLE_DEPTH) {
       vertices_at_depth_.clear();
     } else {
-      for (int invalid_depth = minimum_updated_depth;
+      for (int invalid_depth = updated_depth_;
            invalid_depth < (int)vertices_at_depth_.size(); ++invalid_depth) {
         vertices_at_depth_.erase(invalid_depth);
       }
@@ -295,12 +295,12 @@ class Graph {
       vertices_.find(vertex_id)->second.depth = depth;
       vertices_at_depth_[depth].insert(vertex_id);
     }
-    is_depth_dirty = false;
+    is_depth_dirty_ = false;
   }
 
  private:
-  bool is_depth_dirty = true;
-  int minimum_updated_depth = UNREACHABLE_DEPTH;
+  bool is_depth_dirty_ = true;
+  int updated_depth_ = UNREACHABLE_DEPTH;
   VertexId next_vertex_id_{};
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
