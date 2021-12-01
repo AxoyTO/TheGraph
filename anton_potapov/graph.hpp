@@ -321,8 +321,7 @@ class Graph {
                     const VertexId& vertex2_id) const {
     const auto vertex1_depth = get_vertex(vertex1_id).depth;
     const auto vertex2_depth = get_vertex(vertex2_id).depth;
-    if (vertex1_depth == INIT_DEPTH &&
-        vertex2_depth == INIT_DEPTH) {
+    if (vertex1_depth == INIT_DEPTH && vertex2_depth == INIT_DEPTH) {
       return INIT_DEPTH;
     }
     if (vertex1_depth == INIT_DEPTH) {
