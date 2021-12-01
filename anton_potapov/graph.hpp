@@ -139,13 +139,13 @@ class Graph {
 
   const std::map<VertexId, Vertex>& vertices() const { return vertices_; }
 
-  std::set<VertexId> get_vertices_at_depth(int depth) {
+  const std::set<VertexId>& get_vertices_at_depth(int depth) {
     update_vertices_depth();
     const auto& const_this = *this;
     return const_this.get_vertices_at_depth(depth);
   }
 
-  std::set<VertexId> get_vertices_at_depth(int depth) const {
+  const std::set<VertexId>& get_vertices_at_depth(int depth) const {
     return vertices_at_depth_.at(depth);
   }
 

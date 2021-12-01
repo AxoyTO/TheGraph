@@ -30,6 +30,8 @@ void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
   for (int current_depth = 0;
        current_depth <= graph.max_depth() && current_depth < depth;
        ++current_depth) {
+    // copy is needed since get_vertices_at_depth() returns a const reference to
+    // a changing object
     const auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
     for (const auto& current_vertex_id : same_depth_vertices) {
       for (int i = 0; i < new_vertices_num; ++i) {
@@ -52,6 +54,8 @@ void generate_green_edges(Graph& graph) {
 
 void generate_blue_edges(Graph& graph) {
   for (int cur_depth = 0; cur_depth <= graph.max_depth(); ++cur_depth) {
+    // copy is needed since get_vertices_at_depth() returns a const reference to
+    // a changing object
     const auto same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     for (auto it = same_depth_vertices.begin();
          std::next(it) != same_depth_vertices.end(); ++it) {
@@ -70,6 +74,8 @@ void generate_yellow_edges(Graph& graph) {
     return;
   }
   for (int cur_depth = 0; cur_depth + 1 <= graph.max_depth(); ++cur_depth) {
+    // copies are needed since get_vertices_at_depth() returns a const reference
+    // to a changing object
     const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     const auto next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
@@ -92,11 +98,15 @@ void generate_yellow_edges(Graph& graph) {
 
 void generate_red_edges(Graph& graph) {
   for (int cur_depth = 0; cur_depth + 2 <= graph.max_depth(); ++cur_depth) {
+    // copy is needed since get_vertices_at_depth() returns a const reference to
+    // a changing object
     const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (cur_depth + 2 > graph.max_depth()) {
         break;
       }
+      // copy is needed since get_vertices_at_depth() returns a const reference
+      // to a changing object
       const auto next_depth_vertices =
           graph.get_vertices_at_depth(cur_depth + 2);
       if (is_lucky(RED_EDGE_PROB)) {
