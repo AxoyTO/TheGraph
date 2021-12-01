@@ -283,16 +283,8 @@ class Graph {
       }
     }
 
-    if (updated_depth_ == UNREACHABLE_DEPTH) {
-      vertices_at_depth_.clear();
-    } else {
-      vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
-                               vertices_at_depth_.end());
-    }
-    for (const auto& [vertex_id, depth] : depths) {
-      get_vertex(vertex_id).depth = depth;
-      vertices_at_depth_[depth].insert(vertex_id);
-    }
+    update_vertices_at_depth_map(depths);
+
     is_depth_dirty_ = false;
   }
 
@@ -361,6 +353,19 @@ class Graph {
       case EdgeColor::Red:
         return std::abs(get_vertex(vertex1_id).depth -
                         get_vertex(vertex2_id).depth) == 2;
+    }
+  }
+
+  void update_vertices_at_depth_map(const std::map<VertexId, int>& depths) {
+    if (updated_depth_ == UNREACHABLE_DEPTH) {
+      vertices_at_depth_.clear();
+    } else {
+      vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
+                               vertices_at_depth_.end());
+    }
+    for (const auto& [vertex_id, depth] : depths) {
+      get_vertex(vertex_id).depth = depth;
+      vertices_at_depth_[depth].insert(vertex_id);
     }
   }
 };
