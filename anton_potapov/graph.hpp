@@ -202,7 +202,7 @@ class Graph {
       get_vertex(vertex2_id).add_edge(new_edge_id);
     }
 
-    something_changed = true;
+    is_depth_dirty = true;
     if (minimum_updated_depth != UNREACHABLE_DEPTH) {
       minimum_updated_depth = std::min(minimum_updated_depth,
                                        get_new_depth(vertex1_id, vertex2_id));
@@ -239,7 +239,7 @@ class Graph {
   }
 
   void update_vertices_depth() {
-    if (!something_changed) {
+    if (!is_depth_dirty) {
       return;
     }
     std::map<VertexId, int> depths;
@@ -295,11 +295,11 @@ class Graph {
       vertices_.find(vertex_id)->second.depth = depth;
       vertices_at_depth_[depth].insert(vertex_id);
     }
-    something_changed = false;
+    is_depth_dirty = false;
   }
 
  private:
-  bool something_changed = true;
+  bool is_depth_dirty = true;
   int minimum_updated_depth = UNREACHABLE_DEPTH;
   VertexId next_vertex_id_{};
   EdgeId next_edge_id_{};
