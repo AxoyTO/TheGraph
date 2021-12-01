@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <list>
 #include <random>
@@ -63,7 +64,7 @@ void generate_green_edges(Graph& graph, std::mutex& mutex_add_edge) {
   }
 }
 
-void generate_blue_edges(Graph& graph) {
+void generate_blue_edges(Graph& graph, std::mutex& mutex_add_edge) {
   const float probability = get_color_probability(Edge::Color::Blue);
   // так как на нулевом уровне только одна вершина == нулевая, нет смысла ее
   // учитывать
@@ -72,6 +73,7 @@ void generate_blue_edges(Graph& graph) {
     const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
     for (int idx = 0; idx < vertices_at_depth.size() - 1; ++idx) {
       if (is_lucky(probability)) {
+        const std::lock_guard lock(mutex_add_edge);
         graph.add_edge(vertices_at_depth[idx], vertices_at_depth[idx + 1],
                        Edge::Color::Blue);
       }
@@ -140,13 +142,14 @@ void GraphGenerator::generate_gray_branch(Graph& graph,
                                           std::mutex& mutex_add,
                                           const VertexId& parent_vertex_id,
                                           const Depth current_depth) const {
+  assert(current_depth <= params_.depth && "Depth error");
   const auto new_vertex_id = [&graph, &mutex_add, &parent_vertex_id]() {
     const std::lock_guard lock(mutex_add);
     const auto& new_vertex_id = graph.add_vertex();
     graph.add_edge(parent_vertex_id, new_vertex_id);
     return new_vertex_id;
   }();
-  if (current_depth >= params_.depth) {
+  if (current_depth == params_.depth) {
     return;
   }
   const float probability = get_color_probability(Edge::Color::Gray);
@@ -245,7 +248,8 @@ Graph GraphGenerator::generate() const {
                             std::ref(mutex_add_edge));
   std::thread red_thread(generate_red_edges, std::ref(graph),
                          std::ref(mutex_add_edge));
-  std::thread blue_thread(generate_blue_edges, std::ref(graph));
+  std::thread blue_thread(generate_blue_edges, std::ref(graph),
+                          std::ref(mutex_add_edge));
   green_thread.join();
   yellow_thread.join();
   red_thread.join();
