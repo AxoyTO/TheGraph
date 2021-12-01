@@ -246,7 +246,7 @@ class Graph {
     std::queue<VertexId> bfs_queue;
     std::set<VertexId> used;
     if (updated_depth_ == UNREACHABLE_DEPTH) {
-      const VertexId first_vertex_id = vertices_.begin()->first;
+      const VertexId& first_vertex_id = vertices_.begin()->first;
       depths.emplace(first_vertex_id, 0);
       bfs_queue.push(first_vertex_id);
       used.insert(first_vertex_id);
@@ -266,14 +266,14 @@ class Graph {
     }
 
     while (!bfs_queue.empty()) {
-      const VertexId current_vertex_id = bfs_queue.front();
+      const VertexId& current_vertex_id = bfs_queue.front();
       bfs_queue.pop();
       for (const auto& connected_edge_id :
-           vertices_.find(current_vertex_id)->second.connected_edges()) {
-        const Edge connected_edge = edges_.find(connected_edge_id)->second;
-        const VertexId vertex1_id = connected_edge.vertex1_id;
-        const VertexId vertex2_id = connected_edge.vertex2_id;
-        const VertexId connected_vertex_id =
+           get_vertex(current_vertex_id).connected_edges()) {
+        const Edge& connected_edge = get_edge(connected_edge_id);
+        const VertexId& vertex1_id = connected_edge.vertex1_id;
+        const VertexId& vertex2_id = connected_edge.vertex2_id;
+        const VertexId& connected_vertex_id =
             (current_vertex_id == vertex1_id ? vertex2_id : vertex2_id);
         if (used.find(connected_vertex_id) == used.end()) {
           used.insert(connected_vertex_id);
