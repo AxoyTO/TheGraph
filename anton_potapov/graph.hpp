@@ -31,11 +31,11 @@ std::string get_edge_color_string(const EdgeColor& color) {
 using VertexId = int;
 using EdgeId = int;
 
-constexpr int UNREACHABLE_DEPTH = -1;
+constexpr int INIT_DEPTH = 0;
 
 class Vertex {
  public:
-  int depth = UNREACHABLE_DEPTH;
+  int depth = INIT_DEPTH;
 
   explicit Vertex(const VertexId& vertex_id) : id_(vertex_id) {}
 
@@ -203,7 +203,7 @@ class Graph {
     }
 
     is_depth_dirty_ = true;
-    if (updated_depth_ != UNREACHABLE_DEPTH) {
+    if (updated_depth_ != INIT_DEPTH) {
       updated_depth_ =
           std::min(updated_depth_, get_new_depth(vertex1_id, vertex2_id));
     }
@@ -245,7 +245,7 @@ class Graph {
     std::map<VertexId, int> depths;
     std::queue<VertexId> bfs_queue;
     std::set<VertexId> used;
-    if (updated_depth_ == UNREACHABLE_DEPTH) {
+    if (updated_depth_ == INIT_DEPTH) {
       const VertexId& first_vertex_id = vertices_.begin()->first;
       depths.emplace(first_vertex_id, 0);
       bfs_queue.push(first_vertex_id);
@@ -290,7 +290,7 @@ class Graph {
 
  private:
   bool is_depth_dirty_ = true;
-  int updated_depth_ = UNREACHABLE_DEPTH;
+  int updated_depth_ = INIT_DEPTH;
   VertexId next_vertex_id_{};
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
@@ -321,13 +321,13 @@ class Graph {
                     const VertexId& vertex2_id) const {
     const auto vertex1_depth = get_vertex(vertex1_id).depth;
     const auto vertex2_depth = get_vertex(vertex2_id).depth;
-    if (vertex1_depth == UNREACHABLE_DEPTH &&
-        vertex2_depth == UNREACHABLE_DEPTH) {
-      return UNREACHABLE_DEPTH;
+    if (vertex1_depth == INIT_DEPTH &&
+        vertex2_depth == INIT_DEPTH) {
+      return INIT_DEPTH;
     }
-    if (vertex1_depth == UNREACHABLE_DEPTH) {
+    if (vertex1_depth == INIT_DEPTH) {
       return vertex2_depth + 1;
-    } else if (vertex2_depth == UNREACHABLE_DEPTH) {
+    } else if (vertex2_depth == INIT_DEPTH) {
       return vertex1_depth + 1;
     } else {
       return std::min(vertex1_depth, vertex2_depth) + 1;
@@ -367,7 +367,7 @@ class Graph {
   }
 
   void update_vertices_at_depth_map(const std::map<VertexId, int>& depths) {
-    if (updated_depth_ == UNREACHABLE_DEPTH) {
+    if (updated_depth_ == INIT_DEPTH) {
       vertices_at_depth_.clear();
     } else {
       vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
