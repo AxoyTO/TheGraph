@@ -286,10 +286,8 @@ class Graph {
     if (updated_depth_ == UNREACHABLE_DEPTH) {
       vertices_at_depth_.clear();
     } else {
-      for (int invalid_depth = updated_depth_;
-           invalid_depth < (int)vertices_at_depth_.size(); ++invalid_depth) {
-        vertices_at_depth_.erase(invalid_depth);
-      }
+      vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
+                               vertices_at_depth_.end());
     }
     for (const auto& [vertex_id, depth] : depths) {
       vertices_.find(vertex_id)->second.depth = depth;
