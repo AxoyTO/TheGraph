@@ -290,7 +290,7 @@ class Graph {
                                vertices_at_depth_.end());
     }
     for (const auto& [vertex_id, depth] : depths) {
-      vertices_.find(vertex_id)->second.depth = depth;
+      get_vertex(vertex_id).depth = depth;
       vertices_at_depth_[depth].insert(vertex_id);
     }
     is_depth_dirty_ = false;
