@@ -96,7 +96,7 @@ void generate_red_edges(Graph& graph) {
       }
       const auto next_depth_vertices =
           graph.get_vertices_at_depth(cur_depth + 2);
-      if (is_lucky(RED_EDGE_PROB) && !next_depth_vertices.empty()) {
+      if (is_lucky(RED_EDGE_PROB)) {
         const auto chosen_vertex_id = get_random_vertex_id(next_depth_vertices);
         graph.add_edge(cur_vertex_id, chosen_vertex_id, EdgeColor::Red);
       }
