@@ -337,23 +337,33 @@ class Graph {
   bool new_edge_color_is_correct(const VertexId& vertex1_id,
                                  const VertexId& vertex2_id,
                                  const EdgeColor& color) {
+    const auto vertices_at_depth_buffer = vertices_at_depth_;
     update_vertices_depth();
+    bool is_correct;
     switch (color) {
       case EdgeColor::Gray:
-        return vertices_.at(vertex1_id).connected_edges().empty() ||
-               vertices_.at(vertex2_id).connected_edges().empty();
+        is_correct = vertices_.at(vertex1_id).connected_edges().empty() ||
+                     vertices_.at(vertex2_id).connected_edges().empty();
+        break;
       case EdgeColor::Green:
-        return vertex1_id == vertex2_id;
+        is_correct = vertex1_id == vertex2_id;
+        break;
       case EdgeColor::Blue:
-        return get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
+        is_correct =
+            get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
+        break;
       case EdgeColor::Yellow:
-        return (std::abs(get_vertex(vertex1_id).depth -
-                         get_vertex(vertex2_id).depth) == 1) &&
-               !is_connected(vertex1_id, vertex2_id);
+        is_correct = (std::abs(get_vertex(vertex1_id).depth -
+                               get_vertex(vertex2_id).depth) == 1) &&
+                     !is_connected(vertex1_id, vertex2_id);
+        break;
       case EdgeColor::Red:
-        return std::abs(get_vertex(vertex1_id).depth -
-                        get_vertex(vertex2_id).depth) == 2;
+        is_correct = std::abs(get_vertex(vertex1_id).depth -
+                              get_vertex(vertex2_id).depth) == 2;
+        break;
     }
+    vertices_at_depth_ = vertices_at_depth_buffer;
+    return is_correct;
   }
 
   void update_vertices_at_depth_map(const std::map<VertexId, int>& depths) {
