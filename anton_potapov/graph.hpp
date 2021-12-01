@@ -125,7 +125,7 @@ class Graph {
     vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
   }
 
-  virtual ~Graph() = default;
+  ~Graph() = default;
 
   int max_depth() {
     update_vertices_depth();
