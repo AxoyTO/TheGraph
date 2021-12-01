@@ -3,7 +3,6 @@
 #include <atomic>
 #include <cassert>
 #include <functional>
-#include <iostream>
 #include <limits>
 #include <list>
 #include <random>
