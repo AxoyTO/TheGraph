@@ -293,7 +293,7 @@ void generate_green_edges(Graph& returned_graph) {
   }
 }
 
-VertexId& get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
+VertexId get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
   std::random_device rd;
   std::mt19937 mersenne(rd());
   return set_of_vertices_id[mersenne() % set_of_vertices_id.size()];
