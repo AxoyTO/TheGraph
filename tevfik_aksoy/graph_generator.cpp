@@ -41,12 +41,11 @@ std::vector<VertexId> filter_connected_vertices(
 namespace uni_cpp_practice {
 void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
   graph.insert_vertex();
-
-  for (VertexDepth depth = 0; depth < max_depth_; depth++) {
+  for (VertexDepth depth = 0; depth < params_.max_depth; depth++) {
     bool is_new_vertex_generated = false;
-    const float probability = (float)depth / (float)max_depth_;
+    const float probability = (float)depth / (float)params_.max_depth;
     for (const auto& source : graph.get_vertices_in_depth(depth)) {
-      for (int j = 0; j < new_vertices_num_; j++) {
+      for (int j = 0; j < params_.new_vertices_num; j++) {
         if (get_random_probability() > probability) {
           is_new_vertex_generated = true;
           const VertexId new_vertex = graph.insert_vertex();
@@ -58,7 +57,7 @@ void GraphGenerator::generate_vertices_and_gray_edges(Graph& graph) const {
       break;
   }
 
-  if (max_depth_ != graph.depth()) {
+  if (params_.max_depth != graph.depth()) {
     std::cout << "Max depth couldn't be reached. Depth of final vertex: "
               << graph.depth() << "\n";
   }
