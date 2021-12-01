@@ -1,5 +1,7 @@
 #include "graph_printer.hpp"
 
+using Color = Edge::Color;
+
 std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
   std::string str_vertex = "\t  {\n\t\t\"id\":" + std::to_string(vertex.id) +
                            ",\n\t\t\"edge_ids\":[";
@@ -13,9 +15,25 @@ std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
 }
 
 std::string GraphPrinter::print_edge(const Edge& edge) const {
-  return "\t  {\n\t\t\"id\":" + std::to_string(edge.id) +
-         ",\n\t\t\"vertex_ids\":[" + std::to_string(edge.vertex_start) + "," +
-         std::to_string(edge.vertex_end) + "]\n\t  }";
+  std::string str_edge =
+      "\t  {\n\t\t\"id\":" + std::to_string(edge.id) +
+      ",\n\t\t\"vertex_ids\":[" + std::to_string(edge.vertex_start) + "," +
+      std::to_string(edge.vertex_end) + "],\n\t\t\"color\": ";
+  switch (edge.color) {
+    case Color::Grey:
+      str_edge += "\"grey\"\n\t  }";
+      break;
+    case Color::Green:
+      str_edge += "\"green\"\n\t  }";
+      break;
+    case Color::Yellow:
+      str_edge += "\"yellow\"\n\t  }";
+      break;
+    case Color::Red:
+      str_edge += "\"red\"\n\t  }";
+      break;
+  }
+  return str_edge;
 }
 
 std::string GraphPrinter::print() const {

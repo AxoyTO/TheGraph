@@ -2,15 +2,41 @@
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 
-// #include <iostream>
-// #include <algorithm>
-// #include <unordered_set>
-// #include <utility>
-// #include <vector>
-
-// using std::cout;
-// using std::endl;
 #include <fstream>
+
+using Params = GraphGenerator::Params;
+
+const int handle_depth_input() {
+  int entered_depth = -1;
+
+  while (entered_depth < 0) {
+    std::cout << "Enter depth value: ";
+    std::cin >> entered_depth;
+    if (entered_depth < 0)
+      std::cout << "\nIncorrect depth: " << entered_depth
+                << "\nDepth cannot be negative.\n";
+    std::cout << std::endl;
+  }
+
+  return entered_depth;
+}
+
+const int handle_new_vertices_num_input() {
+  int entered_new_vertices_num = -1;
+
+  while (entered_new_vertices_num < 0) {
+    std::cout << "Enter the number of new vertices: ";
+    std::cin >> entered_new_vertices_num;
+    if (entered_new_vertices_num < 0)
+      std::cout
+          << "\nIncorrect value of the number of new vertices: "
+          << entered_new_vertices_num
+          << "\nThe value of the number of new vertices cannot be negative.\n";
+    std::cout << std::endl;
+  }
+
+  return entered_new_vertices_num;
+}
 
 void write_to_file(const std::string& graph_string, const std::string& file) {
   std::ofstream out(file);
@@ -19,12 +45,12 @@ void write_to_file(const std::string& graph_string, const std::string& file) {
 }
 
 int main() {
-  const Depth depth = 4;  //я знаю, что надо вводить эти данные, но так проще
-                          //отлаживать программу
-  const int new_vertices_num = 3;
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
 
-  auto graph = generate_graph(depth, new_vertices_num);
-
+  const auto params = Params(depth, new_vertices_num);
+  const auto generator = GraphGenerator(params);
+  const auto graph = generator.generate();
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
 

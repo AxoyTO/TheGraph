@@ -7,11 +7,7 @@ using Depth = int;
 using VertexId = int;
 using EdgeId = int;
 
-constexpr float GREEN_PROBABILITY = 0.1, 
-                RED_PROBABILITY = 0.33;
-
 struct Vertex {
-
   const VertexId id = 0;
   Depth depth = 0;
 
@@ -23,11 +19,10 @@ struct Vertex {
 
  private:
   std::vector<EdgeId> edge_ids_;
-
 };
 
 struct Edge {
-  enum class Color { Grey, Green, Blue, Yellow, Red };
+  enum class Color { Grey, Green, Yellow, Red };
 
   const EdgeId id = 0;
   const VertexId vertex_start = 0;
@@ -36,7 +31,8 @@ struct Edge {
 
   Edge(const EdgeId& edge_id,
        const VertexId& vertex_connection_start,
-       const VertexId& vertex_connection_end);
+       const VertexId& vertex_connection_end,
+       const Color& edge_color);
 };
 
 class Graph {
@@ -44,11 +40,16 @@ class Graph {
   Vertex& add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
 
+  //гетерры
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   const VertexId& get_vertex_id_counter() const { return vertex_id_counter_; }
+  const std::vector<std::vector<VertexId>>& get_depth_map() const {
+    return depth_map_;
+  }
   std::vector<VertexId> get_vertex_ids_at(const Depth& depth) const;
 
+  //проверка данных
   bool has_vertex_id(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const;
@@ -64,8 +65,8 @@ class Graph {
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
 
-  void add_vertex_id_to_depth_map() {
-    depth_map_[depth_map_.size() - 1].push_back(vertex_id_counter_);
-  }
-  void change_size_depth_map() { depth_map_.resize(depth_map_.size() + 1); }
+  void set_vertex_depth(const VertexId& from_vertex_id,
+                        const VertexId& to_vertex_id);
+  Edge::Color set_edge_color(const Vertex& from_vertex,
+                             const Vertex& to_vertex);
 };
