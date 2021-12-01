@@ -5,7 +5,7 @@ using std::endl;
 
 using Probability = int;
 
-constexpr float GREEN_PROBABILITY = 10, RED_PROBABILITY = 33;
+constexpr int GREEN_PROBABILITY = 10, RED_PROBABILITY = 33;
 
 namespace {
 Probability get_probability(Depth depth, Depth current_depth) {
