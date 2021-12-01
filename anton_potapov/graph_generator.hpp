@@ -65,12 +65,15 @@ void generate_blue_edges(Graph& graph) {
   }
 }
 
-void generate_yellow_edges(Graph& graph, int depth) {
+void generate_yellow_edges(Graph& graph) {
+  if (graph.max_depth() <= 1) {
+    return;
+  }
   for (int cur_depth = 0; cur_depth + 1 <= graph.max_depth(); ++cur_depth) {
     const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     const auto next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
-      if (depth > 1 && is_lucky((float)cur_depth / (depth - 1))) {
+      if (is_lucky((float)cur_depth / (graph.max_depth() - 1))) {
         std::set<VertexId> not_connected_vertices;
         for (const auto& next_vertex_id : next_depth_vertices) {
           if (!graph.is_connected(cur_vertex_id, next_vertex_id)) {
@@ -121,7 +124,7 @@ class GraphGenerator {
     generate_vertices(graph, params_.depth, params_.new_vertices_num);
     generate_green_edges(graph);
     generate_blue_edges(graph);
-    generate_yellow_edges(graph, params_.depth);
+    generate_yellow_edges(graph);
     generate_red_edges(graph);
     return graph;
   }
