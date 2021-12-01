@@ -19,7 +19,7 @@ using uni_cpp_practice::Vertex;
 using uni_cpp_practice::VertexId;
 using Params = uni_cpp_practice::GraphGenerator::Params;
 
-double get_color_probability(const Edge::Color& color) {
+float get_color_probability(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Green:
       return 0.1;
@@ -34,9 +34,9 @@ double get_color_probability(const Edge::Color& color) {
   }
 }
 
-bool is_lucky(double probability) {
-  assert(probability + std::numeric_limits<double>::epsilon() >= 0 &&
-         probability - std::numeric_limits<double>::epsilon() <= 1.0 &&
+bool is_lucky(float probability) {
+  assert(probability + std::numeric_limits<float>::epsilon() >= 0 &&
+         probability - std::numeric_limits<float>::epsilon() <= 1.0 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
@@ -53,7 +53,7 @@ int get_random_number(int size) {
 }
 
 void generate_green_edges(Graph& graph, std::mutex& mutex_add_edge) {
-  const double probability = get_color_probability(Edge::Color::Green);
+  const float probability = get_color_probability(Edge::Color::Green);
   for (const auto& [current_vertex_id, current_vertex] :
        graph.get_vertex_map()) {
     if (is_lucky(probability)) {
@@ -64,7 +64,7 @@ void generate_green_edges(Graph& graph, std::mutex& mutex_add_edge) {
 }
 
 void generate_blue_edges(Graph& graph) {
-  const double probability = get_color_probability(Edge::Color::Blue);
+  const float probability = get_color_probability(Edge::Color::Blue);
   // так как на нулевом уровне только одна вершина == нулевая, нет смысла ее
   // учитывать
   for (Depth current_depth = 1; current_depth <= graph.get_depth();
@@ -80,9 +80,9 @@ void generate_blue_edges(Graph& graph) {
 }
 
 void generate_yellow_edges(Graph& graph, std::mutex& mutex_add_edge) {
-  double probability =
+  float probability =
       get_color_probability(Edge::Color::Yellow) / (graph.get_depth() - 1);
-  double yellow_edge_probability = probability;
+  float yellow_edge_probability = probability;
   //так как вероятность генерации желтых ребер из нулевой вершины должна быть
   //нулевой, то можно просто не рассматривать эту вершину
   for (Depth current_depth = 1; current_depth < graph.get_depth();
@@ -94,14 +94,12 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex_add_edge) {
       if (is_lucky(yellow_edge_probability)) {
         std::vector<VertexId> not_binded_vertices;
         for (const auto& next_vertex_id : vertices_at_next_depth) {
-          const auto is_binding = [&graph, &mutex_add_edge, &current_vertex_id,
-                                   &next_vertex_id]() {
+          const auto is_binded = [&graph, &mutex_add_edge, &current_vertex_id,
+                                  &next_vertex_id]() {
             const std::lock_guard lock(mutex_add_edge);
-            const auto is_binding =
-                graph.check_binding(current_vertex_id, next_vertex_id);
-            return is_binding;
+            return graph.check_binding(current_vertex_id, next_vertex_id);
           }();
-          if (!is_binding) {
+          if (!is_binded) {
             not_binded_vertices.push_back(next_vertex_id);
           }
         }
@@ -118,7 +116,7 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex_add_edge) {
 }
 
 void generate_red_edges(Graph& graph, std::mutex& mutex_add_edge) {
-  const double probability = get_color_probability(Edge::Color::Red);
+  const float probability = get_color_probability(Edge::Color::Red);
   for (Depth current_depth = 0; current_depth < graph.get_depth() - 1;
        ++current_depth) {
     const auto& vertices_at_depth = graph.get_vertices_at_depth(current_depth);
@@ -151,9 +149,9 @@ void GraphGenerator::generate_gray_branch(Graph& graph,
   if (current_depth >= params_.depth) {
     return;
   }
-  const double probability = get_color_probability(Edge::Color::Gray);
-  const double new_vertex_probability =
-      probability * (1 - (double(current_depth) / double(params_.depth)));
+  const float probability = get_color_probability(Edge::Color::Gray);
+  const float new_vertex_probability =
+      probability * (1 - (float(current_depth) / float(params_.depth)));
   for (int i = 0; i < params_.new_vertices_num; ++i) {
     if (is_lucky(new_vertex_probability)) {
       generate_gray_branch(graph, mutex_add, new_vertex_id, current_depth + 1);
@@ -187,7 +185,7 @@ void GraphGenerator::generate_gray_edges(
   // есть ли работа, и выполняет её
   std::mutex mutex_jobs;
   std::atomic<bool> should_terminate = false;
-  auto worker = [&should_terminate, &mutex_jobs, &jobs]() {
+  const auto worker = [&should_terminate, &mutex_jobs, &jobs]() {
     while (true) {
       // Проверка флага, должны ли мы остановить поток
       if (should_terminate) {
