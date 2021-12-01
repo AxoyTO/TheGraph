@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 #include "graph.hpp"
-#include "graph_generator.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
@@ -14,6 +14,7 @@ using Graph = uni_cpp_practice::Graph;
 using Edge = uni_cpp_practice::Edge;
 using GraphPrinter = uni_cpp_practice::GraphPrinter;
 using GraphGenerator = uni_cpp_practice::GraphGenerator;
+using GraphGenerationController = uni_cpp_practice::GraphGenerationController;
 using Logger = uni_cpp_practice::Logger;
 
 std::string get_date_and_time() {
@@ -46,6 +47,18 @@ int handle_new_vertices_num_input() {
                    "negative!\nEnter a non-negative new_vertices_num: ";
   } while (new_vertices_num < 0);
   return new_vertices_num;
+}
+
+int handle_threads_count_input() {
+  int threads_count = 0;
+  std::cout << "Enter threads_count: ";
+  do {
+    std::cin >> threads_count;
+    if (threads_count < 0)
+      std::cerr << "Count of threads can not be negative!\n"
+                   "Enter a non-negative threads_count: ";
+  } while (threads_count < 0);
+  return threads_count;
 }
 
 int handle_graphs_count_input() {
@@ -108,21 +121,27 @@ void write_to_file(const GraphPrinter& graph_printer,
 }
 
 int main() {
+  const int threads_count = handle_threads_count_input();
   const int graphs_count = handle_graphs_count_input();
   const int max_depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
-  const auto graph_generator = GraphGenerator(max_depth, new_vertices_num);
+  const auto params = GraphGenerator::Params(max_depth, new_vertices_num);
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
   auto& logger = Logger::get_instance();
   std::filesystem::create_directory("./temp");
-
   logger.set_file("./temp/log.txt");
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
 
-  for (int i = 0; i < graphs_count; i++) {
-    log_start(logger, i);
-    const auto graph = graph_generator.generate();
-    log_end(logger, graph, i);
-    const auto graph_printer = GraphPrinter(graph);
-    write_to_file(graph_printer, "./temp/graph_" + std::to_string(i) + ".json");
-  }
+  generation_controller.generate(
+      [&logger](int index) { log_start(logger, index); },
+      [&logger, &graphs](int index, Graph graph) {
+        log_end(logger, graph, index);
+        graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter(graph);
+        write_to_file(graph_printer,
+                      "./temp/graph_" + std::to_string(index) + ".json");
+      });
   return 0;
 }
