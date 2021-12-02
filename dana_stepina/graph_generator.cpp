@@ -86,7 +86,7 @@ void generate_yellow_edges(Graph& graph) {
 
   for (Depth depth = 0; depth < depth_map.size() - 1; depth++) {
     const auto& probability =
-        MAX_PROBABILITY - get_probability(depth_map.size() - 1, depth);
+        MAX_PROBABILITY - get_probability(depth_map.size() - 2, depth);
 
     for (const auto& from_vertex_id : depth_map[depth]) {
       if (is_lucky(probability)) {
