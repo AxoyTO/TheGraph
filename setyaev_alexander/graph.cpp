@@ -163,10 +163,9 @@ std::string Graph::to_string() const {
       json << edge_id;
       if (edge_id != edge_ids.back()) {
         json << ", ";
-      } else {
-        json << "]" << std::endl;
       }
     }
+    json << "]" << std::endl;
     json << "		}";
     if (vertex.get_id() != vertices_.back().get_id()) {
       json << ",\n";
