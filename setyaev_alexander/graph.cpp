@@ -30,7 +30,6 @@ struct Edge {
   EdgeId get_id() const;
   VertexId get_first_vertex_id() const;
   VertexId get_second_vertex_id() const;
-  bool operator==(const Edge& right_edge) const;
 
  private:
   EdgeId id_ = 0;
@@ -70,13 +69,6 @@ VertexId Edge::get_first_vertex_id() const {
 
 VertexId Edge::get_second_vertex_id() const {
   return second_vertex_id_;
-}
-
-bool Edge::operator==(const Edge& right_edge) const {
-  if (get_id() == right_edge.get_id()) {
-    return true;
-  }
-  return false;
 }
 
 void Graph::add_vertex() {
@@ -181,7 +173,7 @@ std::string Graph::to_string() const {
          << ",\n			\"vertex_ids\": ["
          << edge.get_first_vertex_id() << ", " << edge.get_second_vertex_id()
          << "]\n		}";
-    if (!(edge == edges_.back())) {
+    if (edge.get_id() != edges_.back().get_id()) {
       json << ",\n";
     } else {
       json << "\n	]\n}\n";
