@@ -2,7 +2,6 @@
 
 #include "graph.hpp"
 
-#include <iostream>
 #include <string>
 
 class GraphPrinter {
@@ -14,5 +13,5 @@ class GraphPrinter {
   std::string print_edge(const Edge& edge) const;
 
  private:
-  Graph graph_;
+  const Graph& graph_;
 };

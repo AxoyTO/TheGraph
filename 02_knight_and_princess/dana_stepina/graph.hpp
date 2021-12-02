@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <vector>
 
 using Depth = int;
@@ -27,7 +26,7 @@ struct Edge {
   const EdgeId id = 0;
   const VertexId vertex_start = 0;
   const VertexId vertex_end = 0;
-  Color color = Color::Grey;
+  const Color color = Color::Grey;
 
   Edge(const EdgeId& edge_id,
        const VertexId& vertex_connection_start,
@@ -37,20 +36,21 @@ struct Edge {
 
 class Graph {
  public:
-  Vertex& add_vertex();
+  const Vertex& add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
 
-  //гетерры
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
-  const VertexId& get_vertex_id_counter() const { return vertex_id_counter_; }
   const std::vector<std::vector<VertexId>>& get_depth_map() const {
     return depth_map_;
   }
-  std::vector<VertexId> get_vertex_ids_at(const Depth& depth) const;
+  const std::vector<VertexId> get_vertex_ids_at(const Depth& depth) const {
+    return depth_map_[depth];
+  }
+  const Vertex& get_vertex(const VertexId& id) const { return vertices_[id]; }
+  const Edge& get_edge(const EdgeId& id) const { return edges_[id]; }
 
-  //проверка данных
-  bool has_vertex_id(const VertexId& vertex_id) const;
+  bool has_vertex_id(const VertexId& id) const;
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const;
 
@@ -67,6 +67,6 @@ class Graph {
 
   void set_vertex_depth(const VertexId& from_vertex_id,
                         const VertexId& to_vertex_id);
-  Edge::Color set_edge_color(const Vertex& from_vertex,
+  Edge::Color get_edge_color(const Vertex& from_vertex,
                              const Vertex& to_vertex);
 };

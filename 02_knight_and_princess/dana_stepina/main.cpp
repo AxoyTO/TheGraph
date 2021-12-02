@@ -3,10 +3,11 @@
 #include "graph_printer.hpp"
 
 #include <fstream>
+#include <iostream>
 
 using Params = GraphGenerator::Params;
 
-const int handle_depth_input() {
+int handle_depth_input() {
   int entered_depth = -1;
 
   while (entered_depth < 0) {
@@ -21,7 +22,7 @@ const int handle_depth_input() {
   return entered_depth;
 }
 
-const int handle_new_vertices_num_input() {
+int handle_new_vertices_num_input() {
   int entered_new_vertices_num = -1;
 
   while (entered_new_vertices_num < 0) {
@@ -54,7 +55,7 @@ int main() {
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
 
-  // std::cout << graph_json << std::endl;
+  std::cout << graph_json << std::endl;
   write_to_file(graph_json, "graph.json");
 
   return 0;

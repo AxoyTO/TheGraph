@@ -2,10 +2,6 @@
 
 #include "graph.hpp"
 
-#include <cmath>
-#include <iostream>
-#include <random>
-
 class GraphGenerator {
  public:
   struct Params {
