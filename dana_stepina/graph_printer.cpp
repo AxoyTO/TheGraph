@@ -42,7 +42,9 @@ std::string GraphPrinter::print() const {
   std::string graph_string = "{";
 
   // write graph depth
-  graph_string += "\n\t\"depth\": " + std::to_string(0) + ",";
+  graph_string +=
+      "\n\t\"depth\": " + std::to_string(graph_.get_depth_map().size() - 1) +
+      ",";
 
   // write vertices
   graph_string += "\n\t\"vertices\": [\n";
