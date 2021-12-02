@@ -5,9 +5,14 @@
 #include <iostream>
 #include <vector>
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
+
+const std::string temp_folder_path = "./temp";
+const std::string filename_prefix = "Graph";
+const std::string filename_suffix = ".json";
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -34,15 +39,15 @@ set_count_edges_of_color(const uni_cpp_practice::Graph& graph) {
   return colors;
 }
 
-const std::string start_string(int graph_numbe) {
+std::string gen_started_string(int graph_numbe) {
   std::stringstream log_string;
   log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
              << ", Generation Started\n";
   return log_string.str();
 }
 
-const std::string end_string(int graph_numbe,
-                             const uni_cpp_practice::Graph& graph) {
+std::string gen_finished_string(int graph_numbe,
+                                const uni_cpp_practice::Graph& graph) {
   std::stringstream log_string;
   log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
              << ", Generation Finished {  \n";
@@ -71,7 +76,7 @@ const std::string end_string(int graph_numbe,
   return log_string.str();
 }
 
-const uni_cpp_practice::Depth handle_depth_input() {
+uni_cpp_practice::Depth handle_depth_input() {
   uni_cpp_practice::Depth
       depth;  //Глубина графов (int от 0 и до бесконечности).
   std::cout << "Enter the Depth of the graphs" << std::endl;
@@ -105,11 +110,19 @@ int handle_graphs_count_input() {
   }
   return graphs_count;
 }
+int handle_threads_count_input() {
+  int threads_count;  // Количество потоков генерации графов.
+  std::cout << "Enter the Count of threads for graphs generation" << std::endl;
+  std::cin >> threads_count;
+  while (threads_count <= 0) {
+    std::cout << "Try to enter a natural number" << std::endl;
+    std::cin >> threads_count;
+  }
+  return threads_count;
+}
 uni_cpp_practice::Logger& prepare_logger() {
   try {
-    if (!std::filesystem::create_directory("./temp")) {
-      std::cout << "A directory wasn't created\n";
-    }
+    std::filesystem::create_directory("./temp");
   } catch (const std::exception& ex) {
     std::cout << ex.what() << "\n";
   }
@@ -130,26 +143,34 @@ void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
   }
 }
 
+using uni_cpp_practice::Graph;
+using uni_cpp_practice::GraphGenerationController;
+using uni_cpp_practice::GraphGenerator;
+using uni_cpp_practice::GraphPrinter;
 int main() {
-  const std::string temp_folder_path = "./temp";
-  const std::string filename_prefix = "Graph";
-  const std::string filename_suffix = ".json";
-
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
 
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
   auto& logger = prepare_logger();
-  const auto graph_generator =
-      uni_cpp_practice::GraphGenerator(depth, new_vertices_num);
-  for (int i = 0; i < graphs_count; ++i) {
-    logger.log(start_string(i));
-    const auto graph = graph_generator.generate();
-    logger.log(end_string(i, graph));
-    const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
-    write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
-                                     "_" + std::to_string(i + 1) +
-                                     filename_suffix);
-  }
+
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  generation_controller.generate(
+      [&logger](int index) { logger.log(gen_started_string(index)); },
+      [&logger, &graphs](int index, Graph graph) {
+        logger.log(gen_finished_string(index, graph));
+        graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter(graph);
+        write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
+                                         "_" + std::to_string(index) +
+                                         filename_suffix);
+      });
+
   return 0;
 }
