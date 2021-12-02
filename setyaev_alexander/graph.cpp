@@ -141,9 +141,8 @@ Graph generate_graph() {
 
 std::string Vertex::to_string() const {
   std::stringstream json;
-  json << "		{\n			\"id\": " << get_id() << ","
-       << std::endl
-       << "			\"edge_ids\": [";
+  json << "{\n  \"id\": " << get_id() << ",\n"
+       << "  \"edge_ids\": [";
   const auto& edge_ids = get_connected_edge_ids();
   for (const auto edge_id : edge_ids) {
     json << edge_id;
@@ -151,52 +150,44 @@ std::string Vertex::to_string() const {
       json << ", ";
     }
   }
-  json << "]" << std::endl;
-  json << "		}";
+  json << "]\n";
+  json << "}";
 
   return json.str();
 }
 
 std::string Edge::to_string() const {
   std::stringstream json;
-  json << "		{\n			\"id\": " << get_id()
-       << ",\n			\"vertex_ids\": [" << get_first_vertex_id()
-       << ", " << get_second_vertex_id() << "]\n		}";
+  json << "{\n  \"id\": " << get_id() << ",\n  \"vertex_ids\": ["
+       << get_first_vertex_id() << ", " << get_second_vertex_id() << "]\n}";
   return json.str();
 }
 
 std::string Graph::to_string() const {
   std::stringstream json;
 
-  json << "{	\"vertices\":" << std::endl;
+  json << "{\n\"vertices\":";
 
-  if (vertices_.size() > 0) {
-    json << " [" << std::endl;
-  }
+  json << " [\n";
 
   for (const auto& vertex : vertices_) {
     json << vertex.to_string();
     if (vertex.get_id() != vertices_.back().get_id()) {
       json << ",\n";
-    } else {
-      json << "\n	],\n";
     }
   }
 
-  json << "edges\": ";
+  json << "\n],\n\"edges\": ";
 
-  if (edges_.size() > 0) {
-    json << "[\n";
-  }
+  json << "[\n";
+
   for (const auto& edge : edges_) {
     json << edge.to_string();
     if (edge.get_id() != edges_.back().get_id()) {
       json << ",\n";
-    } else {
-      json << "\n	]\n}\n";
     }
   }
-
+  json << "\n]\n}\n";
   return json.str();
 }
 
