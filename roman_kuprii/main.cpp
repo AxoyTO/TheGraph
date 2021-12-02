@@ -22,7 +22,6 @@ const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 using uni_cpp_practice::Graph;
 using uni_cpp_practice::GraphGenerator;
 using uni_cpp_practice::Logger;
-using uni_cpp_practice::graph_generation::Params;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
 
 int handle_graphs_number_input() {
@@ -58,8 +57,8 @@ int handle_threads_number_input() {
     std::cout << "Enter threads number from zero to max_threads: "
               << MAX_THREADS_COUNT << std::endl;
     std::cin >> threads_count;
-  } while (threads_count <= INVALID_THREADS_NUMBER &&
-           threads_count < MAX_THREADS_COUNT);
+  } while (threads_count <= INVALID_THREADS_NUMBER ||
+           threads_count > MAX_THREADS_COUNT);
   return threads_count;
 }
 
@@ -77,9 +76,6 @@ int main() {
   const int new_vertices_num = handle_vertices_number_input();
   const int threads_count = handle_threads_number_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
-
-  auto generator = GraphGenerator(params);
-  generator.generate();
 
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);

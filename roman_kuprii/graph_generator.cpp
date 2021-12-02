@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <atomic>
 #include <functional>
 #include <list>
@@ -39,7 +41,7 @@ using uni_cpp_practice::INVALID_ID;
 using uni_cpp_practice::Vertex;
 using uni_cpp_practice::VertexId;
 
-void add_blue_edges(Graph& work_graph) {
+void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   const int graph_depth = work_graph.get_depth();
   for (int current_depth = 1; current_depth <= graph_depth; current_depth++) {
     vector<Vertex> uni_depth_vertices;
@@ -55,31 +57,37 @@ void add_blue_edges(Graph& work_graph) {
         adjacent_vertices[1] = vertex.get_id();
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (get_real_random_number() < BLUE_TRASHOULD)
+          if (get_real_random_number() < BLUE_TRASHOULD) {
+            std::lock_guard lock(add_edge_mutex);
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
+          }
       } else {
         adjacent_vertices[0] = adjacent_vertices[1];
         adjacent_vertices[1] = vertex.get_id();
         if (!work_graph.is_connected(adjacent_vertices[0],
                                      adjacent_vertices[1]))
-          if (get_real_random_number() < BLUE_TRASHOULD)
+          if (get_real_random_number() < BLUE_TRASHOULD) {
+            std::lock_guard lock(add_edge_mutex);
             work_graph.connect_vertices(adjacent_vertices[0],
                                         adjacent_vertices[1], false);
+          }
       }
     }
   }
 }
 
-void add_green_edges(Graph& work_graph) {
+void add_green_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   for (const auto& start_vertex : work_graph.get_vertices())
     if (!work_graph.is_connected(start_vertex.get_id(), start_vertex.get_id()))
-      if (get_real_random_number() < GREEN_TRASHOULD)
+      if (get_real_random_number() < GREEN_TRASHOULD) {
+        std::lock_guard lock(add_edge_mutex);
         work_graph.connect_vertices(start_vertex.get_id(),
                                     start_vertex.get_id(), false);
+      }
 }
 
-void add_red_edges(Graph& work_graph) {
+void add_red_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   const int graph_depth = work_graph.get_depth();
   for (const auto& start_vertex : work_graph.get_vertices()) {
     if (get_real_random_number() < RED_TRASHOULD) {
@@ -92,6 +100,7 @@ void add_red_edges(Graph& work_graph) {
               red_vertices_ids.emplace_back(end_vertex.get_id());
         }
         if (red_vertices_ids.size() > 0) {
+          std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(start_vertex.get_id(),
                                       red_vertices_ids[get_int_random_number(
                                           red_vertices_ids.size() - 1)],
@@ -102,7 +111,7 @@ void add_red_edges(Graph& work_graph) {
   }
 }
 
-void add_yellow_edges(Graph& work_graph) {
+void add_yellow_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   const int graph_depth = work_graph.get_depth();
   for (const auto& start_vertex : work_graph.get_vertices()) {
     const double probability = static_cast<double>(start_vertex.depth) /
@@ -117,6 +126,7 @@ void add_yellow_edges(Graph& work_graph) {
         }
       }
       if (yellow_vertices_ids.size() > 0) {
+        std::lock_guard lock(add_edge_mutex);
         work_graph.connect_vertices(start_vertex.get_id(),
                                     yellow_vertices_ids[get_int_random_number(
                                         yellow_vertices_ids.size() - 1)],
@@ -127,39 +137,51 @@ void add_yellow_edges(Graph& work_graph) {
 }
 
 void paint_edges(Graph& work_graph) {
-  add_blue_edges(work_graph);
-  add_green_edges(work_graph);
-  add_red_edges(work_graph);
-  add_yellow_edges(work_graph);
+  std::mutex add_edges_mutex;
+  std::thread blue_thread([&work_graph, &add_edges_mutex]() {
+    add_blue_edges(work_graph, add_edges_mutex);
+  });
+  std::thread green_thread([&work_graph, &add_edges_mutex]() {
+    add_green_edges(work_graph, add_edges_mutex);
+  });
+  std::thread red_thread([&work_graph, &add_edges_mutex]() {
+    add_red_edges(work_graph, add_edges_mutex);
+  });
+  std::thread yellow_thread([&work_graph, &add_edges_mutex]() {
+    add_yellow_edges(work_graph, add_edges_mutex);
+  });
+  blue_thread.join();
+  green_thread.join();
+  red_thread.join();
+  yellow_thread.join();
 }
 
 void generate_gray_branch(Graph& work_graph,
-                          uni_cpp_practice::GraphGenerator::Params params,
-                          std::mutex& modify_mutex) {
+                          uni_cpp_practice::GraphGenerator::Params& params,
+                          std::mutex& modify_mutex,
+                          const VertexId& parent_vertex_id,
+                          int current_depth) {
   int depth = params.depth;
   int new_vertices_num = params.new_vertices_num;
+  VertexId new_vertex_id;
+  {
+    const std::lock_guard lock(modify_mutex);
+    work_graph.add_vertex();
+    new_vertex_id = work_graph.get_vertices().back().get_id();
+    work_graph.connect_vertices(parent_vertex_id, new_vertex_id, true);
+  }
 
-  auto vertices = work_graph.get_vertices();
-
-  for (int current_depth = 1; current_depth <= depth; current_depth++) {
+  if (current_depth == depth) {
+    return;
+  } else {
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
 
-    for (const auto& vertex : vertices) {
-      const VertexId vertex_id = vertex.get_id();
-      if (vertex.depth == current_depth)
-        for (int iter = 0; iter < new_vertices_num; iter++) {
-          if (get_real_random_number() > probability) {
-            const std::lock_guard lock(modify_mutex);
-            work_graph.add_vertex();
-            vertices.emplace_back(work_graph.get_vertices().back().get_id());
-            work_graph.connect_vertices(
-                vertex_id,
-                work_graph.get_vertices()[work_graph.get_vertices_num() - 1]
-                    .get_id(),
-                true);
-          }
-        }
+    for (int iter = 0; iter < new_vertices_num; iter++) {
+      if (get_real_random_number() > probability) {
+        generate_gray_branch(work_graph, params, modify_mutex, new_vertex_id,
+                             current_depth + 1);
+      }
     }
   }
 }
@@ -172,8 +194,7 @@ void generate_new_vertices(Graph& graph,
   std::mutex modify_mutex;
   for (int i = 0; i < new_vertices_num; i++)
     jobs.emplace_back([&graph, &params, &completed_jobs, &modify_mutex]() {
-      generate_gray_branch(graph, params, modify_mutex);
-      // add mutex
+      generate_gray_branch(graph, params, modify_mutex, 0, 1);
       completed_jobs++;
     });
 

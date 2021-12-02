@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 namespace uni_cpp_practice {
 
 class Graph;
