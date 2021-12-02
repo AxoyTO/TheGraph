@@ -1,4 +1,5 @@
 #include "graph_generator.hpp"
+#include <array>
 #include <atomic>
 #include <functional>
 #include <iostream>
