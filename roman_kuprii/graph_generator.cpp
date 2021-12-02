@@ -2,6 +2,7 @@
 #include <functional>
 #include <list>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <thread>
 #include <vector>
