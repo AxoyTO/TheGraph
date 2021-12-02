@@ -26,9 +26,9 @@ void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
 
   for (Depth depth = 0; depth <= params.depth; depth++) {
     const auto& probability = get_probability(params.depth, depth);
-    /*Required constant reference, since the vector being iterated over changes
-      in the process*/
-    const auto& vertex_ids = graph.get_vertex_ids_at(depth);
+    /*A copy is needed, since the vector over which it is iterated changes in
+     * the process*/
+    const auto vertex_ids = graph.get_vertex_ids_at(depth);
 
     bool any_new_vertex_generated = false;
 
@@ -53,9 +53,9 @@ void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
 }
 
 void generate_green_edges(Graph& graph) {
-  /*Required constant reference, since the vector being iterated over changes
-  in the process*/
-  const auto& depth_map = graph.get_depth_map();
+  /*A copy is needed, since the vector over which it is iterated changes in the
+   * process*/
+  const auto depth_map = graph.get_depth_map();
 
   for (const auto& vertex_ids : depth_map)
     for (const auto& vertex_id : vertex_ids)
@@ -64,9 +64,9 @@ void generate_green_edges(Graph& graph) {
 }
 
 void generate_yellow_edges(Graph& graph) {
-  /*Required constant reference, since the vector being iterated over changes
-  in the process*/
-  const auto& depth_map = graph.get_depth_map();
+  /*A copy is needed, since the vector over which it is iterated changes in the
+   * process*/
+  const auto depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 1; depth++) {
     const auto& probability =
@@ -83,9 +83,9 @@ void generate_yellow_edges(Graph& graph) {
 }
 
 void generate_red_edges(Graph& graph) {
-  /*Required constant reference, since the vector being iterated over changes
-  in the process*/
-  const auto& depth_map = graph.get_depth_map();
+  /*A copy is needed, since the vector over which it is iterated changes in the
+   * process*/
+  const auto depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 2; depth++)
     for (const auto& from_vertex_id : depth_map[depth])
