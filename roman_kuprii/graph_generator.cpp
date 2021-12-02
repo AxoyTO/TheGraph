@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <atomic>
 #include <functional>
 #include <list>
