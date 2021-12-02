@@ -9,7 +9,6 @@ using EdgeId = int;
 
 constexpr int VERTICES_COUNT = 14;
 
-
 class Vertex {
  public:
   explicit Vertex(VertexId id) : id_(id) {}
@@ -79,8 +78,6 @@ bool Edge::operator==(const Edge& right_edge) const {
   }
   return false;
 }
-
-
 
 void Graph::add_vertex() {
   vertices_.emplace_back(get_new_vertex_id());
