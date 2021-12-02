@@ -7,15 +7,13 @@
 using VertexId = int;
 using EdgeId = int;
 
-constexpr int VERTICES_COUNT() {
-  return 14;
-}
+constexpr int VERTICES_COUNT = 14;
+
 
 class Vertex {
  public:
   explicit Vertex(VertexId id) : id_(id) {}
   VertexId get_id() const;
-  bool operator==(const Vertex& right_edge) const;
   const std::vector<EdgeId>& get_connected_edge_ids() const;
   void add_connected_edge_id(EdgeId id);
 
@@ -31,8 +29,8 @@ struct Edge {
         first_vertex_id_(first_vertex_id),
         second_vertex_id_(second_vertex_id) {}
   EdgeId get_id() const;
-  VertexId get_first_id() const;
-  VertexId get_second_id() const;
+  VertexId get_first_vertex_id() const;
+  VertexId get_second_vertex_id() const;
   bool operator==(const Edge& right_edge) const;
 
  private:
@@ -67,11 +65,11 @@ EdgeId Edge::get_id() const {
   return id_;
 }
 
-VertexId Edge::get_first_id() const {
+VertexId Edge::get_first_vertex_id() const {
   return first_vertex_id_;
 }
 
-VertexId Edge::get_second_id() const {
+VertexId Edge::get_second_vertex_id() const {
   return second_vertex_id_;
 }
 
@@ -82,12 +80,7 @@ bool Edge::operator==(const Edge& right_edge) const {
   return false;
 }
 
-bool Vertex::operator==(const Vertex& right_edge) const {
-  if (get_id() == right_edge.get_id()) {
-    return true;
-  }
-  return false;
-}
+
 
 void Graph::add_vertex() {
   vertices_.emplace_back(get_new_vertex_id());
@@ -129,7 +122,7 @@ void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
 Graph generate_graph() {
   Graph graph;
 
-  for (int i = 0; i < VERTICES_COUNT(); ++i) {
+  for (int i = 0; i < VERTICES_COUNT; ++i) {
     graph.add_vertex();
   }
 
@@ -178,7 +171,7 @@ std::string Graph::to_string() const {
       }
     }
     json << "		}";
-    if (!(vertex == vertices_.back())) {
+    if (vertex.get_id() != vertices_.back().get_id()) {
       json << ",\n";
     } else {
       json << "\n	],\n	\"edges\": ";
@@ -190,7 +183,7 @@ std::string Graph::to_string() const {
   for (const auto& edge : edges_) {
     json << "		{\n			\"id\": " << edge.get_id()
          << ",\n			\"vertex_ids\": ["
-         << edge.get_first_id() << ", " << edge.get_second_id()
+         << edge.get_first_vertex_id() << ", " << edge.get_second_vertex_id()
          << "]\n		}";
     if (!(edge == edges_.back())) {
       json << ",\n";
