@@ -21,6 +21,13 @@ bool is_lucky(Probability probability) {
   return distribution(generator);
 }
 
+VertexId choose_random_vertex_id(const std::vector<VertexId>& vertex_ids) {
+  std::random_device rand;
+  std::default_random_engine generator(rand());
+  std::uniform_int_distribution<int> distribution(0, vertex_ids.size() - 1);
+  return vertex_ids[distribution(generator)];
+}
+
 void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
   graph.add_vertex();  // Zero vertex
 
@@ -63,39 +70,45 @@ void generate_green_edges(Graph& graph) {
         graph.add_edge(vertex_id, vertex_id);
 }
 
+std::vector<VertexId> get_unconnected_vertex_ids(
+    const VertexId& from_vertex_id,
+    const std::vector<VertexId>& vertex_ids,
+    const Graph& graph) {
+  std::vector<VertexId> unconnected_vertex_ids;
+  for (const auto& vertex_id : vertex_ids)
+    if (!graph.is_connected(from_vertex_id, vertex_id))
+      unconnected_vertex_ids.push_back(vertex_id);
+  return unconnected_vertex_ids;
+}
+
 void generate_yellow_edges(Graph& graph) {
-  /*A copy is needed, since the vector over which it is iterated changes in the
-   * process*/
-  const auto depth_map = graph.get_depth_map();
+  const auto& depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 1; depth++) {
     const auto& probability =
         MAX_PROBABILITY - get_probability(depth_map.size() - 1, depth);
-    const auto& from_vertex_ids = graph.get_vertex_ids_at(depth);
-    const auto& to_vertex_ids = graph.get_vertex_ids_at(depth + 1);
 
-    for (const auto& from_vertex_id : from_vertex_ids)
-      for (const auto& to_vertex_id : to_vertex_ids)
-        if (!graph.is_connected(from_vertex_id, to_vertex_id)) {
-          if (is_lucky(probability))
-            graph.add_edge(from_vertex_id, to_vertex_id);
-          break;
-        }
+    for (const auto& from_vertex_id : depth_map[depth]) {
+      if (is_lucky(probability)) {
+        const std::vector<VertexId> vertex_ids = get_unconnected_vertex_ids(
+            from_vertex_id, depth_map[depth + 1], graph);
+        graph.add_edge(from_vertex_id, choose_random_vertex_id(vertex_ids));
+      }
+    }
   }
 }
 
 void generate_red_edges(Graph& graph) {
-  /*A copy is needed, since the vector over which it is iterated changes in the
-   * process*/
-  const auto depth_map = graph.get_depth_map();
+  const auto& depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 2; depth++)
-    for (const auto& from_vertex_id : depth_map[depth])
-      for (const auto& to_vertex_id : depth_map[depth + 2]) {
-        if (is_lucky(RED_PROBABILITY))
-          graph.add_edge(from_vertex_id, to_vertex_id);
-        break;
+    for (const auto& from_vertex_id : depth_map[depth]) {
+      if (is_lucky(RED_PROBABILITY)) {
+        const std::vector<VertexId> vertex_ids = depth_map[depth + 2];
+        graph.add_edge(from_vertex_id,
+                       choose_random_vertex_id(depth_map[depth + 2]));
       }
+    }
 }
 }  // namespace
 
