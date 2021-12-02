@@ -1,4 +1,6 @@
 #include "graph_generator.hpp"
+
+#include <iostream>
 #include <random>
 
 namespace {

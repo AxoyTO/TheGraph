@@ -1,5 +1,7 @@
 #include "graph_printer.hpp"
 
+#include <iostream>
+
 namespace {
 
 std::string color_to_string(uni_cpp_practice::Edge::Color color) {

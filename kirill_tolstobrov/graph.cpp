@@ -1,6 +1,8 @@
 #include "graph.hpp"
+
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 namespace {}
 
