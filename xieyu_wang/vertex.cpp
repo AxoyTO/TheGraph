@@ -1,4 +1,5 @@
-#include "vertex.hpp"
+#include "Vertex.hpp"
+#include <cassert>
 Vertex::Vertex(int vId) : id(vId){};
 void Vertex::addEdgeId(int eId) {
   assert(!hasEdgeId(eId) && "Edge Id already exists");

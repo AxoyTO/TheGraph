@@ -1,18 +1,14 @@
 #pragma once
-#include <cassert>
-#include <stdexcept>
-#include <vector>
-#include "edge.hpp"
-#include "vertex.hpp"
+#include "Edge.hpp"
+#include "Vertex.hpp"
 class Graph {
  public:
-  const std::vector<Vertex>& getVertices() const;
+  const std::vector<Vertex>& getVertices() const ;
   const Vertex& addVertex();
-  void addEdge(int fromVertexId, int toVertexId, const Edge::Color color);
+  void addEdge(int fromVertexId, int toVertexId,const Edge::Color color);
   std::string toString() const;
   bool hasVertex(int idFind);
   bool isConnected(int fromVertexId, int toVertexId);
-
   std::vector<int> getVertexIdsAtDepth(int depth);
 
  private:
@@ -24,3 +20,4 @@ class Graph {
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
 };
+

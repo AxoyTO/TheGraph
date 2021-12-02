@@ -1,5 +1,4 @@
 #pragma once
-#include <assert.h>
 #include <string>
 #include <vector>
 class Vertex {
@@ -15,3 +14,4 @@ class Vertex {
  private:
   std::vector<int> edgeIds_;
 };
+

@@ -1,8 +1,15 @@
-#include "graphGenerator.hpp"
-GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
+#include <cstdlib>
+#include <iostream>
+#include <random>
+#include <vector>
+#include <cassert>
+#include "GraphGenerator.hpp"
+constexpr float GREEN_EDGE_PROBABILITY = 0.10;
+constexpr float BLUE_EDGE_PROBABILITY = 0.25;
+constexpr float RED_EDGE_PROBABILITY = 0.33;
+GraphGenerator:: GraphGenerator(int maxDepth, int newVerticesNum)
     : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
-void GraphGenerator::generateGrey(Graph& graph) const {
-  std::vector<int> verticesPresentLevel;
+void  GraphGenerator::generateGrey(Graph& graph) const{
   for (int depth = 0; depth < maxDepth_; depth++) {
     const auto& vertexIds = graph.getVertexIdsAtDepth(depth);
     bool isNewVertexGenerated = false;
@@ -20,64 +27,64 @@ void GraphGenerator::generateGrey(Graph& graph) const {
     }
   }
 }
-void GraphGenerator::generateGreen(Graph& graph) const {
-  for (auto& vertex : graph.getVertices()) {
-    if (isLucky(GREEN_EDGE_PROBABILITY)) {
-      graph.addEdge(vertex.id, vertex.id, Edge::Color::Green);
+void  GraphGenerator::generateGreen(Graph& graph) const{
+    for (const auto& vertex : graph.getVertices()) {
+        if (isLucky(GREEN_EDGE_PROBABILITY)) {
+            graph.addEdge(vertex.id, vertex.id, Edge::Color::Green);
+        }
     }
-  }
 }
-void GraphGenerator::generateRed(Graph& graph) const {
-  for (int depth = 0; depth < maxDepth_; depth++) {
+void  GraphGenerator::generateRed(Graph& graph)const{
+  for (int depth = 0; depth < maxDepth_-1; depth++) {
     const auto presentDepth = graph.getVertexIdsAtDepth(depth);
     const auto destinationDepth = graph.getVertexIdsAtDepth(depth + 2);
-    for (const auto& fromVertex : presentDepth) {
-      for (const auto& toVertex : destinationDepth) {
-        if (isLucky(RED_EDGE_PROBABILITY)) {
-          graph.addEdge(fromVertex, toVertex, Edge::Color::Red);
-        }
+      for (const auto& fromVertexId : presentDepth) {
+          if (isLucky(RED_EDGE_PROBABILITY)) {
+              const auto randomVertexId = getRandomVertexId(destinationDepth);
+              graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Red);
+          }
       }
-    }
   }
 }
-void GraphGenerator::generateBlue(Graph& graph) const {
+void  GraphGenerator::generateBlue(Graph& graph)const {
   for (int depth = 1; depth < maxDepth_; depth++) {
     const auto presentDepth = graph.getVertexIdsAtDepth(depth);
-    for (auto vertex = presentDepth.begin(); vertex < presentDepth.end();
-         vertex++) {
-      if (*vertex != presentDepth.back() && isLucky(BLUE_EDGE_PROBABILITY)) {
-        graph.addEdge(*vertex, *(vertex + 1), Edge::Color::Blue);
+    for (auto vertexIt = presentDepth.begin(); vertexIt < presentDepth.end()-1;
+         vertexIt++) {
+      if (isLucky(BLUE_EDGE_PROBABILITY)) {
+        graph.addEdge(*vertexIt, *(vertexIt + 1), Edge::Color::Blue);
       }
     }
   }
 }
-void GraphGenerator::generateYellow(Graph& graph) const {
+void  GraphGenerator::generateYellow(Graph& graph)const {
   for (int depth = 0; depth < maxDepth_; depth++) {
     const auto presentLevel = graph.getVertexIdsAtDepth(depth);
     const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
-    for (const auto& fromVertex : presentLevel) {
-      for (const auto& toVertex : destinationLevel) {
-        if (isLucky(getProbabilityYellow(depth)) &&
-            !graph.isConnected(fromVertex, toVertex)) {
-          graph.addEdge(fromVertex, toVertex, Edge::Color::Yellow);
+    for (const auto& fromVertexId : presentLevel) {
+        if (isLucky(getProbabilityYellow(depth))) {
+            const auto unconnectedVertexIds = getUnconnectedVertexIds(fromVertexId, destinationLevel,graph);
+            const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
+            if (randomVertexId!=-1){
+                graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Yellow);
+            }
         }
-      }
     }
   }
 }
 
-float GraphGenerator::getProbabilityYellow(int depth) const {
-  assert(depth >= 0);
-  const float result = (float)depth / (float)maxDepth_;
-  if (std::isnan(result)) {
-    return 0.0;
-  }
-  return result;
+float GraphGenerator::getProbabilityYellow(int depth) const{
+    assert(depth>=0);
+    const float result=(float)depth/(float)(maxDepth_-1);
+    if (std::isnan(result)){
+        return 0.0;
+    }
+    return result;
 }
 
-Graph GraphGenerator::generate() const {
-  auto graph = Graph();
-  graph.addVertex();  // add root vertex
+Graph  GraphGenerator::generate() const {
+  auto graph=Graph();
+  graph.addVertex();//add root vertex
   std::cout << "Generator.................done" << std::endl;
   generateGrey(graph);
   std::cout << "GrayEdgeGenerate..........done" << std::endl;
@@ -92,20 +99,42 @@ Graph GraphGenerator::generate() const {
   return graph;
 }
 
-float GraphGenerator::getProbabilityGray(int depth) const {
-  assert(depth >= 0);
-  const float result = 1.0 - (float)depth / (float)maxDepth_;
-  if (std::isnan(result)) {
-    return 0.0;
-  }
-  return result;
+float GraphGenerator::getProbabilityGray( int depth)const {
+    assert(depth>=0);
+    const float result=1.0-(float)depth/(float)maxDepth_;
+    if (std::isnan(result)){
+        return 0.0;
+    }
+    return result;
 }
 
-bool GraphGenerator::isLucky(float probability) const {
-  assert(probability >= 0);
-  assert(probability <= 1.0);
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution distribution(probability);
-  return distribution(gen);
+std::vector<int>
+GraphGenerator::getUnconnectedVertexIds(const int fromVertexId, const std::vector<int> destinationLevel,Graph& graph) const {
+    std::vector<int> unconnectedVertexIds;
+    for(const auto&vertexId:destinationLevel){
+        if (graph.isConnected(fromVertexId,vertexId)== false){
+            unconnectedVertexIds.push_back(vertexId);
+        }
+    }
+    return unconnectedVertexIds;
 }
+
+bool isLucky(float probability) {
+    assert(probability>=0);
+    assert(probability<=1.0);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::bernoulli_distribution distribution(probability);
+    return distribution(gen);
+}
+
+int getRandomVertexId(const std::vector<int> destinationLevelIds){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    if (destinationLevelIds.size()==0){
+        return -1;
+    }
+    std::uniform_int_distribution<std::mt19937::result_type> vertexIndex(0, destinationLevelIds.size()-1);
+    return destinationLevelIds[vertexIndex(gen)];
+}
+
