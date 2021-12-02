@@ -1,19 +1,17 @@
-#ifndef TASK_04_GRAPH_H
-#define TASK_04_GRAPH_H
+#pragma once
 #include <cassert>
 #include <stdexcept>
 #include <vector>
-#include "edge.h"
-#include "vertex.h"
+#include "edge.hpp"
+#include "vertex.hpp"
 class Graph {
  public:
-  Graph();
-  Vertex addVertex();
-  void addEdge(int fromVertexId, int toVertexId, Edge::Color color);
+  const std::vector<Vertex>& getVertices() const;
+  const Vertex& addVertex();
+  void addEdge(int fromVertexId, int toVertexId, const Edge::Color color);
   std::string toString() const;
   bool hasVertex(int idFind);
   bool isConnected(int fromVertexId, int toVertexId);
-  int getPresentVertexId();
 
   std::vector<int> getVertexIdsAtDepth(int depth);
 
@@ -26,4 +24,3 @@ class Graph {
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
 };
-#endif  // TASK_04_GRAPH_H

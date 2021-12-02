@@ -1,5 +1,5 @@
-#include "vertex.h"
-Vertex::Vertex(int id) : id(id){};
+#include "vertex.hpp"
+Vertex::Vertex(int vId) : id(vId){};
 void Vertex::addEdgeId(int eId) {
   assert(!hasEdgeId(eId) && "Edge Id already exists");
   edgeIds_.push_back(eId);
@@ -24,6 +24,6 @@ bool Vertex::hasEdgeId(int id) const {
   }
   return false;
 }
-std::vector<int> Vertex::getEdgeIds() const {
+const std::vector<int>& Vertex::getEdgeIds() const {
   return edgeIds_;
 }

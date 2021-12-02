@@ -1,25 +1,24 @@
-#include "graph.h"
+#include "graph.hpp"
 
-Graph::Graph() {}
-Vertex Graph::addVertex() {
-  vertices_.emplace_back(getNextVertexId());
-  return vertices_.back();
+const Vertex& Graph::addVertex() {
+  const auto& newVertex = vertices_.emplace_back(getNextVertexId());
+  return newVertex;
 }
-void Graph::addEdge(int fromVertexId, int toVertexId, Edge::Color color) {
+void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   assert(!isConnected(fromVertexId, toVertexId) &&
          "Vertices already connected");
   const auto& newEdge =
       edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId, color);
+  auto& fromVertex = getVertex(fromVertexId);
+  auto& toVertex = getVertex(toVertexId);
   if (color != Edge::Color::Green) {
-    getVertex(fromVertexId).addEdgeId(newEdge.id);
-    getVertex(toVertexId).addEdgeId(newEdge.id);
-  } else {
-    getVertex(fromVertexId).addEdgeId(newEdge.id);
+    fromVertex.addEdgeId(newEdge.id);
   }
+  toVertex.addEdgeId(newEdge.id);
   if (color == Edge::Color::Gray) {
-    getVertex(toVertexId).depth = getVertex(fromVertexId).depth + 1;
+    toVertex.depth = fromVertex.depth + 1;
   }
 }
 std::string Graph::toString() const {
@@ -76,10 +75,6 @@ Vertex& Graph::getVertex(int id) {
   throw std::runtime_error("Unreachable code");
 }
 
-int Graph::getPresentVertexId() {
-  return edgeIdCounter_;
-}
-
 std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
   std::vector<int> vertices;
   for (const auto& vertex : vertices_) {
@@ -88,4 +83,8 @@ std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
     }
   }
   return vertices;
+}
+
+const std::vector<Vertex>& Graph::getVertices() const {
+  return vertices_;
 }
