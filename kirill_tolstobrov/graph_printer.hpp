@@ -2,6 +2,8 @@
 
 #include "graph.hpp"
 
+#include <iostream>
+
 namespace uni_cpp_practice {
 class GraphPrinter {
  public:
