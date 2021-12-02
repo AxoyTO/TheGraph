@@ -76,9 +76,11 @@ void generate_yellow_edges(Graph& graph) {
 
     for (const auto& from_vertex_id : from_vertex_ids)
       for (const auto& to_vertex_id : to_vertex_ids)
-        if (!graph.is_connected(from_vertex_id, to_vertex_id))
+        if (!graph.is_connected(from_vertex_id, to_vertex_id)) {
           if (is_lucky(probability))
             graph.add_edge(from_vertex_id, to_vertex_id);
+          break;
+        }
   }
 }
 
@@ -89,9 +91,11 @@ void generate_red_edges(Graph& graph) {
 
   for (Depth depth = 0; depth < depth_map.size() - 2; depth++)
     for (const auto& from_vertex_id : depth_map[depth])
-      for (const auto& to_vertex_id : depth_map[depth + 2])
+      for (const auto& to_vertex_id : depth_map[depth + 2]) {
         if (is_lucky(RED_PROBABILITY))
           graph.add_edge(from_vertex_id, to_vertex_id);
+        break;
+      }
 }
 }  // namespace
 
