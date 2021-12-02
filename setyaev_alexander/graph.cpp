@@ -141,8 +141,7 @@ Graph generate_graph() {
 
 std::string Vertex::to_string() const {
   std::stringstream json;
-  json << "{\n  \"id\": " << get_id() << ",\n"
-       << "  \"edge_ids\": [";
+  json << "{\n  \"id\": " << get_id() << ",\n  \"edge_ids\": [";
   const auto& edge_ids = get_connected_edge_ids();
   for (const auto edge_id : edge_ids) {
     json << edge_id;
@@ -150,8 +149,8 @@ std::string Vertex::to_string() const {
       json << ", ";
     }
   }
-  json << "]\n";
-  json << "}";
+
+  json << "]\n}";
 
   return json.str();
 }
@@ -166,9 +165,7 @@ std::string Edge::to_string() const {
 std::string Graph::to_string() const {
   std::stringstream json;
 
-  json << "{\n\"vertices\":";
-
-  json << " [\n";
+  json << "{\n\"vertices\": [\n";
 
   for (const auto& vertex : vertices_) {
     json << vertex.to_string();
@@ -177,9 +174,7 @@ std::string Graph::to_string() const {
     }
   }
 
-  json << "\n],\n\"edges\": ";
-
-  json << "[\n";
+  json << "\n],\n\"edges\": [\n";
 
   for (const auto& edge : edges_) {
     json << edge.to_string();
@@ -187,7 +182,9 @@ std::string Graph::to_string() const {
       json << ",\n";
     }
   }
+
   json << "\n]\n}\n";
+
   return json.str();
 }
 
