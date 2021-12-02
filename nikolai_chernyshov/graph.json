@@ -1,0 +1,129 @@
+{
+	"depth": 5,
+	"vertices": [
+		{
+			"id": 0,
+			"edge_ids": [0, 1, 16],
+			"depth": 0
+		}, {
+			"id": 1,
+			"edge_ids": [0, 2, 11],
+			"depth": 1
+		}, {
+			"id": 2,
+			"edge_ids": [1, 3],
+			"depth": 1
+		}, {
+			"id": 3,
+			"edge_ids": [2, 4, 5, 16, 17],
+			"depth": 2
+		}, {
+			"id": 4,
+			"edge_ids": [3, 6, 11, 12],
+			"depth": 2
+		}, {
+			"id": 5,
+			"edge_ids": [4, 7, 12, 13],
+			"depth": 3
+		}, {
+			"id": 6,
+			"edge_ids": [5, 8, 10, 18],
+			"depth": 3
+		}, {
+			"id": 7,
+			"edge_ids": [6, 14],
+			"depth": 3
+		}, {
+			"id": 8,
+			"edge_ids": [7, 15, 17],
+			"depth": 4
+		}, {
+			"id": 9,
+			"edge_ids": [8, 9, 13, 14],
+			"depth": 4
+		}, {
+			"id": 10,
+			"edge_ids": [9, 15, 18],
+			"depth": 5
+		}
+	],
+	"edges": [
+		{
+			"id": 0,
+			"vertex_ids": [0, 1],
+			"color": "gray"
+		}, {
+			"id": 1,
+			"vertex_ids": [0, 2],
+			"color": "gray"
+		}, {
+			"id": 2,
+			"vertex_ids": [1, 3],
+			"color": "gray"
+		}, {
+			"id": 3,
+			"vertex_ids": [2, 4],
+			"color": "gray"
+		}, {
+			"id": 4,
+			"vertex_ids": [3, 5],
+			"color": "gray"
+		}, {
+			"id": 5,
+			"vertex_ids": [3, 6],
+			"color": "gray"
+		}, {
+			"id": 6,
+			"vertex_ids": [4, 7],
+			"color": "gray"
+		}, {
+			"id": 7,
+			"vertex_ids": [5, 8],
+			"color": "gray"
+		}, {
+			"id": 8,
+			"vertex_ids": [6, 9],
+			"color": "gray"
+		}, {
+			"id": 9,
+			"vertex_ids": [9, 10],
+			"color": "gray"
+		}, {
+			"id": 10,
+			"vertex_ids": [6, 6],
+			"color": "green"
+		}, {
+			"id": 11,
+			"vertex_ids": [1, 4],
+			"color": "yellow"
+		}, {
+			"id": 12,
+			"vertex_ids": [4, 5],
+			"color": "yellow"
+		}, {
+			"id": 13,
+			"vertex_ids": [5, 9],
+			"color": "yellow"
+		}, {
+			"id": 14,
+			"vertex_ids": [7, 9],
+			"color": "yellow"
+		}, {
+			"id": 15,
+			"vertex_ids": [8, 10],
+			"color": "yellow"
+		}, {
+			"id": 16,
+			"vertex_ids": [0, 3],
+			"color": "red"
+		}, {
+			"id": 17,
+			"vertex_ids": [3, 8],
+			"color": "red"
+		}, {
+			"id": 18,
+			"vertex_ids": [6, 10],
+			"color": "red"
+		}
+	]
+}
