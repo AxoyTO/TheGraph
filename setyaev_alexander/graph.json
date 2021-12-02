@@ -1,5 +1,4 @@
-{
-	"vertices":
+{	"vertices":
  [
 		{
 			"id": 0,
@@ -58,7 +57,7 @@
 			"edge_ids": [15, 16, 17]
 		}
 	],
-	"edges": [
+edges": [
 		{
 			"id": 0,
 			"vertex_ids": [0, 1]

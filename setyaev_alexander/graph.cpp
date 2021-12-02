@@ -42,6 +42,8 @@ class Graph {
   void add_vertex();
   void add_edge(VertexId first_vertex_id, VertexId second_vertex_id);
   std::string to_string() const;
+  std::string vertices_to_string() const;
+  std::string edges_to_string() const;
 
  private:
   std::vector<Vertex> vertices_;
@@ -137,10 +139,10 @@ Graph generate_graph() {
   return graph;
 }
 
-std::string Graph::to_string() const {
+std::string Graph::vertices_to_string() const {
   std::stringstream json;
 
-  json << "{" << std::endl << "	\"vertices\":" << std::endl;
+  json << "	\"vertices\":" << std::endl;
 
   if (vertices_.size() > 0) {
     json << " [" << std::endl;
@@ -162,9 +164,17 @@ std::string Graph::to_string() const {
     if (vertex.get_id() != vertices_.back().get_id()) {
       json << ",\n";
     } else {
-      json << "\n	],\n	\"edges\": ";
+      json << "\n	]";
     }
   }
+  return json.str();
+}
+
+std::string Graph::edges_to_string() const {
+  std::stringstream json;
+
+  json << "edges\": ";
+
   if (edges_.size() > 0) {
     json << "[\n";
   }
@@ -176,11 +186,15 @@ std::string Graph::to_string() const {
     if (edge.get_id() != edges_.back().get_id()) {
       json << ",\n";
     } else {
-      json << "\n	]\n}\n";
+      json << "\n	]\n";
     }
   }
 
   return json.str();
+}
+
+std::string Graph::to_string() const {
+  return "{" + vertices_to_string() + ",\n" + edges_to_string() + "}\n";
 }
 
 void json_to_file(const std::string& str) {
