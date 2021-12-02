@@ -14,4 +14,3 @@ class Vertex {
  private:
   std::vector<int> edgeIds_;
 };
-

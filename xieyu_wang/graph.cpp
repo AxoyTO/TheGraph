@@ -1,25 +1,26 @@
+#include "Graph.hpp"
 #include <cassert>
 #include <stdexcept>
-#include "Graph.hpp"
 
 const Vertex& Graph::addVertex() {
-    return vertices_.emplace_back(getNextVertexId());;
+  return vertices_.emplace_back(getNextVertexId());
+  ;
 }
-void Graph::addEdge(int fromVertexId, int toVertexId,const Edge::Color color) {
+void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   assert(!isConnected(fromVertexId, toVertexId) &&
          "Vertices already connected");
   const auto& newEdge =
       edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId, color);
-  auto& fromVertex= getVertex(fromVertexId);
-  auto& toVertex= getVertex(toVertexId);
+  auto& fromVertex = getVertex(fromVertexId);
+  auto& toVertex = getVertex(toVertexId);
   if (color != Edge::Color::Green) {
     fromVertex.addEdgeId(newEdge.id);
   }
   toVertex.addEdgeId(newEdge.id);
   if (color == Edge::Color::Gray) {
-    toVertex.depth =fromVertex.depth + 1;
+    toVertex.depth = fromVertex.depth + 1;
   }
 }
 std::string Graph::toString() const {
@@ -55,7 +56,7 @@ bool Graph::isConnected(int fromVertexId, int toVertexId) {
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
     for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
-      if (fromVertexEdgeId == toVertexEdgeId&& fromVertexId!=toVertexId) {
+      if (fromVertexEdgeId == toVertexEdgeId && fromVertexId != toVertexId) {
         return true;
       }
     }
@@ -83,6 +84,6 @@ std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
   return vertices;
 }
 
-const std::vector<Vertex> &Graph::getVertices() const {
-    return vertices_;
+const std::vector<Vertex>& Graph::getVertices() const {
+  return vertices_;
 }

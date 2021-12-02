@@ -1,5 +1,5 @@
-#include <stdexcept>
 #include "Edge.hpp"
+#include <stdexcept>
 Edge::Edge(int id, int fromVertexId, int toVertexId, const Color color)
     : id(id),
       fromVertexId(fromVertexId),
@@ -14,19 +14,18 @@ std::string Edge::toString() const {
   return strEdge;
 }
 
-
 const std::string edgeColorToString(Edge::Color color) {
   switch (color) {
     case Edge::Color::Gray:
       return "gray";
     case Edge::Color::Blue:
-        return "blue";
+      return "blue";
     case Edge::Color::Green:
-        return "green";
+      return "green";
     case Edge::Color::Red:
-        return "red";
+      return "red";
     case Edge::Color::Yellow:
-        return "yellow";
+      return "yellow";
   }
-    throw std::runtime_error("Failed to convert the color");
+  throw std::runtime_error("Failed to convert the color");
 }

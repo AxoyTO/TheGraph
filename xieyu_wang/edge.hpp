@@ -7,7 +7,10 @@ class Edge {
   const int fromVertexId = 0;
   const int toVertexId = 0;
   const Color color = Color::Gray;
-  Edge(int id, int fromVertexId, int toVertexId,const  Color color=Color::Gray);
+  Edge(int id,
+       int fromVertexId,
+       int toVertexId,
+       const Color color = Color::Gray);
   std::string toString() const;
 };
 const std::string edgeColorToString(Edge::Color color);
