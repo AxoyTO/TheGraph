@@ -8,7 +8,7 @@ namespace {
 std::string edge_color_to_string(const Color& color) {
   switch (color) {
     case Color::Grey:
-      return "\"grey\"\n\t  }";
+      return "\"gray\"\n\t  }";
     case Color::Green:
       return "\"green\"\n\t  }";
     case Color::Yellow:
