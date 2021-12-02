@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include <cassert>
+#include <iostream>
 
 namespace {
 bool is_depth_valid(
