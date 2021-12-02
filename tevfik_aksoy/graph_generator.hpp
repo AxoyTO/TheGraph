@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <list>
+#include <mutex>
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
@@ -23,9 +24,5 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
   void generate_vertices_and_gray_edges(Graph& graph) const;
-  void generate_green_edges(Graph& graph) const;
-  void generate_blue_edges(Graph& graph) const;
-  void generate_yellow_edges(Graph& graph) const;
-  void generate_red_edges(Graph& graph) const;
 };
 }  // namespace uni_cpp_practice
