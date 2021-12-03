@@ -1,6 +1,7 @@
 #include "graph.hpp"
 #include <cassert>
 #include <random>
+#include <stdexcept>
 
 constexpr float GREEN_EDGE_PROB = 0.1;
 constexpr float RED_EDGE_PROB = 0.33;
