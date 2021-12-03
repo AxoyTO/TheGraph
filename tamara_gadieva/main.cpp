@@ -1,8 +1,8 @@
-#include <fstream>
-#include <iostream>
-#include <regex>
-#include <string>
 #include "graph.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <regex>
 
 constexpr int DEPTH_MIN = 0;
 constexpr int NEW_VERTICES_NUM_MIN = 0;
@@ -40,6 +40,7 @@ int handle_new_vertices_num_input() {
 }
 
 int main() {
+
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
