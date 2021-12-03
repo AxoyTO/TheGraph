@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-using Color = Edge::Color;
+using Color = uni_cource_cpp::Graph::Edge::Color;
 
 namespace {
 std::string edge_color_to_string(const Color& color) {
@@ -19,7 +19,8 @@ std::string edge_color_to_string(const Color& color) {
 }
 }  // namespace
 
-std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
+namespace uni_cource_cpp {
+std::string GraphPrinter::print_vertex(const Graph::Vertex& vertex) const {
   std::string str_vertex = "\t  {\n\t\t\"id\":" + std::to_string(vertex.id) +
                            ",\n\t\t\"edge_ids\":[";
   for (const auto& edge_id : vertex.get_edge_ids()) {
@@ -31,7 +32,7 @@ std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
   return str_vertex;
 }
 
-std::string GraphPrinter::print_edge(const Edge& edge) const {
+std::string GraphPrinter::print_edge(const Graph::Edge& edge) const {
   return "\t  {\n\t\t\"id\":" + std::to_string(edge.id) +
          ",\n\t\t\"vertex_ids\":[" + std::to_string(edge.vertex_start) + "," +
          std::to_string(edge.vertex_end) +
@@ -67,3 +68,4 @@ std::string GraphPrinter::print() const {
   graph_string += "\n}\n";
   return graph_string;
 }
+}  // namespace uni_cource_cpp

@@ -3,15 +3,16 @@
 #include <cassert>
 #include <stdexcept>
 
+namespace uni_cource_cpp {
 // VERTEX
-Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
+Graph::Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 
-void Vertex::add_edge_id(const EdgeId& edge_id) {
+void Graph::Vertex::add_edge_id(const EdgeId& edge_id) {
   assert(!has_edge_id(edge_id) && "Such an edge already exists!");
   edge_ids_.push_back(edge_id);
 }
 
-bool Vertex::has_edge_id(const EdgeId& edge_id) const {
+bool Graph::Vertex::has_edge_id(const EdgeId& edge_id) const {
   for (const auto& id : edge_ids_)
     if (edge_id == id)
       return true;
@@ -19,17 +20,17 @@ bool Vertex::has_edge_id(const EdgeId& edge_id) const {
 }
 
 // EDGE
-Edge::Edge(const EdgeId& edge_id,
-           const VertexId& vertex_connection_start,
-           const VertexId& vertex_connection_end,
-           const Color& edge_color)
+Graph::Edge::Edge(const EdgeId& edge_id,
+                  const VertexId& vertex_connection_start,
+                  const VertexId& vertex_connection_end,
+                  const Color& edge_color)
     : id(edge_id),
       vertex_start(vertex_connection_start),
       vertex_end(vertex_connection_end),
       color(edge_color) {}
 
 // GRAPH
-const Vertex& Graph::add_vertex() {
+const Graph::Vertex& Graph::add_vertex() {
   if (depth_map_.empty())
     depth_map_.push_back({});
 
@@ -63,8 +64,8 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   }
 }
 
-Edge::Color Graph::get_edge_color(const Vertex& from_vertex,
-                                  const Vertex& to_vertex) {
+Graph::Edge::Color Graph::get_edge_color(const Vertex& from_vertex,
+                                         const Vertex& to_vertex) {
   const auto& from_vertex_depth = from_vertex.depth;
   const auto& to_vertex_depth = to_vertex.depth;
 
@@ -124,3 +125,4 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
 
   return false;
 }
+}  // namespace uni_cource_cpp

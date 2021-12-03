@@ -6,36 +6,37 @@ using Depth = int;
 using VertexId = int;
 using EdgeId = int;
 
-struct Vertex {
-  const VertexId id = 0;
-  Depth depth = 0;
-
-  explicit Vertex(const VertexId& vertex_id);
-
-  void add_edge_id(const EdgeId& edge_id);
-  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-  bool has_edge_id(const EdgeId& edge_id) const;
-
- private:
-  std::vector<EdgeId> edge_ids_;
-};
-
-struct Edge {
-  enum class Color { Grey, Green, Yellow, Red };
-
-  const EdgeId id = 0;
-  const VertexId vertex_start = 0;
-  const VertexId vertex_end = 0;
-  const Color color = Color::Grey;
-
-  Edge(const EdgeId& edge_id,
-       const VertexId& vertex_connection_start,
-       const VertexId& vertex_connection_end,
-       const Color& edge_color);
-};
-
+namespace uni_cource_cpp {
 class Graph {
  public:
+  struct Vertex {
+    const VertexId id = 0;
+    Depth depth = 0;
+
+    explicit Vertex(const VertexId& vertex_id);
+
+    void add_edge_id(const EdgeId& edge_id);
+    const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+    bool has_edge_id(const EdgeId& edge_id) const;
+
+   private:
+    std::vector<EdgeId> edge_ids_;
+  };
+
+  struct Edge {
+    enum class Color { Grey, Green, Yellow, Red };
+
+    const EdgeId id = 0;
+    const VertexId vertex_start = 0;
+    const VertexId vertex_end = 0;
+    const Color color = Color::Grey;
+
+    Edge(const EdgeId& edge_id,
+         const VertexId& vertex_connection_start,
+         const VertexId& vertex_connection_end,
+         const Color& edge_color);
+  };
+
   const Vertex& add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
 
@@ -70,3 +71,4 @@ class Graph {
   Edge::Color get_edge_color(const Vertex& from_vertex,
                              const Vertex& to_vertex);
 };
+}  // namespace uni_cource_cpp

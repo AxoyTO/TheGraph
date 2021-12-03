@@ -10,6 +10,9 @@ constexpr int MAX_PROBABILITY = 100, GREEN_PROBABILITY = 10,
               RED_PROBABILITY = 33;
 
 namespace {
+using Graph = uni_cource_cpp::Graph;
+using Params = uni_cource_cpp::GraphGenerator::Params;
+
 Probability get_probability(Depth depth, Depth current_depth) {
   return floor(MAX_PROBABILITY * (depth - current_depth) / depth);
 }
@@ -28,7 +31,7 @@ VertexId choose_random_vertex_id(const std::vector<VertexId>& vertex_ids) {
   return vertex_ids[distribution(generator)];
 }
 
-void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
+void generate_grey_edges(Graph& graph, const Params& params) {
   graph.add_vertex();  // Zero vertex
 
   for (Depth depth = 0; depth <= params.depth; depth++) {
@@ -112,6 +115,7 @@ void generate_red_edges(Graph& graph) {
 }
 }  // namespace
 
+namespace uni_cource_cpp {
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   generate_grey_edges(graph, params_);
@@ -121,3 +125,4 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
+}  // namespace uni_cource_cpp
