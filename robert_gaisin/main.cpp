@@ -12,11 +12,11 @@ using std::vector;
 using VertexId = int;
 using EdgeId = int;
 
-constexpr int proba_gray_begin = 100;
-constexpr int proba_red = 33;
-constexpr int proba_green = 10;
-constexpr int proba_blue = 25;
-constexpr int proba_yellow_begin = 0;
+const int proba_gray_begin = 100;
+const int proba_red = 33;
+const int proba_green = 10;
+const int proba_blue = 25;
+const int proba_yellow_begin = 0;
 
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
 
@@ -33,7 +33,7 @@ std::string color_to_string(const EdgeColor& color) {
     case EdgeColor::Red:
       return "\"red\"";
   }
-  throw "Color output error";
+  throw std::runtime_error("Color output error");
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
@@ -105,7 +105,7 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
 
 class Graph {
  public:
-  void add_vertex();
+  VertexId add_vertex();
 
   void add_edge(const VertexId& begin,
                 const VertexId& end,
@@ -121,8 +121,7 @@ class Graph {
   Vertex& get_vertex(const VertexId& id);
 
  private:
-  void add_depth_0(const VertexId& vertex_id);
-  void mod_depth_map(const VertexId& begin, const VertexId& end);
+  void add_id_to_depth_map(const VertexId& begin, const VertexId& end);
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
 
@@ -134,25 +133,20 @@ class Graph {
   vector<vector<VertexId>> depth_map_;
 };
 
-void Graph::add_depth_0(const VertexId& vertex_id) {
-  assert(depth_map_.size() == 0 && "Attempt to create zero depth failed");
-  vector<VertexId> tmp_vec = {vertex_id};
-  depth_map_.push_back(tmp_vec);
-}
-
 Vertex& Graph::get_vertex(const VertexId& id) {
   for (auto& vertex : vertices_) {
     if (vertex.id == id)
       return vertex;
   }
-  throw "Wrong id";
+  throw std::runtime_error("Vertex doesn't exist");
 }
 
-void Graph::mod_depth_map(const VertexId& begin, const VertexId& end) {
-  const int depth_for_new_vertex = get_vertex(begin).depth + 1;
-  if (depth_for_new_vertex >= (int)depth_map_.size()) {
-    vector<VertexId> tmp_vec = {end};
-    depth_map_.push_back(tmp_vec);
+void Graph::add_id_to_depth_map(const VertexId& begin, const VertexId& end) {
+  const size_t depth_for_new_vertex = get_vertex(begin).depth + 1;
+  assert(!(depth_for_new_vertex > depth_map_.size()) &&
+         "Error add id to depth map");
+  if (depth_for_new_vertex == depth_map_.size()) {
+    depth_map_.push_back({end});
   } else {
     depth_map_[depth_for_new_vertex].push_back(end);
   }
@@ -179,12 +173,14 @@ bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
   return false;
 }
 
-void Graph::add_vertex() {
+VertexId Graph::add_vertex() {
   auto vertex_id = next_vertex_id();
   vertices_.emplace_back(vertex_id);
-  if (vertex_id == 0) {
-    add_depth_0(vertex_id);
+  if (depth_map_.empty()) {
+    assert(depth_map_.size() == 0 && "Attempt to create zero depth failed");
+    depth_map_.push_back({vertex_id});
   }
+  return vertex_id;
 }
 
 void Graph::add_edge(const VertexId& begin,
@@ -198,7 +194,7 @@ void Graph::add_edge(const VertexId& begin,
   if (begin != end)
     get_vertex(end).add_edge_id(edge.id);
   if (color == EdgeColor::Gray)
-    mod_depth_map(begin, end);
+    add_id_to_depth_map(begin, end);
 }
 
 std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
@@ -233,7 +229,7 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
       << "}" << endl;
   return out;
 }
-bool to_be_or_not_to_be(const int proba) {
+bool to_be_or_not_to_be(int proba) {
   std::random_device rd;
   std::mt19937 mersenne(rd());
   return (int)(mersenne() % 100 + 1) <= proba;
@@ -241,33 +237,29 @@ bool to_be_or_not_to_be(const int proba) {
 void generate_gray_edges(int graph_depth,  //наибольшая возможная глубина
                          int new_vertices_num,
                          Graph& returned_graph) {
-  //Вероятность порождения вершины следующего слоя:
-  int proba_gray = proba_gray_begin;
-  //Настолько вероятность будет уменьшена для следующего слоя:
-  int sub_proba_gray = proba_gray / graph_depth;
-  //Генерация вершин начиная со второго слоя:
-
   for (int depth = 0; depth < graph_depth - 1; ++depth) {
     if (depth >= returned_graph.depth()) {
       break;
     }
-    for (auto& vert_id : returned_graph.depth_map()[depth]) {
+    for (const auto& vertex_id : returned_graph.depth_map()[depth]) {
       for (int c = 0; c < new_vertices_num; ++c) {
+        int proba_gray =
+            proba_gray_begin - depth * proba_gray_begin / graph_depth;
         if (to_be_or_not_to_be(proba_gray)) {
-          returned_graph.add_vertex();
-          returned_graph.add_edge(vert_id, returned_graph.vertices().back().id,
-                                  EdgeColor::Gray);
+          auto new_vertex_id = returned_graph.add_vertex();
+          returned_graph.add_edge(vertex_id, new_vertex_id, EdgeColor::Gray);
         }
       }
     }
-    proba_gray -= sub_proba_gray;  //Уменьшили вероятность для следующего слоя
   }
 }
 void generate_blue_edges(Graph& returned_graph) {
   for (auto& vector_ids : returned_graph.depth_map()) {
-    for (auto k = vector_ids.begin(); k < vector_ids.end() - 1; ++k) {
+    for (auto vertex_id_iter = vector_ids.begin();
+         vertex_id_iter < vector_ids.end() - 1; ++vertex_id_iter) {
       if (to_be_or_not_to_be(proba_blue)) {
-        returned_graph.add_edge(*k, *(k + 1), EdgeColor::Blue);
+        returned_graph.add_edge(*vertex_id_iter, *(vertex_id_iter + 1),
+                                EdgeColor::Blue);
       }
     }
   }
@@ -300,18 +292,19 @@ VertexId get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
 }
 void generate_yellow_edges(Graph& returned_graph) {
   int proba_yellow = proba_yellow_begin;
-  //Настолько будет увеличиваться от слоя к слою вероятность возникновения
-  //желтого ребра:
   int add_proba_yellow = 100 / returned_graph.depth();
 
-  for (auto i = returned_graph.depth_map().begin();
-       i != returned_graph.depth_map().end() - 1; ++i) {
-    for (auto k = (*i).begin(); k != (*i).end(); ++k) {
+  for (auto vertex_ids_at_depth = returned_graph.depth_map().begin();
+       vertex_ids_at_depth != returned_graph.depth_map().end() - 1;
+       ++vertex_ids_at_depth) {
+    for (auto vertex_id = (*vertex_ids_at_depth).begin();
+         vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_yellow)) {
-        vector<VertexId> vertices_to_connect =
-            get_unconnected_vertex_ids(*(i + 1), *k, returned_graph);
+        vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
+            *(vertex_ids_at_depth + 1), *vertex_id, returned_graph);
         const int vertex_to_attach = get_random_vertex_id(vertices_to_connect);
-        returned_graph.add_edge(*k, vertex_to_attach, EdgeColor::Yellow);
+        returned_graph.add_edge(*vertex_id, vertex_to_attach,
+                                EdgeColor::Yellow);
       }
     }
     proba_yellow += add_proba_yellow;
@@ -319,12 +312,15 @@ void generate_yellow_edges(Graph& returned_graph) {
 }
 
 void generate_red_edges(Graph& returned_graph) {
-  for (auto i = returned_graph.depth_map().begin();
-       i != returned_graph.depth_map().end() - 2; ++i) {
-    for (auto k = (*i).begin(); k != (*i).end(); ++k) {
+  for (auto vertex_ids_at_depth = returned_graph.depth_map().begin();
+       vertex_ids_at_depth != returned_graph.depth_map().end() - 2;
+       ++vertex_ids_at_depth) {
+    for (auto vertex_id = (*vertex_ids_at_depth).begin();
+         vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_red)) {
-        const int vertex_to_attach = get_random_vertex_id(*(i + 2));
-        returned_graph.add_edge(*k, vertex_to_attach, EdgeColor::Red);
+        const int vertex_to_attach =
+            get_random_vertex_id(*(vertex_ids_at_depth + 2));
+        returned_graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Red);
       }
     }
   }
