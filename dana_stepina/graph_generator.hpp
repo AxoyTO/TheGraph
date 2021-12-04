@@ -14,7 +14,7 @@ class GraphGenerator {
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
-
+  const Params& get_params() const { return params_; }
   Graph generate() const;
 
  private:

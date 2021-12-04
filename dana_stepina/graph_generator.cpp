@@ -53,7 +53,6 @@ void generate_grey_edges(Graph& graph, const Params& params) {
     if (!any_new_vertex_generated)
       break;
   }
-
   if (graph.get_depth_map().size() - 1 < params.depth)
     std::cout
         << "The resulting depth of the generated graph is less than expected.\n"

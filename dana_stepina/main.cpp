@@ -3,18 +3,38 @@
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
+#include <chrono>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <string>
 
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::GraphPrinter;
+using uni_cource_cpp::Logger;
 
 using Params = GraphGenerator::Params;
 
-const std::string filename_folder_path = "./temp";
+const std::string filename_folder_path = "./temp/";
 const std::string filename_prefix = "graph_";
 const std::string filename_file_extension = ".json";
+const std::string filename_log = "log.txt";
+
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
+}
+
+Logger& prepare_logger() {
+  auto& logger = Logger::get_logger();
+  logger.set_file(filename_folder_path + filename_log);
+  return logger;
+}
 
 int handle_depth_input() {
   int entered_depth = -1;
@@ -87,8 +107,8 @@ int main() {
 
     const auto graph_printer = GraphPrinter(graph);
     write_to_file(graph_printer.print(),
-                  filename_folder_path + '/' + filename_prefix +
-                      std::to_string(i) + filename_file_extension);
+                  filename_folder_path + filename_prefix + std::to_string(i) +
+                      filename_file_extension);
   }
 
   return 0;
