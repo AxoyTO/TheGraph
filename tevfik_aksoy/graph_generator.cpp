@@ -163,7 +163,6 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
       if (get_random_probability() > probability) {
         const auto& filtered_vertex_ids =
             filter_connected_vertices(vertex_id, vertices_next, graph, mutex);
-        // const std::lock_guard locker(mutex);
         if (filtered_vertex_ids.empty()) {
           continue;
         }
