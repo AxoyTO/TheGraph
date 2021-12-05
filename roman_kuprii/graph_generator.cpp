@@ -155,16 +155,18 @@ void paint_edges(Graph& work_graph) {
   yellow_thread.join();
 }
 
-void generate_gray_branch(Graph& work_graph,
-                          uni_cpp_practice::GraphGenerator::Params& params,
-                          std::mutex& modify_mutex,
-                          const VertexId& parent_vertex_id,
-                          int current_depth) {
-  int depth = params.depth;
-  int new_vertices_num = params.new_vertices_num;
+}  // namespace
+
+namespace uni_cpp_practice {
+
+void GraphGenerator::generate_gray_branch(Graph& work_graph,
+                                          std::mutex& graph_mutex,
+                                          const VertexId& parent_vertex_id,
+                                          int current_depth) const {
+  const int depth = params_.depth;
   VertexId new_vertex_id;
   {
-    const std::lock_guard lock(modify_mutex);
+    const std::lock_guard lock(graph_mutex);
     work_graph.add_vertex();
     new_vertex_id = work_graph.get_vertices().back().get_id();
     work_graph.connect_vertices(parent_vertex_id, new_vertex_id, true);
@@ -176,24 +178,22 @@ void generate_gray_branch(Graph& work_graph,
     const double probability =
         static_cast<double>(current_depth) / static_cast<double>(depth);
 
-    for (int iter = 0; iter < new_vertices_num; iter++) {
+    for (int iter = 0; iter < params_.new_vertices_num; iter++) {
       if (get_real_random_number() > probability) {
-        generate_gray_branch(work_graph, params, modify_mutex, new_vertex_id,
+        generate_gray_branch(work_graph, graph_mutex, new_vertex_id,
                              current_depth + 1);
       }
     }
   }
 }
 
-void generate_new_vertices(Graph& graph,
-                           uni_cpp_practice::GraphGenerator::Params& params) {
-  int new_vertices_num = params.new_vertices_num;
+void GraphGenerator::generate_new_vertices(Graph& graph) const {
   std::list<std::function<void()>> jobs;
   std::atomic<int> completed_jobs = 0;
-  std::mutex modify_mutex;
-  for (int i = 0; i < new_vertices_num; i++)
-    jobs.emplace_back([&graph, &params, &completed_jobs, &modify_mutex]() {
-      generate_gray_branch(graph, params, modify_mutex, 0, 1);
+  std::mutex graph_mutex;
+  for (int i = 0; i < params_.new_vertices_num; i++)
+    jobs.emplace_back([this, &graph, &completed_jobs, &graph_mutex]() {
+      generate_gray_branch(graph, graph_mutex, 0, 1);
       completed_jobs++;
     });
 
@@ -226,7 +226,7 @@ void generate_new_vertices(Graph& graph,
     threads[i] = std::thread(worker);
   }
 
-  while (completed_jobs != new_vertices_num) {
+  while (completed_jobs != params_.new_vertices_num) {
   }
 
   should_terminate = true;
@@ -235,14 +235,10 @@ void generate_new_vertices(Graph& graph,
   }
 }
 
-}  // namespace
-
-namespace uni_cpp_practice {
-
-Graph GraphGenerator::generate() {
+Graph GraphGenerator::generate() const {
   auto graph = Graph();
   graph.add_vertex();
-  generate_new_vertices(graph, params_);
+  generate_new_vertices(graph);
   paint_edges(graph);
   return graph;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <mutex>
 
 namespace uni_cpp_practice {
 
@@ -16,12 +16,18 @@ class GraphGenerator {
     int new_vertices_num = 0;
   };
 
-  Graph generate();
+  Graph generate() const;
 
   GraphGenerator(const Params& params) : params_(params) {}
 
  private:
   Params params_;
+
+  void generate_gray_branch(Graph& graph,
+                            std::mutex& graph_mutex,
+                            const VertexId& parent_vertex_id,
+                            int current_depth) const;
+  void generate_new_vertices(Graph& graph) const;
 };
 
 }  // namespace uni_cpp_practice
