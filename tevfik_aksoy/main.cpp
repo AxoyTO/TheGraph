@@ -136,7 +136,7 @@ int main() {
 
   generation_controller.generate(
       [&logger](int index) { log_start(logger, index); },
-      [&logger, &graphs](int index, const Graph& graph) {
+      [&logger, &graphs](int index, Graph graph) {
         log_end(logger, graph, index);
         graphs.push_back(graph);
         const auto graph_printer = GraphPrinter(graph);
