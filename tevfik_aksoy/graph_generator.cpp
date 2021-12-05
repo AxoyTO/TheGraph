@@ -124,7 +124,7 @@ void GraphGenerator::generate_vertices_and_gray_edges(
 
   while (jobs_count < params_.new_vertices_num) {
   }
-  
+
   should_terminate = true;
   for (auto& thread : threads) {
     thread.join();
