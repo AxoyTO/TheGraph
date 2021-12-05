@@ -164,13 +164,13 @@ void GraphGenerator::generate_gray_branch(Graph& work_graph,
                                           const VertexId& parent_vertex_id,
                                           int current_depth) const {
   const int depth = params_.depth;
-  VertexId new_vertex_id;
-  {
+  const VertexId new_vertex_id = [&work_graph, &graph_mutex,
+                                  &parent_vertex_id]() {
     const std::lock_guard lock(graph_mutex);
-    work_graph.add_vertex();
-    new_vertex_id = work_graph.get_vertices().back().get_id();
+    const auto new_vertex_id = work_graph.add_vertex();
     work_graph.connect_vertices(parent_vertex_id, new_vertex_id, true);
-  }
+    return new_vertex_id;
+  }();
 
   if (current_depth == depth) {
     return;
