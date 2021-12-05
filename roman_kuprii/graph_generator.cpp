@@ -78,12 +78,11 @@ void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
 
 void add_green_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   for (const auto& start_vertex : work_graph.get_vertices())
-    if (!work_graph.is_connected(start_vertex.get_id(), start_vertex.get_id()))
-      if (get_real_random_number() < GREEN_TRASHOULD) {
-        std::lock_guard lock(add_edge_mutex);
-        work_graph.connect_vertices(start_vertex.get_id(),
-                                    start_vertex.get_id(), false);
-      }
+    if (get_real_random_number() < GREEN_TRASHOULD) {
+      std::lock_guard lock(add_edge_mutex);
+      work_graph.connect_vertices(start_vertex.get_id(), start_vertex.get_id(),
+                                  false);
+    }
 }
 
 void add_red_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
@@ -172,17 +171,16 @@ void GraphGenerator::generate_gray_branch(Graph& work_graph,
     return new_vertex_id;
   }();
 
-  if (current_depth == depth) {
+  if (current_depth == depth)
     return;
-  } else {
-    const double probability =
-        static_cast<double>(current_depth) / static_cast<double>(depth);
 
-    for (int iter = 0; iter < params_.new_vertices_num; iter++) {
-      if (get_real_random_number() > probability) {
-        generate_gray_branch(work_graph, graph_mutex, new_vertex_id,
-                             current_depth + 1);
-      }
+  const double probability =
+      static_cast<double>(current_depth) / static_cast<double>(depth);
+
+  for (int i = 0; i < params_.new_vertices_num; i++) {
+    if (get_real_random_number() > probability) {
+      generate_gray_branch(work_graph, graph_mutex, new_vertex_id,
+                           current_depth + 1);
     }
   }
 }
@@ -221,9 +219,13 @@ void GraphGenerator::generate_new_vertices(Graph& graph) const {
     }
   };
 
-  auto threads = std::array<std::thread, MAX_THREADS_COUNT>();
-  for (int i = 0; i < MAX_THREADS_COUNT; ++i) {
-    threads[i] = std::thread(worker);
+  const auto threads_number =
+      std::min(params_.new_vertices_num, MAX_THREADS_COUNT);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_number);
+
+  for (int i = 0; i < threads_number; ++i) {
+    threads.emplace_back(std::thread(worker));
   }
 
   while (completed_jobs != params_.new_vertices_num) {
