@@ -240,11 +240,9 @@ void generate_gray_edges(int graph_depth,  //наибольшая возможн
     if (depth >= graph.depth()) {
       break;
     }
-    int proba_gray =
-            PROBA_GRAY_BEGIN - depth * PROBA_GRAY_BEGIN / graph_depth;
+    int proba_gray = PROBA_GRAY_BEGIN - depth * PROBA_GRAY_BEGIN / graph_depth;
     for (const auto& vertex_id : graph.depth_map()[depth]) {
       for (int c = 0; c < new_vertices_num; ++c) {
-
         if (to_be_or_not_to_be(proba_gray)) {
           const auto new_vertex_id = graph.add_vertex();
           graph.add_edge(vertex_id, new_vertex_id, EdgeColor::Gray);
@@ -258,8 +256,7 @@ void generate_blue_edges(Graph& graph) {
     for (auto vertex_id_iter = vector_ids.begin();
          vertex_id_iter < vector_ids.end() - 1; ++vertex_id_iter) {
       if (to_be_or_not_to_be(PROBA_BLUE)) {
-        graph.add_edge(*vertex_id_iter, *(vertex_id_iter + 1),
-                                EdgeColor::Blue);
+        graph.add_edge(*vertex_id_iter, *(vertex_id_iter + 1), EdgeColor::Blue);
       }
     }
   }
@@ -291,20 +288,20 @@ VertexId get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
   return set_of_vertices_id[mersenne() % set_of_vertices_id.size()];
 }
 void generate_yellow_edges(Graph& graph) {
-
   for (auto vertex_ids_at_depth = graph.depth_map().begin();
        vertex_ids_at_depth != graph.depth_map().end() - 1;
        ++vertex_ids_at_depth) {
-    int proba_yellow = PROBA_YELLOW_BEGIN + 100 / graph.depth() * graph.get_vertex((*vertex_ids_at_depth).front()).depth;
+    int proba_yellow =
+        PROBA_YELLOW_BEGIN +
+        100 / graph.depth() *
+            graph.get_vertex((*vertex_ids_at_depth).front()).depth;
     for (auto vertex_id = (*vertex_ids_at_depth).begin();
          vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
-      
       if (to_be_or_not_to_be(proba_yellow)) {
         vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
             *(vertex_ids_at_depth + 1), *vertex_id, graph);
         const int vertex_to_attach = get_random_vertex_id(vertices_to_connect);
-        graph.add_edge(*vertex_id, vertex_to_attach,
-                                EdgeColor::Yellow);
+        graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Yellow);
       }
     }
   }
