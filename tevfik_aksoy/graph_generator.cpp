@@ -111,15 +111,13 @@ void GraphGenerator::generate_vertices_and_gray_edges(
     }
   };
 
-  /*
-  const int THREADS_COUNT = params_.new_vertices_num >= MAX_THREADS_COUNT
-                                ? MAX_THREADS_COUNT
-                                : params_.new_vertices_num;
-  */
+  const auto threads_count =
+      std::max(MAX_THREADS_COUNT, params_.new_vertices_num);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
 
-  std::array<std::thread, MAX_THREADS_COUNT> threads;
-  for (int i = 0; i < MAX_THREADS_COUNT; ++i) {
-    threads[i] = std::thread(worker);
+  for (int i = 0; i < threads_count; ++i) {
+    threads.push_back(std::thread(worker));
   }
 
   while (jobs_count < params_.new_vertices_num) {
