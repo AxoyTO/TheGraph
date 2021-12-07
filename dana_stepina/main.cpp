@@ -1,14 +1,13 @@
-#include "graph.hpp"
-#include "graph_generator.hpp"
-#include "graph_printer.hpp"
-#include "logger.hpp"
-#include <sstream>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
-
+#include "graph.hpp"
+#include "graph_generator.hpp"
+#include "graph_printer.hpp"
+#include "logger.hpp"
 
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerator;
@@ -38,7 +37,8 @@ Logger& prepare_logger() {
 }
 
 // std::string generation_started_string(int graph_num) {
-//   return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) + ", Generation Started\n";
+//   return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1)
+//   + ", Generation Started\n";
 // }
 
 // std::string generation_finished_string(int graph_num) { }
