@@ -16,22 +16,6 @@
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
-std::string color_to_string(uni_cpp_practice::Edge::Color color) {
-  switch (color) {
-    case uni_cpp_practice::Edge::Color::Grey:
-      return "grey";
-    case uni_cpp_practice::Edge::Color::Green:
-      return "green";
-    case uni_cpp_practice::Edge::Color::Blue:
-      return "blue";
-    case uni_cpp_practice::Edge::Color::Yellow:
-      return "yellow";
-    case uni_cpp_practice::Edge::Color::Red:
-      return "red";
-  }
-  throw std::runtime_error("Nonexistent color");
-}
-
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
   const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
@@ -75,7 +59,8 @@ const std::string logger_finish_string(int graph_number,
     if (it != colors.begin()) {
       edges_string << ", ";
     }
-    edges_string << color_to_string(it->first) << ": " << (it->second).size();
+    edges_string << uni_cpp_practice::GraphPrinter::color_to_string(it->first)
+                 << ": " << (it->second).size();
   }
   edges_string << "}";
   string << " edges: " << graph.get_edges().size() << ", " << edges_string.str()
@@ -86,9 +71,8 @@ const std::string logger_finish_string(int graph_number,
   return string.str();
 }
 
-int main() {
-  int depth = 0, new_vertices_num = 0, graphs_count = 0;
-
+int handle_depth_input() {
+  int depth;
   std::cout << "Enter the depth:" << std::endl;
   std::cin >> depth;
   while (depth < 0) {
@@ -96,7 +80,11 @@ int main() {
     std::cout << "Enter the depth:" << std::endl;
     std::cin >> depth;
   }
+  return depth;
+}
 
+int handle_new_vertices_num_input() {
+  int new_vertices_num;
   std::cout << "Enter max amount of vertices genereted from one vertex:"
             << std::endl;
   std::cin >> new_vertices_num;
@@ -108,7 +96,11 @@ int main() {
               << std::endl;
     std::cin >> new_vertices_num;
   }
+  return new_vertices_num;
+}
 
+int handle_graphs_count_input() {
+  int graphs_count;
   std::cout << "Enter number of graphs:" << std::endl;
   std::cin >> graphs_count;
   while (graphs_count < 0) {
@@ -116,14 +108,36 @@ int main() {
     std::cout << "Enter number of graphs:" << std::endl;
     std::cin >> graphs_count;
   }
+  return graphs_count;
+}
+
+uni_cpp_practice::Logger& prepare_logger() {
+  std::filesystem::create_directory("temp");
+  auto& logger = uni_cpp_practice::Logger::get_instance();
+  logger.set_file("temp/log.txt");
+  return logger;
+}
+
+void write_to_file(const std::string& string, const std::string& filename) {
+  std::ofstream file;
+  file.open(filename);
+
+  if (file.is_open()) {
+    file << string << std::endl;
+    file.close();
+  }
+}
+
+int main() {
+  int depth = handle_depth_input();
+  int new_vertices_num = handle_new_vertices_num_input();
+  int graphs_count = handle_graphs_count_input();
 
   const uni_cpp_practice::GraphGenerator::Params params(depth,
                                                         new_vertices_num);
   const uni_cpp_practice::GraphGenerator generator(params);
 
-  std::filesystem::create_directory("temp");
-  auto& logger = uni_cpp_practice::Logger::get_instance();
-  logger.set_file("temp/log.txt");
+  auto& logger = prepare_logger();
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(logger_start_string(i + 1));
@@ -134,15 +148,8 @@ int main() {
 
     const uni_cpp_practice::GraphPrinter graph_printer(graph);
 
-    std::string filename = "temp/graph_" + std::to_string(i + 1) + ".json";
-
-    std::ofstream file;
-    file.open(filename);
-
-    if (file.is_open()) {
-      file << graph_printer.print() << std::endl;
-      file.close();
-    }
+    write_to_file(graph_printer.print(),
+                  "temp/graph_" + std::to_string(i + 1) + ".json");
   }
 
   return 0;

@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-namespace {
+namespace uni_cpp_practice {
 
-std::string color_to_string(uni_cpp_practice::Edge::Color color) {
+std::string GraphPrinter::color_to_string(uni_cpp_practice::Edge::Color color) {
   switch (color) {
     case uni_cpp_practice::Edge::Color::Grey:
       return "grey";
@@ -20,7 +20,7 @@ std::string color_to_string(uni_cpp_practice::Edge::Color color) {
   throw std::runtime_error("Nonexistent color");
 }
 
-std::string print_vertex(const uni_cpp_practice::Vertex& vertex) {
+std::string GraphPrinter::print_vertex(const uni_cpp_practice::Vertex& vertex) {
   std::string result = "";
   auto edge_ids = vertex.get_edge_ids();
   result += "{\n\"id\": " + std::to_string(vertex.id);
@@ -39,7 +39,7 @@ std::string print_vertex(const uni_cpp_practice::Vertex& vertex) {
   return result;
 }
 
-std::string print_edge(const uni_cpp_practice::Edge& edge) {
+std::string GraphPrinter::print_edge(const uni_cpp_practice::Edge& edge) {
   std::string result = "";
   result += "{\n\"id\": " + std::to_string(edge.id);
   result += ",\n\"vertex_ids\": ";
@@ -52,9 +52,7 @@ std::string print_edge(const uni_cpp_practice::Edge& edge) {
 
   return result;
 }
-}  // namespace
 
-namespace uni_cpp_practice {
 std::string GraphPrinter::print() const {
   std::string result = "{\n  \"vertices\": [\n";
   auto vertices = graph_.get_vertices();

@@ -19,8 +19,6 @@ class GraphGenerator {
 
  private:
   const Params params_ = Params();
-  bool random_bool(float true_prob) const;
-  VertexId random_vertex_id(const std::vector<VertexId>& vertex_ids) const;
 
   void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) const;
 

@@ -4,8 +4,6 @@
 #include <cassert>
 #include <iostream>
 
-namespace {}
-
 namespace uni_cpp_practice {
 
 const std::vector<EdgeId>& Vertex::get_edge_ids() const {

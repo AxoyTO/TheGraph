@@ -7,6 +7,23 @@ namespace {
 constexpr float GREEN_PROB = 0.1;
 constexpr float BLUE_PROB = 0.25;
 constexpr float RED_PROB = 0.33;
+
+bool random_bool(float true_prob) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::bernoulli_distribution d(true_prob);
+  return d(gen);
+}
+
+uni_cpp_practice::VertexId random_vertex_id(
+    const std::vector<uni_cpp_practice::VertexId>& vertex_ids) {
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> random_index(
+      0, vertex_ids.size() - 1);
+  return vertex_ids[random_index(rng)];
+}
+
 }  // namespace
 
 namespace uni_cpp_practice {
@@ -21,22 +38,6 @@ Graph GraphGenerator::generate_random_graph() const {
   generate_red_edges(graph);
 
   return graph;
-}
-
-bool GraphGenerator::random_bool(float true_prob) const {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution d(true_prob);
-  return d(gen);
-}
-
-VertexId GraphGenerator::random_vertex_id(
-    const std::vector<VertexId>& vertex_ids) const {
-  std::random_device dev;
-  std::mt19937 rng(dev());
-  std::uniform_int_distribution<std::mt19937::result_type> random_index(
-      0, vertex_ids.size() - 1);
-  return vertex_ids[random_index(rng)];
 }
 
 void GraphGenerator::generate_grey_edges(Graph& graph,
