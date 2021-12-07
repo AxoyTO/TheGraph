@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
 
