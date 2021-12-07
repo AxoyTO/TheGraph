@@ -5,6 +5,7 @@
 
 #include "graph.hpp"
 #include "graph_generator.hpp"
+#include "graph_printer.hpp"
 
 int main() {
   int depth;
@@ -37,6 +38,10 @@ int main() {
               << " is less than specified one =" << depth << std::endl;
   }
 
+  int i = 0;
+  auto graph_printer = GraphPrinter(graph);
+  write_to_file(graph_printer.print(), "graph_" + std::to_string(i) + ".json");
+  /*
   const std::string json_string = graph.get_json_string();
   std::fstream json_file;
   json_file.open("graph.json", std::ios::out);
@@ -45,5 +50,6 @@ int main() {
   }
   json_file << json_string << std::endl;
   json_file.close();
+  */
   return 0;
 }

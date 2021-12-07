@@ -29,6 +29,15 @@ const std::set<VertexId>& Graph::get_vertices_at_depth(int depth) const {
   return vertices_at_depth_.at(depth);
 }
 
+void Graph::update_vertices_depth() {
+  if (!is_depth_dirty_) {
+    return;
+  }
+  const auto& depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+  update_vertices_at_depth_map(depths);
+  is_depth_dirty_ = false;
+}
+
 bool Graph::is_vertex_exists(const VertexId& vertex_id) const {
   return vertices_.find(vertex_id) != vertices_.end();
 }
@@ -88,6 +97,67 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   }
 
   return new_edge_id;
+}
+
+int Graph::get_new_depth(const VertexId& vertex1_id,
+                         const VertexId& vertex2_id) const {
+  const auto vertex1_depth = get_vertex(vertex1_id).depth;
+  const auto vertex2_depth = get_vertex(vertex2_id).depth;
+  if (vertex1_depth == INIT_DEPTH && vertex2_depth == INIT_DEPTH) {
+    return INIT_DEPTH;
+  }
+  if (vertex1_depth == INIT_DEPTH) {
+    return vertex2_depth + 1;
+  } else if (vertex2_depth == INIT_DEPTH) {
+    return vertex1_depth + 1;
+  } else {
+    return std::min(vertex1_depth, vertex2_depth) + 1;
+  }
+}
+
+bool Graph::new_edge_color_is_correct(const VertexId& vertex1_id,
+                                      const VertexId& vertex2_id,
+                                      const EdgeColor& color) {
+  const auto vertices_at_depth_buffer = vertices_at_depth_;
+  update_vertices_depth();
+  bool is_correct;
+  switch (color) {
+    case EdgeColor::Gray:
+      is_correct = vertices_.at(vertex1_id).connected_edges().empty() ||
+                   vertices_.at(vertex2_id).connected_edges().empty();
+      break;
+    case EdgeColor::Green:
+      is_correct = vertex1_id == vertex2_id;
+      break;
+    case EdgeColor::Blue:
+      is_correct = get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
+      break;
+    case EdgeColor::Yellow:
+      is_correct = (std::abs(get_vertex(vertex1_id).depth -
+                             get_vertex(vertex2_id).depth) == 1) &&
+                   !is_connected(vertex1_id, vertex2_id);
+      break;
+    case EdgeColor::Red:
+      is_correct = std::abs(get_vertex(vertex1_id).depth -
+                            get_vertex(vertex2_id).depth) == 2;
+      break;
+  }
+  vertices_at_depth_ = vertices_at_depth_buffer;
+  return is_correct;
+}
+
+void Graph::update_vertices_at_depth_map(
+    const std::map<VertexId, int>& depths) {
+  if (updated_depth_ == INIT_DEPTH) {
+    vertices_at_depth_.clear();
+  } else {
+    vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
+                             vertices_at_depth_.end());
+  }
+  for (const auto& [vertex_id, depth] : depths) {
+    get_vertex(vertex_id).depth = depth;
+    vertices_at_depth_[depth].insert(vertex_id);
+  }
 }
 
 VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
