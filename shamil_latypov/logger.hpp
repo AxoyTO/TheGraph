@@ -8,7 +8,7 @@ namespace uni_cource_cpp {
 
 class Logger {
  public:
-  static Logger& prepare_logger() {
+  static Logger& get_logger() {
     static Logger logger;
     return logger;
   }

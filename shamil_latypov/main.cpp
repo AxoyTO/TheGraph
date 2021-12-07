@@ -1,5 +1,6 @@
 #include <array>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -31,6 +32,7 @@ std::string gen_started_string(int graph_number) {
 
 std::string gen_finished_string(int graph_number,
                                 const uni_cource_cpp::Graph& graph) {
+  const auto graph_printer = uni_cource_cpp::GraphPrinter();
   std::stringstream log_second_string;
   log_second_string << get_current_date_time() << ": Graph " << graph_number
                     << ", Generation Ended {\n";
@@ -52,7 +54,7 @@ std::string gen_finished_string(int graph_number,
       uni_cource_cpp::Edge::Color::Blue, uni_cource_cpp::Edge::Color::Yellow,
       uni_cource_cpp::Edge::Color::Red};
   for (const auto& color : colors) {
-    log_second_string << uni_cource_cpp::color_to_string(color) << ": "
+    log_second_string << graph_printer.print_edge_color(color) << ": "
                       << graph.get_edge_vector_for_color(color).size();
     if (&color != colors.end() - 1) {
       log_second_string << ", ";
@@ -103,12 +105,14 @@ void write_to_file(const std::string& graph_output,
 }
 
 int main() {
+  std::filesystem::create_directory("/temp");
+
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
 
   const auto graph_generator = uni_cource_cpp::GraphGenerator();
-  auto& logger = uni_cource_cpp::Logger::prepare_logger();
+  auto& logger = uni_cource_cpp::Logger::get_logger();
 
   logger.set_output_file_path("temp/log.txt");
 

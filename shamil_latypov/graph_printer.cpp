@@ -4,7 +4,7 @@
 
 namespace uni_cource_cpp {
 
-std::string color_to_string(const Edge::Color& color) {
+std::string GraphPrinter::print_edge_color(const Edge::Color& color) const {
   switch (color) {
     case Edge::Color::Gray:
       return "gray";
@@ -70,8 +70,8 @@ std::string GraphPrinter::print_edge(const Edge& edge) const {
   std::stringstream ss;
   ss << "{\n      \"id\": " << edge.get_id() << ",\n      \"vertex_ids\": ["
      << edge.get_vertex1_id() << ", " << edge.get_vertex2_id()
-     << "],\n      \"color\": \"" << color_to_string(edge.get_color())
-     << "\"\n    }";
+     << "],\n      \"color\": \""
+     << GraphPrinter::print_edge_color(edge.get_color()) << "\"\n    }";
   return ss.str();
 }
 
