@@ -5,13 +5,12 @@
 
 namespace uni_cpp_practice {
 void Logger::set_file(const std::optional<std::string>& filename) {
-
   if (file_stream_->is_open()) {
     file_stream_->close();
     file_stream_ = std::nullopt;
   }
 
-  if(!filename.has_value()) {
+  if (!filename.has_value()) {
     file_stream_ = std::nullopt;
     return;
   }

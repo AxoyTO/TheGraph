@@ -4,7 +4,8 @@
 
 namespace uni_cpp_practice {
 
-std::string GraphPrinter::color_to_string(const uni_cpp_practice::Edge::Color& color) {
+std::string GraphPrinter::color_to_string(
+    const uni_cpp_practice::Edge::Color& color) {
   switch (color) {
     case uni_cpp_practice::Edge::Color::Grey:
       return "grey";
