@@ -78,7 +78,6 @@ void GraphGenerator::generate_vertices_and_gray_edges(
   std::atomic<bool> should_terminate = false;
   std::atomic<int> jobs_count = 0;
   std::mutex graph_mutex;
-  // VertexDepth depth = 0;
 
   for (int i = 0; i < params_.new_vertices_num; i++) {
     jobs.emplace_back(
