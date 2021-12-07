@@ -70,8 +70,8 @@ std::string GraphPrinter::print_edge(const Edge& edge) const {
   std::stringstream ss;
   ss << "{\n      \"id\": " << edge.get_id() << ",\n      \"vertex_ids\": ["
      << edge.get_vertex1_id() << ", " << edge.get_vertex2_id()
-     << "],\n      \"color\": \""
-     << GraphPrinter::print_edge_color(edge.get_color()) << "\"\n    }";
+     << "],\n      \"color\": \"" << print_edge_color(edge.get_color())
+     << "\"\n    }";
   return ss.str();
 }
 

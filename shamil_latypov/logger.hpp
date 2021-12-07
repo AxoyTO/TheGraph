@@ -17,7 +17,7 @@ class Logger {
 
   void set_output_file_path(const std::optional<std::string>& file_path);
 
-  ~Logger();
+  ~Logger() = default;
 
  private:
   std::optional<std::ofstream> output_stream_;

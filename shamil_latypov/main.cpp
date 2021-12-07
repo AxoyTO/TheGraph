@@ -26,7 +26,7 @@ std::string get_current_date_time() {
 std::string gen_started_string(int graph_number) {
   std::stringstream log_first_string;
   log_first_string << get_current_date_time() << ": Graph " << graph_number
-                   << ", Generation Started {\n";
+                   << ", Generation Started";
   return log_first_string.str();
 }
 
@@ -105,7 +105,7 @@ void write_to_file(const std::string& graph_output,
 }
 
 int main() {
-  std::filesystem::create_directory("/temp");
+  std::filesystem::create_directory("temp/");
 
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();

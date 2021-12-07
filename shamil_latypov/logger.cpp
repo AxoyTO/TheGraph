@@ -28,6 +28,4 @@ void Logger::log(const std::string& text) {
   }
 }
 
-Logger::~Logger() {}
-
 }  // namespace uni_cource_cpp
