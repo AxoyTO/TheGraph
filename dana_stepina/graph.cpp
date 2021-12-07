@@ -96,6 +96,14 @@ void Graph::set_vertex_depth(const VertexId& from_vertex_id,
   depth_map_[get_vertex(to_vertex_id).depth].push_back(to_vertex_id);
 }
 
+int Graph::get_count_edges_with_color_num(const int color_num) const {
+  int cout_edges = 0;
+  for (const auto& edge : edges_)
+    if (static_cast<int>(edge.color) == color_num)
+      cout_edges++;
+  return cout_edges;
+}
+
 bool Graph::has_vertex_id(const VertexId& id) const {
   for (const auto& vertex : vertices_)
     if (id == vertex.id)
