@@ -63,11 +63,13 @@ class Graph {
 
   Vertex& get_vertex(const VertexId& id);
 
-  void fill_vertices_ids_in_depth(const int depth, VertexId id);
+  void update_vertex_depth(const VertexId& id, const int depth);
 
   std::vector<VertexId> get_vertices_ids_in_depth(int depth);
 
-  std::vector<EdgeId> get_edge_ids(const VertexId& id);
+  const std::vector<VertexId>& get_vertices_ids_in_depth(int depth) const;
+
+  const std::vector<EdgeId>& get_edge_ids(const VertexId& id);
 
   const int get_depth() const { return vertices_ids_in_depth_.size(); }
 

@@ -38,27 +38,42 @@ void Vertex::add_edge_id(const EdgeId& id) {
   edge_ids_.push_back(id);
 }
 
-void Graph::fill_vertices_ids_in_depth(int depth, VertexId id) {
-  if (depth >= vertices_ids_in_depth_.size())
-    vertices_ids_in_depth_.resize(depth + 1);
+const std::vector<VertexId>& Graph::get_vertices_ids_in_depth(int depth) const {
+  assert((depth < get_depth()) && "Invalid depth");
+  return vertices_ids_in_depth_[depth];
+}
+
+std::vector<VertexId> Graph::get_vertices_ids_in_depth(int depth) {
+  const auto& const_self = *this;
+  return const_cast<std::vector<VertexId>&>(
+      const_self.get_vertices_ids_in_depth(depth));
+}
+
+void Graph::update_vertex_depth(const VertexId& id, int depth) {
+  assert(depth <= get_depth() && "Invalid depth");
+  if (depth == get_depth())
+    vertices_ids_in_depth_.emplace_back();
   vertices_ids_in_depth_[depth].push_back(id);
-  if (id != 0) {
-    for (auto vertex_id_ind = vertices_ids_in_depth_[0].begin();
-         vertex_id_ind < vertices_ids_in_depth_[0].end(); vertex_id_ind++) {
-      if (*vertex_id_ind == id)
-        vertices_ids_in_depth_[0].erase(vertex_id_ind);
-    }
+  auto& vertex = get_vertex(id);
+  vertex.depth = depth;
+
+  for (auto vertex_id_ind = vertices_ids_in_depth_[0].begin() + 1;
+       vertex_id_ind < vertices_ids_in_depth_[0].end(); vertex_id_ind++) {
+    if (*vertex_id_ind == id)
+      vertices_ids_in_depth_[0].erase(vertex_id_ind);
   }
 }
 
 VertexId Graph::add_vertex() {
   auto new_vertex_id = get_new_vertex_id();
   vertices_.emplace_back(new_vertex_id);
-  fill_vertices_ids_in_depth(0, new_vertex_id);
+  if (vertices_ids_in_depth_.size() == 0)
+    vertices_ids_in_depth_.emplace_back();
+  vertices_ids_in_depth_[0].push_back(new_vertex_id);
   return new_vertex_id;
 }
 
-std::vector<EdgeId> Graph::get_edge_ids(const VertexId& id) {
+const std::vector<EdgeId>& Graph::get_edge_ids(const VertexId& id) {
   const auto& vertex = get_vertex(id);
   return vertex.get_edge_ids();
 }
@@ -83,20 +98,24 @@ void Graph::add_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) {
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
-  assert(!is_connected(from_vertex_id, to_vertex_id) &&
-         "Vertices are already connected");
   auto& from_vertex = get_vertex(from_vertex_id);
   auto& to_vertex = get_vertex(to_vertex_id);
-  auto edge_color = define_edge_color(from_vertex_id, to_vertex_id);
+  const auto edge_color = define_edge_color(from_vertex_id, to_vertex_id);
+  if (edge_color == Edge::Color::Green)
+    assert(is_connected(from_vertex_id, to_vertex_id) &&
+           "Vertices are not connected");
+  else
+    assert(!is_connected(from_vertex_id, to_vertex_id) &&
+           "Vertices are already connected");
   const auto& new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id,
                                              to_vertex_id, edge_color);
   from_vertex.add_edge_id(new_edge.id);
   if (edge_color != Edge::Color::Green)
     to_vertex.add_edge_id(new_edge.id);
-
-  if (edge_color == Edge::Color::Gray)
-    to_vertex.depth = from_vertex.depth + 1;
-  fill_vertices_ids_in_depth(to_vertex.depth, to_vertex.id);
+  if (edge_color == Edge::Color::Gray) {
+    const int new_depth = from_vertex.depth + 1;
+    update_vertex_depth(to_vertex.id, new_depth);
+  }
 }
 
 bool Graph::is_connected(const VertexId& from_vertex_id,
@@ -104,7 +123,7 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
   if (from_vertex_id == to_vertex_id)
-    return false;
+    return true;
   const auto& from_vertex = get_vertex(from_vertex_id);
   const auto& to_vertex = get_vertex(to_vertex_id);
   const auto& from_vertex_edges = from_vertex.get_edge_ids();
@@ -127,11 +146,6 @@ const Vertex& Graph::get_vertex(const VertexId& id) const {
 Vertex& Graph::get_vertex(const VertexId& id) {
   const auto& const_self = *this;
   return const_cast<Vertex&>(const_self.get_vertex(id));
-}
-
-std::vector<VertexId> Graph::get_vertices_ids_in_depth(int depth) {
-  assert((depth < get_depth()) && "Invalid depth");
-  return vertices_ids_in_depth_[depth];
 }
 
 std::string Graph::json_string() const {
@@ -182,14 +196,15 @@ std::string Vertex::json_string() const {
   return result_string;
 }
 
-bool should_be_created_new_elem(float probability) {
+bool should_create_new_element(float probability) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::bernoulli_distribution d(probability);
   return d(gen);
 }
 
-VertexId get_random_vertex_id(const std::vector<VertexId>& vertices_ids) {
+const VertexId& get_random_vertex_id(
+    const std::vector<VertexId>& vertices_ids) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<int> d(0, vertices_ids.size() - 1);
@@ -216,7 +231,7 @@ void generate_gray_edges(Graph& graph, int max_depth, int new_vertices_num) {
     for (const auto vertex_id_in_current_depth :
          graph.get_vertices_ids_in_depth(depth)) {
       for (int i = 0; i < new_vertices_num; i++)
-        if (should_be_created_new_elem(prob_of_creating_new_vertex)) {
+        if (should_create_new_element(prob_of_creating_new_vertex)) {
           was_new_vertex_created = true;
           const auto& vertex_id_in_new_depth = graph.add_vertex();
           graph.add_edge(vertex_id_in_current_depth, vertex_id_in_new_depth);
@@ -232,12 +247,12 @@ void generate_green_edges(Graph& graph) {
   for (int depth = 0; depth < graph.get_depth(); depth++)
     for (const auto& vertex_id_in_current_depth :
          graph.get_vertices_ids_in_depth(depth))
-      if (should_be_created_new_elem(GREEN_EDGE_PROB))
+      if (should_create_new_element(GREEN_EDGE_PROB))
         graph.add_edge(vertex_id_in_current_depth, vertex_id_in_current_depth);
 }
 
 void generate_yellow_edges(Graph& graph) {
-  for (int depth = 1; depth < graph.get_depth() - 1; depth++) {
+  for (int depth = 0; depth < graph.get_depth() - 1; depth++) {
     const float prob_of_creating_new_edge =
         (float)depth / (float)(graph.get_depth() - 1);
     const auto& vertices_ids_in_current_depth =
@@ -246,12 +261,12 @@ void generate_yellow_edges(Graph& graph) {
         graph.get_vertices_ids_in_depth(depth + 1);
     for (const auto& vertex_id_in_current_depth :
          vertices_ids_in_current_depth) {
-      if (should_be_created_new_elem(prob_of_creating_new_edge)) {
+      if (should_create_new_element(prob_of_creating_new_edge)) {
         auto unconnected_vertices = get_unconnected_vertices(
             vertex_id_in_current_depth, vertices_ids_in_prev_depth, graph);
         if (unconnected_vertices.size() == 0)
           continue;
-        auto random_vertex_id_in_prev_depth =
+        const auto& random_vertex_id_in_prev_depth =
             get_random_vertex_id(unconnected_vertices);
         graph.add_edge(vertex_id_in_current_depth,
                        random_vertex_id_in_prev_depth);
@@ -267,7 +282,7 @@ void generate_red_edges(Graph& graph) {
     const auto& vertices_ids_in_next_depth =
         graph.get_vertices_ids_in_depth(depth + 2);
     for (const auto& vertex_id_in_current_depth : vertices_ids_in_current_depth)
-      if (should_be_created_new_elem(RED_EDGE_PROB))
+      if (should_create_new_element(RED_EDGE_PROB))
         graph.add_edge(vertex_id_in_current_depth,
                        get_random_vertex_id(vertices_ids_in_next_depth));
   }
