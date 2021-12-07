@@ -27,7 +27,8 @@ class GraphGenerator {
                             std::mutex& graph_mutex,
                             const VertexId& parent_vertex_id,
                             int current_depth) const;
-  void generate_new_vertices(Graph& graph) const;
+  void generate_new_vertices(Graph& graph,
+                             const VertexId& parent_vertex_id) const;
 };
 
 }  // namespace uni_cpp_practice

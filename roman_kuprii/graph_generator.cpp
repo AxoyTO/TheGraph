@@ -184,15 +184,18 @@ void GraphGenerator::generate_gray_branch(Graph& work_graph,
   }
 }
 
-void GraphGenerator::generate_new_vertices(Graph& graph) const {
+void GraphGenerator::generate_new_vertices(
+    Graph& graph,
+    const VertexId& parent_vertex_id) const {
   std::list<std::function<void()>> jobs;
   std::atomic<int> completed_jobs = 0;
   std::mutex graph_mutex;
   for (int i = 0; i < params_.new_vertices_num; i++)
-    jobs.emplace_back([this, &graph, &completed_jobs, &graph_mutex]() {
-      generate_gray_branch(graph, graph_mutex, 0, 1);
-      completed_jobs++;
-    });
+    jobs.emplace_back(
+        [this, &graph, &completed_jobs, &graph_mutex, parent_vertex_id]() {
+          generate_gray_branch(graph, graph_mutex, parent_vertex_id, 1);
+          completed_jobs++;
+        });
 
   std::atomic<bool> should_terminate = false;
   std::mutex jobs_mutex;
@@ -224,7 +227,7 @@ void GraphGenerator::generate_new_vertices(Graph& graph) const {
   threads.reserve(threads_number);
 
   for (int i = 0; i < threads_number; ++i) {
-    threads.emplace_back(std::thread(worker));
+    threads.emplace_back(worker);
   }
 
   while (completed_jobs != params_.new_vertices_num) {
@@ -238,8 +241,8 @@ void GraphGenerator::generate_new_vertices(Graph& graph) const {
 
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
-  graph.add_vertex();
-  generate_new_vertices(graph);
+  const auto parent_vertex_id = graph.add_vertex();
+  generate_new_vertices(graph, parent_vertex_id);
   paint_edges(graph);
   return graph;
 }
