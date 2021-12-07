@@ -2,6 +2,7 @@
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
+#include <sstream>
 
 #include <chrono>
 #include <fstream>
@@ -35,6 +36,12 @@ Logger& prepare_logger() {
   logger.set_file(filename_folder_path + filename_log);
   return logger;
 }
+
+std::string generation_started_string(int graph_num) {
+  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) + ", Generation Started\n";
+}
+
+std::string generation_finished_string(int graph_num) { }
 
 int handle_depth_input() {
   int entered_depth = -1;
@@ -98,7 +105,7 @@ int main() {
 
   const auto params = Params(depth, new_vertices_num);
   const auto generator = GraphGenerator(params);
-  // auto& logger = prepare_logger();
+  auto& logger = prepare_logger();
 
   for (int i = 0; i < graphs_count; i++) {
     // logger.log(gen_started_string(i));
