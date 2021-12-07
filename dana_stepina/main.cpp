@@ -37,11 +37,11 @@ Logger& prepare_logger() {
   return logger;
 }
 
-std::string generation_started_string(int graph_num) {
-  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) + ", Generation Started\n";
-}
+// std::string generation_started_string(int graph_num) {
+//   return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) + ", Generation Started\n";
+// }
 
-std::string generation_finished_string(int graph_num) { }
+// std::string generation_finished_string(int graph_num) { }
 
 int handle_depth_input() {
   int entered_depth = -1;
