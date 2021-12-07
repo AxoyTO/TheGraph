@@ -291,10 +291,12 @@ void generate_yellow_edges(Graph& graph) {
   for (auto vertex_ids_at_depth = graph.depth_map().begin();
        vertex_ids_at_depth != graph.depth_map().end() - 1;
        ++vertex_ids_at_depth) {
-    int proba_yellow =
-        PROBA_YELLOW_BEGIN +
-        100 / graph.depth() *
-            graph.get_vertex((*vertex_ids_at_depth).front()).depth;
+    const int depth = graph.get_vertex((*vertex_ids_at_depth).front()).depth;
+    const int proba_yellow = [&depth, &graph]() {
+      if (depth == graph.depth() - 2)
+        return 100;
+      return 100 / (graph.depth() - 2) * depth;
+    }();
     for (auto vertex_id = (*vertex_ids_at_depth).begin();
          vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_yellow)) {
