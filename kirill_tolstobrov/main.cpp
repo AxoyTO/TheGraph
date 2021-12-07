@@ -129,9 +129,9 @@ void write_to_file(const std::string& string, const std::string& filename) {
 }
 
 int main() {
-  int depth = handle_depth_input();
-  int new_vertices_num = handle_new_vertices_num_input();
-  int graphs_count = handle_graphs_count_input();
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const int graphs_count = handle_graphs_count_input();
 
   const uni_cpp_practice::GraphGenerator::Params params(depth,
                                                         new_vertices_num);
