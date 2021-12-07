@@ -2,13 +2,13 @@
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
-#include <sstream>
 
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerator;
