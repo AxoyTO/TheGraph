@@ -39,8 +39,8 @@ std::vector<VertexId> filter_connected_vertices(
     std::mutex& mutex) {
   std::vector<VertexId> result;
   for (const auto& vertex_id : vertex_ids) {
+    const std::lock_guard lock(mutex);
     if (!graph.are_vertices_connected(id, vertex_id)) {
-      const std::lock_guard lock(mutex);
       result.push_back(vertex_id);
     }
   }
@@ -78,12 +78,12 @@ void GraphGenerator::generate_vertices_and_gray_edges(
   std::atomic<bool> should_terminate = false;
   std::atomic<int> jobs_count = 0;
   std::mutex graph_mutex;
-  VertexDepth depth = 0;
+  // VertexDepth depth = 0;
 
   for (int i = 0; i < params_.new_vertices_num; i++) {
     jobs.emplace_back(
-        [this, &graph, &graph_mutex, &jobs_count, &source_vertex_id, depth]() {
-          generate_gray_branch(graph, graph_mutex, source_vertex_id, depth + 1);
+        [this, &graph, &graph_mutex, &jobs_count, &source_vertex_id]() {
+          generate_gray_branch(graph, graph_mutex, source_vertex_id, 1);
           ++jobs_count;
         });
   }
