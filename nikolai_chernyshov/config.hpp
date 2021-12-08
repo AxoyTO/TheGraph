@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <sstream>
 
 namespace config {
 constexpr const char* k_temp_directory_path = "./temp/";
