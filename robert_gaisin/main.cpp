@@ -16,7 +16,6 @@ constexpr int PROBA_GRAY_BEGIN = 100;
 constexpr int PROBA_RED = 33;
 constexpr int PROBA_GREEN = 10;
 constexpr int PROBA_BLUE = 25;
-constexpr int PROBA_YELLOW_BEGIN = 0;
 
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
 
@@ -111,7 +110,7 @@ class Graph {
                 const VertexId& end,
                 const EdgeColor& color);
 
-  int depth() const { return depth_map_.size(); }
+  int depth() const { return depth_map_.size() - 1; }
 
   const vector<Vertex>& vertices() const { return vertices_; }
   const vector<Edge>& edges() const { return edges_; }
@@ -218,7 +217,7 @@ std::ostream& operator<<(std::ostream& out, const vector<Edge>& edges) {
 
 std::ostream& operator<<(std::ostream& out, const Graph& graph) {
   out << "{" << endl;
-  out << "  \"depth\": " << graph.depth() << "," << endl;
+  out << "  \"depth\": " << graph.depth() + 1 << "," << endl;
   out << "  \"vertices\": [" << endl
       << "   " << graph.vertices() << endl
       << "  ]," << endl;
@@ -237,7 +236,7 @@ void generate_gray_edges(int graph_depth,  //наибольшая возможн
                          int new_vertices_num,
                          Graph& graph) {
   for (int depth = 0; depth < graph_depth - 1; ++depth) {
-    if (depth >= graph.depth()) {
+    if (depth >= graph.depth() + 1) {
       break;
     }
     int proba_gray = PROBA_GRAY_BEGIN - depth * PROBA_GRAY_BEGIN / graph_depth;
@@ -288,16 +287,13 @@ VertexId get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
   return set_of_vertices_id[mersenne() % set_of_vertices_id.size()];
 }
 void generate_yellow_edges(Graph& graph) {
-  if (graph.depth() > 2) {
+  if (graph.depth() > 1) {
     for (auto vertex_ids_at_depth = graph.depth_map().begin();
          vertex_ids_at_depth != graph.depth_map().end() - 1;
          ++vertex_ids_at_depth) {
       const int depth = graph.get_vertex((*vertex_ids_at_depth).front()).depth;
-      const int proba_yellow = [&depth, &graph]() {
-        if (depth == graph.depth() - 2)
-          return 100;
-        return 100 / (graph.depth() - 2) * depth;
-      }();
+      const int proba_yellow =
+          ((float)depth / (float)(graph.depth() - 1)) * 100;
       for (auto vertex_id = (*vertex_ids_at_depth).begin();
            vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
         if (to_be_or_not_to_be(proba_yellow)) {
