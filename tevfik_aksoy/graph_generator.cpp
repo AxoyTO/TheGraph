@@ -31,6 +31,24 @@ VertexId get_random_vertex_id(const std::vector<VertexId>& vertices) {
       0, vertices.size() - 1);
   return vertices[random_vertex_distribution(mt)];
 }
+
+std::vector<VertexId> filter_connected_vertices(
+    const VertexId& vertex_id,
+    const std::vector<VertexId>& next_vertices,
+    const Graph& graph,
+    std::mutex& mutex) {
+  std::vector<VertexId> result;
+  for (const auto& next_vertex_id : next_vertices) {
+    const auto results = [&graph, &mutex, vertex_id, next_vertices,
+                          &next_vertex_id, &result]() {
+      const std::lock_guard lock(mutex);
+      if (!graph.are_vertices_connected(vertex_id, next_vertex_id))
+        result.push_back(next_vertex_id);
+    };
+    results();
+  }
+  return result;
+}
 }  // namespace
 
 namespace uni_cpp_practice {
@@ -135,28 +153,6 @@ void generate_blue_edges(Graph& graph, std::mutex& mutex) {
     }
   }
 }
-/*
-void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
-  for (VertexDepth depth = 0; depth < graph.depth(); depth++) {
-    float probability = 1 - (float)depth * (1 / (float)(graph.depth() - 1));
-    const auto& vertices = graph.get_vertices_in_depth(depth);
-    const auto& vertices_next = graph.get_vertices_in_depth(depth + 1);
-    if (get_random_probability() > probability) {
-      std::vector<VertexId> not_binded_vertices;
-      for (const auto& vertex_id : vertices) {
-        const auto& filtered_vertex_ids =
-            filter_connected_vertices(vertex_id, vertices_next, graph, mutex);
-        if (filtered_vertex_ids.empty()) {
-          continue;
-        }
-        VertexId random_vertex_id = get_random_vertex_id(filtered_vertex_ids);
-        const std::lock_guard lock(mutex);
-        graph.insert_edge(vertex_id, random_vertex_id);
-      }
-    }
-  }
-}
-*/
 
 void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
   for (VertexDepth depth = 1; depth < graph.depth(); depth++) {
@@ -166,17 +162,9 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
     for (const auto& vertex_id : vertices) {
       if (get_random_probability() > probability) {
         std::vector<VertexId> filtered_vertex_ids;
-        for (const auto& next_vertex_id : vertices_next) {
-          const auto is_connected = [&graph, &mutex, &vertex_id,
-                                     &next_vertex_id]() {
-            const std::lock_guard lock(mutex);
-            return graph.are_vertices_connected(vertex_id, next_vertex_id);
-          }();
-          if (!is_connected) {
-            filtered_vertex_ids.push_back(next_vertex_id);
-          }
-        }
-        if (filtered_vertex_ids.size()) {
+        filtered_vertex_ids =
+            filter_connected_vertices(vertex_id, vertices_next, graph, mutex);
+        if (!filtered_vertex_ids.empty()) {
           VertexId random_vertex_id = get_random_vertex_id(filtered_vertex_ids);
           const std::lock_guard lock(mutex);
           graph.insert_edge(vertex_id, random_vertex_id);
