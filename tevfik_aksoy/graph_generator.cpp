@@ -37,17 +37,18 @@ std::vector<VertexId> filter_connected_vertices(
     const std::vector<VertexId>& next_vertices,
     const Graph& graph,
     std::mutex& mutex) {
-  std::vector<VertexId> result;
+  std::vector<VertexId> filtered_vertices;
   for (const auto& next_vertex_id : next_vertices) {
-    const auto results = [&graph, &mutex, vertex_id, next_vertices,
-                          &next_vertex_id, &result]() {
+    const auto is_connected = [&graph, &mutex, vertex_id, next_vertices,
+                               &next_vertex_id, &filtered_vertices]() {
       const std::lock_guard lock(mutex);
-      if (!graph.are_vertices_connected(vertex_id, next_vertex_id))
-        result.push_back(next_vertex_id);
-    };
-    results();
+      return graph.are_vertices_connected(vertex_id, next_vertex_id);
+    }();
+    if (!is_connected) {
+      filtered_vertices.push_back(next_vertex_id);
+    }
   }
-  return result;
+  return filtered_vertices;
 }
 }  // namespace
 
