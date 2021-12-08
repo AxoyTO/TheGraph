@@ -101,7 +101,6 @@ class Graph {
         std::random_device seed;
         std::default_random_engine generator(seed());
         std::uniform_int_distribution<> idDistribution(0, vertexIds.size() - 1);
-        cout << idDistribution(generator) << " " << vertexIds.size() << "\n";
         randomNextVertexId = vertexIds[idDistribution(generator)];
       } while (isConnected(vertexId, randomNextVertexId));
       return randomNextVertexId;
