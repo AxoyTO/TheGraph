@@ -1,4 +1,6 @@
+#include <cassert>
 #include "graph.hpp"
+#include <random>
 
 Graph& Graph::operator=(Graph&& other_graph) {
   other_graph.update_vertices_depth();
@@ -25,14 +27,15 @@ const std::set<VertexId>& Graph::get_vertices_at_depth(int depth) {
 }
 
 std::set<VertexId> Graph::get_vertices_at_depth(int depth) const {
-  const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
-    std::set<VertexId> ans;
-    for (const auto& [vertex_id, vertex_depth] : updated_depths) {
-      if (vertex_depth == depth) {
-        ans.insert(vertex_id);
-      }
+  const auto updated_depths =
+      GraphTraverser::dynamic_bfs(*this, updated_depth_);
+  std::set<VertexId> ans;
+  for (const auto& [vertex_id, vertex_depth] : updated_depths) {
+    if (vertex_depth == depth) {
+      ans.insert(vertex_id);
     }
-    return ans;
+  }
+  return ans;
 }
 
 void Graph::update_vertices_depth() {

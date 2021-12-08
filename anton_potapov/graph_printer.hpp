@@ -7,7 +7,6 @@ class GraphPrinter {
   explicit GraphPrinter(const Graph& input_graph) : graph(input_graph) {}
 
   std::string print() const {
-    // doesn't work need to update vertices depth
     std::stringstream json_stringstream;
     json_stringstream << "{\"depth\":" << graph.max_depth() << ",";
     json_stringstream << "\"vertices\":[";

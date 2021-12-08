@@ -88,7 +88,8 @@ class Graph {
 
   Vertex get_vertex(const VertexId& id) const {
     Vertex vertex_copy = vertices_.at(id);
-    vertex_copy.depth = GraphTraverser::dynamic_bfs(*this, updated_depth_).at(vertex_copy.id);
+    vertex_copy.depth =
+        GraphTraverser::dynamic_bfs(*this, updated_depth_).at(vertex_copy.id);
     return vertex_copy;
   }
 
@@ -110,7 +111,8 @@ class Graph {
   }
 
   int max_depth() const {
-    const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+    const auto updated_depths =
+        GraphTraverser::dynamic_bfs(*this, updated_depth_);
     int ans = 0;
     for (const auto& [vertex_id, vertex_depth] : updated_depths) {
       if (vertex_depth > ans) {
@@ -122,7 +124,8 @@ class Graph {
 
   std::map<VertexId, Vertex> vertices() const {
     auto vertices_updated_copy = vertices_;
-    const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+    const auto updated_depths =
+        GraphTraverser::dynamic_bfs(*this, updated_depth_);
     for (auto& [vertex_id, vertex] : vertices_updated_copy) {
       vertex.depth = updated_depths.at(vertex_id);
     }
