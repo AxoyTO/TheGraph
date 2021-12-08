@@ -12,57 +12,101 @@ using std::string;
 using std::vector;
 using VertexId = int;
 using EdgeId = int;
+constexpr float RED_GENERATION_PROBABILITY = 0.33;
+constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
 
 class Graph {
  public:
   struct Edge {
+    enum class Color { Gray, Green, Yellow, Red };
     EdgeId const id;
     VertexId const fromVertexId;
     VertexId const toVertexId;
-    string const color;
-    Edge(EdgeId _id,
-         VertexId _fromVertexId,
-         VertexId _toVertexId,
-         string _color)
+    Color const color;
+    Edge(EdgeId _id, VertexId _fromVertexId, VertexId _toVertexId, Color _color)
         : id(_id),
           fromVertexId(_fromVertexId),
           toVertexId(_toVertexId),
           color(_color) {}
+    string getEdgeColor() const {
+      switch (color) {
+        case Color::Green:
+          return "green";
+          break;
+        case Color::Yellow:
+          return "yellow";
+          break;
+        case Color::Red:
+          return "red";
+          break;
+        default:
+          return "gray";
+          break;
+      }
+    }
   };
   struct Vertex {
     VertexId const id;
     int depth;
-    explicit Vertex(VertexId _id, int _depth) : id(_id), depth(_depth) {}
+    explicit Vertex(VertexId _id) : id(_id), depth(0) {}
   };
-  vector<EdgeId> const& getConnectionsVector(VertexId vertexId) const {
+  vector<EdgeId> const& getconnections(VertexId vertexId) const {
     return edgeConectionMap_.at(vertexId);
   }
   vector<EdgeId> const& getVertexIdByDepth(int depth) const {
-    return vertexIdByDepth_.at(depth);
+    return vertexIdByDepth_[depth];
   }
   vector<Vertex> const& getVertexes() const { return vertexes_; }
   vector<Edge> const& getEdges() const { return edges_; }
 
-  void addEdge(VertexId fromVertexId, VertexId toVertexId, string color) {
+  void addEdge(VertexId fromVertexId, VertexId toVertexId, Edge::Color color) {
     EdgeId const newEdgeId = getNewEdgeId();
     edgeConectionMap_[fromVertexId].push_back(newEdgeId);
     edgeConectionMap_[toVertexId].push_back(newEdgeId);
+    if (color == Edge::Color::Gray) {
+      vertexIdByDepth_[0].pop_back();
+      vertexIdByDepth_[vertexes_[fromVertexId].depth + 1].emplace_back(
+          toVertexId);
+      vertexes_[toVertexId].depth = vertexes_[fromVertexId].depth + 1;
+    }
     edges_.emplace_back(newEdgeId, fromVertexId, toVertexId, color);
   }
   VertexId addVertex() {
     VertexId const newVertexId = getNewVertexId();
-    vertexes_.emplace_back(newVertexId, 0);
-    vertexIdByDepth_[0].emplace_back(0);
+    auto const& new_vertex = vertexes_.emplace_back(newVertexId);
+    vertexIdByDepth_[0].emplace_back(new_vertex.id);
     edgeConectionMap_[newVertexId] = {};
     return newVertexId;
   }
   VertexId spawnVertex(VertexId parentId) {
     VertexId const newVertexId = addVertex();
-    vertexIdByDepth_[0].pop_back();
-    vertexIdByDepth_[vertexes_[parentId].depth + 1].emplace_back(newVertexId);
-    vertexes_[newVertexId].depth = vertexes_[parentId].depth + 1;
-    addEdge(parentId, newVertexId, "gray");
+    addEdge(parentId, newVertexId, Edge::Color::Gray);
     return newVertexId;
+  }
+  void setVertexIdByDepthSize(int size) { vertexIdByDepth_.resize(size); }
+  bool isConnected(VertexId fromVertexId, VertexId toVertexId) const {
+    bool isDesceptant = 0;
+    auto const& connections = getconnections(fromVertexId);
+    for (int i = 0; i < (int)connections.size(); i++)
+      isDesceptant = isDesceptant ||
+                     (getEdges()[connections[i]].toVertexId == toVertexId) ||
+                     (getEdges()[connections[i]].fromVertexId == toVertexId);
+    return isDesceptant;
+  }
+  VertexId getUnconnectedVertexId(VertexId vertexId,
+                                  const std::vector<VertexId>& vertexIds) {
+    if (vertexIds.size() - 1) {
+      VertexId randomNextVertexId;
+      do {
+        std::random_device seed;
+        std::default_random_engine generator(seed());
+        std::uniform_int_distribution<> idDistribution(0, vertexIds.size() - 1);
+        cout << idDistribution(generator) << " " << vertexIds.size() << "\n";
+        randomNextVertexId = vertexIds[idDistribution(generator)];
+      } while (isConnected(vertexId, randomNextVertexId));
+      return randomNextVertexId;
+    } else
+      return 0;
   }
 
  private:
@@ -73,7 +117,7 @@ class Graph {
   EdgeId edgeIdCounter_ = 0;
   VertexId getNewVertexId() { return vertexIdCounter_++; }
   EdgeId getNewEdgeId() { return edgeIdCounter_++; }
-  map<int, vector<VertexId>> vertexIdByDepth_;
+  vector<vector<VertexId>> vertexIdByDepth_;
 };
 class GraphPrinter {
  public:
@@ -81,10 +125,10 @@ class GraphPrinter {
   string print_vertex(Graph::Vertex const& vertex) const {
     std::stringstream vertexOutput;
     vertexOutput << "\t{ \"id\": " << vertex.id << ", \"edge_ids\":[";
-    auto const& connectionsVector = graph_.getConnectionsVector(vertex.id);
-    for (int i = 0; i < (int)connectionsVector.size(); i++) {
-      vertexOutput << connectionsVector[i];
-      if (i != ((int)(connectionsVector.size() - 1)))
+    auto const& connections = graph_.getconnections(vertex.id);
+    for (int i = 0; i < (int)connections.size(); i++) {
+      vertexOutput << connections[i];
+      if (i != ((int)(connections.size() - 1)))
         vertexOutput << ", ";
     }
     vertexOutput << "]"
@@ -96,7 +140,7 @@ class GraphPrinter {
     std::stringstream edgeOutput;
     edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
                << edge.fromVertexId << ", " << edge.toVertexId
-               << "],\"color\":\"" << edge.color << "\"}";
+               << "],\"color\":\"" << edge.getEdgeColor() << "\"}";
     return edgeOutput.str();
   }
 
@@ -139,6 +183,7 @@ class GraphGenerator {
 
   Graph generate() const {
     auto graph = Graph();
+    graph.setVertexIdByDepthSize(params_.depth);
     graph.addVertex();
     generate_gray_edges(graph);
     generate_green_edges(graph);
@@ -146,87 +191,78 @@ class GraphGenerator {
     generate_red_edges(graph);
     return graph;
   }
-  void generate_gray_edges(Graph& graph) const {
-    float generationProb = 0;
-    float const step = 100.0 / (params_.depth - 1);
+
+ private:
+  bool probability(float p) const {
     std::random_device seed{};
     std::default_random_engine generator(seed());
-    std::bernoulli_distribution grayGenerationDistribution;
+    std::bernoulli_distribution generationDistribution(p);
+    return generationDistribution(generator);
+  }
+
+  void generate_gray_edges(Graph& graph) const {
+    float generationProb = 0;
+    bool generated = 0;
+    float const step = 100.0 / (params_.depth - 1);
     for (int currentDepth = 0; currentDepth < params_.depth; currentDepth++) {
+      generated = 0;
       generationProb = ((100.0 - (step * (currentDepth))) / 100);
-      grayGenerationDistribution = std::bernoulli_distribution(generationProb);
       for (auto parrentId : graph.getVertexIdByDepth(currentDepth)) {
         for (int j = 0; j < params_.new_vertices_num; j++) {
-          if (grayGenerationDistribution(generator))
+          if (probability(generationProb)) {
             graph.spawnVertex(parrentId);
+            generated = 1;
+          }
+          if (!generated)
+            break;
         }
       }
     }
   }
   void generate_green_edges(Graph& graph) const {
-    std::random_device seed{};
-    std::default_random_engine generator(seed());
-    std::bernoulli_distribution greenGenerationDistribution(0.1);
     for (auto vertex : graph.getVertexes()) {
-      if (greenGenerationDistribution(generator))
-        graph.addEdge(vertex.id, vertex.id, "green");
+      if (probability(GREEN_GENERATION_PROBABILITY))
+        graph.addEdge(vertex.id, vertex.id, Graph::Edge::Color::Green);
     }
   }
   void generate_yellow_edges(Graph& graph) const {
-    bool isDesceptant = 0;
     float const step = 100.0 / (params_.depth - 1);
-    std::random_device seed{};
-    std::default_random_engine generator(seed());
-    std::bernoulli_distribution yellowGenerationDistribution;
     for (auto vertex : graph.getVertexes()) {
-      yellowGenerationDistribution = std::bernoulli_distribution(
-          (100.0 - (100.0 - (step * (vertex.depth)))) / 100);
-      if (yellowGenerationDistribution(generator) &&
+      if (probability(((100.0 - (100.0 - (step * (vertex.depth)))) / 100)) &&
           vertex.depth < params_.depth - 1) {
-        isDesceptant = 0;
-        auto randomPreviousVertexId = graph.getVertexIdByDepth(
-            vertex.depth +
-            1)[rand() % graph.getVertexIdByDepth(vertex.depth + 1).size()];
-        auto const& connectionsVector = graph.getConnectionsVector(vertex.id);
-        for (int i = 0; i < (int)connectionsVector.size(); i++)
-          isDesceptant = isDesceptant ||
-                         (graph.getEdges()[connectionsVector[i]].toVertexId ==
-                          randomPreviousVertexId) ||
-                         (graph.getEdges()[connectionsVector[i]].fromVertexId ==
-                          randomPreviousVertexId);
-
-        if (!isDesceptant)
-          graph.addEdge(vertex.id, randomPreviousVertexId, "yellow");
+        auto randomNextVertexId = graph.getUnconnectedVertexId(
+            vertex.id, graph.getVertexIdByDepth(vertex.depth + 1));
+        if (randomNextVertexId)
+          graph.addEdge(vertex.id, randomNextVertexId,
+                        Graph::Edge::Color::Yellow);
       }
     }
   }
   void generate_red_edges(Graph& graph) const {
-    std::random_device seed{};
-    std::default_random_engine generator(seed());
-    std::bernoulli_distribution redGenerationDistribution(0.33);
     for (auto vertex : graph.getVertexes()) {
-      if (redGenerationDistribution(generator) &&
-          vertex.depth < params_.depth - 2) {
-        auto randomPreviousVertexId = graph.getVertexIdByDepth(
-            vertex.depth +
-            2)[rand() % graph.getVertexIdByDepth(vertex.depth + 1).size()];
-        graph.addEdge(vertex.id, randomPreviousVertexId, "red");
+      if (vertex.depth < params_.depth - 2 &&
+          probability(RED_GENERATION_PROBABILITY)) {
+        auto randomNextVertexId = graph.getUnconnectedVertexId(
+            vertex.id, graph.getVertexIdByDepth(vertex.depth + 2));
+        if (randomNextVertexId)
+          graph.addEdge(vertex.id, randomNextVertexId, Graph::Edge::Color::Red);
       }
     }
   }
 
  private:
-  const Params params_ = Params();
+  Params const params_ = Params();
 };
 
-int const intInput() {
+int intInput(string inputMessage) {
   int input = -1;
+  cout << inputMessage;
   std::cin >> input;
   while ((std::cin.fail() || input < 0)) {
-    std::cout << "error"
-              << "\n";
+    std::cout << ((input < 0) ? "Error: <0" : "Error: !=int") << "\n";
     std::cin.clear();
     std::cin.ignore(256, '\n');
+    cout << inputMessage;
     std::cin >> input;
   }
   return input;
@@ -236,16 +272,14 @@ void write_to_file(string const& output, string const& filename) {
   fileToWrite << output;
 }
 int main() {
-  const int depth = intInput();
-  const int new_vertices_num = intInput();
-  const auto params = GraphGenerator::Params(depth, new_vertices_num);
-  const auto generator = GraphGenerator(params);
-  const auto graph = generator.generate();
-  const auto graph_printer = GraphPrinter(graph);
-  const auto graph_json = graph_printer.print();
-
+  int const depth = intInput("Input depth: ");
+  int const new_vertices_num = intInput("Input new_vertex_num: ");
+  auto const params = GraphGenerator::Params(depth, new_vertices_num);
+  auto const generator = GraphGenerator(params);
+  auto const graph = generator.generate();
+  auto const graph_printer = GraphPrinter(graph);
+  auto const graph_json = graph_printer.print();
   std::cout << graph_json << std::endl;
   write_to_file(graph_json, "graph.json");
-
   return 0;
 }
