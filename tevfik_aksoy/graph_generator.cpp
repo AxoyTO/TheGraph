@@ -39,8 +39,7 @@ std::vector<VertexId> filter_connected_vertices(
     std::mutex& mutex) {
   std::vector<VertexId> filtered_vertices;
   for (const auto& next_vertex_id : next_vertices) {
-    const auto is_connected = [&graph, &mutex, vertex_id, next_vertices,
-                               &next_vertex_id]() {
+    const auto is_connected = [&graph, &mutex, vertex_id, &next_vertex_id]() {
       const std::lock_guard lock(mutex);
       return graph.are_vertices_connected(vertex_id, next_vertex_id);
     }();
