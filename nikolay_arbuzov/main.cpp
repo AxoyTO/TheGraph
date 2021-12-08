@@ -68,7 +68,7 @@ class Graph {
         return (vertex);
       }
     }
-    // return nullptr;
+    throw std::runtime_error("No such vertex");
   }
   const Edge get_edge(const EdgeId& edge_id) const {
     for (const auto edge : edges_) {
@@ -76,14 +76,12 @@ class Graph {
         return (edge);
       }
     }
-    // return nullptr;
+    throw std::runtime_error("No such edge");
   }
 
-  const std::vector<Vertex>& vertices() const {
-    return (vertices_);
-  }
+  const std::vector<Vertex>& vertices() const { return (vertices_); }
 
-  std::set<EdgeId>& connected_edge_ids(const VertexId& id){
+  std::set<EdgeId>& connected_edge_ids(const VertexId& id) {
     return (adjacency_list_[id]);
   }
 
@@ -118,66 +116,64 @@ class GraphPrinter {
         result_stream << ", ";
       }
     }
-  
-  result_stream << "]" << std::endl;
-  result_stream << "\t\t}";
 
-  return result_stream.str();
-}
+    result_stream << "]" << std::endl;
+    result_stream << "\t\t}";
 
-std::string
-print_edge(const Edge& edg) const {
-  std::stringstream result_stream;
-  result_stream << "\t\t{" << std::endl;
-  result_stream << "\t\t\t\"id\": " << edg.id << "," << std::endl;
-  result_stream << "\t\t\t\"vertex_ids\": [";
-  result_stream << edg.from_vertex_id << ", " << edg.to_vertex_id;
-  result_stream << "]" << std::endl;
-  result_stream << "\t\t}";
-
-  return result_stream.str();
-}
-
-std::string print() const {
-  std::stringstream result_stream;
-  std::cout << "Printing graph to string" << std::endl;
-
-  result_stream << "{" << std::endl;
-  std::cout << "\tPrinting vertices to string" << std::endl;
-
-  result_stream << "\t\"vertices\": [" << std::endl;
-
-  const auto& vertices = graph_.vertices();
-  for (const auto& vertex : vertices) {
-    result_stream << print_vertex(vertex);
-    if (vertex.id != vertices.back().id) {
-      result_stream << ",";
-    }
-    result_stream << std::endl;
+    return result_stream.str();
   }
 
-  result_stream << std::endl
-                << "\t]"
-                << "," << std::endl;
+  std::string print_edge(const Edge& edg) const {
+    std::stringstream result_stream;
+    result_stream << "\t\t{" << std::endl;
+    result_stream << "\t\t\t\"id\": " << edg.id << "," << std::endl;
+    result_stream << "\t\t\t\"vertex_ids\": [";
+    result_stream << edg.from_vertex_id << ", " << edg.to_vertex_id;
+    result_stream << "]" << std::endl;
+    result_stream << "\t\t}";
 
-  int i = 0;
-
-  std::cout << "\tPrinting edges to string" << std::endl;
-  result_stream << "\t\"edges\": [" << std::endl;
-  while (graph_.has_edge(i)) {
-    if (i++) {
-      result_stream << "," << std::endl;
-    }
-    result_stream << print_edge(graph_.get_edge(i - 1));
+    return result_stream.str();
   }
-  result_stream << std::endl << "\t]" << std::endl << "}";
-  return result_stream.str();
-}
 
-private:
-Graph& graph_;
-}
-;
+  std::string print() const {
+    std::stringstream result_stream;
+    std::cout << "Printing graph to string" << std::endl;
+
+    result_stream << "{" << std::endl;
+    std::cout << "\tPrinting vertices to string" << std::endl;
+
+    result_stream << "\t\"vertices\": [" << std::endl;
+
+    const auto& vertices = graph_.vertices();
+    for (const auto& vertex : vertices) {
+      result_stream << print_vertex(vertex);
+      if (vertex.id != vertices.back().id) {
+        result_stream << ",";
+      }
+      result_stream << std::endl;
+    }
+
+    result_stream << std::endl
+                  << "\t]"
+                  << "," << std::endl;
+
+    int i = 0;
+
+    std::cout << "\tPrinting edges to string" << std::endl;
+    result_stream << "\t\"edges\": [" << std::endl;
+    while (graph_.has_edge(i)) {
+      if (i++) {
+        result_stream << "," << std::endl;
+      }
+      result_stream << print_edge(graph_.get_edge(i - 1));
+    }
+    result_stream << std::endl << "\t]" << std::endl << "}";
+    return result_stream.str();
+  }
+
+ private:
+  Graph& graph_;
+};
 
 void str_to_file(const std::string& graph_json, const std::string& file_path) {
   std::ofstream out_file;
@@ -234,8 +230,8 @@ int main(int argc, char* argv[]) {
   std::cout << graph_json << std::endl;
 
   std::string out_file("graph.json");
-  
-  if (argc > 1){
+
+  if (argc > 1) {
     out_file = std::string(argv[1]);
   }
   str_to_file(graph_json, out_file);
