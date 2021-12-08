@@ -114,8 +114,8 @@ class GraphPrinter {
 
     for (const auto& edge_id : edge_ids) {
       result_stream << edge_id;
-      if (edge_id != (*edge_ids.end())) {
-        result_stream << ",";
+      if (edge_id != *(edge_ids.rbegin())) {
+        result_stream << ", ";
       }
     }
   
