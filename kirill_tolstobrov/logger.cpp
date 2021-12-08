@@ -5,7 +5,6 @@
 
 namespace uni_cpp_practice {
 void Logger::set_file(const std::optional<std::string>& filename) {
-
   if (!filename.has_value()) {
     file_stream_ = std::nullopt;
     return;
