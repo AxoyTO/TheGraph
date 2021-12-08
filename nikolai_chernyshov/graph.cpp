@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdlib>
+#include <stdexcept>
 
 #include "graph.hpp"
 
