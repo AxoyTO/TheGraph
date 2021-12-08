@@ -122,9 +122,7 @@ int handle_threads_count_input() {
 }
 uni_cpp_practice::Logger& prepare_logger() {
   try {
-    if (!std::filesystem::create_directory("./temp")) {
-      std::cout << "A directory wasn't created\n";
-    }
+    std::filesystem::create_directory("./temp");
   } catch (const std::exception& ex) {
     std::cout << ex.what() << "\n";
   }
