@@ -92,8 +92,8 @@ class Graph {
   std::vector<Vertex> vertices_;
   std::unordered_map<VertexId, std::set<EdgeId>> adjacency_list_;
 
-  int edges_id_counter_ = 0;
-  int vertex_id_counter_ = 0;
+  EdgeId edges_id_counter_ = 0;
+  VertexId vertex_id_counter_ = 0;
 
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edges_id_counter_++; }
