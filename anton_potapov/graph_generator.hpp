@@ -136,7 +136,6 @@ class GraphGenerator {
     generate_blue_edges(graph);
     generate_yellow_edges(graph);
     generate_red_edges(graph);
-    graph.update_vertices_depth();
     return graph;
   }
 

@@ -1,19 +1,13 @@
 #pragma once
 
-#include <variant>
 #include "graph.hpp"
 
 class GraphPrinter {
  public:
-  explicit GraphPrinter(Graph& input_graph)
-      : const_graph(false), graph(input_graph) {}
-  explicit GraphPrinter(const Graph& input_graph)
-      : const_graph(true), graph(input_graph) {}
+  explicit GraphPrinter(const Graph& input_graph) : graph(input_graph) {}
 
   std::string print() const {
-    if (!const_graph) {
-      graph.update_depth_vertices();
-    }
+    // doesn't work need to update vertices depth
     std::stringstream json_stringstream;
     json_stringstream << "{\"depth\":" << graph.max_depth() << ",";
     json_stringstream << "\"vertices\":[";
@@ -36,8 +30,8 @@ class GraphPrinter {
   }
 
  private:
-  bool const_graph;
-  std::variant<Graph&, const Graph&> graph;
+  const Graph& graph;
+
   std::string print_vertex(const Vertex& vertex) const {
     std::stringstream json_stringstream;
     json_stringstream << "{\"id\":" << vertex.id << ","
@@ -53,6 +47,7 @@ class GraphPrinter {
                       << "\"depth\":" << vertex.depth << "}";
     return json_stringstream.str();
   }
+
   std::string print_edge(const Edge& Edge) const {
     std::stringstream json_stringstream;
     std::string color_string = get_edge_color_string(Edge.color);

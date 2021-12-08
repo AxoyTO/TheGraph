@@ -21,12 +21,18 @@ Graph::Graph(Graph&& other_graph) {
 
 const std::set<VertexId>& Graph::get_vertices_at_depth(int depth) {
   update_vertices_depth();
-  const auto& const_this = *this;
-  return const_this.get_vertices_at_depth(depth);
+  return vertices_at_depth_.at(depth);
 }
 
-const std::set<VertexId>& Graph::get_vertices_at_depth(int depth) const {
-  return vertices_at_depth_.at(depth);
+std::set<VertexId> Graph::get_vertices_at_depth(int depth) const {
+  const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+    std::set<VertexId> ans;
+    for (const auto& [vertex_id, vertex_depth] : updated_depths) {
+      if (vertex_depth == depth) {
+        ans.insert(vertex_id);
+      }
+    }
+    return ans;
 }
 
 void Graph::update_vertices_depth() {

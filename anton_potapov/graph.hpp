@@ -86,13 +86,15 @@ class Graph {
 
   ~Graph() = default;
 
-  const Vertex& get_vertex(const VertexId& id) const {
-    return vertices_.at(id);
+  Vertex get_vertex(const VertexId& id) const {
+    Vertex vertex_copy = vertices_.at(id);
+    vertex_copy.depth = GraphTraverser::dynamic_bfs(*this, updated_depth_).at(vertex_copy.id);
+    return vertex_copy;
   }
 
   Vertex& get_vertex(const VertexId& id) {
-    const auto& const_this = *this;
-    return const_cast<Vertex&>(const_this.get_vertex(id));
+    update_vertices_depth();
+    return vertices_.at(id);
   }
 
   const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
@@ -104,19 +106,36 @@ class Graph {
 
   int max_depth() {
     update_vertices_depth();
-    const auto& const_this = *this;
-    return const_this.max_depth();
+    return vertices_at_depth_.size() - 1;
   }
 
   int max_depth() const {
-    return std::max((int)vertices_at_depth_.size() - 1, 0);
+    const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+    int ans = 0;
+    for (const auto& [vertex_id, vertex_depth] : updated_depths) {
+      if (vertex_depth > ans) {
+        ans = vertex_depth;
+      }
+    }
+    return ans;
   }
 
-  const std::map<VertexId, Vertex>& vertices() const { return vertices_; }
+  std::map<VertexId, Vertex> vertices() const {
+    auto vertices_updated_copy = vertices_;
+    const auto updated_depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
+    for (auto& [vertex_id, vertex] : vertices_updated_copy) {
+      vertex.depth = updated_depths.at(vertex_id);
+    }
+    return vertices_updated_copy;
+  }
+  const std::map<VertexId, Vertex>& vertices() {
+    update_vertices_depth();
+    return vertices_;
+  }
   const std::map<EdgeId, Edge>& edges() const { return edges_; }
 
   const std::set<VertexId>& get_vertices_at_depth(int depth);
-  const std::set<VertexId>& get_vertices_at_depth(int depth) const;
+  std::set<VertexId> get_vertices_at_depth(int depth) const;
 
   bool is_vertex_exists(const VertexId& vertex_id) const;
 
@@ -132,9 +151,6 @@ class Graph {
   const VertexId& get_root_vertex_id() const {
     return vertices_.begin()->first;
   }
-
-  void update_vertices_depth();
-  void update_vertices_depth() const;
 
  private:
   bool is_depth_dirty_ = true;
@@ -154,6 +170,9 @@ class Graph {
   bool new_edge_color_is_correct(const VertexId& vertex1_id,
                                  const VertexId& vertex2_id,
                                  const EdgeColor& color);
+
+  void update_vertices_depth();
+  void update_vertices_depth() const;
 
   void update_vertices_at_depth_map(const std::map<VertexId, int>& depths);
 };

@@ -7,6 +7,16 @@
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 
+void write_to_file(const std::string& file_text, const std::string& file_path) {
+  std::fstream json_file;
+  json_file.open(file_path, std::ios::out);
+  if (!json_file.is_open()) {
+    throw std::runtime_error("file not created");
+  }
+  json_file << file_text << std::endl;
+  json_file.close();
+}
+
 int main() {
   int depth;
   int new_vertices_num;
@@ -41,15 +51,5 @@ int main() {
   int i = 0;
   auto graph_printer = GraphPrinter(graph);
   write_to_file(graph_printer.print(), "graph_" + std::to_string(i) + ".json");
-  /*
-  const std::string json_string = graph.get_json_string();
-  std::fstream json_file;
-  json_file.open("graph.json", std::ios::out);
-  if (!json_file.is_open()) {
-    throw std::runtime_error("file not created");
-  }
-  json_file << json_string << std::endl;
-  json_file.close();
-  */
   return 0;
 }
