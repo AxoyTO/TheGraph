@@ -62,27 +62,28 @@ class Graph {
     return false;
   };
 
-  const Vertex get_vertex(const VertexId& vertex_id) const {
-    for (const auto vertex : vertices_) {
+  const Vertex& get_vertex(const VertexId& vertex_id) const {
+    for (const auto& vertex : vertices_) {
       if (vertex.id == vertex_id) {
-        return (vertex);
+        return vertex;
       }
     }
     throw std::runtime_error("No such vertex");
   }
-  const Edge get_edge(const EdgeId& edge_id) const {
-    for (const auto edge : edges_) {
+  const Edge& get_edge(const EdgeId& edge_id) const {
+    for (const auto& edge : edges_) {
       if (edge.id == edge_id) {
-        return (edge);
+        return edge;
       }
     }
     throw std::runtime_error("No such edge");
   }
 
-  const std::vector<Vertex>& vertices() const { return (vertices_); }
+  const std::vector<Vertex>& vertices() const { return vertices_; }
+  const std::vector<Edge>& edges() const { return edges_; }
 
-  std::set<EdgeId>& connected_edge_ids(const VertexId& id) {
-    return (adjacency_list_[id]);
+  const std::set<EdgeId>& connected_edge_ids(const VertexId& id) const {
+    return adjacency_list_.at(id);
   }
 
  private:
@@ -99,16 +100,15 @@ class Graph {
 
 class GraphPrinter {
  public:
-  explicit GraphPrinter(Graph& graph) : graph_(graph) {}
+  explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
 
   std::string print_vertex(const Vertex& vertex) const {
     std::stringstream result_stream;
-    std::vector<Edge> edges;
     result_stream << "\t\t{" << std::endl;
     result_stream << "\t\t\t\"id\": " << vertex.id << "," << std::endl;
     result_stream << "\t\t\t\"edge_ids\": [";
 
-    auto edge_ids = graph_.connected_edge_ids(vertex.id);
+    const auto& edge_ids = graph_.connected_edge_ids(vertex.id);
 
     for (const auto& edge_id : edge_ids) {
       result_stream << edge_id;
@@ -123,12 +123,12 @@ class GraphPrinter {
     return result_stream.str();
   }
 
-  std::string print_edge(const Edge& edg) const {
+  std::string print_edge(const Edge& edge) const {
     std::stringstream result_stream;
     result_stream << "\t\t{" << std::endl;
-    result_stream << "\t\t\t\"id\": " << edg.id << "," << std::endl;
+    result_stream << "\t\t\t\"id\": " << edge.id << "," << std::endl;
     result_stream << "\t\t\t\"vertex_ids\": [";
-    result_stream << edg.from_vertex_id << ", " << edg.to_vertex_id;
+    result_stream << edge.from_vertex_id << ", " << edge.to_vertex_id;
     result_stream << "]" << std::endl;
     result_stream << "\t\t}";
 
@@ -157,25 +157,26 @@ class GraphPrinter {
                   << "\t]"
                   << "," << std::endl;
 
-    int i = 0;
-
+    const auto& edges = graph_.edges();
     std::cout << "\tPrinting edges to string" << std::endl;
     result_stream << "\t\"edges\": [" << std::endl;
-    while (graph_.has_edge(i)) {
-      if (i++) {
-        result_stream << "," << std::endl;
+    for (const auto& edge : edges) {
+      result_stream << print_edge(edge);
+      if (edge.id != edges.back().id) {
+        result_stream << ",";
       }
-      result_stream << print_edge(graph_.get_edge(i - 1));
+      result_stream << std::endl;
     }
     result_stream << std::endl << "\t]" << std::endl << "}";
     return result_stream.str();
   }
 
  private:
-  Graph& graph_;
+  const Graph& graph_;
 };
 
-void str_to_file(const std::string& graph_json, const std::string& file_path) {
+void string_to_file(const std::string& graph_json,
+                    const std::string& file_path) {
   std::ofstream out_file;
   out_file.open(file_path);
   out_file << graph_json;
@@ -220,7 +221,7 @@ Graph generate_graph() {
 }
 
 int main(int argc, char* argv[]) {
-  auto graph = generate_graph();
+  const auto graph = generate_graph();
 
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
@@ -234,7 +235,7 @@ int main(int argc, char* argv[]) {
   if (argc > 1) {
     out_file = std::string(argv[1]);
   }
-  str_to_file(graph_json, out_file);
+  string_to_file(graph_json, out_file);
 
   std::cout << out_file << " file has been created (if not existed) and filled"
             << std::endl;
