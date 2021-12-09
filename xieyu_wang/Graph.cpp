@@ -98,4 +98,5 @@ const Edge& Graph::getEdge(int id) {
       return edge;
     }
   }
+  throw std::runtime_error("No such Vertex");
 }
