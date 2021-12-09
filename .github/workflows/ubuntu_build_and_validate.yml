@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Get Changed Files
         id: changed_files
-        uses: jitterbit/get-changed-files@v1
+        uses: Ana06/get-changed-files@v2.0.0
       - name: Get Changed Directory
         id: changed_directory
         run: |
@@ -75,7 +75,7 @@ jobs:
       run: |
         clang++ --version;
         echo "Compile directory with changes: ${{ needs.get_changed_files.outputs.directory }}";
-        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -Werror;
+        clang++ ${{ needs.get_changed_files.outputs.directory }}/*.cpp -o ${{ needs.get_changed_files.outputs.directory }}/test_build -std=c++17 -pthread -Werror;
     # - name: Install include-what-you-use
     #   run: brew install iwyu;
     # - name: Validate "#include" preprocessors
