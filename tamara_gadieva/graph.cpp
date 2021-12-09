@@ -257,7 +257,7 @@ void generate_green_edges(Graph& graph) {
 void generate_yellow_edges(Graph& graph) {
   for (int depth = 0; depth < graph.get_depth() - 1; depth++) {
     const float prob_of_creating_new_edge =
-        (float)depth / (float)(graph.get_depth() - 1);
+        (float)depth / (float)(graph.get_depth() - 2);
     const auto& vertices_ids_in_current_depth =
         graph.get_vertices_ids_in_depth(depth);
     const auto& vertices_ids_in_prev_depth =
