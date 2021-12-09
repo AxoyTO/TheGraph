@@ -1,0 +1,70 @@
+2021.12.09 09:52:41: Graph 1, Generation Started
+2021.12.09 09:52:41: Graph 1, Generation Finished {  
+  depth: 4,
+  vertices: 27, [1, 3, 7, 11, 5],
+  edges: 46, {gray: 26, green: 2, yellow: 14, red: 4}}
+}
+
+2021.12.09 09:52:41: Graph 2, Generation Started
+2021.12.09 09:52:41: Graph 2, Generation Finished {  
+  depth: 4,
+  vertices: 41, [1, 3, 8, 17, 12],
+  edges: 75, {gray: 40, green: 4, yellow: 24, red: 7}}
+}
+
+2021.12.09 09:52:41: Graph 3, Generation Started
+2021.12.09 09:52:41: Graph 3, Generation Finished {  
+  depth: 4,
+  vertices: 31, [1, 3, 8, 12, 7],
+  edges: 59, {gray: 30, green: 4, yellow: 20, red: 5}}
+}
+
+2021.12.09 09:52:41: Graph 4, Generation Started
+2021.12.09 09:52:41: Graph 4, Generation Finished {  
+  depth: 4,
+  vertices: 41, [1, 3, 9, 16, 12],
+  edges: 71, {gray: 40, green: 3, yellow: 25, red: 3}}
+}
+
+2021.12.09 09:52:41: Graph 5, Generation Started
+2021.12.09 09:52:41: Graph 5, Generation Finished {  
+  depth: 4,
+  vertices: 23, [1, 3, 5, 8, 6],
+  edges: 44, {gray: 22, green: 4, yellow: 14, red: 4}}
+}
+
+2021.12.09 09:52:41: Graph 6, Generation Started
+2021.12.09 09:52:41: Graph 6, Generation Finished {  
+  depth: 4,
+  vertices: 34, [1, 3, 8, 11, 11],
+  edges: 60, {gray: 33, green: 4, yellow: 20, red: 3}}
+}
+
+2021.12.09 09:52:41: Graph 7, Generation Started
+2021.12.09 09:52:41: Graph 7, Generation Finished {  
+  depth: 4,
+  vertices: 32, [1, 3, 8, 11, 9],
+  edges: 55, {gray: 31, green: 2, yellow: 16, red: 6}}
+}
+
+2021.12.09 09:52:41: Graph 8, Generation Started
+2021.12.09 09:52:41: Graph 8, Generation Finished {  
+  depth: 4,
+  vertices: 28, [1, 3, 7, 11, 6],
+  edges: 49, {gray: 27, green: 4, yellow: 15, red: 3}}
+}
+
+2021.12.09 09:52:41: Graph 9, Generation Started
+2021.12.09 09:52:41: Graph 9, Generation Finished {  
+  depth: 3,
+  vertices: 19, [1, 3, 8, 7],
+  edges: 34, {gray: 18, green: 3, yellow: 11, red: 2}}
+}
+
+2021.12.09 09:52:41: Graph 10, Generation Started
+2021.12.09 09:52:41: Graph 10, Generation Finished {  
+  depth: 4,
+  vertices: 45, [1, 3, 8, 17, 16],
+  edges: 80, {gray: 44, green: 5, yellow: 27, red: 4}}
+}
+
