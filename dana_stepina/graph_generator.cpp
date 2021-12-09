@@ -62,9 +62,7 @@ void generate_grey_edges(Graph& graph, const Params& params) {
 }
 
 void generate_green_edges(Graph& graph) {
-  /*A copy is needed, since the vector over which it is iterated changes in the
-   * process*/
-  const auto depth_map = graph.get_depth_map();
+  const auto& depth_map = graph.get_depth_map();
 
   for (const auto& vertex_ids : depth_map)
     for (const auto& vertex_id : vertex_ids)
@@ -103,7 +101,7 @@ void generate_yellow_edges(Graph& graph) {
 }
 
 void generate_red_edges(Graph& graph) {
-  const auto depth_map = graph.get_depth_map();
+  const auto& depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 2; depth++)
     for (const auto& from_vertex_id : depth_map[depth]) {

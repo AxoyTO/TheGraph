@@ -1,70 +1,70 @@
-2021.12.09 10:07:02: Graph 1, Generation Started
-2021.12.09 10:07:02: Graph 1, Generation Finished {  
+2021.12.09 10:11:37: Graph 1, Generation Started
+2021.12.09 10:11:37: Graph 1, Generation Finished {  
   depth: 4,
-  vertices: 31, [1, 3, 9, 12, 6],
-  edges: 56, {gray: 30, green: 2, yellow: 21, red: 3}}
+  vertices: 22, [1, 3, 6, 6, 6],
+  edges: 34, {gray: 21, green: 1, yellow: 11, red: 1}}
 }
 
-2021.12.09 10:07:02: Graph 2, Generation Started
-2021.12.09 10:07:02: Graph 2, Generation Finished {  
+2021.12.09 10:11:37: Graph 2, Generation Started
+2021.12.09 10:11:37: Graph 2, Generation Finished {  
   depth: 4,
-  vertices: 27, [1, 3, 6, 10, 7],
-  edges: 45, {gray: 26, green: 1, yellow: 13, red: 5}}
+  vertices: 48, [1, 3, 8, 18, 18],
+  edges: 82, {gray: 47, green: 9, yellow: 25, red: 1}}
 }
 
-2021.12.09 10:07:02: Graph 3, Generation Started
-2021.12.09 10:07:02: Graph 3, Generation Finished {  
+2021.12.09 10:11:37: Graph 3, Generation Started
+2021.12.09 10:11:37: Graph 3, Generation Finished {  
   depth: 4,
-  vertices: 44, [1, 3, 9, 16, 15],
-  edges: 76, {gray: 43, green: 4, yellow: 24, red: 5}}
+  vertices: 30, [1, 3, 7, 8, 11],
+  edges: 53, {gray: 29, green: 5, yellow: 14, red: 5}}
 }
 
-2021.12.09 10:07:02: Graph 4, Generation Started
-2021.12.09 10:07:02: Graph 4, Generation Finished {  
+2021.12.09 10:11:37: Graph 4, Generation Started
+2021.12.09 10:11:37: Graph 4, Generation Finished {  
   depth: 4,
-  vertices: 22, [1, 3, 6, 7, 5],
-  edges: 40, {gray: 21, green: 3, yellow: 13, red: 3}}
+  vertices: 16, [1, 3, 4, 6, 2],
+  edges: 22, {gray: 15, green: 0, yellow: 4, red: 3}}
 }
 
-2021.12.09 10:07:02: Graph 5, Generation Started
-2021.12.09 10:07:02: Graph 5, Generation Finished {  
+2021.12.09 10:11:37: Graph 5, Generation Started
+2021.12.09 10:11:37: Graph 5, Generation Finished {  
   depth: 4,
-  vertices: 24, [1, 3, 7, 8, 5],
-  edges: 40, {gray: 23, green: 3, yellow: 12, red: 2}}
+  vertices: 28, [1, 3, 7, 11, 6],
+  edges: 51, {gray: 27, green: 4, yellow: 15, red: 5}}
 }
 
-2021.12.09 10:07:02: Graph 6, Generation Started
-2021.12.09 10:07:02: Graph 6, Generation Finished {  
+2021.12.09 10:11:37: Graph 6, Generation Started
+2021.12.09 10:11:37: Graph 6, Generation Finished {  
   depth: 4,
-  vertices: 26, [1, 3, 6, 10, 6],
-  edges: 45, {gray: 25, green: 1, yellow: 16, red: 3}}
+  vertices: 14, [1, 3, 5, 3, 2],
+  edges: 24, {gray: 13, green: 0, yellow: 8, red: 3}}
 }
 
-2021.12.09 10:07:02: Graph 7, Generation Started
-2021.12.09 10:07:02: Graph 7, Generation Finished {  
+2021.12.09 10:11:37: Graph 7, Generation Started
+2021.12.09 10:11:37: Graph 7, Generation Finished {  
   depth: 4,
-  vertices: 25, [1, 3, 5, 8, 8],
-  edges: 41, {gray: 24, green: 0, yellow: 13, red: 4}}
+  vertices: 31, [1, 3, 8, 9, 10],
+  edges: 55, {gray: 30, green: 3, yellow: 15, red: 7}}
 }
 
-2021.12.09 10:07:02: Graph 8, Generation Started
-2021.12.09 10:07:02: Graph 8, Generation Finished {  
+2021.12.09 10:11:37: Graph 8, Generation Started
+2021.12.09 10:11:37: Graph 8, Generation Finished {  
   depth: 4,
-  vertices: 29, [1, 3, 7, 10, 8],
-  edges: 50, {gray: 28, green: 3, yellow: 15, red: 4}}
+  vertices: 28, [1, 3, 6, 11, 7],
+  edges: 51, {gray: 27, green: 2, yellow: 18, red: 4}}
 }
 
-2021.12.09 10:07:02: Graph 9, Generation Started
-2021.12.09 10:07:02: Graph 9, Generation Finished {  
+2021.12.09 10:11:37: Graph 9, Generation Started
+2021.12.09 10:11:37: Graph 9, Generation Finished {  
   depth: 4,
-  vertices: 20, [1, 3, 5, 6, 5],
-  edges: 37, {gray: 19, green: 1, yellow: 10, red: 7}}
+  vertices: 18, [1, 3, 5, 5, 4],
+  edges: 30, {gray: 17, green: 2, yellow: 7, red: 4}}
 }
 
-2021.12.09 10:07:02: Graph 10, Generation Started
-2021.12.09 10:07:02: Graph 10, Generation Finished {  
+2021.12.09 10:11:37: Graph 10, Generation Started
+2021.12.09 10:11:37: Graph 10, Generation Finished {  
   depth: 4,
-  vertices: 31, [1, 3, 6, 11, 10],
-  edges: 55, {gray: 30, green: 5, yellow: 16, red: 4}}
+  vertices: 26, [1, 3, 9, 7, 6],
+  edges: 47, {gray: 25, green: 3, yellow: 14, red: 5}}
 }
 

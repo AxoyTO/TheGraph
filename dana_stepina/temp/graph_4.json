@@ -3,122 +3,142 @@
 	"vertices": [
 	  {
 		"id":0,
-		"edge_ids":[0,1,2,23],
+		"edge_ids":[0,1,2,46],
 		"depth":0
 	  },
 	  {
 		"id":1,
-		"edge_ids":[0,3,4,5],
+		"edge_ids":[0,3,4,5,27,47],
 		"depth":1
 	  },
 	  {
 		"id":2,
-		"edge_ids":[1,6,7],
+		"edge_ids":[1,6,7,48],
 		"depth":1
 	  },
 	  {
 		"id":3,
-		"edge_ids":[2,8,9],
+		"edge_ids":[2,8,9,28,49],
 		"depth":1
 	  },
 	  {
 		"id":4,
-		"edge_ids":[3,10,26],
+		"edge_ids":[3,10],
 		"depth":2
 	  },
 	  {
 		"id":5,
-		"edge_ids":[4,11,38],
+		"edge_ids":[4,11,12,31,46],
 		"depth":2
 	  },
 	  {
 		"id":6,
-		"edge_ids":[5,12,13,24,39],
+		"edge_ids":[5,13,14,32],
 		"depth":2
 	  },
 	  {
 		"id":7,
-		"edge_ids":[6,14,15,27],
+		"edge_ids":[6,29,33],
 		"depth":2
 	  },
 	  {
 		"id":8,
-		"edge_ids":[7,28],
+		"edge_ids":[7,15,16,34],
 		"depth":2
 	  },
 	  {
 		"id":9,
-		"edge_ids":[8,16],
+		"edge_ids":[8,17,18,19,50],
 		"depth":2
 	  },
 	  {
 		"id":10,
-		"edge_ids":[9,17,29],
+		"edge_ids":[9,20],
 		"depth":2
 	  },
 	  {
 		"id":11,
-		"edge_ids":[10,29,30],
+		"edge_ids":[10,21,31,35],
 		"depth":3
 	  },
 	  {
 		"id":12,
-		"edge_ids":[11,31],
+		"edge_ids":[11,30,36,47],
 		"depth":3
 	  },
 	  {
 		"id":13,
-		"edge_ids":[12,32],
+		"edge_ids":[12,37],
 		"depth":3
 	  },
 	  {
 		"id":14,
-		"edge_ids":[13,18,33],
+		"edge_ids":[13,22,38],
 		"depth":3
 	  },
 	  {
 		"id":15,
-		"edge_ids":[14,19,34],
+		"edge_ids":[14,23,39],
 		"depth":3
 	  },
 	  {
 		"id":16,
-		"edge_ids":[15,20,35],
+		"edge_ids":[15,40],
 		"depth":3
 	  },
 	  {
 		"id":17,
-		"edge_ids":[16,26,28,36],
+		"edge_ids":[16,24,32,41,49],
 		"depth":3
 	  },
 	  {
 		"id":18,
-		"edge_ids":[17,21,22,27,37],
+		"edge_ids":[17,42],
 		"depth":3
 	  },
 	  {
 		"id":19,
-		"edge_ids":[18,32,36,37],
-		"depth":4
+		"edge_ids":[18,25,33,34,43,48],
+		"depth":3
 	  },
 	  {
 		"id":20,
-		"edge_ids":[19,31],
-		"depth":4
+		"edge_ids":[19,44],
+		"depth":3
 	  },
 	  {
 		"id":21,
-		"edge_ids":[20],
-		"depth":4
+		"edge_ids":[20,26,45],
+		"depth":3
 	  },
 	  {
 		"id":22,
-		"edge_ids":[21,25,33,35,38,39],
+		"edge_ids":[21,44,45,50],
 		"depth":4
 	  },
 	  {
 		"id":23,
-		"edge_ids":[22,30,34],
+		"edge_ids":[22,35,41],
+		"depth":4
+	  },
+	  {
+		"id":24,
+		"edge_ids":[23,43],
+		"depth":4
+	  },
+	  {
+		"id":25,
+		"edge_ids":[24,39],
+		"depth":4
+	  },
+	  {
+		"id":26,
+		"edge_ids":[25,37,38,40],
+		"depth":4
+	  },
+	  {
+		"id":27,
+		"edge_ids":[26,36,42],
 		"depth":4
 	  }
 	],
@@ -185,7 +205,7 @@
 	  },
 	  {
 		"id":12,
-		"vertex_ids":[6,13],
+		"vertex_ids":[5,13],
 		"color": "gray"
 	  },
 	  {
@@ -195,132 +215,187 @@
 	  },
 	  {
 		"id":14,
-		"vertex_ids":[7,15],
+		"vertex_ids":[6,15],
 		"color": "gray"
 	  },
 	  {
 		"id":15,
-		"vertex_ids":[7,16],
+		"vertex_ids":[8,16],
 		"color": "gray"
 	  },
 	  {
 		"id":16,
-		"vertex_ids":[9,17],
+		"vertex_ids":[8,17],
 		"color": "gray"
 	  },
 	  {
 		"id":17,
-		"vertex_ids":[10,18],
+		"vertex_ids":[9,18],
 		"color": "gray"
 	  },
 	  {
 		"id":18,
-		"vertex_ids":[14,19],
+		"vertex_ids":[9,19],
 		"color": "gray"
 	  },
 	  {
 		"id":19,
-		"vertex_ids":[15,20],
+		"vertex_ids":[9,20],
 		"color": "gray"
 	  },
 	  {
 		"id":20,
-		"vertex_ids":[16,21],
+		"vertex_ids":[10,21],
 		"color": "gray"
 	  },
 	  {
 		"id":21,
-		"vertex_ids":[18,22],
+		"vertex_ids":[11,22],
 		"color": "gray"
 	  },
 	  {
 		"id":22,
-		"vertex_ids":[18,23],
+		"vertex_ids":[14,23],
 		"color": "gray"
 	  },
 	  {
 		"id":23,
-		"vertex_ids":[0,0],
-		"color": "green"
+		"vertex_ids":[15,24],
+		"color": "gray"
 	  },
 	  {
 		"id":24,
-		"vertex_ids":[6,6],
-		"color": "green"
+		"vertex_ids":[17,25],
+		"color": "gray"
 	  },
 	  {
 		"id":25,
-		"vertex_ids":[22,22],
-		"color": "green"
+		"vertex_ids":[19,26],
+		"color": "gray"
 	  },
 	  {
 		"id":26,
-		"vertex_ids":[4,17],
-		"color": "yellow"
+		"vertex_ids":[21,27],
+		"color": "gray"
 	  },
 	  {
 		"id":27,
-		"vertex_ids":[7,18],
-		"color": "yellow"
+		"vertex_ids":[1,1],
+		"color": "green"
 	  },
 	  {
 		"id":28,
-		"vertex_ids":[8,17],
-		"color": "yellow"
+		"vertex_ids":[3,3],
+		"color": "green"
 	  },
 	  {
 		"id":29,
-		"vertex_ids":[10,11],
-		"color": "yellow"
+		"vertex_ids":[7,7],
+		"color": "green"
 	  },
 	  {
 		"id":30,
-		"vertex_ids":[11,23],
-		"color": "yellow"
+		"vertex_ids":[12,12],
+		"color": "green"
 	  },
 	  {
 		"id":31,
-		"vertex_ids":[12,20],
+		"vertex_ids":[5,11],
 		"color": "yellow"
 	  },
 	  {
 		"id":32,
-		"vertex_ids":[13,19],
+		"vertex_ids":[6,17],
 		"color": "yellow"
 	  },
 	  {
 		"id":33,
-		"vertex_ids":[14,22],
+		"vertex_ids":[7,19],
 		"color": "yellow"
 	  },
 	  {
 		"id":34,
-		"vertex_ids":[15,23],
+		"vertex_ids":[8,19],
 		"color": "yellow"
 	  },
 	  {
 		"id":35,
-		"vertex_ids":[16,22],
+		"vertex_ids":[11,23],
 		"color": "yellow"
 	  },
 	  {
 		"id":36,
-		"vertex_ids":[17,19],
+		"vertex_ids":[12,27],
 		"color": "yellow"
 	  },
 	  {
 		"id":37,
-		"vertex_ids":[18,19],
+		"vertex_ids":[13,26],
 		"color": "yellow"
 	  },
 	  {
 		"id":38,
-		"vertex_ids":[5,22],
-		"color": "red"
+		"vertex_ids":[14,26],
+		"color": "yellow"
 	  },
 	  {
 		"id":39,
-		"vertex_ids":[6,22],
+		"vertex_ids":[15,25],
+		"color": "yellow"
+	  },
+	  {
+		"id":40,
+		"vertex_ids":[16,26],
+		"color": "yellow"
+	  },
+	  {
+		"id":41,
+		"vertex_ids":[17,23],
+		"color": "yellow"
+	  },
+	  {
+		"id":42,
+		"vertex_ids":[18,27],
+		"color": "yellow"
+	  },
+	  {
+		"id":43,
+		"vertex_ids":[19,24],
+		"color": "yellow"
+	  },
+	  {
+		"id":44,
+		"vertex_ids":[20,22],
+		"color": "yellow"
+	  },
+	  {
+		"id":45,
+		"vertex_ids":[21,22],
+		"color": "yellow"
+	  },
+	  {
+		"id":46,
+		"vertex_ids":[0,5],
+		"color": "red"
+	  },
+	  {
+		"id":47,
+		"vertex_ids":[1,12],
+		"color": "red"
+	  },
+	  {
+		"id":48,
+		"vertex_ids":[2,19],
+		"color": "red"
+	  },
+	  {
+		"id":49,
+		"vertex_ids":[3,17],
+		"color": "red"
+	  },
+	  {
+		"id":50,
+		"vertex_ids":[9,22],
 		"color": "red"
 	  }
 	]
