@@ -1,42 +1,52 @@
 #include <fstream>
+#include <iostream>
+#include <regex>
+#include <string>
 #include "graph.hpp"
 
-constexpr int VERTICES_NUM = 14;
-constexpr int EDGES_NUM = 18;
+constexpr int DEPTH_MIN = 0;
+constexpr int NEW_VERTICES_NUM_MIN = 0;
 
-//информация о парах вершин, соединённых рёбрами
-const std::array<std::pair<VertexId, VertexId>, EDGES_NUM> vertices_pairs = {
-    {{0, 1},
-     {0, 2},
-     {0, 3},
-     {1, 4},
-     {1, 5},
-     {1, 6},
-     {2, 7},
-     {2, 8},
-     {3, 9},
-     {4, 10},
-     {5, 10},
-     {6, 10},
-     {7, 11},
-     {8, 11},
-     {9, 12},
-     {10, 13},
-     {11, 13},
-     {12, 13}}};
+int handle_depth_input() {
+  int depth = DEPTH_MIN - 1;
+  while (depth < DEPTH_MIN) {
+    std::cout << "Enter the depth of graph (int, >= 0): ";
+    std::cin >> depth;
+    if (std::cin.fail()) {
+      std::cin.clear();
+      std::string dummy;
+      std::cin >> dummy;
+      depth = DEPTH_MIN - 1;
+      continue;
+    }
+  }
+  return depth;
+}
+
+int handle_new_vertices_num_input() {
+  int new_vertices_num = NEW_VERTICES_NUM_MIN - 1;
+  while (new_vertices_num < NEW_VERTICES_NUM_MIN) {
+    std::cout << "Enter the number of new vertices (int, >= 0): ";
+    std::cin >> new_vertices_num;
+    if (std::cin.fail()) {
+      std::cin.clear();
+      std::string dummy;
+      std::cin >> dummy;
+      new_vertices_num = NEW_VERTICES_NUM_MIN - 1;
+      continue;
+    }
+  }
+  return new_vertices_num;
+}
 
 int main() {
-  Graph graph;
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+  const auto generator = GraphGenerator(params);
+  const auto graph = generator.generate();
 
-  for (int i = 0; i < VERTICES_NUM; i++) {
-    graph.add_vertex();
-  }
-
-  for (const auto& vertices_pair : vertices_pairs) {
-    graph.add_edge(vertices_pair.first, vertices_pair.second);
-  }
-
-  std::ofstream graph_json("graph_json");
+  std::ofstream graph_json("graph.json");
   graph_json << graph.json_string() << std::endl;
   graph_json.close();
 
