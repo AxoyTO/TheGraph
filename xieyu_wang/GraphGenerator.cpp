@@ -40,8 +40,10 @@ void GraphGenerator::generateRed(Graph& graph) const {
     const auto destinationDepth = graph.getVertexIdsAtDepth(depth + 2);
     for (const auto& fromVertexId : presentDepth) {
       if (isLucky(RED_EDGE_PROBABILITY)) {
-        const auto randomVertexId = getRandomVertexId(destinationDepth);
-        graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Red);
+        if (!destinationDepth.empty()) {
+          const auto randomVertexId = getRandomVertexId(destinationDepth);
+          graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Red);
+        }
       }
     }
   }
