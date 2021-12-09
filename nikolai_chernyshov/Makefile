@@ -12,4 +12,4 @@ format:
 
 clean:
 	rm -f main.o
-	rm -f graph*.json
+	rm -f temp/graph*.json

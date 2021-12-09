@@ -114,7 +114,8 @@ int main() {
     logger.log(gen_finished_string(i, graph));
 
     std::ofstream myfile;
-    myfile.open(FILENAME_PREFIX + std::to_string(i) + FILENAME_SUFFIX);
+    myfile.open(uni_course_cpp::config::TEMP_DIRECTORY_PATH + FILENAME_PREFIX +
+                std::to_string(i) + FILENAME_SUFFIX);
     myfile << uni_course_cpp::graph_printing::print_graph(graph);
     myfile.close();
   }
