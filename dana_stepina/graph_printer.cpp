@@ -14,7 +14,7 @@ namespace uni_cource_cpp {
 std::string GraphPrinter::print_graph_description(const Graph& graph) {
   std::stringstream log_string;
 
-  Depth depth = graph.get_depth();
+  const Depth depth = graph.get_depth();
 
   log_string << "  depth: " << depth << ",\n";
 
@@ -26,7 +26,7 @@ std::string GraphPrinter::print_graph_description(const Graph& graph) {
   }
   log_string << "],\n";
 
-  std::array<Color, NUM_COLORS> colors_of_edges = {Color::Grey, Color::Green,
+  const std::array<Color, NUM_COLORS> colors_of_edges = {Color::Grey, Color::Green,
                                                    Color::Yellow, Color::Red};
   log_string << "  edges: " << graph.get_edges().size() << ", {";
   for (const auto& color : colors_of_edges) {
