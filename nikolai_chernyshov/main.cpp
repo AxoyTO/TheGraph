@@ -94,7 +94,7 @@ std::string gen_finished_string(int graph_number, const Graph& graph) {
 
 void prepare_temp_directory() {
   std::filesystem::create_directory(
-      uni_course_cpp::config::K_TEMP_DIRECTORY_PATH);
+      uni_course_cpp::config::TEMP_DIRECTORY_PATH);
 }
 
 int main() {
