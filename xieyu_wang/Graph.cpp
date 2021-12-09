@@ -56,7 +56,11 @@ bool Graph::isConnected(int fromVertexId, int toVertexId) {
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
     for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
-      if (fromVertexEdgeId == toVertexEdgeId && fromVertexId != toVertexId) {
+      if (fromVertexEdgeId == toVertexEdgeId) {
+        const auto edge = getEdge(fromVertexEdgeId);
+        if (edge.fromVertexId != edge.toVertexId) {
+          continue;
+        }
         return true;
       }
     }
@@ -86,4 +90,12 @@ std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
 
 const std::vector<Vertex>& Graph::getVertices() const {
   return vertices_;
+}
+
+const Edge& Graph::getEdge(int id) {
+  for (const auto& edge : edges_) {
+    if (edge.id == id) {
+      return edge;
+    }
+  }
 }

@@ -20,7 +20,7 @@ class GraphGenerator {
 
   std::vector<int> getUnconnectedVertexIds(
       const int fromVertexId,
-      const std::vector<int> destinationLevel,
+      const std::vector<int>& destinationLevel,
       Graph& graph) const;
 };
 int getRandomVertexId(const std::vector<int> vector1);

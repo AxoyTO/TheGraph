@@ -65,8 +65,8 @@ void GraphGenerator::generateYellow(Graph& graph) const {
       if (isLucky(getProbabilityYellow(depth))) {
         const auto unconnectedVertexIds =
             getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
-        const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
-        if (randomVertexId != -1) {
+        if (!unconnectedVertexIds.empty()) {
+          const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
           graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Yellow);
         }
       }
@@ -111,11 +111,11 @@ float GraphGenerator::getProbabilityGray(int depth) const {
 
 std::vector<int> GraphGenerator::getUnconnectedVertexIds(
     const int fromVertexId,
-    const std::vector<int> destinationLevel,
+    const std::vector<int>& destinationLevel,
     Graph& graph) const {
   std::vector<int> unconnectedVertexIds;
   for (const auto& vertexId : destinationLevel) {
-    if (graph.isConnected(fromVertexId, vertexId) == false) {
+    if (!graph.isConnected(fromVertexId, vertexId)) {
       unconnectedVertexIds.push_back(vertexId);
     }
   }
@@ -132,11 +132,9 @@ bool isLucky(float probability) {
 }
 
 int getRandomVertexId(const std::vector<int> destinationLevelIds) {
+  assert(!destinationLevelIds.empty() && "destinationLevelIds is empty!!!");
   std::random_device rd;
   std::mt19937 gen(rd());
-  if (destinationLevelIds.size() == 0) {
-    return -1;
-  }
   std::uniform_int_distribution<std::mt19937::result_type> vertexIndex(
       0, destinationLevelIds.size() - 1);
   return destinationLevelIds[vertexIndex(gen)];

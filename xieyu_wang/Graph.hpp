@@ -13,6 +13,7 @@ class Graph {
 
  private:
   Vertex& getVertex(int id);
+  const Edge& getEdge(int id);
   int getNextEdgeId() { return vertexIdCounter_++; }
   int getNextVertexId() { return edgeIdCounter_++; }
   int vertexIdCounter_ = 0;

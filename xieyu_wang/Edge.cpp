@@ -14,7 +14,7 @@ std::string Edge::toString() const {
   return strEdge;
 }
 
-const std::string edgeColorToString(Edge::Color color) {
+std::string edgeColorToString(const Edge::Color color) {
   switch (color) {
     case Edge::Color::Gray:
       return "gray";
