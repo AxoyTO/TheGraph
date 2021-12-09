@@ -43,12 +43,6 @@ const std::vector<VertexId>& Graph::get_vertices_ids_in_depth(int depth) const {
   return vertices_ids_in_depth_[depth];
 }
 
-std::vector<VertexId> Graph::get_vertices_ids_in_depth(int depth) {
-  const auto& const_self = *this;
-  return const_cast<std::vector<VertexId>&>(
-      const_self.get_vertices_ids_in_depth(depth));
-}
-
 void Graph::update_vertex_depth(const VertexId& id, int depth) {
   assert(depth <= get_depth() && "Invalid depth");
   if (depth == get_depth())
@@ -56,16 +50,16 @@ void Graph::update_vertex_depth(const VertexId& id, int depth) {
   vertices_ids_in_depth_[depth].push_back(id);
   auto& vertex = get_vertex(id);
   vertex.depth = depth;
-
-  for (auto vertex_id_ind = vertices_ids_in_depth_[0].begin() + 1;
-       vertex_id_ind < vertices_ids_in_depth_[0].end(); vertex_id_ind++) {
+  auto& ids = vertices_ids_in_depth_[0];
+  for (auto vertex_id_ind = ids.begin() + 1; vertex_id_ind < ids.end();
+       vertex_id_ind++) {
     if (*vertex_id_ind == id)
-      vertices_ids_in_depth_[0].erase(vertex_id_ind);
+      ids.erase(vertex_id_ind);
   }
 }
 
 VertexId Graph::add_vertex() {
-  auto new_vertex_id = get_new_vertex_id();
+  const auto new_vertex_id = get_new_vertex_id();
   vertices_.emplace_back(new_vertex_id);
   if (vertices_ids_in_depth_.size() == 0)
     vertices_ids_in_depth_.emplace_back();
@@ -73,7 +67,7 @@ VertexId Graph::add_vertex() {
   return new_vertex_id;
 }
 
-const std::vector<EdgeId>& Graph::get_edge_ids(const VertexId& id) {
+const std::vector<EdgeId>& Graph::get_edge_ids(const VertexId& id) const {
   const auto& vertex = get_vertex(id);
   return vertex.get_edge_ids();
 }
@@ -98,15 +92,11 @@ void Graph::add_edge(const VertexId& from_vertex_id,
                      const VertexId& to_vertex_id) {
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
+  assert(!is_connected(from_vertex_id, to_vertex_id) &&
+         "Vertices are already connected");
   auto& from_vertex = get_vertex(from_vertex_id);
   auto& to_vertex = get_vertex(to_vertex_id);
   const auto edge_color = define_edge_color(from_vertex_id, to_vertex_id);
-  if (edge_color == Edge::Color::Green)
-    assert(is_connected(from_vertex_id, to_vertex_id) &&
-           "Vertices are not connected");
-  else
-    assert(!is_connected(from_vertex_id, to_vertex_id) &&
-           "Vertices are already connected");
   const auto& new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id,
                                              to_vertex_id, edge_color);
   from_vertex.add_edge_id(new_edge.id);
@@ -118,20 +108,33 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   }
 }
 
+const Edge& Graph::get_edge(const EdgeId& id) const {
+  for (const auto& edge : edges_)
+    if (edge.id == id)
+      return edge;
+  throw std::runtime_error("Unreachable code");
+}
+
 bool Graph::is_connected(const VertexId& from_vertex_id,
                          const VertexId& to_vertex_id) const {
   assert(has_vertex(from_vertex_id) && "Vertex doesn't exist");
   assert(has_vertex(to_vertex_id) && "Vertex doesn't exist");
-  if (from_vertex_id == to_vertex_id)
-    return true;
   const auto& from_vertex = get_vertex(from_vertex_id);
   const auto& to_vertex = get_vertex(to_vertex_id);
-  const auto& from_vertex_edges = from_vertex.get_edge_ids();
-  const auto& to_vertex_edges = to_vertex.get_edge_ids();
-  for (const auto& from_vertex_edge : from_vertex_edges)
-    for (const auto& to_vertex_edge : to_vertex_edges)
-      if (from_vertex_edge == to_vertex_edge)
+  const auto& from_vertex_edges_ids = from_vertex.get_edge_ids();
+  const auto& to_vertex_edges_ids = to_vertex.get_edge_ids();
+  if (from_vertex_id != to_vertex_id) {
+    for (const auto& from_vertex_edge_id : from_vertex_edges_ids)
+      for (const auto& to_vertex_edge_id : to_vertex_edges_ids)
+        if (from_vertex_edge_id == to_vertex_edge_id)
+          return true;
+  } else {
+    for (const auto& from_vertex_edge_id : from_vertex_edges_ids) {
+      const auto& edge = get_edge(from_vertex_edge_id);
+      if (edge.color == Edge::Color::Green)
         return true;
+    }
+  }
   return false;
 }
 
