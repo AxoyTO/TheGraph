@@ -4,7 +4,7 @@ CXXFLAGS = -Wall -std=c++17 -g -pthread
 all: clean prog format
 
 prog:
-	$(CXX) $(CXXFLAGS) main.cpp graph.cpp graph_generation.cpp graph_printing.cpp graph_generation_controller.cpp logger.cpp -o prog
+	$(CXX) $(CXXFLAGS) main.cpp graph.cpp graph_printing.cpp graph_generation_controller.cpp graph_generator.cpp logger.cpp -o prog
 
 format:
 	clang-format -i -style=Chromium *.hpp

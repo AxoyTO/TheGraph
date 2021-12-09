@@ -45,7 +45,7 @@ struct Vertex {
 
 class Graph {
  public:
-  void add_vertex() { vertices_.emplace_back(get_next_vertex_id()); }
+  VertexId add_vertex();
 
   bool is_vertex_exist(const VertexId& vertex_id) const;
 
