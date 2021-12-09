@@ -13,4 +13,4 @@ class Edge {
        const Color color = Color::Gray);
   std::string toString() const;
 };
-std::string edgeColorToString(const Edge::Color color);
+std::string edgeColorToString(const Edge::Color& color);

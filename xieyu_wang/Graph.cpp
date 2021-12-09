@@ -54,14 +54,20 @@ bool Graph::hasVertex(int idFind) {
 bool Graph::isConnected(int fromVertexId, int toVertexId) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
-  for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
-    for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
-      if (fromVertexEdgeId == toVertexEdgeId) {
-        const auto edge = getEdge(fromVertexEdgeId);
-        if (edge.fromVertexId != edge.toVertexId) {
-          continue;
-        }
+  if (fromVertexId ==
+      toVertexId) {  // if from vertex id== to vertex id ===>green
+    for (const auto& edgeId : getVertex(fromVertexId).getEdgeIds()) {
+      const auto& edge = getEdge(edgeId);
+      if (edge.fromVertexId == edge.toVertexId) {
         return true;
+      }
+    }
+  } else {  // from vertex id!= to vertex id ==> not green check here
+    for (const auto& fromVertexEdgeId : getVertex(fromVertexId).getEdgeIds()) {
+      for (const auto& toVertexEdgeId : getVertex(toVertexId).getEdgeIds()) {
+        if (fromVertexEdgeId == toVertexEdgeId) {
+          return true;
+        }
       }
     }
   }
@@ -98,5 +104,5 @@ const Edge& Graph::getEdge(int id) {
       return edge;
     }
   }
-  throw std::runtime_error("No such Vertex");
+  throw std::runtime_error("No such vertex");
 }
