@@ -44,9 +44,7 @@ int handle_graphs_count_input() {
   }
 }
 
-void prepare_temp_directory() {
-  
-}
+void prepare_temp_directory() {}
 
 void write_to_file(const std::string& file_text, const std::string& file_path) {
   std::fstream json_file;
@@ -72,8 +70,8 @@ int main() {
     // logger.log(generation_started_string(i));
     const auto graph = generator.generate_graph();
     if (graph.max_depth() < depth) {
-    std::cerr << "generated graph's depth=" << graph.max_depth()
-              << " is less than specified one =" << depth << std::endl;
+      std::cerr << "generated graph's depth=" << graph.max_depth()
+                << " is less than specified one =" << depth << std::endl;
     }
     // logger.log(generation_finished_string(i, graph));
 

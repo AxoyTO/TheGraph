@@ -1,12 +1,12 @@
 #include <map>
-#include <set>
 #include <queue>
+#include <set>
 
 #include "graph.hpp"
 #include "graph_traverser.hpp"
 
 std::map<VertexId, int> GraphTraverser::dynamic_bfs(const Graph& graph,
-                                                           int start_depth) {
+                                                    int start_depth) {
   std::map<VertexId, int> depths;
   std::queue<VertexId> bfs_queue;
   std::set<VertexId> used;
