@@ -167,7 +167,7 @@ class GraphPrinter {
       }
       result_stream << std::endl;
     }
-    result_stream << std::endl << "\t]" << std::endl << "}";
+    result_stream << "\t]" << std::endl << "}";
     return result_stream.str();
   }
 
