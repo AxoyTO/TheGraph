@@ -15,15 +15,13 @@ using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::GraphPrinter;
 using uni_cource_cpp::Logger;
 
+using Color = Graph::Edge::Color;
 using Params = GraphGenerator::Params;
 
 const std::string filename_folder_path = "./temp/";
 const std::string filename_prefix = "graph_";
 const std::string filename_file_extension = ".json";
 const std::string filename_log = "log.txt";
-
-constexpr int COLOR_NUM = 4, GREY_NUM = 0, GREEN_NUM = 1, YELLOW_NUM = 2,
-              RED_NUM = 3;
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -45,25 +43,17 @@ std::string generation_started_string(int graph_num) {
          ", Generation Started";
 }
 
-std::string color_and_count_edges_to_string(int num_color, const Graph& graph) {
-  switch (num_color) {
-    case GREY_NUM:
-      return "gray:  " +
-             std::to_string(graph.get_count_edges_with_color_num(GREY_NUM)) +
-             ", ";
-    case GREEN_NUM:
-      return "green: " +
-             std::to_string(graph.get_count_edges_with_color_num(GREEN_NUM)) +
-             ", ";
-    case YELLOW_NUM:
-      return "yellow: " +
-             std::to_string(graph.get_count_edges_with_color_num(YELLOW_NUM)) +
-             ", ";
-    case RED_NUM:
-      return "red: " +
-             std::to_string(graph.get_count_edges_with_color_num(RED_NUM));
+std::string edge_color_to_string(const Graph::Edge::Color& color) {
+  switch (color) {
+    case Color::Grey:
+      return "gray: ";
+    case Color::Green:
+      return "green: ";
+    case Color::Yellow:
+      return "yellow: ";
+    case Color::Red:
+      return "red: ";
   }
-  throw std::runtime_error("Can't determine color");
 }
 
 std::string generation_finished_string(int graph_num, const Graph& graph) {
@@ -83,9 +73,16 @@ std::string generation_finished_string(int graph_num, const Graph& graph) {
   }
   log_string << "],\n";
 
+  std::vector<Color> colors_of_edges = {Color::Grey, Color::Green,
+                                        Color::Yellow, Color::Red};
   log_string << "  edges: " << graph.get_edges().size() << ", {";
-  for (int num_color = 0; num_color < COLOR_NUM; ++num_color)
-    log_string << color_and_count_edges_to_string(num_color, graph);
+  for (const auto& color : colors_of_edges) {
+    log_string << edge_color_to_string(color)
+               << graph.get_colored_edges(color).size();
+    if (color != Color::Red)
+      log_string << ", ";
+  }
+
   log_string << "}}\n}\n";
 
   return log_string.str();

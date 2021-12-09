@@ -22,10 +22,6 @@ void Logger::set_file(const std::optional<std::string>& filename) {
     return;
   }
 
-  if (file_stream_.has_value()) {
-    file_stream_->close();
-  }
-
   file_stream_ = std::ofstream(filename.value());
 
   if (!file_stream_->is_open()) {

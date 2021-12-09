@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
 
 using Depth = int;
@@ -50,7 +51,7 @@ class Graph {
   }
   const Vertex& get_vertex(const VertexId& id) const { return vertices_[id]; }
   const Edge& get_edge(const EdgeId& id) const { return edges_[id]; }
-  int get_count_edges_with_color_num(const int color_num) const;
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
   bool has_vertex_id(const VertexId& id) const;
   bool is_connected(const VertexId& from_vertex_id,
@@ -58,6 +59,7 @@ class Graph {
 
  private:
   std::vector<std::vector<VertexId>> depth_map_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> edges_color_map_;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
 

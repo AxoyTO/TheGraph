@@ -13,8 +13,6 @@ class Logger {
     return logger;
   }
 
-  Logger& prepare_logger();
-
   void log(const std::string& log_string);
 
   void set_file(const std::optional<std::string>& filename);

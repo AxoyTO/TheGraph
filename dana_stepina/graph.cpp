@@ -51,9 +51,9 @@ void Graph::add_edge(const VertexId& from_vertex_id,
 
   auto& from_vertex = vertices_[from_vertex_id];
   auto& to_vertex = vertices_[to_vertex_id];
-  auto& new_edge =
-      edges_.emplace_back(get_new_edge_id(), from_vertex_id, to_vertex_id,
-                          get_edge_color(from_vertex, to_vertex));
+  const auto& edge_color = get_edge_color(from_vertex, to_vertex);
+  auto& new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id,
+                                       to_vertex_id, edge_color);
   from_vertex.add_edge_id(new_edge.id);
   if (from_vertex_id != to_vertex_id)
     to_vertex.add_edge_id(new_edge.id);
@@ -62,6 +62,8 @@ void Graph::add_edge(const VertexId& from_vertex_id,
     to_vertex.depth = from_vertex.depth + 1;
     set_vertex_depth(from_vertex_id, to_vertex_id);
   }
+
+  edges_color_map_[edge_color].push_back(new_edge.id);
 }
 
 Graph::Edge::Color Graph::get_edge_color(const Vertex& from_vertex,
@@ -96,12 +98,13 @@ void Graph::set_vertex_depth(const VertexId& from_vertex_id,
   depth_map_[get_vertex(to_vertex_id).depth].push_back(to_vertex_id);
 }
 
-int Graph::get_count_edges_with_color_num(const int color_num) const {
-  int cout_edges = 0;
-  for (const auto& edge : edges_)
-    if (static_cast<int>(edge.color) == color_num)
-      cout_edges++;
-  return cout_edges;
+const std::vector<EdgeId>& Graph::get_colored_edges(
+    const Edge::Color& color) const {
+  if (edges_color_map_.find(color) == edges_color_map_.end()) {
+    static std::vector<EdgeId> empty_result;
+    return empty_result;
+  }
+  return edges_color_map_.at(color);
 }
 
 bool Graph::has_vertex_id(const VertexId& id) const {
