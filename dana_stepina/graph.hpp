@@ -46,6 +46,7 @@ class Graph {
   const std::vector<std::vector<VertexId>>& get_depth_map() const {
     return depth_map_;
   }
+  const Depth get_depth() const { return depth_map_.size() - 1; }
   const std::vector<VertexId>& get_vertex_ids_at(const Depth& depth) const {
     return depth_map_[depth];
   }

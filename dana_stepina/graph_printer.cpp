@@ -1,33 +1,38 @@
 #include "graph_printer.hpp"
 
+#include <array>
 #include <iostream>
 #include <sstream>
 
 using Color = uni_cource_cpp::Graph::Edge::Color;
 
+namespace {
+constexpr int NUM_COLORS = 4;
+}
+
 namespace uni_cource_cpp {
 std::string GraphPrinter::print_graph_description(const Graph& graph) {
   std::stringstream log_string;
 
-  const Depth& size_gepth_map = graph.get_depth_map().size() - 1;
+  Depth depth = graph.get_depth();
 
-  log_string << "  depth: " << size_gepth_map << ",\n";
+  log_string << "  depth: " << depth << ",\n";
 
   log_string << "  vertices: " << graph.get_vertices().size() << ", [";
-  for (Depth depth = 0; depth <= size_gepth_map; ++depth) {
+  for (Depth current_depth = 0; current_depth <= depth; ++current_depth) {
     log_string << graph.get_vertex_ids_at(depth).size();
-    if (depth != size_gepth_map)
+    if (current_depth != depth)
       log_string << ", ";
   }
   log_string << "],\n";
 
-  std::vector<Color> colors_of_edges = {Color::Grey, Color::Green,
-                                        Color::Yellow, Color::Red};
+  std::array<Color, NUM_COLORS> colors_of_edges = {Color::Grey, Color::Green,
+                                                   Color::Yellow, Color::Red};
   log_string << "  edges: " << graph.get_edges().size() << ", {";
   for (const auto& color : colors_of_edges) {
     log_string << GraphPrinter::print_edge_color(color) << ": "
                << graph.get_colored_edges(color).size();
-    if (color != Color::Red)
+    if (color != colors_of_edges.back())
       log_string << ", ";
   }
 
