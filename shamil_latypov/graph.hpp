@@ -72,7 +72,7 @@ class Graph {
   int get_vertices_cnt() const;
   int get_edges_cnt() const;
 
-  std::vector<EdgeId> get_edge_vector_for_color(const Edge::Color& color) const;
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
  private:
   VertexId vert_num_ = 0;

@@ -55,7 +55,7 @@ std::string gen_finished_string(int graph_number,
       uni_cource_cpp::Edge::Color::Red};
   for (const auto& color : colors) {
     log_second_string << graph_printer.print_edge_color(color) << ": "
-                      << graph.get_edge_vector_for_color(color).size();
+                      << graph.get_colored_edges(color).size();
     if (&color != colors.end() - 1) {
       log_second_string << ", ";
     }

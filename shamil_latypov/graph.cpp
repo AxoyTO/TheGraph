@@ -140,15 +140,14 @@ int Graph::get_edges_cnt() const {
   return edge_num_ - 1;
 }
 
-std::vector<EdgeId> Graph::get_edge_vector_for_color(
+const std::vector<EdgeId>& Graph::get_colored_edges(
     const Edge::Color& color) const {
-  for (const auto& edge : get_edges()) {
-    if (edge.get_color() == color)
-      return colored_edges_.at(color);
+  if (colored_edges_.find(color) == colored_edges_.end()) {
+    static std::vector<EdgeId> edge_ids;
+    return edge_ids;
   }
 
-  std::vector<EdgeId> edge_ids;
-  return edge_ids;
+  return colored_edges_.at(color);
 }
 
 Edge::Color Graph::calculate_edge_color(const Vertex& vertex1,
