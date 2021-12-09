@@ -18,10 +18,10 @@ using uni_cource_cpp::Logger;
 using Color = Graph::Edge::Color;
 using Params = GraphGenerator::Params;
 
-const std::string filename_folder_path = "./temp/";
-const std::string filename_prefix = "graph_";
-const std::string filename_file_extension = ".json";
-const std::string filename_log = "log.txt";
+const std::string FILENAME_FOLDER_PATH = "./temp/";
+const std::string FILENAME_PREFIX = "graph_";
+const std::string FILENAME_FILE_EXTENSION_JSON = ".json";
+const std::string FILENAME_LOG = "log.txt";
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -34,7 +34,7 @@ std::string get_current_date_time() {
 
 Logger& prepare_logger() {
   auto& logger = Logger::get_logger();
-  logger.set_file(filename_folder_path + filename_log);
+  logger.set_file(FILENAME_FOLDER_PATH + FILENAME_LOG);
   return logger;
 }
 
@@ -43,49 +43,10 @@ std::string generation_started_string(int graph_num) {
          ", Generation Started";
 }
 
-std::string edge_color_to_string(const Graph::Edge::Color& color) {
-  switch (color) {
-    case Color::Grey:
-      return "gray: ";
-    case Color::Green:
-      return "green: ";
-    case Color::Yellow:
-      return "yellow: ";
-    case Color::Red:
-      return "red: ";
-  }
-}
-
 std::string generation_finished_string(int graph_num, const Graph& graph) {
-  std::stringstream log_string;
-
-  log_string << get_current_date_time() << ": Graph " << graph_num + 1
-             << ", Generation Finished {  \n";
-  const Depth& size_gepth_map = graph.get_depth_map().size() - 1;
-
-  log_string << "  depth: " << size_gepth_map << ",\n";
-
-  log_string << "  vertices: " << graph.get_vertices().size() << ", [";
-  for (Depth depth = 0; depth <= size_gepth_map; ++depth) {
-    log_string << graph.get_vertex_ids_at(depth).size();
-    if (depth != size_gepth_map)
-      log_string << ", ";
-  }
-  log_string << "],\n";
-
-  std::vector<Color> colors_of_edges = {Color::Grey, Color::Green,
-                                        Color::Yellow, Color::Red};
-  log_string << "  edges: " << graph.get_edges().size() << ", {";
-  for (const auto& color : colors_of_edges) {
-    log_string << edge_color_to_string(color)
-               << graph.get_colored_edges(color).size();
-    if (color != Color::Red)
-      log_string << ", ";
-  }
-
-  log_string << "}}\n}\n";
-
-  return log_string.str();
+  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) +
+         ", Generation Finished {  \n" +
+         GraphPrinter::print_graph_description(graph);
 }
 
 int handle_depth_input() {
@@ -159,8 +120,8 @@ int main() {
 
     const auto graph_printer = GraphPrinter(graph);
     write_to_file(graph_printer.print(),
-                  filename_folder_path + filename_prefix + std::to_string(i) +
-                      filename_file_extension);
+                  FILENAME_FOLDER_PATH + FILENAME_PREFIX + std::to_string(i) +
+                      FILENAME_FILE_EXTENSION_JSON);
   }
 
   return 0;

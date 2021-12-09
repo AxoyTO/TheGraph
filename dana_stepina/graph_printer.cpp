@@ -1,25 +1,41 @@
 #include "graph_printer.hpp"
 
 #include <iostream>
+#include <sstream>
 
 using Color = uni_cource_cpp::Graph::Edge::Color;
 
-namespace {
-std::string edge_color_to_string(const Color& color) {
-  switch (color) {
-    case Color::Grey:
-      return "\"gray\"\n\t  }";
-    case Color::Green:
-      return "\"green\"\n\t  }";
-    case Color::Yellow:
-      return "\"yellow\"\n\t  }";
-    case Color::Red:
-      return "\"red\"\n\t  }";
-  }
-}
-}  // namespace
-
 namespace uni_cource_cpp {
+std::string GraphPrinter::print_graph_description(const Graph& graph) {
+  std::stringstream log_string;
+
+  const Depth& size_gepth_map = graph.get_depth_map().size() - 1;
+
+  log_string << "  depth: " << size_gepth_map << ",\n";
+
+  log_string << "  vertices: " << graph.get_vertices().size() << ", [";
+  for (Depth depth = 0; depth <= size_gepth_map; ++depth) {
+    log_string << graph.get_vertex_ids_at(depth).size();
+    if (depth != size_gepth_map)
+      log_string << ", ";
+  }
+  log_string << "],\n";
+
+  std::vector<Color> colors_of_edges = {Color::Grey, Color::Green,
+                                        Color::Yellow, Color::Red};
+  log_string << "  edges: " << graph.get_edges().size() << ", {";
+  for (const auto& color : colors_of_edges) {
+    log_string << GraphPrinter::print_edge_color(color) << ": "
+               << graph.get_colored_edges(color).size();
+    if (color != Color::Red)
+      log_string << ", ";
+  }
+
+  log_string << "}}\n}\n";
+
+  return log_string.str();
+}
+
 std::string GraphPrinter::print_vertex(const Graph::Vertex& vertex) const {
   std::string str_vertex = "\t  {\n\t\t\"id\":" + std::to_string(vertex.id) +
                            ",\n\t\t\"edge_ids\":[";
@@ -35,8 +51,21 @@ std::string GraphPrinter::print_vertex(const Graph::Vertex& vertex) const {
 std::string GraphPrinter::print_edge(const Graph::Edge& edge) const {
   return "\t  {\n\t\t\"id\":" + std::to_string(edge.id) +
          ",\n\t\t\"vertex_ids\":[" + std::to_string(edge.vertex_start) + "," +
-         std::to_string(edge.vertex_end) +
-         "],\n\t\t\"color\": " + edge_color_to_string(edge.color);
+         std::to_string(edge.vertex_end) + "],\n\t\t\"color\": \"" +
+         print_edge_color(edge.color) + "\"\n\t  }";
+}
+
+std::string GraphPrinter::print_edge_color(const Color& color) {
+  switch (color) {
+    case Color::Grey:
+      return "gray";
+    case Color::Green:
+      return "green";
+    case Color::Yellow:
+      return "yellow";
+    case Color::Red:
+      return "red";
+  }
 }
 
 std::string GraphPrinter::print() const {

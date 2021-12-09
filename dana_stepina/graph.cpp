@@ -52,8 +52,8 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   auto& from_vertex = vertices_[from_vertex_id];
   auto& to_vertex = vertices_[to_vertex_id];
   const auto& edge_color = get_edge_color(from_vertex, to_vertex);
-  auto& new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id,
-                                       to_vertex_id, edge_color);
+  const auto new_edge = edges_.emplace_back(get_new_edge_id(), from_vertex_id,
+                                            to_vertex_id, edge_color);
   from_vertex.add_edge_id(new_edge.id);
   if (from_vertex_id != to_vertex_id)
     to_vertex.add_edge_id(new_edge.id);

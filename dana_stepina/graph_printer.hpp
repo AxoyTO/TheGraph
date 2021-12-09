@@ -7,6 +7,9 @@
 namespace uni_cource_cpp {
 class GraphPrinter {
  public:
+  static std::string print_edge_color(const Graph::Edge::Color& color);
+  static std::string print_graph_description(const Graph& graph);
+
   explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
 
   std::string print() const;
