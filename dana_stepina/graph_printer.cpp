@@ -26,8 +26,8 @@ std::string GraphPrinter::print_graph_description(const Graph& graph) {
   }
   log_string << "],\n";
 
-  const std::array<Color, NUM_COLORS> colors_of_edges = {Color::Grey, Color::Green,
-                                                   Color::Yellow, Color::Red};
+  const std::array<Color, NUM_COLORS> colors_of_edges = {
+      Color::Grey, Color::Green, Color::Yellow, Color::Red};
   log_string << "  edges: " << graph.get_edges().size() << ", {";
   for (const auto& color : colors_of_edges) {
     log_string << GraphPrinter::print_edge_color(color) << ": "
