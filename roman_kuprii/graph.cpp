@@ -28,6 +28,12 @@ void Vertex::add_edge_id(const EdgeId& _id) {
   edges_ids_.push_back(_id);
 }
 
+VertexId Graph::add_vertex() {
+  const VertexId new_vertex_id = get_next_vertex_id();
+  vertices_.emplace_back(new_vertex_id);
+  return new_vertex_id;
+}
+
 bool Graph::is_vertex_exist(const VertexId& vertex_id) const {
   for (const auto& vertex : vertices_) {
     if (vertex_id == vertex.get_id())

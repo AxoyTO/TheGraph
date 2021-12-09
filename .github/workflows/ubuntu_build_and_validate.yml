@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Get Changed Files
         id: changed_files
-        uses: jitterbit/get-changed-files@v1
+        uses: Ana06/get-changed-files@v2.0.0
       - name: Get Changed Directory
         id: changed_directory
         run: |
