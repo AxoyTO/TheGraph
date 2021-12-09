@@ -2,6 +2,7 @@
 
 #include "graph.hpp"
 
+namespace uni_cource_cpp {
 class GraphGenerator {
  public:
   struct Params {
@@ -19,3 +20,4 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
 };
+}  // namespace uni_cource_cpp
