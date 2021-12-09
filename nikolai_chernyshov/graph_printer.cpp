@@ -2,7 +2,7 @@
 #include <sstream>
 
 namespace {
-std::string vertex_to_json(const uni_course_cpp::Vertex& vertex) {
+std::string print_vertex(const uni_course_cpp::Vertex& vertex) {
   std::string res;
   res += "{\n\t\t\t\"id\": ";
   res += std::to_string(vertex.id);
@@ -25,7 +25,7 @@ std::string vertex_to_json(const uni_course_cpp::Vertex& vertex) {
   return res;
 }
 
-std::string edge_to_json(const uni_course_cpp::Edge& edge) {
+std::string print_edge(const uni_course_cpp::Edge& edge) {
   std::string res;
 
   res += "{\n\t\t\t\"id\": ";
@@ -35,7 +35,7 @@ std::string edge_to_json(const uni_course_cpp::Edge& edge) {
   res += ", ";
   res += std::to_string(edge.vertex2_id);
   res += "],\n\t\t\t\"color\": \"";
-  res += uni_course_cpp::color_to_string(edge.color);
+  res += uni_course_cpp::graph_printing::print_edge_color(edge.color);
   res += "\"\n\t\t}, ";
 
   return res;
@@ -67,7 +67,7 @@ std::string print_graph_description(const Graph& graph) {
   const auto color_edge_count_pairs = graph.get_color_edge_count_pairs();
 
   for (const auto& pair : color_edge_count_pairs) {
-    res << uni_course_cpp::color_to_string(pair.first) << ": " << pair.second;
+    res << print_edge_color(pair.first) << ": " << pair.second;
     res << ", ";
   }
   res.seekp(-2, res.cur);
@@ -75,9 +75,8 @@ std::string print_graph_description(const Graph& graph) {
 
   return res.str();
 }
-}  // namespace graph_printing
 
-std::string color_to_string(const Edge::Color& color) {
+std::string print_edge_color(const Edge::Color& color) {
   switch (color) {
     case Edge::Color::Gray:
       return "gray";
@@ -91,7 +90,7 @@ std::string color_to_string(const Edge::Color& color) {
   throw std::runtime_error("Invalid color value");
 }
 
-std::string GraphPrinter::to_json(const Graph& graph) const {
+std::string print_graph(const Graph& graph) {
   std::string res;
   res += "{\n\t\"depth\": ";
   res += std::to_string(graph.get_depth());
@@ -101,7 +100,7 @@ std::string GraphPrinter::to_json(const Graph& graph) const {
 
   if (!vertices.empty()) {
     for (const auto& vertex : graph.get_vertices()) {
-      res += vertex_to_json(vertex);
+      res += print_vertex(vertex);
       res += ", ";
     }
     res.pop_back();
@@ -114,7 +113,7 @@ std::string GraphPrinter::to_json(const Graph& graph) const {
 
   if (!edges.empty()) {
     for (const auto& edge : graph.get_edges()) {
-      res += edge_to_json(edge);
+      res += print_edge(edge);
     }
     res.pop_back();
     res.pop_back();
@@ -124,5 +123,7 @@ std::string GraphPrinter::to_json(const Graph& graph) const {
 
   return res;
 }
+
+}  // namespace graph_printing
 
 }  // namespace uni_course_cpp

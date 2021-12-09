@@ -1,8 +1,6 @@
 #include <chrono>
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -15,7 +13,6 @@
 
 using uni_course_cpp::Graph;
 using uni_course_cpp::GraphGenerator;
-using uni_course_cpp::GraphPrinter;
 using uni_course_cpp::Logger;
 
 constexpr int MIN_DEPTH = 0;
@@ -77,14 +74,14 @@ std::string get_current_date_time() {
   return date_time_string.str();
 }
 
-std::string gen_started_string(const int graph_number) {
+std::string gen_started_string(int graph_number) {
   std::stringstream res;
   res << get_current_date_time() << ": Graph " << graph_number + 1
       << ", Generation Started\n";
   return res.str();
 }
 
-std::string gen_finished_string(const int graph_number, const Graph& graph) {
+std::string gen_finished_string(int graph_number, const Graph& graph) {
   std::stringstream res;
   res << get_current_date_time() << ": Graph " << graph_number + 1
       << ", Generation Finished ";
@@ -96,7 +93,8 @@ std::string gen_finished_string(const int graph_number, const Graph& graph) {
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory(config::k_temp_directory_path);
+  std::filesystem::create_directory(
+      uni_course_cpp::config::K_TEMP_DIRECTORY_PATH);
 }
 
 int main() {
@@ -109,17 +107,15 @@ int main() {
   const auto generator = GraphGenerator(params);
 
   auto& logger = Logger::get_instance();
-  logger.set_file(config::log_file_path());
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(gen_started_string(i));
     const auto graph = generator.generate();
     logger.log(gen_finished_string(i, graph));
 
-    const GraphPrinter graph_printer;
     std::ofstream myfile;
     myfile.open(FILENAME_PREFIX + std::to_string(i) + FILENAME_SUFFIX);
-    myfile << graph_printer.to_json(graph);
+    myfile << uni_course_cpp::graph_printing::print_graph(graph);
     myfile.close();
   }
 

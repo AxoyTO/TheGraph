@@ -1,5 +1,5 @@
 CC = clang++
-FLAGS = -std=c++17 -Werror -Wall -fsanitize=address
+FLAGS = -std=c++17 -Werror -fsanitize=address
 
 all: clean main.o format
 

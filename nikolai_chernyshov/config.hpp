@@ -3,12 +3,17 @@
 #include <fstream>
 #include <sstream>
 
+namespace uni_course_cpp {
+
 namespace config {
-constexpr const char* k_temp_directory_path = "./temp/";
-constexpr const char* k_log_filename = "log.txt";
-std::string log_file_path() {
+constexpr const char* K_TEMP_DIRECTORY_PATH = "./temp/";
+constexpr const char* K_LOG_FILENAME = "log.txt";
+static std::string log_file_path() {
   std::stringstream res;
-  res << k_temp_directory_path << k_log_filename;
+  res << K_TEMP_DIRECTORY_PATH << K_LOG_FILENAME;
   return res.str();
-};
+}
+
 }  // namespace config
+
+}  // namespace uni_course_cpp

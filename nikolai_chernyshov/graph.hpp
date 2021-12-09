@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
 #include <vector>
 
 namespace uni_course_cpp {
@@ -32,14 +30,7 @@ struct Vertex {
 
   explicit Vertex(const VertexId& _id) : id(_id) {}
 
-  bool has_edge_id(const EdgeId& id) const {
-    if (edge_ids_.empty())
-      return false;
-    if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
-      return true;
-    return false;
-  }
-
+  bool has_edge_id(const EdgeId& id) const;
   void add_edge_id(const EdgeId& id);
   const std::vector<EdgeId>& get_edge_ids() const;
 
@@ -59,7 +50,7 @@ class Graph {
   const VertexId& add_vertex();
   const std::vector<Edge>& get_edges() const;
   const std::vector<Vertex>& get_vertices() const;
-  const std::vector<VertexId>& get_vertex_ids_in_depth(const int depth) const;
+  const std::vector<VertexId>& get_vertex_ids_in_depth(int depth) const;
   const std::vector<std::vector<VertexId>>& get_depth_map() const;
   const int get_depth() const;
   const int get_edges_count_by_color(const Edge::Color color) const;
@@ -76,7 +67,7 @@ class Graph {
   int yellow_edges_count_ = 0;
   int red_edges_count_ = 0;
 
-  void set_vertex_depth(const VertexId& vertex_id, const int depth);
+  void set_vertex_depth(const VertexId& vertex_id, int depth);
   const Edge::Color calculate_edge_color(const VertexId& vertex1_id,
                                          const VertexId& vertex2_id) const;
   const EdgeId get_max_edge_id();

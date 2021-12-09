@@ -1,5 +1,5 @@
+#include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <stdexcept>
 
 #include "graph.hpp"
@@ -12,6 +12,14 @@ void Vertex::add_edge_id(const EdgeId& id) {
 
 const std::vector<EdgeId>& Vertex::get_edge_ids() const {
   return edge_ids_;
+}
+
+bool Vertex::has_edge_id(const EdgeId& id) const {
+  if (edge_ids_.empty())
+    return false;
+  if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
+    return true;
+  return false;
 }
 
 bool Graph::are_connected(const VertexId& vertex1_id,
@@ -111,8 +119,7 @@ const std::vector<Vertex>& Graph::get_vertices() const {
   return vertices_;
 }
 
-const std::vector<VertexId>& Graph::get_vertex_ids_in_depth(
-    const int depth) const {
+const std::vector<VertexId>& Graph::get_vertex_ids_in_depth(int depth) const {
   return depth_map_[depth];
 }
 
@@ -135,7 +142,7 @@ const int Graph::get_edges_count_by_color(const Edge::Color color) const {
     return red_edges_count_;
 };
 
-void Graph::set_vertex_depth(const VertexId& vertex_id, const int depth) {
+void Graph::set_vertex_depth(const VertexId& vertex_id, int depth) {
   Vertex& vertex = get_vertex(vertex_id);
   vertex.depth = depth;
 
