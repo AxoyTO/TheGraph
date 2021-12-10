@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -97,7 +99,9 @@ int main() {
       });
 
   auto traverser = GraphTraverser();
-  traverser.find_shortest_path(graphs[0], 0, 0);
-
+  const auto path = traverser.find_shortest_path(graphs[0], 0, 6);
+  for (const auto id : path->vertex_ids)
+    std::cout << id;
+  std::cout << "\t" << path->distance << std::endl;
   return 0;
 }
