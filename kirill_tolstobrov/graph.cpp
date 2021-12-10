@@ -142,7 +142,7 @@ void Graph::bind_vertices(const VertexId& id1, const VertexId& id2) {
     depths_map_[0].erase(
         std::remove(depths_map_[0].begin(), depths_map_[0].end(), to_id),
         depths_map_[0].end());
-    depths_map_[depths_map_.size() - 1].push_back(to_id);
+    depths_map_[get_vertex(to_id).depth].push_back(to_id);
   }
 
   const auto& edge =
