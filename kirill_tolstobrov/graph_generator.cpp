@@ -1,8 +1,8 @@
 #include "graph_generator.hpp"
 
 #include <atomic>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <list>
 #include <random>
 #include <thread>
@@ -42,16 +42,13 @@ Graph GraphGenerator::generate_random_graph() const {
 
   generate_grey_edges(graph, params_.depth, params_.new_vertices_num);
 
-  std::thread green_thread([&graph, &mutex, this]() {
-    generate_green_edges(graph, mutex);
-  });
-  //generate_blue_edges(graph);
-  std::thread yellow_thread([&graph, &mutex, this]() {
-    generate_yellow_edges(graph, mutex);
-  });
-  std::thread red_thread([&graph, &mutex, this]() {
-    generate_red_edges(graph, mutex);
-  });
+  std::thread green_thread(
+      [&graph, &mutex, this]() { generate_green_edges(graph, mutex); });
+  // generate_blue_edges(graph);
+  std::thread yellow_thread(
+      [&graph, &mutex, this]() { generate_yellow_edges(graph, mutex); });
+  std::thread red_thread(
+      [&graph, &mutex, this]() { generate_red_edges(graph, mutex); });
 
   green_thread.join();
   yellow_thread.join();
@@ -63,30 +60,32 @@ Graph GraphGenerator::generate_random_graph() const {
 void GraphGenerator::generate_grey_edges(Graph& graph,
                                          int depth,
                                          int new_vertices_num) const {
-  using JobCallback = std::function<void()>;  
+  using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
   std::mutex graph_mutex;
 
   const VertexId first_vertex_id = 0;
   std::atomic<int> done_jobs_number = 0;
-  for(int i = 0; i < new_vertices_num; i++) {
-    jobs.push_back([&graph, &graph_mutex, &done_jobs_number, &first_vertex_id, this]() {
-      generate_gray_branch(graph, 0, first_vertex_id, graph_mutex);
-      done_jobs_number++;
-    });
+  for (int i = 0; i < new_vertices_num; i++) {
+    jobs.push_back(
+        [&graph, &graph_mutex, &done_jobs_number, &first_vertex_id, this]() {
+          generate_gray_branch(graph, 0, first_vertex_id, graph_mutex);
+          done_jobs_number++;
+        });
   }
 
   std::mutex jobs_mutex;
   std::atomic<bool> should_terminate = false;
   auto worker = [&jobs, &jobs_mutex, &should_terminate]() {
-    while(true) {
-      if(should_terminate) {
+    while (true) {
+      if (should_terminate) {
         return;
       }
 
-      const auto job_optional = [&jobs, &jobs_mutex]() -> std::optional<JobCallback> {
+      const auto job_optional = [&jobs,
+                                 &jobs_mutex]() -> std::optional<JobCallback> {
         const std::lock_guard lock(jobs_mutex);
-        if(!jobs.empty()) {
+        if (!jobs.empty()) {
           const auto job = jobs.back();
           jobs.pop_back();
           return job;
@@ -94,7 +93,7 @@ void GraphGenerator::generate_grey_edges(Graph& graph,
         return std::nullopt;
       }();
 
-      if(job_optional.has_value()) {
+      if (job_optional.has_value()) {
         const auto& job = job_optional.value();
         job();
       }
@@ -105,22 +104,24 @@ void GraphGenerator::generate_grey_edges(Graph& graph,
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
-  for(int i = 0; i < threads_count; i++) {
+  for (int i = 0; i < threads_count; i++) {
     threads.push_back(std::thread(worker));
   }
 
-
-  while(done_jobs_number < new_vertices_num) {
+  while (done_jobs_number < new_vertices_num) {
   }
 
   should_terminate = true;
-  for(auto& thread : threads) {
+  for (auto& thread : threads) {
     thread.join();
   }
 }
 
-void GraphGenerator::generate_gray_branch(Graph& graph, const int cur_depth, const VertexId& cur_vertex_id, std::mutex& mutex) const {
-  if(cur_depth == params_.depth) {
+void GraphGenerator::generate_gray_branch(Graph& graph,
+                                          const int cur_depth,
+                                          const VertexId& cur_vertex_id,
+                                          std::mutex& mutex) const {
+  if (cur_depth == params_.depth) {
     return;
   }
 
@@ -129,8 +130,8 @@ void GraphGenerator::generate_gray_branch(Graph& graph, const int cur_depth, con
   if (cur_vertex_id == 0) {
     new_vertices_num = 1;
   }
-  for(int i = 0; i < new_vertices_num; i++) {
-    if(random_bool(new_vertex_prob)) {
+  for (int i = 0; i < new_vertices_num; i++) {
+    if (random_bool(new_vertex_prob)) {
       const std::lock_guard lock(mutex);
       const auto new_vertex_id = graph.add_new_vertex();
       graph.bind_vertices(cur_vertex_id, new_vertex_id);
@@ -138,10 +139,10 @@ void GraphGenerator::generate_gray_branch(Graph& graph, const int cur_depth, con
       generate_gray_branch(graph, cur_depth + 1, new_vertex_id, mutex);
     }
   }
-
 }
 
-void GraphGenerator::generate_green_edges(Graph& graph, std::mutex& mutex) const {
+void GraphGenerator::generate_green_edges(Graph& graph,
+                                          std::mutex& mutex) const {
   for (const auto& cur_vertex : graph.get_vertices()) {
     if (random_bool(GREEN_PROB)) {
       const std::lock_guard lock(mutex);
@@ -151,7 +152,8 @@ void GraphGenerator::generate_green_edges(Graph& graph, std::mutex& mutex) const
 }
 
 // void GraphGenerator::generate_blue_edges(Graph& graph) const {
-//   for (int cur_depth = 0; cur_depth < graph.depths_map_.size(); cur_depth++) {
+//   for (int cur_depth = 0; cur_depth < graph.depths_map_.size(); cur_depth++)
+//   {
 //     const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
 //     const int last_id = vertex_ids_at_depth[vertex_ids_at_depth.size() - 1];
 //     for (const VertexId cur_id : vertex_ids_at_depth) {
@@ -162,7 +164,8 @@ void GraphGenerator::generate_green_edges(Graph& graph, std::mutex& mutex) const
 //   }
 // }
 
-void GraphGenerator::generate_yellow_edges(Graph& graph, std::mutex& mutex) const {
+void GraphGenerator::generate_yellow_edges(Graph& graph,
+                                           std::mutex& mutex) const {
   float yellow_probability = 0;
   const float probability_increasement = 1.0 / (graph.depths_map_.size() - 1);
   for (int cur_depth = 0; cur_depth < graph.depths_map_.size() - 1;
