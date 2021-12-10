@@ -7,6 +7,7 @@
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printing.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
@@ -21,6 +22,7 @@ const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
 using uni_cpp_practice::Graph;
 using uni_cpp_practice::GraphGenerator;
+using uni_cpp_practice::GraphTraverser;
 using uni_cpp_practice::Logger;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
 
@@ -93,5 +95,9 @@ int main() {
         graphs.push_back(graph);
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
+
+  auto traverser = GraphTraverser();
+  traverser.find_shortest_path(graphs[0], 0, 0);
+
   return 0;
 }
