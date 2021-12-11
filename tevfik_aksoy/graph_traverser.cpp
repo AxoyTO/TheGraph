@@ -4,7 +4,7 @@
 #include <list>
 #include <queue>
 
-using iPair = std::pair<int, int>;
+using Pair = std::pair<int, int>;
 
 namespace uni_cpp_practice {
 GraphTraverser::GraphTraverser(const Graph& graph)
@@ -21,7 +21,7 @@ GraphTraverser::GraphTraverser(const Graph& graph)
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
-  std::priority_queue<iPair, std::vector<iPair>, std::greater<iPair>> pq;
+  std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> pq;
 
   std::vector<int> dist(vertices_.size(), INT_MAX);
 
