@@ -23,7 +23,6 @@ class GraphTraverser {
 
  private:
   Path path_ = Path();
-  Graph graph_;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
   std::vector<std::vector<Distance>> shortest_paths_;

@@ -1,8 +1,8 @@
 #pragma once
-#include "graph_traverser.hpp"
 #include <functional>
+#include "graph_traverser.hpp"
 
-namespace uni_cpp_practice{
+namespace uni_cpp_practice {
 class GraphTraverserController {
   using TraverserStartedCallback = std::function<void(const Graph&)>;
   using TraverserFinishedCallback =
@@ -12,11 +12,10 @@ class GraphTraverserController {
 
   GraphTraverserController(const Graph& graph);
 
-  void traverse(
-      const TraverserStartedCallback& traversalStartedCallback,
-      const TraverserFinishedCallback& traversalFinishedCallback);
+  void traverse(const TraverserStartedCallback& traversalStartedCallback,
+                const TraverserFinishedCallback& traversalFinishedCallback);
 
  private:
   const Graph graph;
 };
-}
+}  // namespace uni_cpp_practice

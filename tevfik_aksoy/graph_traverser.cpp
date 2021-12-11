@@ -8,14 +8,34 @@ using Pair = std::pair<int, int>;
 
 namespace uni_cpp_practice {
 GraphTraverser::GraphTraverser(const Graph& graph)
-    : graph_(graph),
-      vertices_(graph.get_vertices()),
-      edges_(graph.get_edges()) {
+    : vertices_(graph.get_vertices()), edges_(graph.get_edges()) {
+
   for (const auto& destination_vertex_id :
        graph.get_vertices_in_depth(graph.depth())) {
     std::cout << "Source: 0 --- Destination: " << destination_vertex_id << "\n";
     find_shortest_path(0, destination_vertex_id);
   }
+}
+
+void printPath(std::vector<int> path_vertices, int j) {
+  if (path_vertices[j] == -1)
+    return;
+
+  printPath(path_vertices, path_vertices[j]);
+
+  printf("%d ", j);
+}
+
+void printSolution(std::vector<int> dist,
+                   int V,
+                   std::vector<int> path_vertices) {
+  int src = 0;
+  printf("Vertex\t Distance\tPath");
+  for (int i = 1; i < V; i++) {
+    printf("\n%d -> %d \t\t %d\t\t%d ", src, i, dist[i], src);
+    printPath(path_vertices, i);
+  }
+  std::cout << "\n";
 }
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
@@ -45,6 +65,8 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
       }
     }
   }
+
+  printSolution(dist, vertices_.size(), path_.vertex_ids);
   return std::optional<GraphTraverser::Path>();
 }
 

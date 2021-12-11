@@ -34,7 +34,6 @@ struct Vertex {
 
 struct Edge {
  public:
-  // unknown нужно для return val of calculate_edge_color
   enum class Color { Gray, Green, Blue, Yellow, Red };
   const EdgeId id{};
   const Color color{};
