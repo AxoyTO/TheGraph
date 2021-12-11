@@ -9,69 +9,82 @@ using Pair = std::pair<int, int>;
 namespace uni_cpp_practice {
 GraphTraverser::GraphTraverser(const Graph& graph)
     : vertices_(graph.get_vertices()), edges_(graph.get_edges()) {
-
   for (const auto& destination_vertex_id :
        graph.get_vertices_in_depth(graph.depth())) {
-    std::cout << "Source: 0 --- Destination: " << destination_vertex_id << "\n";
     find_shortest_path(0, destination_vertex_id);
   }
-}
 
-void printPath(std::vector<int> path_vertices, int j) {
-  if (path_vertices[j] == -1)
-    return;
-
-  printPath(path_vertices, path_vertices[j]);
-
-  printf("%d ", j);
-}
-
-void printSolution(std::vector<int> dist,
-                   int V,
-                   std::vector<int> path_vertices) {
-  int src = 0;
-  printf("Vertex\t Distance\tPath");
-  for (int i = 1; i < V; i++) {
-    printf("\n%d -> %d \t\t %d\t\t%d ", src, i, dist[i], src);
-    printPath(path_vertices, i);
+  for (const auto& v : shortest_paths) {
+    for (const auto& p : v.first) {
+      std::cout << p << " ";
+    }
+    // std::cout << v.second; -- distances
+    std::cout << "\n";
   }
-  std::cout << "\n";
+}
+
+void GraphTraverser::save_path(std::vector<VertexId> path_vertices,
+                               VertexId vertex_id) {
+  if (path_vertices[vertex_id] == -1) {
+    path.push_back(vertex_id);
+    return;
+  }
+
+  save_path(path_vertices, path_vertices[vertex_id]);
+  path.push_back(vertex_id);
+}
+
+void GraphTraverser::print_path(std::vector<int> distances,
+                                VertexId destination,
+                                std::vector<int> path_vertices) {
+  // std::cout << "{vertices: [";
+
+  save_path(path_vertices, destination);
+  /*
+  for (const auto& p : path) {
+    std::cout << p << " ";
+  }*/
+  shortest_paths.emplace_back(path, distances[destination]);
+  path.clear();
+  // std::cout << "] distance: " << distances[destination] << "},\n";
 }
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
-  std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> pq;
+  std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>>
+      priority_queue;
 
-  std::vector<int> dist(vertices_.size(), INT_MAX);
+  std::vector<Distance> distances(vertices_.size(), INT_MAX);
 
   for (int i = 0; i < vertices_.size(); i++) {
     path_.vertex_ids.push_back(-1);
   }
 
-  pq.push(std::make_pair(0, source_vertex_id));
-  dist[source_vertex_id] = 0;
+  priority_queue.push(std::make_pair(source_vertex_id, 0));
+  distances[source_vertex_id] = 0;
 
-  while (!pq.empty()) {
-    int u = pq.top().second;
-    pq.pop();
-    for (const auto& i : get_adjacent_with_distances(u)) {
-      int vertex = i.first;
-      int distance = i.second;
-      if (dist[vertex] > dist[u] + distance) {
-        path_.vertex_ids[vertex] = u;
-        dist[vertex] = dist[u] + distance;
-        pq.push(std::make_pair(dist[vertex], vertex));
+  while (!priority_queue.empty()) {
+    VertexId closest_vertex = priority_queue.top().first;
+    priority_queue.pop();
+    for (const auto& vertices_and_distances :
+         get_adjacent_vertices_and_distances(closest_vertex)) {
+      VertexId vertex_id = vertices_and_distances.first;
+      Distance distance = vertices_and_distances.second;
+      if (distances[vertex_id] > distances[closest_vertex] + distance) {
+        path_.vertex_ids[vertex_id] = closest_vertex;
+        distances[vertex_id] = distances[closest_vertex] + distance;
+        priority_queue.push(std::make_pair(vertex_id, distances[vertex_id]));
       }
     }
   }
 
-  printSolution(dist, vertices_.size(), path_.vertex_ids);
+  print_path(distances, destination_vertex_id, path_.vertex_ids);
   return std::optional<GraphTraverser::Path>();
 }
 
 std::vector<std::pair<VertexId, EdgeId>>
-GraphTraverser::get_adjacent_with_distances(const VertexId& vertex_id) {
+GraphTraverser::get_adjacent_vertices_and_distances(const VertexId& vertex_id) {
   std::vector<std::pair<VertexId, EdgeId>> adjacent_vertices;
   auto vertex_edges = vertices_[vertex_id].get_edge_ids();
   for (const auto& edge_id : vertex_edges) {
