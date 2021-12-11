@@ -28,7 +28,8 @@ class GraphTraverser {
                            int destination,
                            std::vector<int> path_vertices);
 
-  std::vector<std::pair<std::vector<VertexId>, Distance>> get_shortest_paths() const;
+  std::vector<std::pair<std::vector<VertexId>, Distance>> get_shortest_paths()
+      const;
 
  private:
   Path path_ = Path();
