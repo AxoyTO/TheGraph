@@ -82,7 +82,7 @@ Edge::Color Graph::calculate_color_for_edge(const Vertex& source,
   throw std::runtime_error("Failed to calculate edge color");
 }
 
-Vertex& Graph::get_vertex(const VertexId& id) {
+const Vertex& Graph::get_vertex(const VertexId& id) const {
   for (auto& vertex : vertices_) {
     if (id == vertex.id)
       return vertex;

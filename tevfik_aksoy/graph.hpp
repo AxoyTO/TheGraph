@@ -65,7 +65,7 @@ class Graph {
   const std::vector<Edge>& get_edges() const;
   const std::vector<VertexId>& get_vertices_in_depth(
       const VertexDepth& depth) const;
-  Vertex& get_vertex(const VertexId& id);
+  const Vertex& get_vertex(const VertexId& id) const;
 
  private:
   std::vector<Edge> edges_;

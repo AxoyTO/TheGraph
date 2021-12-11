@@ -8,6 +8,7 @@
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_printer.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 using Graph = uni_cpp_practice::Graph;
@@ -16,6 +17,7 @@ using GraphPrinter = uni_cpp_practice::GraphPrinter;
 using GraphGenerator = uni_cpp_practice::GraphGenerator;
 using GraphGenerationController = uni_cpp_practice::GraphGenerationController;
 using Logger = uni_cpp_practice::Logger;
+using GraphTraverser = uni_cpp_practice::GraphTraverser;
 
 std::string get_date_and_time() {
   std::time_t now =
@@ -120,25 +122,36 @@ void write_to_file(const GraphPrinter& graph_printer,
   jsonfile.close();
 }
 
+void prepare_temp_directory() {
+  std::filesystem::create_directory("./temp");
+}
+
+void prepare_log_file(Logger& logger) {
+  logger.set_file("./temp/log.txt");
+}
+
 int main() {
   const int threads_count = handle_threads_count_input();
   const int graphs_count = handle_graphs_count_input();
   const int max_depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
+
   const auto params = GraphGenerator::Params(max_depth, new_vertices_num);
+  auto graphs = std::vector<Graph>();
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
   auto& logger = Logger::get_instance();
-  std::filesystem::create_directory("./temp");
-  logger.set_file("./temp/log.txt");
-  auto graphs = std::vector<Graph>();
-  graphs.reserve(graphs_count);
 
+  prepare_temp_directory();
+  prepare_log_file(logger);
+
+  graphs.reserve(graphs_count);
   generation_controller.generate(
       [&logger](int index) { log_start(logger, index); },
       [&logger, &graphs](int index, Graph graph) {
         log_end(logger, graph, index);
         graphs.push_back(graph);
+        GraphTraverser traverser(graph);
         const auto graph_printer = GraphPrinter(graph);
         write_to_file(graph_printer,
                       "./temp/graph_" + std::to_string(index) + ".json");
