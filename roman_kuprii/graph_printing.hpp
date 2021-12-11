@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "graph_traverser.hpp"
+
 namespace uni_cpp_practice {
 
 class Graph;
@@ -13,6 +15,8 @@ std::string color_to_string(const Edge::Color& color);
 std::string graph_to_json(const Graph& graph);
 std::string vertex_to_json(const Vertex& graph);
 std::string edge_to_json(const Graph& graph);
+
+std::string print_path(const GraphTraverser::Path& path);
 
 }  // namespace graph_printing
 

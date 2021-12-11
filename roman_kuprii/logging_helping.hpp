@@ -10,6 +10,7 @@
 
 #include "graph.hpp"
 #include "graph_printing.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 namespace {
@@ -48,7 +49,7 @@ std::string write_log_start(int graph_num) {
   return res;
 }
 
-std::string write_log_end(Graph& work_graph, int graph_num) {
+std::string write_log_end(const Graph& work_graph, int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "  depth: " + to_string(work_graph.get_depth()) + ",\n";
@@ -78,6 +79,30 @@ std::string write_log_end(Graph& work_graph, int graph_num) {
   }
   res.pop_back();
   res += "\n}\n";
+  return res;
+}
+
+std::string write_traverse_start(int graph_num) {
+  std::string res = get_datetime();
+  res += ": Graph " + to_string(graph_num) + ", Traversal Started";
+  return res;
+}
+
+std::string write_traverse_end(
+    int graph_num,
+    const std::vector<GraphTraverser::Path>& pathes) {
+  std::string res = get_datetime();
+  res += ": Graph " + to_string(graph_num) + ", Traversal Finished, Paths: [\n";
+  for (const auto& path : pathes) {
+    res += "  ";
+    res += graph_printing::print_path(path);
+    res += ",\n";
+  }
+  if (pathes.size()) {
+    res.pop_back();
+    res.pop_back();
+  }
+  res += "\n]\n";
   return res;
 }
 

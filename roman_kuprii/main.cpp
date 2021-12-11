@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -10,6 +8,7 @@
 #include "graph_generator.hpp"
 #include "graph_printing.hpp"
 #include "graph_traverser.hpp"
+#include "graph_traversion_controller.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
@@ -27,6 +26,7 @@ using uni_cpp_practice::GraphGenerator;
 using uni_cpp_practice::GraphTraverser;
 using uni_cpp_practice::Logger;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
+using uni_cpp_practice::graph_traversion_controller::GraphTraversionController;
 
 int handle_graphs_number_input() {
   int graphs_quantity = GRAPHS_NUMBER;
@@ -91,17 +91,25 @@ int main() {
       [&logger](int index) {
         logger.log(uni_cpp_practice::logging_helping::write_log_start(index));
       },
-      [&logger, &graphs](uni_cpp_practice::Graph graph, int index) {
+      [&logger, &graphs](const Graph& graph, int index) {
         logger.log(
             uni_cpp_practice::logging_helping::write_log_end(graph, index));
         graphs.push_back(graph);
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
 
-  auto traverser = GraphTraverser();
-  const auto path = traverser.find_shortest_path(graphs[0], 0, 6);
-  for (const auto id : path->vertex_ids)
-    std::cout << id;
-  std::cout << "\t" << path->distance << std::endl;
+  auto traversion_controller =
+      GraphTraversionController(threads_count, graphs_count);
+  traversion_controller.traverse_graphs(
+      graphs,
+      [&logger](int index) {
+        logger.log(
+            uni_cpp_practice::logging_helping::write_traverse_start(index));
+      },
+      [&logger](int index, const std::vector<GraphTraverser::Path>& pathes) {
+        logger.log(uni_cpp_practice::logging_helping::write_traverse_end(
+            index, pathes));
+      });
+
   return 0;
 }

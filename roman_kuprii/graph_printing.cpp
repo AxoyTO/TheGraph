@@ -9,6 +9,7 @@
 
 #include "graph.hpp"
 #include "graph_printing.hpp"
+#include "graph_traverser.hpp"
 
 namespace {
 
@@ -89,6 +90,23 @@ std::string graph_to_json(const Graph& graph) {
     res.pop_back();
   }
   res += " ] }\n";
+  return res;
+}
+
+std::string print_path(const GraphTraverser::Path& path) {
+  std::string res;
+  res = "{vertices: [";
+  for (const auto& vertex_id : path.vertex_ids) {
+    res += to_string(vertex_id);
+    res += ", ";
+  }
+  if (path.vertex_ids.size()) {
+    res.pop_back();
+    res.pop_back();
+  }
+  res += "], distance: ";
+  res += to_string(path.distance);
+  res += "}";
   return res;
 }
 

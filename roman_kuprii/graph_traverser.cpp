@@ -15,7 +15,7 @@ constexpr int VISITED = 1;
 // constexpr int MAX_DISTANCE = INT_MAX;
 constexpr int MAX_DISTANCE = 100000;
 
-std::optional<Vertex> get_vertex_from_id(Graph& graph,
+std::optional<Vertex> get_vertex_from_id(const Graph& graph,
                                          const VertexId& vertex_id) {
   const auto& vertices = graph.get_vertices();
   for (const auto& vertex : vertices)
@@ -24,7 +24,8 @@ std::optional<Vertex> get_vertex_from_id(Graph& graph,
   return std::nullopt;
 }
 
-std::optional<Edge> get_edge_from_id(Graph& graph, const EdgeId& edge_id) {
+std::optional<Edge> get_edge_from_id(const Graph& graph,
+                                     const EdgeId& edge_id) {
   const auto& edges = graph.get_edges();
   for (const auto& edge : edges)
     if (edge.id == edge_id)
@@ -35,7 +36,7 @@ std::optional<Edge> get_edge_from_id(Graph& graph, const EdgeId& edge_id) {
 }  // namespace
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
-    Graph& graph,
+    const Graph& graph,
     const VertexId& source_vertex_id,
     const VertexId& destination_vertex_id) const {
   // unvisited vertices
