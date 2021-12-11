@@ -13,9 +13,9 @@ namespace uni_cpp_practice {
 
 class Graph;
 
-namespace graph_traversion_controller {
+namespace graph_traversal_controller {
 
-class GraphTraversionController {
+class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
   using GetJobCallback = std::function<std::optional<JobCallback>()>;
@@ -41,7 +41,7 @@ class GraphTraversionController {
     std::atomic<State> state_ = State::Idle;
   };
 
-  GraphTraversionController(int threads_count, int graphs_count);
+  GraphTraversalController(int threads_count, int graphs_count);
 
   void traverse_graphs(const std::vector<Graph>& graphs,
                        const GenStartedCallback& gen_started_callback,
@@ -56,6 +56,6 @@ class GraphTraversionController {
   std::mutex get_job_mutex_;
 };
 
-}  // namespace graph_traversion_controller
+}  // namespace graph_traversal_controller
 
 }  // namespace uni_cpp_practice

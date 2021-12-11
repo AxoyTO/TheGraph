@@ -7,15 +7,15 @@
 #include <vector>
 
 #include "graph.hpp"
+#include "graph_traversal_controller.hpp"
 #include "graph_traverser.hpp"
-#include "graph_traversion_controller.hpp"
 
 namespace uni_cpp_practice {
 
-namespace graph_traversion_controller {
+namespace graph_traversal_controller {
 
-GraphTraversionController::GraphTraversionController(int threads_count,
-                                                     int graphs_count)
+GraphTraversalController::GraphTraversalController(int threads_count,
+                                                   int graphs_count)
     : graphs_count_(graphs_count) {
   for (int iter = 0; iter < threads_count; iter++) {
     workers_.emplace_back(
@@ -32,7 +32,7 @@ GraphTraversionController::GraphTraversionController(int threads_count,
   }
 }
 
-void GraphTraversionController::traverse_graphs(
+void GraphTraversalController::traverse_graphs(
     const std::vector<Graph>& graphs,
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
@@ -76,12 +76,12 @@ void GraphTraversionController::traverse_graphs(
   }
 }
 
-GraphTraversionController::Worker::~Worker() {
+GraphTraversalController::Worker::~Worker() {
   if (state_ == State::Working)
     stop();
 }
 
-void GraphTraversionController::Worker::start() {
+void GraphTraversalController::Worker::start() {
   assert(state_ != State::Working);
   state_ = State::Working;
   thread_ =
@@ -99,13 +99,13 @@ void GraphTraversionController::Worker::start() {
       });
 }
 
-void GraphTraversionController::Worker::stop() {
+void GraphTraversalController::Worker::stop() {
   assert(state_ == State::Working);
   state_ = State::ShouldTerminate;
   if (thread_.joinable())
     thread_.join();
 }
 
-}  // namespace graph_traversion_controller
+}  // namespace graph_traversal_controller
 
 }  // namespace uni_cpp_practice

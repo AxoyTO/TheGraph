@@ -7,8 +7,8 @@
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printing.hpp"
+#include "graph_traversal_controller.hpp"
 #include "graph_traverser.hpp"
-#include "graph_traversion_controller.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
@@ -26,7 +26,7 @@ using uni_cpp_practice::GraphGenerator;
 using uni_cpp_practice::GraphTraverser;
 using uni_cpp_practice::Logger;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
-using uni_cpp_practice::graph_traversion_controller::GraphTraversionController;
+using uni_cpp_practice::graph_traversal_controller::GraphTraversalController;
 
 int handle_graphs_number_input() {
   int graphs_quantity = GRAPHS_NUMBER;
@@ -98,9 +98,9 @@ int main() {
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
 
-  auto traversion_controller =
-      GraphTraversionController(threads_count, graphs_count);
-  traversion_controller.traverse_graphs(
+  auto traversal_controller =
+      GraphTraversalController(threads_count, graphs_count);
+  traversal_controller.traverse_graphs(
       graphs,
       [&logger](int index) {
         logger.log(
