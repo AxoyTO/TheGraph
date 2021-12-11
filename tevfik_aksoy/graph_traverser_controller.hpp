@@ -39,6 +39,7 @@ class GraphTraverserController {
                 const TraverserFinishedCallback& traversalFinishedCallback);
 
  private:
+  const Graph graph_;
   const GraphTraverser graph_traverser_;
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;

@@ -21,6 +21,8 @@ using Logger = uni_cpp_practice::Logger;
 using GraphTraverser = uni_cpp_practice::GraphTraverser;
 using GraphTraverserController = uni_cpp_practice::GraphTraverserController;
 
+const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+
 std::string get_date_and_time() {
   std::time_t now =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -119,18 +121,17 @@ void log_paths(Logger& logger, const GraphTraverser graph_traverser) {
   const auto shortest_paths = graph_traverser.get_shortest_paths();
   for (const auto& shortest_path : shortest_paths) {
     logger.log("{vertices: [");
-    for (int i = 0; i < shortest_path.first.size(); i++) {
-      logger.log(std::to_string(shortest_path.first[i]));
-      if (i != shortest_path.first.size() - 1)
+    for (int i = 0; i < shortest_path.vertex_ids.size(); i++) {
+      logger.log(std::to_string(shortest_path.vertex_ids[i]));
+      if (i != shortest_path.vertex_ids.size() - 1)
         logger.log(",");
     }
-    logger.log("], distance: " + std::to_string(shortest_path.second) + "},\n");
+    logger.log("], distance: " + std::to_string(shortest_path.distance) +
+               "},\n");
   }
 }
 
-void log_traverser_start(Logger& logger,
-                         const GraphTraverser& traverser,
-                         int graph_number) {
+void log_traverser_start(Logger& logger, int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Traversal Started\n");
 }
@@ -167,6 +168,71 @@ void traverse_graphs(const std::vector<Graph>& graphs, Logger& logger) {
   // start workers
   // wait for all jobs to be done
   // stop workers
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
+  std::atomic<bool> should_terminate = false;
+  std::atomic<int> jobs_count = 0;
+  // std::mutex traverser_mutex;
+
+  for (int i = 0; i < graphs.size(); i++) {
+    jobs.emplace_back([&graphs, &jobs_count, &i]() {
+      auto traverser = GraphTraverser(graphs[i]);
+      ++jobs_count;
+    });
+  }
+
+  std::mutex jobs_mutex;
+  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional = [&jobs_mutex,
+                                 &jobs]() -> std::optional<JobCallback> {
+        const std::lock_guard lock(jobs_mutex);
+        if (jobs.empty()) {
+          return std::nullopt;
+        }
+        const auto first_job = jobs.front();
+        jobs.pop_front();
+        return first_job;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  const auto threads_count = MAX_WORKERS_COUNT;
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
+
+  for (int i = 0; i < threads_count; ++i) {
+    threads.push_back(std::thread(worker));
+  }
+
+  while (jobs_count < graphs.size()) {
+  }
+
+  should_terminate = true;
+
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  /*
+  for (int i = 0; i < graphs.size(); i++) {
+    auto traverser = GraphTraverser(graphs[i]);
+    auto traverser_controller = GraphTraverserController(graphs[i]);
+    traverser_controller.traverse(
+        [&logger, &i](Graph graph) { log_traverser_start(logger, i); },
+        [&logger, &traverser, &i](Graph graph,
+                                  std::vector<GraphTraverser::Path> paths) {
+          log_traverser_end(logger, traverser, i);
+        });
+  }
+   */
 }
 
 int main() {
@@ -192,14 +258,14 @@ int main() {
         log_end(logger, graph, index);
         graphs.push_back(graph);
         GraphTraverser traverser(graph);
-        log_traverser_start(logger, traverser, index);
+        log_traverser_start(logger, index);
         log_traverser_end(logger, traverser, index);
         const auto graph_printer = GraphPrinter(graph);
         write_to_file(graph_printer,
                       "./temp/graph_" + std::to_string(index) + ".json");
       });
 
-  // traverse_graphs(graphs, logger);
+  //traverse_graphs(graphs, logger);
 
   return 0;
 }
