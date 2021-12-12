@@ -1,6 +1,11 @@
+#include <atomic>
 #include <cassert>
+#include <functional>
+#include <list>
+#include <mutex>
 #include <optional>
 #include <queue>
+#include <thread>
 #include <vector>
 
 #include "graph.hpp"
@@ -12,8 +17,8 @@ namespace {
 
 constexpr int UNVISITED = 0;
 constexpr int VISITED = 1;
-// constexpr int MAX_DISTANCE = INT_MAX;
-constexpr int MAX_DISTANCE = 100000;
+constexpr int MAX_DISTANCE = 10000;
+const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
 std::optional<Vertex> get_vertex_from_id(const Graph& graph,
                                          const VertexId& vertex_id) {
@@ -33,26 +38,43 @@ std::optional<Edge> get_edge_from_id(const Graph& graph,
   return std::nullopt;
 }
 
+std::vector<uni_cpp_practice::VertexId> get_max_depth_vertices_ids(
+    const uni_cpp_practice::Graph& graph) {
+  const auto vertices = graph.get_vertices();
+  std::vector<uni_cpp_practice::VertexId> vertex_ids;
+  for (const auto& vertex : vertices)
+    if (vertex.depth == graph.get_depth())
+      vertex_ids.push_back(vertex.get_id());
+  return vertex_ids;
+}
+
 }  // namespace
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     const Graph& graph,
     const VertexId& source_vertex_id,
-    const VertexId& destination_vertex_id) const {
+    const VertexId& destination_vertex_id,
+    std::mutex& graph_mutex) const {
+  int vertices_number;
+  const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
+                               &source_vertex_id]() -> std::optional<Vertex> {
+    std::lock_guard lock(graph_mutex);
+    vertices_number = graph.get_vertices_num();
+    const auto& vertex = get_vertex_from_id(graph, source_vertex_id);
+    assert(vertex.has_value());
+    return vertex;
+  }();
   // unvisited vertices
-  std::vector<VertexId> vertices(graph.get_vertices_num(), UNVISITED);
+  std::vector<VertexId> vertices(vertices_number, UNVISITED);
   vertices[source_vertex_id] = VISITED;
-  // get source vertex
-  const auto& source_vertex = get_vertex_from_id(graph, source_vertex_id);
-  assert(source_vertex.has_value());
+  // create distances
+  std::vector<Distance> distance(vertices_number, MAX_DISTANCE);
+  distance[source_vertex_id] = 0;
   // create queue
   std::queue<Vertex> vertices_queue;
   vertices_queue.push(source_vertex.value());
-  // create distances
-  std::vector<Distance> distance(graph.get_vertices_num(), MAX_DISTANCE);
-  distance[source_vertex_id] = 0;
   // create path
-  std::vector<std::vector<VertexId>> all_pathes(graph.get_vertices_num());
+  std::vector<std::vector<VertexId>> all_pathes(vertices_number);
   std::vector<VertexId> source_vector(1, source_vertex_id);
   all_pathes[source_vertex_id] = source_vector;
 
@@ -62,22 +84,19 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
 
     // check all outcoming edges
     for (const auto& edge_id : current_vertex.get_edges_ids()) {
-      const auto& edge = get_edge_from_id(graph, edge_id);
-      assert(edge.has_value());
-      const auto& next_vertex_id = edge->connected_vertices.back();
-      const auto& next_vertex = get_vertex_from_id(graph, next_vertex_id);
-      assert(next_vertex.has_value());
+      VertexId next_vertex_id;
+      const auto& next_vertex = [&graph_mutex, &graph, &edge_id,
+                                 &next_vertex_id]() -> std::optional<Vertex> {
+        std::lock_guard lock(graph_mutex);
+        const auto& edge = get_edge_from_id(graph, edge_id);
+        assert(edge.has_value());
+        next_vertex_id = edge->connected_vertices.back();
+        const auto& next_vertex = get_vertex_from_id(graph, next_vertex_id);
+        assert(next_vertex.has_value());
+        return next_vertex;
+      }();
       // update distances
       if (distance[current_vertex.get_id()] + 1 < distance[next_vertex_id]) {
-        if (distance[next_vertex_id] != MAX_DISTANCE) {
-          //          vertices_queue.pop();
-
-          //            for (auto it = vertices_queue.begin(); it !=
-          //            vertices_queue.end(); it++) {
-          //                vertices_queue.erase(next_vertex);
-          //                break;
-          //            }
-        }
         vertices_queue.push(next_vertex.value());
         distance[next_vertex_id] = distance[current_vertex.get_id()] + 1;
         all_pathes[next_vertex_id] = all_pathes[current_vertex.get_id()];
@@ -91,6 +110,71 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
   }
 
   return std::nullopt;
+}
+
+std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph(
+    const Graph& graph) {
+  std::list<std::function<void()>> jobs;
+  std::atomic<int> completed_jobs = 0;
+  std::mutex graph_mutex;
+  std::mutex path_mutex;
+  auto vertex_ids = get_max_depth_vertices_ids(graph);
+  std::vector<GraphTraverser::Path> pathes;
+  pathes.reserve(vertex_ids.size());
+
+  for (const auto& vertex_id : vertex_ids)
+    jobs.emplace_back([this, &graph, &completed_jobs, &graph_mutex, &vertex_id,
+                       &pathes, &path_mutex]() {
+      auto path = find_shortest_path(graph, 0, vertex_id, graph_mutex);
+      {
+        std::lock_guard lock(path_mutex);
+        if (path.has_value())
+          pathes.emplace_back(path.value());
+      }
+      completed_jobs++;
+    });
+
+  std::atomic<bool> should_terminate = false;
+  std::mutex jobs_mutex;
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional =
+          [&jobs_mutex, &jobs]() -> std::optional<std::function<void()>> {
+        const std::lock_guard lock(jobs_mutex);
+        if (jobs.empty()) {
+          return std::nullopt;
+        }
+        const auto job = jobs.front();
+        jobs.pop_front();
+        return job;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  const auto threads_number = std::min(vertex_ids.size(), MAX_WORKERS_COUNT);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_number);
+
+  for (int i = 0; i < threads_number; ++i) {
+    threads.emplace_back(worker);
+  }
+
+  while (completed_jobs != vertex_ids.size()) {
+  }
+
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  return pathes;
 }
 
 }  // namespace uni_cpp_practice

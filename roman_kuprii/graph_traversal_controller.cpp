@@ -10,20 +10,6 @@
 #include "graph_traversal_controller.hpp"
 #include "graph_traverser.hpp"
 
-namespace {
-
-std::vector<uni_cpp_practice::VertexId> get_max_depth_vertices_ids(
-    const uni_cpp_practice::Graph& graph) {
-  const auto vertices = graph.get_vertices();
-  std::vector<uni_cpp_practice::VertexId> vertex_ids;
-  for (const auto& vertex : vertices)
-    if (vertex.depth == graph.get_depth())
-      vertex_ids.push_back(vertex.get_id());
-  return vertex_ids;
-}
-
-}  // namespace
-
 namespace uni_cpp_practice {
 
 namespace graph_traversal_controller {
@@ -69,17 +55,8 @@ void GraphTraversalController::traverse_graphs(
           gen_started_callback(i);
         }
 
-        auto vertex_ids = get_max_depth_vertices_ids(graphs[i]);
-        std::vector<GraphTraverser::Path> pathes;
-        pathes.reserve(vertex_ids.size());
-
         GraphTraverser graph_traverser;
-        for (const auto vertex_id : vertex_ids) {
-          auto path =
-              graph_traverser.find_shortest_path(graphs[i], 0, vertex_id);
-          if (path.has_value())
-            pathes.emplace_back(path.value());
-        }
+        auto pathes = graph_traverser.traverse_graph(graphs[i]);
 
         {
           const std::lock_guard lock(finish_callback_mutex_);
