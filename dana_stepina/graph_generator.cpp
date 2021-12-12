@@ -10,11 +10,14 @@ constexpr int MAX_PROBABILITY = 100, GREEN_PROBABILITY = 10,
               RED_PROBABILITY = 33;
 
 namespace {
-Probability get_probability(Depth depth, Depth current_depth) {
+using Graph = uni_cource_cpp::Graph;
+using Params = uni_cource_cpp::GraphGenerator::Params;
+
+Probability get_probability(const Depth& depth, const Depth& current_depth) {
   return floor(MAX_PROBABILITY * (depth - current_depth) / depth);
 }
 
-bool is_lucky(Probability probability) {
+bool is_lucky(const Probability& probability) {
   std::random_device rand;
   std::mt19937 generator(rand());
   std::bernoulli_distribution distribution(probability * 0.01);
@@ -28,7 +31,7 @@ VertexId choose_random_vertex_id(const std::vector<VertexId>& vertex_ids) {
   return vertex_ids[distribution(generator)];
 }
 
-void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
+void generate_grey_edges(Graph& graph, const Params& params) {
   graph.add_vertex();  // Zero vertex
 
   for (Depth depth = 0; depth <= params.depth; depth++) {
@@ -50,7 +53,6 @@ void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
     if (!any_new_vertex_generated)
       break;
   }
-
   if (graph.get_depth_map().size() - 1 < params.depth)
     std::cout
         << "The resulting depth of the generated graph is less than expected.\n"
@@ -60,9 +62,7 @@ void generate_grey_edges(Graph& graph, const GraphGenerator::Params& params) {
 }
 
 void generate_green_edges(Graph& graph) {
-  /*A copy is needed, since the vector over which it is iterated changes in the
-   * process*/
-  const auto depth_map = graph.get_depth_map();
+  const auto& depth_map = graph.get_depth_map();
 
   for (const auto& vertex_ids : depth_map)
     for (const auto& vertex_id : vertex_ids)
@@ -85,13 +85,15 @@ void generate_yellow_edges(Graph& graph) {
   const auto& depth_map = graph.get_depth_map();
 
   for (Depth depth = 0; depth < depth_map.size() - 1; depth++) {
-    const auto& probability =
+    const auto probability =
         MAX_PROBABILITY - get_probability(depth_map.size() - 2, depth);
 
     for (const auto& from_vertex_id : depth_map[depth]) {
       if (is_lucky(probability)) {
-        const std::vector<VertexId> vertex_ids = get_unconnected_vertex_ids(
+        const std::vector<VertexId>& vertex_ids = get_unconnected_vertex_ids(
             from_vertex_id, depth_map[depth + 1], graph);
+        if (vertex_ids.size() == 0)
+          break;
         graph.add_edge(from_vertex_id, choose_random_vertex_id(vertex_ids));
       }
     }
@@ -112,6 +114,7 @@ void generate_red_edges(Graph& graph) {
 }
 }  // namespace
 
+namespace uni_cource_cpp {
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   generate_grey_edges(graph, params_);
@@ -121,3 +124,4 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
+}  // namespace uni_cource_cpp
