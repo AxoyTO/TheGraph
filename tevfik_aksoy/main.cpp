@@ -265,7 +265,7 @@ int main() {
                       "./temp/graph_" + std::to_string(index) + ".json");
       });
 
-  //traverse_graphs(graphs, logger);
+  // traverse_graphs(graphs, logger);
 
   return 0;
 }
