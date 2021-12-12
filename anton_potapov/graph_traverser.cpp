@@ -54,3 +54,7 @@ std::map<VertexId, int> GraphTraverser::dynamic_bfs(const Graph& graph,
   }
   return depths;
 }
+
+int get_vertex_depth(const Graph &Graph) {
+  
+}
