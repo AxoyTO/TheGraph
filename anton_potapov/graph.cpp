@@ -149,29 +149,22 @@ EdgeId Graph::get_next_edge_id() {
 bool Graph::new_edge_color_is_correct(const VertexId& vertex1_id,
                                       const VertexId& vertex2_id,
                                       const EdgeColor& color) const {
-  bool is_correct;
   switch (color) {
     case EdgeColor::Gray:
-      is_correct = get_vertex(vertex1_id).connected_edges().empty() ||
-                   get_vertex(vertex2_id).connected_edges().empty();
-      break;
+      return get_vertex(vertex1_id).connected_edges().empty() ||
+             get_vertex(vertex2_id).connected_edges().empty();
     case EdgeColor::Green:
-      is_correct = vertex1_id == vertex2_id;
-      break;
+      return vertex1_id == vertex2_id;
     case EdgeColor::Blue:
-      is_correct = get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
-      break;
+      return get_vertex(vertex1_id).depth == get_vertex(vertex2_id).depth;
     case EdgeColor::Yellow:
-      is_correct = (std::abs(get_vertex(vertex1_id).depth -
-                             get_vertex(vertex2_id).depth) == 1) &&
-                   !is_connected(vertex1_id, vertex2_id);
-      break;
+      return (std::abs(get_vertex(vertex1_id).depth -
+                       get_vertex(vertex2_id).depth) == 1) &&
+             !is_connected(vertex1_id, vertex2_id);
     case EdgeColor::Red:
-      is_correct = std::abs(get_vertex(vertex1_id).depth -
-                            get_vertex(vertex2_id).depth) == 2;
-      break;
+      return std::abs(get_vertex(vertex1_id).depth -
+                      get_vertex(vertex2_id).depth) == 2;
   }
-  return is_correct;
 }
 
 VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
