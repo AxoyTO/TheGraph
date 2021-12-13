@@ -2,6 +2,8 @@
 
 #include "config.hpp"
 
-std::string config::log_file_path() {
-    return "";
+namespace config {
+std::string log_file_path() {
+  return "";
 }
+}  // namespace config

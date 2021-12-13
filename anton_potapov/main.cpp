@@ -6,6 +6,10 @@
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerator;
+using uni_cource_cpp::GraphPrinter;
+
 int handle_depth_input() {
   while (true) {
     std::cout << "Input the depth parameter: " << std::flush;

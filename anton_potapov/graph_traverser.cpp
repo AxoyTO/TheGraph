@@ -5,6 +5,7 @@
 #include "graph.hpp"
 #include "graph_traverser.hpp"
 
+namespace uni_cource_cpp {
 std::map<VertexId, int> GraphTraverser::dynamic_bfs(const Graph& graph,
                                                     int start_depth) {
   // NOT WORKING: recursive call + returns depths only at last depths
@@ -54,3 +55,4 @@ std::map<VertexId, int> GraphTraverser::dynamic_bfs(const Graph& graph,
   }
   return depths;
 }
+}  // namespace uni_cource_cpp

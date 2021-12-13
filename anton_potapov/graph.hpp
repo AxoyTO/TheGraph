@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 
+namespace uni_cource_cpp {
 using VertexId = int;
 using EdgeId = int;
 
@@ -86,7 +87,8 @@ class Graph {
 
   bool new_edge_color_is_correct(const VertexId& vertex1_id,
                                  const VertexId& vertex2_id,
-                                 const EdgeColor& color);
+                                 const EdgeColor& color) const;
 
   void update_vertices_depth();
 };
+}  // namespace uni_cource_cpp

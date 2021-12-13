@@ -3,6 +3,7 @@
 #include "graph.hpp"
 #include "graph_printer.hpp"
 
+namespace uni_cource_cpp {
 GraphPrinter::GraphPrinter(const Graph& input_graph) : graph(input_graph) {}
 
 std::string GraphPrinter::print() const {
@@ -52,3 +53,4 @@ std::string GraphPrinter::print_edge(const Edge& Edge) const {
                     << "\"}";
   return json_stringstream.str();
 }
+}  // namespace uni_cource_cpp

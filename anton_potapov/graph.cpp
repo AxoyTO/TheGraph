@@ -1,11 +1,13 @@
-#include "graph.hpp"
 #include <algorithm>
 #include <cassert>
 #include <random>
 #include <utility>
 #include <vector>
+
+#include "graph.hpp"
 #include "graph_traverser.hpp"
 
+namespace uni_cource_cpp {
 std::string get_edge_color_string(const EdgeColor& color) {
   switch (color) {
     case EdgeColor::Gray:
@@ -251,3 +253,4 @@ const std::map<VertexId, Vertex>& Graph::vertices() {
   update_vertices_depth();
   return vertices_;
 }
+}  // namespace uni_cource_cpp

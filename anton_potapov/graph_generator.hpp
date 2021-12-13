@@ -2,12 +2,7 @@
 
 #include "graph.hpp"
 
-void generate_vertices(Graph& graph, int depth, int new_vertices_num);
-void generate_green_edges(Graph& graph);
-void generate_blue_edges(Graph& graph);
-void generate_yellow_edges(Graph& graph);
-void generate_red_edges(Graph& graph);
-
+namespace uni_cource_cpp {
 class GraphGenerator {
  public:
   struct Params {
@@ -21,3 +16,4 @@ class GraphGenerator {
  private:
   const Params params_{};
 };
+}  // namespace uni_cource_cpp
