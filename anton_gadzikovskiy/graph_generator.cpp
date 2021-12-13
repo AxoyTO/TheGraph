@@ -228,6 +228,7 @@ void generate_gray_edges(Graph& graph, int depth, int new_vertices_num) {
     double step = 100 / depth;
     double probability = 100 - step * current_depth;
     if (current_depth < graph.depth()) {
+      //Создаю копию, чтобы не менять объект по которому итерирую
       const auto vertex_ids_on_depth =
           graph.get_vertices_on_depth().at(current_depth);
       for (const auto& from_vertex_id : vertex_ids_on_depth) {
