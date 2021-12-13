@@ -4,7 +4,7 @@
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
-class GraphTraverser {
+class GraphTraversal {
  public:
   using Distance = int;
 
@@ -14,25 +14,21 @@ class GraphTraverser {
     Distance distance = 0;
   };
 
-  GraphTraverser(const Graph& graph);
+  GraphTraversal(const Graph& graph);
 
-  std::vector<std::pair<VertexId, EdgeId>> get_adjacent_vertices_and_distances(
-      const VertexId& vertex_id);
-
-  std::optional<Path> find_shortest_path(VertexId source_vertex_id,
-                                         VertexId destination_vertex_id);
-
-  std::vector<GraphTraverser::Path> get_shortest_paths() const;
-
-  //  std::vector<std::pair<std::vector<VertexId>, Distance>>
-  //  get_shortest_paths()
-  //      const;
+  std::vector<GraphTraversal::Path> get_shortest_paths() const;
 
  private:
   Path path_ = Path();
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
   std::vector<Path> shortest_paths_;
+
+  std::vector<std::pair<VertexId, EdgeId>> get_adjacent_vertices_and_distances(
+      const VertexId& vertex_id);
+
+  std::optional<Path> find_shortest_path(VertexId source_vertex_id,
+                                         VertexId destination_vertex_id);
 
   void parse_shortest_path(std::vector<VertexId> path_vertices,
                            VertexId vertex_id);

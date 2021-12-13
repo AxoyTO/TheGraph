@@ -1,13 +1,15 @@
-#include "graph_traverser.hpp"
+#include "graph_traversal.hpp"
 #include <climits>
 #include <iostream>
 #include <list>
 #include <queue>
 
-using Pair = std::pair<int, int>;
+constexpr int DUMMY_DISTANCE_VALUE = -1;
+using Distance = uni_cpp_practice::GraphTraversal::Distance;
 
 namespace uni_cpp_practice {
-GraphTraverser::GraphTraverser(const Graph& graph)
+
+GraphTraversal::GraphTraversal(const Graph& graph)
     : vertices_(graph.get_vertices()), edges_(graph.get_edges()) {
   for (const auto& destination_vertex_id :
        graph.get_vertices_in_depth(graph.depth())) {
@@ -15,9 +17,9 @@ GraphTraverser::GraphTraverser(const Graph& graph)
   }
 }
 
-void GraphTraverser::parse_shortest_path(std::vector<VertexId> path_vertices,
+void GraphTraversal::parse_shortest_path(std::vector<VertexId> path_vertices,
                                          VertexId vertex_id) {
-  if (path_vertices[vertex_id] == -1) {
+  if (path_vertices[vertex_id] == DUMMY_DISTANCE_VALUE) {
     path_.vertex_ids.push_back(vertex_id);
     return;
   }
@@ -26,7 +28,7 @@ void GraphTraverser::parse_shortest_path(std::vector<VertexId> path_vertices,
   path_.vertex_ids.push_back(vertex_id);
 }
 
-void GraphTraverser::save_shortest_paths(std::vector<int> distances,
+void GraphTraversal::save_shortest_paths(std::vector<int> distances,
                                          VertexId destination,
                                          std::vector<int> path_vertices) {
   parse_shortest_path(path_vertices, destination);
@@ -35,20 +37,22 @@ void GraphTraverser::save_shortest_paths(std::vector<int> distances,
   path_.vertex_ids.clear();
 }
 
-std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
+std::optional<GraphTraversal::Path> GraphTraversal::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
   if (vertices_.size() == 1)
     return std::nullopt;
 
-  std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>>
+  std::priority_queue<std::pair<VertexId, Distance>,
+                      std::vector<std::pair<VertexId, Distance>>,
+                      std::greater<std::pair<VertexId, Distance>>>
       priority_queue;
 
   std::vector<Distance> distances(vertices_.size(), INT_MAX);
   std::vector<VertexId> dummy_path_vertices;
 
   for (int i = 0; i < vertices_.size(); i++) {
-    dummy_path_vertices.push_back(-1);
+    dummy_path_vertices.push_back(DUMMY_DISTANCE_VALUE);
   }
 
   priority_queue.push(std::make_pair(source_vertex_id, 0));
@@ -73,12 +77,12 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
   return path_;
 }
 
-std::vector<GraphTraverser::Path> GraphTraverser::get_shortest_paths() const {
+std::vector<GraphTraversal::Path> GraphTraversal::get_shortest_paths() const {
   return shortest_paths_;
 }
 
 std::vector<std::pair<VertexId, EdgeId>>
-GraphTraverser::get_adjacent_vertices_and_distances(const VertexId& vertex_id) {
+GraphTraversal::get_adjacent_vertices_and_distances(const VertexId& vertex_id) {
   std::vector<std::pair<VertexId, EdgeId>> adjacent_vertices;
   auto vertex_edges = vertices_[vertex_id].get_edge_ids();
   for (const auto& edge_id : vertex_edges) {

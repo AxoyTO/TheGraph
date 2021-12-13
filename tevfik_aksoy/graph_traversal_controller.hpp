@@ -3,17 +3,17 @@
 #include <functional>
 #include <mutex>
 #include <thread>
-#include "graph_traverser.hpp"
+#include "graph_traversal.hpp"
 
 namespace uni_cpp_practice {
-class GraphTraverserController {
+class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
-  using TraverserStartedCallback = std::function<void(const Graph&)>;
-  using TraverserFinishedCallback =
-      std::function<void(const Graph&, std::vector<GraphTraverser::Path>)>;
+  using TraversalStartedCallback = std::function<void(int)>;
+  using TraversalFinishedCallback =
+      std::function<void(int, std::vector<GraphTraversal::Path>)>;
 
-  GraphTraverserController(const Graph& graph);
+  GraphTraversalController(const std::vector<Graph>& graphs);
 
   class Worker {
    public:
@@ -35,12 +35,12 @@ class GraphTraverserController {
     GetJobCallback get_job_callback_;
   };
 
-  void traverse(const TraverserStartedCallback& traversalStartedCallback,
-                const TraverserFinishedCallback& traversalFinishedCallback);
+  void traverse(const TraversalStartedCallback& traversalStartedCallback,
+                const TraversalFinishedCallback& traversalFinishedCallback);
 
  private:
-  const Graph graph_;
-  const GraphTraverser graph_traverser_;
+  const std::vector<Graph>& graphs_;
+  const int graphs_count_;
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   std::mutex mutex_;

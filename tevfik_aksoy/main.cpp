@@ -8,8 +8,8 @@
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_printer.hpp"
-#include "graph_traverser.hpp"
-#include "graph_traverser_controller.hpp"
+#include "graph_traversal.hpp"
+#include "graph_traversal_controller.hpp"
 #include "logger.hpp"
 
 using Graph = uni_cpp_practice::Graph;
@@ -18,8 +18,8 @@ using GraphPrinter = uni_cpp_practice::GraphPrinter;
 using GraphGenerator = uni_cpp_practice::GraphGenerator;
 using GraphGenerationController = uni_cpp_practice::GraphGenerationController;
 using Logger = uni_cpp_practice::Logger;
-using GraphTraverser = uni_cpp_practice::GraphTraverser;
-using GraphTraverserController = uni_cpp_practice::GraphTraverserController;
+using GraphTraversal = uni_cpp_practice::GraphTraversal;
+using GraphTraversalController = uni_cpp_practice::GraphTraversalController;
 
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
@@ -117,8 +117,8 @@ void log_end(Logger& logger, const Graph& graph, int graph_number) {
   logger.log("}\n}\n");
 }
 
-void log_paths(Logger& logger, const GraphTraverser graph_traverser) {
-  const auto shortest_paths = graph_traverser.get_shortest_paths();
+void log_paths(Logger& logger, const GraphTraversal graph_traversal) {
+  const auto shortest_paths = graph_traversal.get_shortest_paths();
   for (const auto& shortest_path : shortest_paths) {
     logger.log("{vertices: [");
     for (int i = 0; i < shortest_path.vertex_ids.size(); i++) {
@@ -131,17 +131,17 @@ void log_paths(Logger& logger, const GraphTraverser graph_traverser) {
   }
 }
 
-void log_traverser_start(Logger& logger, int graph_number) {
+void log_traversal_start(Logger& logger, int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Traversal Started\n");
 }
 
-void log_traverser_end(Logger& logger,
-                       const GraphTraverser& traverser,
+void log_traversal_end(Logger& logger,
+                       const GraphTraversal& traversal,
                        int graph_number) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Traversal Finished, Paths: [  \n");
-  log_paths(logger, traverser);
+  log_paths(logger, traversal);
   logger.log("]\n");
 }
 
@@ -160,79 +160,6 @@ void prepare_temp_directory() {
 
 void prepare_log_file(Logger& logger) {
   logger.set_file("./temp/log.txt");
-}
-
-void traverse_graphs(const std::vector<Graph>& graphs, Logger& logger) {
-  // prepare jobs
-  // prepare workers
-  // start workers
-  // wait for all jobs to be done
-  // stop workers
-  using JobCallback = std::function<void()>;
-  auto jobs = std::list<JobCallback>();
-  std::atomic<bool> should_terminate = false;
-  std::atomic<int> jobs_count = 0;
-  // std::mutex traverser_mutex;
-
-  for (int i = 0; i < graphs.size(); i++) {
-    jobs.emplace_back([&graphs, &jobs_count, &i]() {
-      auto traverser = GraphTraverser(graphs[i]);
-      ++jobs_count;
-    });
-  }
-
-  std::mutex jobs_mutex;
-  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
-    while (true) {
-      if (should_terminate) {
-        return;
-      }
-      const auto job_optional = [&jobs_mutex,
-                                 &jobs]() -> std::optional<JobCallback> {
-        const std::lock_guard lock(jobs_mutex);
-        if (jobs.empty()) {
-          return std::nullopt;
-        }
-        const auto first_job = jobs.front();
-        jobs.pop_front();
-        return first_job;
-      }();
-      if (job_optional.has_value()) {
-        const auto& job = job_optional.value();
-        job();
-      }
-    }
-  };
-
-  const auto threads_count = MAX_WORKERS_COUNT;
-  auto threads = std::vector<std::thread>();
-  threads.reserve(threads_count);
-
-  for (int i = 0; i < threads_count; ++i) {
-    threads.push_back(std::thread(worker));
-  }
-
-  while (jobs_count < graphs.size()) {
-  }
-
-  should_terminate = true;
-
-  for (auto& thread : threads) {
-    thread.join();
-  }
-
-  /*
-  for (int i = 0; i < graphs.size(); i++) {
-    auto traverser = GraphTraverser(graphs[i]);
-    auto traverser_controller = GraphTraverserController(graphs[i]);
-    traverser_controller.traverse(
-        [&logger, &i](Graph graph) { log_traverser_start(logger, i); },
-        [&logger, &traverser, &i](Graph graph,
-                                  std::vector<GraphTraverser::Path> paths) {
-          log_traverser_end(logger, traverser, i);
-        });
-  }
-   */
 }
 
 int main() {
@@ -257,15 +184,25 @@ int main() {
       [&logger, &graphs](int index, Graph graph) {
         log_end(logger, graph, index);
         graphs.push_back(graph);
-        GraphTraverser traverser(graph);
-        log_traverser_start(logger, index);
-        log_traverser_end(logger, traverser, index);
+        // GraphTraversal traversal(graph);
+        // log_traversal_start(logger, index);
+        // log_traversal_end(logger, traversal, index);
         const auto graph_printer = GraphPrinter(graph);
         write_to_file(graph_printer,
                       "./temp/graph_" + std::to_string(index) + ".json");
       });
 
   // traverse_graphs(graphs, logger);
+
+  auto traversal_controller = GraphTraversalController(graphs);
+  traversal_controller.traverse(
+      [&logger](int index) { log_traversal_start(logger, index); },
+      [&logger, &graphs](int index, std::vector<GraphTraversal::Path> path) {
+        GraphTraversal traversal(graphs[index]);
+        log_traversal_end(logger, traversal, index);
+      }
+
+  );
 
   return 0;
 }
