@@ -125,17 +125,19 @@ void GraphGenerator::generate_gray_branch(Graph& graph,
   }
 
   const float new_vertex_prob = 1.0 - (float)depth / params_.depth;
-  if (random_bool(new_vertex_prob)) {
-    VertexId new_vertex_id;
-    {
-      const std::lock_guard lock(mutex);
-      new_vertex_id = graph.add_new_vertex();
-      graph.bind_vertices(vertex_id, new_vertex_id);
-    }
-    int new_vertices_num = params_.new_vertices_num;
-    for (int i = 0; i < new_vertices_num; i++) {
-      generate_gray_branch(graph, depth + 1, new_vertex_id, mutex);
-    }
+  if (!random_bool(new_vertex_prob)) {
+    return;
+  }
+
+  const VertexId new_vertex_id = [&mutex, &graph, &vertex_id]() {
+    const std::lock_guard lock(mutex);
+    const auto new_vertex_id = graph.add_new_vertex();
+    graph.bind_vertices(vertex_id, new_vertex_id);
+    return new_vertex_id;
+  }();
+
+  for (int i = 0; i < params_.new_vertices_num; i++) {
+    generate_gray_branch(graph, depth + 1, new_vertex_id, mutex);
   }
 }
 
