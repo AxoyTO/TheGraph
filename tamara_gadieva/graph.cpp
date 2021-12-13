@@ -2,23 +2,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace {
-constexpr int COLORS_NUM = 4;
-}  // namespace
-
 namespace uni_cource_cpp {
-std::string color_to_string(const Edge::Color& color) {
-  switch (color) {
-    case Edge::Color::Gray:
-      return "gray";
-    case Edge::Color::Green:
-      return "green";
-    case Edge::Color::Yellow:
-      return "yellow";
-    case Edge::Color::Red:
-      return "red";
-  }
-}
 
 const Edge& Graph::get_edge(const EdgeId& id) const {
   for (const auto& edge : edges_)
@@ -59,15 +43,9 @@ bool Graph::has_vertex(const VertexId& id) const {
   return false;
 }
 
-const std::vector<VertexId>& Graph::get_vertices_ids_in_depth(int depth) const {
+const std::vector<VertexId>& Graph::get_vertex_ids_in_depth(int depth) const {
   assert((depth < get_depth()) && "Invalid depth");
   return vertices_ids_in_depth_[depth];
-}
-
-std::vector<VertexId> Graph::get_vertices_ids_in_depth(int depth) {
-  const auto& const_self = *this;
-  return const_cast<std::vector<VertexId>&>(
-      const_self.get_vertices_ids_in_depth(depth));
 }
 
 void Graph::update_vertex_depth(const VertexId& id, int depth) {
@@ -165,53 +143,5 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
     }
   }
   return false;
-}
-
-std::string Graph::json_string() const {
-  std::string result_string;
-
-  result_string = "{\n\t\"depth\": " + std::to_string(get_depth()) +
-                  ",\n\t\"vertices\": [\n";
-
-  for (int i = 0; i < vertices_.size(); i++) {
-    result_string += vertices_[i].json_string();
-    if (i != vertices_.size() - 1)
-      result_string += ",";
-    result_string += "\n";
-  }
-  result_string += "\t],\n";
-
-  result_string += "\t\"edges\": [\n";
-  for (int i = 0; i < edges_.size(); i++) {
-    result_string += edges_[i].json_string();
-    if (i != edges_.size() - 1)
-      result_string += ",";
-    result_string += "\n";
-  }
-  result_string += "\t]\n}\n";
-
-  return result_string;
-}
-
-std::string Edge::json_string() const {
-  return "\t\t{ \"id\": " + std::to_string(id) + ", \"vertex_ids\": [" +
-         std::to_string(vertex_id1) + ", " + std::to_string(vertex_id2) +
-         "], \"color\": \"" + color_to_string(color) + "\" }";
-}
-
-std::string Vertex::json_string() const {
-  std::string result_string =
-      "\t\t{ \"id\": " + std::to_string(id) + ", \"edge_ids\": [";
-
-  for (int i = 0; i < edge_ids_.size(); i++) {
-    result_string += std::to_string(edge_ids_[i]);
-    if (i != edge_ids_.size() - 1)
-      result_string += ", ";
-    else
-      result_string += "], \"depth\": ";
-  }
-  result_string += std::to_string(depth);
-  result_string += " }";
-  return result_string;
 }
 }  // namespace uni_cource_cpp

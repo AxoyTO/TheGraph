@@ -21,8 +21,6 @@ class Vertex {
 
   const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
-  std::string json_string() const;
-
  private:
   std::vector<EdgeId> edge_ids_;
 };
@@ -43,11 +41,7 @@ class Edge {
         vertex_id1(_vertex_id1),
         vertex_id2(_vertex_id2),
         color(_color) {}
-
-  std::string json_string() const;
 };
-
-std::string color_to_string(const Edge::Color& color);
 
 class Graph {
  public:
@@ -73,23 +67,15 @@ class Graph {
 
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
-  std::vector<VertexId> get_vertices_ids_in_depth(int depth);
-
-  const std::vector<VertexId>& get_vertices_ids_in_depth(int depth) const;
+  const std::vector<VertexId>& get_vertex_ids_in_depth(int depth) const;
 
   const std::vector<EdgeId>& get_edge_ids(const VertexId& id) const;
 
-  const int get_depth() const { return vertices_ids_in_depth_.size(); }
+  int get_depth() const { return vertices_ids_in_depth_.size(); }
 
-  const int get_vertices_in_depth_number(int depth) const {
-    return vertices_ids_in_depth_[depth].size();
-  }
+  const std::vector<Vertex>& get_vertices() const { return vertices_; }
 
-  const int get_vertices_number() const { return vertices_.size(); }
-
-  const int get_edges_number() const { return edges_.size(); }
-
-  std::string json_string() const;
+  const std::vector<Edge>& get_edges() const { return edges_; }
 
  private:
   std::vector<Vertex> vertices_;
