@@ -109,7 +109,7 @@ class Graph {
         }
       }
     } else {
-      for (const auto& edge_id: vertices_.at(from_vertex_id).get_edge_ids()) {
+      for (const auto& edge_id : vertices_.at(from_vertex_id).get_edge_ids()) {
         if (edges_[edge_id].from_vertex_id == edges_[edge_id].to_vertex_id) {
           return true;
         }
