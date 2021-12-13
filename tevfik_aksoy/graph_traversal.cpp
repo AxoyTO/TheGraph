@@ -1,11 +1,9 @@
 #include "graph_traversal.hpp"
 #include <climits>
-#include <iostream>
 #include <list>
 #include <queue>
 
 constexpr int DUMMY_DISTANCE_VALUE = -1;
-using Distance = uni_cpp_practice::GraphTraversal::Distance;
 
 namespace uni_cpp_practice {
 

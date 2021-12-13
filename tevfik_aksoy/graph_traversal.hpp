@@ -1,6 +1,5 @@
 #pragma once
 #include <list>
-#include <sstream>
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
