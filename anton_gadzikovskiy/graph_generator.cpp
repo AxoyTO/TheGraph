@@ -109,8 +109,8 @@ class Graph {
         }
       }
     } else {
-      for (const auto& edge : edges_) {
-        if (edge.from_vertex_id == edge.to_vertex_id) {
+      for (const auto& edge_id: vertices_.at(from_vertex_id).get_edge_ids()) {
+        if (edges_[edge_id].from_vertex_id == edges_[edge_id].to_vertex_id) {
           return true;
         }
       }
