@@ -41,13 +41,6 @@ class Edge {
 
 class Graph {
  public:
-  Graph() = default;
-  Graph& operator=(const Graph&) = delete;
-  Graph& operator=(Graph&& other_graph);
-  Graph(const Graph&) = delete;
-  Graph(Graph&& other_graph);
-  ~Graph() = default;
-
   Vertex get_vertex(const VertexId& id) const;
   Vertex& get_vertex(const VertexId& id);
 

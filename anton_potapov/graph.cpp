@@ -45,25 +45,6 @@ void Vertex::add_edge(const EdgeId& edge_id) {
   connected_edges_.insert(edge_id);
 }
 
-Graph& Graph::operator=(Graph&& other_graph) {
-  other_graph.update_vertices_depth();
-  vertices_ = std::move(other_graph.vertices_);
-  edges_ = std::move(other_graph.edges_);
-  next_vertex_id_ = std::move(other_graph.next_vertex_id_);
-  next_edge_id_ = std::move(other_graph.next_edge_id_);
-  vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
-  return *this;
-}
-
-Graph::Graph(Graph&& other_graph) {
-  other_graph.update_vertices_depth();
-  vertices_ = std::move(other_graph.vertices_);
-  edges_ = std::move(other_graph.edges_);
-  next_vertex_id_ = std::move(other_graph.next_vertex_id_);
-  next_edge_id_ = std::move(other_graph.next_edge_id_);
-  vertices_at_depth_ = std::move(other_graph.vertices_at_depth_);
-}
-
 const Edge& Graph::get_edge(const EdgeId& id) const {
   return edges_.at(id);
 }
