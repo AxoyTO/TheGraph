@@ -148,14 +148,12 @@ EdgeId Graph::get_next_edge_id() {
 
 bool Graph::new_edge_color_is_correct(const VertexId& vertex1_id,
                                       const VertexId& vertex2_id,
-                                      const EdgeColor& color) {
-  const auto vertices_at_depth_buffer = vertices_at_depth_;
-  update_vertices_depth();
+                                      const EdgeColor& color) const {
   bool is_correct;
   switch (color) {
     case EdgeColor::Gray:
-      is_correct = vertices_.at(vertex1_id).connected_edges().empty() ||
-                   vertices_.at(vertex2_id).connected_edges().empty();
+      is_correct = get_vertex(vertex1_id).connected_edges().empty() ||
+                   get_vertex(vertex2_id).connected_edges().empty();
       break;
     case EdgeColor::Green:
       is_correct = vertex1_id == vertex2_id;
@@ -173,7 +171,6 @@ bool Graph::new_edge_color_is_correct(const VertexId& vertex1_id,
                             get_vertex(vertex2_id).depth) == 2;
       break;
   }
-  vertices_at_depth_ = vertices_at_depth_buffer;
   return is_correct;
 }
 
@@ -231,7 +228,6 @@ void Graph::update_vertices_depth() {
   }
   is_depth_dirty_ = false;
 }
-
 
 int Graph::max_depth() {
   update_vertices_depth();
