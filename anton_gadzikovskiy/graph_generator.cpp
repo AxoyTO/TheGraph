@@ -61,7 +61,7 @@ class Graph {
     }
     const VertexId new_vertex_id = get_new_vertex_id();
     vertices_.emplace(new_vertex_id, new_vertex_id);
-    vertices_on_depth_.at(0).push_back(new_vertex_id);
+    vertices_on_depth_[0].push_back(new_vertex_id);
     return new_vertex_id;
   }
 
@@ -81,11 +81,11 @@ class Graph {
       if (vertices_on_depth_.size() - 1 < new_vertex_depth) {
         vertices_on_depth_.push_back(vector<VertexId>());
       }
-      vertices_on_depth_.at(new_vertex_depth).push_back(to_vertex_id);
+      vertices_on_depth_[new_vertex_depth].push_back(to_vertex_id);
       for (auto vertex_id = vertices_on_depth_.at(0).begin();
-           vertex_id != vertices_on_depth_.at(0).end(); vertex_id++) {
+           vertex_id != vertices_on_depth_[0].end(); vertex_id++) {
         if (to_vertex_id == *vertex_id) {
-          vertices_on_depth_.at(0).erase(vertex_id);
+          vertices_on_depth_[0].erase(vertex_id);
           break;
         }
       }
@@ -98,9 +98,19 @@ class Graph {
 
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
-    for (const auto& edge_id_1 : vertices_.at(from_vertex_id).get_edge_ids()) {
-      for (const auto& edge_id_2 : vertices_.at(to_vertex_id).get_edge_ids()) {
-        if (edge_id_1 == edge_id_2) {
+    if (from_vertex_id != to_vertex_id) {
+      for (const auto& edge_id_1 :
+           vertices_.at(from_vertex_id).get_edge_ids()) {
+        for (const auto& edge_id_2 :
+             vertices_.at(to_vertex_id).get_edge_ids()) {
+          if (edge_id_1 == edge_id_2) {
+            return true;
+          }
+        }
+      }
+    } else {
+      for (const auto& edge : edges_) {
+        if (edge.from_vertex_id == edge.to_vertex_id) {
           return true;
         }
       }
@@ -138,6 +148,10 @@ class Graph {
 
   const vector<vector<VertexId>>& get_vertices_on_depth() const {
     return vertices_on_depth_;
+  }
+
+  const vector<VertexId>& get_vertex_ids_on_depth(Depth depth) const {
+    return vertices_on_depth_[depth];
   }
 
   const vector<Edge>& get_edges() const { return edges_; }
@@ -230,7 +244,7 @@ void generate_gray_edges(Graph& graph, int depth, int new_vertices_num) {
     if (current_depth < graph.depth()) {
       //Создаю копию, чтобы не менять объект по которому итерирую
       const auto vertex_ids_on_depth =
-          graph.get_vertices_on_depth().at(current_depth);
+          graph.get_vertex_ids_on_depth(current_depth);
       for (const auto& from_vertex_id : vertex_ids_on_depth) {
         for (int k = 0; k < new_vertices_num; k++) {
           if (is_generated(probability)) {
@@ -255,14 +269,14 @@ void generate_yellow_edges(Graph& graph) {
   for (int current_depth = 0; current_depth < graph.depth(); current_depth++) {
     if (current_depth != graph.depth() - 1) {
       for (const auto& from_vertex_id :
-           graph.get_vertices_on_depth().at(current_depth)) {
+           graph.get_vertex_ids_on_depth(current_depth)) {
         const double probability =
             graph.get_vertices().at(from_vertex_id).depth *
             (100 / (graph.depth() - 1));
         if (is_generated(probability)) {
           vector<VertexId> vertices_on_deeper_depth;
           for (const auto& to_vertex_id :
-               graph.get_vertices_on_depth().at(current_depth + 1)) {
+               graph.get_vertex_ids_on_depth(current_depth + 1)) {
             if (!graph.is_connected(from_vertex_id, to_vertex_id)) {
               vertices_on_deeper_depth.push_back(to_vertex_id);
             }
@@ -284,11 +298,11 @@ void generate_red_edges(Graph& graph) {
       break;
     } else {
       for (const auto& from_vertex_id :
-           graph.get_vertices_on_depth().at(current_depth)) {
+           graph.get_vertex_ids_on_depth(current_depth)) {
         if (is_generated(kRedEdgesProbability)) {
           graph.add_edge(from_vertex_id,
-                         get_random_vertex_id(graph.get_vertices_on_depth().at(
-                             current_depth + 2)));
+                         get_random_vertex_id(
+                             graph.get_vertex_ids_on_depth(current_depth + 2)));
         }
       }
     }
