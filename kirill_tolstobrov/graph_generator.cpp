@@ -43,7 +43,7 @@ Graph GraphGenerator::generate_random_graph() const {
 
   std::thread green_thread(
       [&graph, &mutex, this]() { generate_green_edges(graph, mutex); });
-  // generate_blue_edges(graph);
+
   std::thread yellow_thread(
       [&graph, &mutex, this]() { generate_yellow_edges(graph, mutex); });
   std::thread red_thread(
@@ -148,19 +148,6 @@ void GraphGenerator::generate_green_edges(Graph& graph,
     }
   }
 }
-
-// void GraphGenerator::generate_blue_edges(Graph& graph) const {
-//   for (int cur_depth = 0; cur_depth < graph.depths_map_.size(); cur_depth++)
-//   {
-//     const auto& vertex_ids_at_depth = graph.depths_map_[cur_depth];
-//     const int last_id = vertex_ids_at_depth[vertex_ids_at_depth.size() - 1];
-//     for (const VertexId cur_id : vertex_ids_at_depth) {
-//       if (cur_id != last_id && random_bool(BLUE_PROB)) {
-//         graph.bind_vertices(cur_id, cur_id + 1);
-//       }
-//     }
-//   }
-// }
 
 void GraphGenerator::generate_yellow_edges(Graph& graph,
                                            std::mutex& mutex) const {
