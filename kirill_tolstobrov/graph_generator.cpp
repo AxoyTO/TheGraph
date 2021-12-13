@@ -36,7 +36,6 @@ uni_cpp_practice::VertexId random_vertex_id(
 namespace uni_cpp_practice {
 Graph GraphGenerator::generate_random_graph() const {
   Graph graph = Graph();
-  VertexId first_vertex_id = graph.add_new_vertex();
 
   std::mutex mutex;
 
@@ -64,7 +63,7 @@ void GraphGenerator::generate_grey_edges(Graph& graph,
   auto jobs = std::list<JobCallback>();
   std::mutex graph_mutex;
 
-  const VertexId first_vertex_id = 0;
+  const VertexId first_vertex_id = graph.add_new_vertex();
   std::atomic<int> done_jobs_number = 0;
   for (int i = 0; i < new_vertices_num; i++) {
     jobs.push_back(
@@ -76,7 +75,7 @@ void GraphGenerator::generate_grey_edges(Graph& graph,
 
   std::mutex jobs_mutex;
   std::atomic<bool> should_terminate = false;
-  auto worker = [&jobs, &jobs_mutex, &should_terminate]() {
+  const auto worker = [&jobs, &jobs_mutex, &should_terminate]() {
     while (true) {
       if (should_terminate) {
         return;
@@ -118,25 +117,24 @@ void GraphGenerator::generate_grey_edges(Graph& graph,
 }
 
 void GraphGenerator::generate_gray_branch(Graph& graph,
-                                          const int cur_depth,
-                                          const VertexId& cur_vertex_id,
+                                          int depth,
+                                          const VertexId& vertex_id,
                                           std::mutex& mutex) const {
-  if (cur_depth == params_.depth) {
+  if (depth == params_.depth) {
     return;
   }
 
-  const float new_vertex_prob = 1.0 - (float)cur_depth / params_.depth;
-  int new_vertices_num = params_.new_vertices_num;
-  if (cur_vertex_id == 0) {
-    new_vertices_num = 1;
-  }
-  for (int i = 0; i < new_vertices_num; i++) {
-    if (random_bool(new_vertex_prob)) {
+  const float new_vertex_prob = 1.0 - (float)depth / params_.depth;
+  if (random_bool(new_vertex_prob)) {
+    VertexId new_vertex_id;
+    {
       const std::lock_guard lock(mutex);
-      const auto new_vertex_id = graph.add_new_vertex();
-      graph.bind_vertices(cur_vertex_id, new_vertex_id);
-      lock.~lock_guard();
-      generate_gray_branch(graph, cur_depth + 1, new_vertex_id, mutex);
+      new_vertex_id = graph.add_new_vertex();
+      graph.bind_vertices(vertex_id, new_vertex_id);
+    }
+    int new_vertices_num = params_.new_vertices_num;
+    for (int i = 0; i < new_vertices_num; i++) {
+      generate_gray_branch(graph, depth + 1, new_vertex_id, mutex);
     }
   }
 }
