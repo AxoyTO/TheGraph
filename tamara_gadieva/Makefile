@@ -8,7 +8,7 @@ logger.cpp: logger.hpp
 config.cpp: config.hpp
 
 main: main.o graph.o graph_generator.o logger.o config.o
-	clang++ main.o graph.o graph_generator.o logger.o config.o -o main $(FLAGS) -lstdc++fs
+	clang++ main.o graph.o graph_generator.o logger.o config.o -o main $(FLAGS)
 
 main.o: main.cpp
 	clang++ -c main.cpp $(FLAGS)
