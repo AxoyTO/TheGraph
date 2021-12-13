@@ -1,11 +1,13 @@
 #pragma once
 #include <array>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 using VertexId = int;
 using EdgeId = int;
 
+namespace uni_cource_cpp {
 class Vertex {
  public:
   const VertexId id;
@@ -45,6 +47,8 @@ class Edge {
   std::string json_string() const;
 };
 
+std::string color_to_string(const Edge::Color& color);
+
 class Graph {
  public:
   VertexId add_vertex();
@@ -67,11 +71,23 @@ class Graph {
 
   void update_vertex_depth(const VertexId& id, const int depth);
 
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
+
+  std::vector<VertexId> get_vertices_ids_in_depth(int depth);
+
   const std::vector<VertexId>& get_vertices_ids_in_depth(int depth) const;
 
   const std::vector<EdgeId>& get_edge_ids(const VertexId& id) const;
 
   const int get_depth() const { return vertices_ids_in_depth_.size(); }
+
+  const int get_vertices_in_depth_number(int depth) const {
+    return vertices_ids_in_depth_[depth].size();
+  }
+
+  const int get_vertices_number() const { return vertices_.size(); }
+
+  const int get_edges_number() const { return edges_.size(); }
 
   std::string json_string() const;
 
@@ -79,6 +95,7 @@ class Graph {
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
   std::vector<std::vector<VertexId>> vertices_ids_in_depth_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> edges_color_map_;
 
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
@@ -87,21 +104,4 @@ class Graph {
 
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
 };
-
-class GraphGenerator {
- public:
-  struct Params {
-    const int depth = 0;
-    const int new_vertices_num = 0;
-
-    explicit Params(int _depth = 0, int _new_vertices_num = 0)
-        : depth(_depth), new_vertices_num(_new_vertices_num) {}
-  };
-
-  explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
-
-  Graph generate() const;
-
- private:
-  const Params params_ = Params();
-};
+}  // namespace uni_cource_cpp
