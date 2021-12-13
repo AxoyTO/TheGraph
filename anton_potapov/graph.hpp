@@ -89,6 +89,4 @@ class Graph {
                                  const EdgeColor& color);
 
   void update_vertices_depth();
-  void update_vertices_depth() const;
-  void update_vertices_at_depth_map(const std::map<VertexId, int>& depths);
 };

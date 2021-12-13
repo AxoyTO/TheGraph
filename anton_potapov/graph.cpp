@@ -186,20 +186,6 @@ VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
   return *vertex_id_set_it;
 }
 
-void Graph::update_vertices_at_depth_map(
-    const std::map<VertexId, int>& depths) {
-  if (updated_depth_ == INIT_DEPTH) {
-    vertices_at_depth_.clear();
-  } else {
-    vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
-                             vertices_at_depth_.end());
-  }
-  for (const auto& [vertex_id, depth] : depths) {
-    get_vertex(vertex_id).depth = depth;
-    vertices_at_depth_[depth].insert(vertex_id);
-  }
-}
-
 int Graph::get_new_depth(const VertexId& vertex1_id,
                          const VertexId& vertex2_id) const {
   const auto vertex1_depth = get_vertex(vertex1_id).depth;
@@ -233,7 +219,16 @@ void Graph::update_vertices_depth() {
     return;
   }
   const auto& depths = GraphTraverser::dynamic_bfs(*this, updated_depth_);
-  update_vertices_at_depth_map(depths);
+  if (updated_depth_ == INIT_DEPTH) {
+    vertices_at_depth_.clear();
+  } else {
+    vertices_at_depth_.erase(vertices_at_depth_.find(updated_depth_),
+                             vertices_at_depth_.end());
+  }
+  for (const auto& [vertex_id, depth] : depths) {
+    get_vertex(vertex_id).depth = depth;
+    vertices_at_depth_[depth].insert(vertex_id);
+  }
   is_depth_dirty_ = false;
 }
 
