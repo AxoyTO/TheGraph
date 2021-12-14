@@ -30,8 +30,9 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
 
   {
     std::lock_guard lock(graph_mutex);
-    assert(graph.is_vertex_exist(source_vertex_id));
-    assert(graph.is_vertex_exist(destination_vertex_id));
+    if (!graph.is_vertex_exist(source_vertex_id) ||
+        !graph.is_vertex_exist(destination_vertex_id))
+      return std::nullopt;
   }
 
   const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
