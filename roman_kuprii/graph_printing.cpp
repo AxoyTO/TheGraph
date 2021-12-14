@@ -5,6 +5,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "graph.hpp"
@@ -37,29 +38,29 @@ std::string color_to_string(const Edge::Color& color) {
   }
 }
 
-std::string edge_to_json(const Edge& edge) {
+std::string edge_to_json(const std::pair<EdgeId, Edge>& edge) {
   std::string res;
   res = "{ \"id\": ";
-  res += to_string(edge.id);
+  res += to_string(edge.first);
   res += ", \"vertex_ids\": [";
-  res += to_string(edge.connected_vertices[0]);
+  res += to_string(edge.second.connected_vertices[0]);
   res += ", ";
-  res += to_string(edge.connected_vertices[1]);
+  res += to_string(edge.second.connected_vertices[1]);
   res += "], \"color\": ";
-  res += color_to_string(edge.color);
+  res += color_to_string(edge.second.color);
   res += " }";
   return res;
 }
 
-std::string vertex_to_json(const Vertex& vertex) {
+std::string vertex_to_json(const std::pair<VertexId, Vertex>& vertex) {
   std::string res;
   res = "{ \"id\": ";
-  res += to_string(vertex.get_id()) + ", \"edge_ids\": [";
-  for (const auto& edge_id : vertex.get_edges_ids()) {
+  res += to_string(vertex.first) + ", \"edge_ids\": [";
+  for (const auto& edge_id : vertex.second.get_edges_ids()) {
     res += to_string(edge_id);
     res += ", ";
   }
-  if (vertex.get_edges_ids().size() > 0) {
+  if (vertex.second.get_edges_ids().size() > 0) {
     res.pop_back();
     res.pop_back();
   }
@@ -72,20 +73,20 @@ std::string graph_to_json(const Graph& graph) {
   res = "{ \"depth\": ";
   res += to_string(graph.get_depth());
   res += ", \"vertices\": [ ";
-  for (const auto& vertex : graph.get_vertices()) {
+  for (const auto& vertex : graph.get_vertices_map()) {
     res += vertex_to_json(vertex);
     res += ", ";
   }
-  if (graph.get_vertices().size()) {
+  if (graph.get_vertices_map().size()) {
     res.pop_back();
     res.pop_back();
   }
   res += " ], \"edges\": [ ";
-  for (const auto& edge : graph.get_edges()) {
+  for (const auto& edge : graph.get_edges_map()) {
     res += edge_to_json(edge);
     res += ", ";
   }
-  if (graph.get_edges().size() > 0) {
+  if (graph.get_edges_map().size() > 0) {
     res.pop_back();
     res.pop_back();
   }

@@ -58,8 +58,8 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
   std::vector<int> depth_count;
   for (int iter = 0; iter <= work_graph.get_depth(); iter++)
     depth_count.emplace_back(0);
-  for (const auto& vertex : work_graph.get_vertices()) {
-    depth_count[vertex.depth]++;
+  for (const auto& vertex_pair : work_graph.get_vertices_map()) {
+    depth_count[vertex_pair.second.depth]++;
   }
   for (const auto& depth : depth_count) {
     res += to_string(depth) + ", ";

@@ -20,31 +20,13 @@ constexpr int VISITED = 1;
 constexpr int MAX_DISTANCE = 10000;
 const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
-std::optional<Vertex> get_vertex_from_id(const Graph& graph,
-                                         const VertexId& vertex_id) {
-  const auto& vertices = graph.get_vertices();
-  for (const auto& vertex : vertices)
-    if (vertex.get_id() == vertex_id)
-      return vertex;
-  return std::nullopt;
-}
-
-std::optional<Edge> get_edge_from_id(const Graph& graph,
-                                     const EdgeId& edge_id) {
-  const auto& edges = graph.get_edges();
-  for (const auto& edge : edges)
-    if (edge.id == edge_id)
-      return edge;
-  return std::nullopt;
-}
-
 std::vector<uni_cpp_practice::VertexId> get_max_depth_vertices_ids(
     const uni_cpp_practice::Graph& graph) {
-  const auto vertices = graph.get_vertices();
+  const auto& vertices_map = graph.get_vertices_map();
   std::vector<uni_cpp_practice::VertexId> vertex_ids;
-  for (const auto& vertex : vertices)
-    if (vertex.depth == graph.get_depth())
-      vertex_ids.push_back(vertex.get_id());
+  for (const auto& vertex : vertices_map)
+    if (vertex.second.depth == graph.get_depth())
+      vertex_ids.push_back(vertex.first);
   return vertex_ids;
 }
 
@@ -57,11 +39,11 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     std::mutex& graph_mutex) const {
   int vertices_number;
   const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
-                               &source_vertex_id]() -> std::optional<Vertex> {
+                               &source_vertex_id]() {
     std::lock_guard lock(graph_mutex);
     vertices_number = graph.get_vertices_num();
-    const auto& vertex = get_vertex_from_id(graph, source_vertex_id);
-    assert(vertex.has_value());
+    const auto& vertex =
+        graph.get_vertices_map().find(source_vertex_id)->second;
     return vertex;
   }();
   // unvisited vertices
@@ -72,7 +54,7 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
   distance[source_vertex_id] = 0;
   // create queue
   std::queue<Vertex> vertices_queue;
-  vertices_queue.push(source_vertex.value());
+  vertices_queue.push(source_vertex);
   // create path
   std::vector<std::vector<VertexId>> all_pathes(vertices_number);
   std::vector<VertexId> source_vector(1, source_vertex_id);
@@ -86,18 +68,17 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     for (const auto& edge_id : current_vertex.get_edges_ids()) {
       VertexId next_vertex_id;
       const auto& next_vertex = [&graph_mutex, &graph, &edge_id,
-                                 &next_vertex_id]() -> std::optional<Vertex> {
+                                 &next_vertex_id]() {
         std::lock_guard lock(graph_mutex);
-        const auto& edge = get_edge_from_id(graph, edge_id);
-        assert(edge.has_value());
-        next_vertex_id = edge->connected_vertices.back();
-        const auto& next_vertex = get_vertex_from_id(graph, next_vertex_id);
-        assert(next_vertex.has_value());
+        const auto& edge = graph.get_edges_map().find(edge_id)->second;
+        next_vertex_id = edge.connected_vertices.back();
+        const auto& next_vertex =
+            graph.get_vertices_map().find(next_vertex_id)->second;
         return next_vertex;
       }();
       // update distances
       if (distance[current_vertex.get_id()] + 1 < distance[next_vertex_id]) {
-        vertices_queue.push(next_vertex.value());
+        vertices_queue.push(next_vertex);
         distance[next_vertex_id] = distance[current_vertex.get_id()] + 1;
         all_pathes[next_vertex_id] = all_pathes[current_vertex.get_id()];
         all_pathes[next_vertex_id].push_back(next_vertex_id);

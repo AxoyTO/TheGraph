@@ -1,5 +1,7 @@
 #include <cassert>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "graph.hpp"
@@ -30,13 +32,13 @@ void Vertex::add_edge_id(const EdgeId& _id) {
 
 VertexId Graph::add_vertex() {
   const VertexId new_vertex_id = get_next_vertex_id();
-  vertices_.emplace_back(new_vertex_id);
+  vertices_map_.emplace(new_vertex_id, new_vertex_id);
   return new_vertex_id;
 }
 
 bool Graph::is_vertex_exist(const VertexId& vertex_id) const {
-  for (const auto& vertex : vertices_) {
-    if (vertex_id == vertex.get_id())
+  for (const auto& vertex_pair : vertices_map_) {
+    if (vertex_id == vertex_pair.first)
       return true;
   }
   return false;
@@ -47,12 +49,14 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
   assert(is_vertex_exist(from_vertex_id));
   assert(is_vertex_exist(to_vertex_id));
 
-  const auto& from_vertex_edges_ids = vertices_[from_vertex_id].get_edges_ids();
-  const auto& to_vertex_edges_ids = vertices_[to_vertex_id].get_edges_ids();
+  const auto& from_vertex_edges_ids =
+      vertices_map_.find(from_vertex_id)->second.get_edges_ids();
+  const auto& to_vertex_edges_ids =
+      vertices_map_.find(to_vertex_id)->second.get_edges_ids();
   for (const auto& from_vertex_edge_id : from_vertex_edges_ids)
     if (from_vertex_id == to_vertex_id) {
       const auto& connected_vertices =
-          edges_[from_vertex_edge_id].connected_vertices;
+          edges_map_.find(from_vertex_edge_id)->second.connected_vertices;
       if (connected_vertices[0] == connected_vertices[1])
         return true;
     } else
@@ -72,20 +76,23 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
 
   if (initialization) {
     const int minimum_depth = [&from_vertex_id, &to_vertex_id,
-                               vertices = &vertices_, edges = &edges_]() {
-      int min_depth = vertices->at(from_vertex_id).depth;
-      for (const auto& edge_idx : vertices->at(to_vertex_id).get_edges_ids()) {
-        const VertexId vert = edges->at(edge_idx).connected_vertices[0];
-        min_depth = min(min_depth, vertices->at(vert).depth);
+                               vertices_map = &vertices_map_,
+                               edges_map = &edges_map_]() {
+      int min_depth = vertices_map->find(from_vertex_id)->second.depth;
+      for (const auto& edge_id :
+           vertices_map->find(to_vertex_id)->second.get_edges_ids()) {
+        const VertexId vert =
+            edges_map->find(edge_id)->second.connected_vertices[0];
+        min_depth = min(min_depth, vertices_map->find(vert)->second.depth);
       }
       return min_depth;
     }();
-    vertices_[to_vertex_id].depth = minimum_depth + 1;
+    vertices_map_.find(to_vertex_id)->second.depth = minimum_depth + 1;
     depth_ = std::max(depth_, minimum_depth + 1);
   }
 
-  const int diff =
-      vertices_[to_vertex_id].depth - vertices_[from_vertex_id].depth;
+  const int diff = vertices_map_.find(to_vertex_id)->second.depth -
+                   vertices_map_.find(from_vertex_id)->second.depth;
 
   const Edge::Color color = [&initialization, &diff, &from_vertex_id,
                              &to_vertex_id]() {
@@ -103,19 +110,20 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
       return Edge::Color::Gray;
   }();
 
-  const auto& new_edge = edges_.emplace_back(from_vertex_id, to_vertex_id,
-                                             get_next_edge_id(), color);
-  vertices_[from_vertex_id].add_edge_id(new_edge.id);
+  auto new_edge_id = get_next_edge_id();
+  edges_map_.emplace(std::make_pair(
+      new_edge_id, Edge(from_vertex_id, to_vertex_id, new_edge_id, color)));
+  vertices_map_.find(from_vertex_id)->second.add_edge_id(new_edge_id);
   if (from_vertex_id != to_vertex_id)
-    vertices_[to_vertex_id].add_edge_id(new_edge.id);
+    vertices_map_.find(to_vertex_id)->second.add_edge_id(new_edge_id);
 }
 
 std::vector<EdgeId> Graph::get_edge_ids_with_color(
     const Edge::Color& color) const {
   std::vector<EdgeId> edge_ids;
-  for (const auto& edge : get_edges()) {
-    if (edge.color == color)
-      edge_ids.emplace_back(edge.id);
+  for (const auto& edge_pair : get_edges_map()) {
+    if (edge_pair.second.color == color)
+      edge_ids.emplace_back(edge_pair.first);
   }
 
   return edge_ids;
