@@ -38,6 +38,7 @@ std::string print_edge(const uni_cpp_practice::Edge& edge) {
   ss_out << tab_2 << "}";
   return ss_out.str();
 }
+
 }  // namespace
 
 namespace uni_cpp_practice {
@@ -66,6 +67,22 @@ std::string GraphPrinter::print() const {
   }
   ss_out << std::endl << tab_1 << "]\n";
   ss_out << "}" << std::endl;
+  return ss_out.str();
+}
+
+std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
+  std::stringstream ss_out;
+  std::string tab_1 = "    ";
+  ss_out << tab_1 << "{\"vertices\": [";
+  const auto& vertex_ids = path.vertex_ids;
+  for (auto it = vertex_ids.begin(); it != vertex_ids.end(); ++it) {
+    if (it != vertex_ids.begin()) {
+      ss_out << ", ";
+    }
+    ss_out << *it;
+  }
+  ss_out << "], \"distance\": ";
+  ss_out << path.distance << "}\n";
   return ss_out.str();
 }
 }  // namespace uni_cpp_practice
