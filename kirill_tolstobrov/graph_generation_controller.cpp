@@ -62,15 +62,9 @@ void GraphGenerationController::generate(
     for (int i = 0; i < graphs_count_; i++) {
       jobs_.emplace_back([this, &gen_started_callback, &gen_finished_callback,
                           &done_jobs_number, i]() {
-        {
-          const std::lock_guard lock(mutex_start_);
-          gen_started_callback(i);
-        }
+        gen_started_callback(i);
         auto graph = graph_generator_.generate_random_graph();
-        {
-          const std::lock_guard lock(mutex_finish_);
-          gen_finished_callback(i, std::move(graph));
-        }
+        gen_finished_callback(i, std::move(graph));
         done_jobs_number++;
       });
     }

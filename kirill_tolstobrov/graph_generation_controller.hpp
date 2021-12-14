@@ -46,8 +46,6 @@ class GraphGenerationController {
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   std::mutex mutex_;
-  std::mutex mutex_start_;
-  std::mutex mutex_finish_;
   const int graphs_count_;
   const GraphGenerator graph_generator_;
 };
