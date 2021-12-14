@@ -11,9 +11,9 @@
 #include <iostream>
 
 using uni_cource_cpp::Graph;
-using uni_cource_cpp::GraphGenerationParams;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::Logger;
+using uni_cource_cpp::Params;
 using uni_cource_cpp::config::log_file_path;
 using uni_cource_cpp::graph_printing::print_graph;
 using uni_cource_cpp::graph_printing::print_graph_description;
@@ -84,7 +84,7 @@ int main() {
   const int graphs_count = handle_graphs_count_input();
   prepare_temp_directory();
 
-  const auto params = GraphGenerationParams(depth, new_vertices_count);
+  const auto params = Params(depth, new_vertices_count);
   const auto generator = GraphGenerator(params);
   auto& logger = Logger::get_logger();
 
