@@ -43,17 +43,15 @@ using uni_cpp_practice::VertexId;
 void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   const int graph_depth = work_graph.get_depth();
   for (int current_depth = 1; current_depth <= graph_depth; current_depth++) {
-    std::unordered_map<VertexId, Vertex> uni_depth_vertices;
-    for (const auto& vertex : work_graph.get_vertices_map())
-      if (vertex.second.depth == current_depth)
-        uni_depth_vertices.emplace(vertex);
+    const auto& vertex_ids_at_current_depth =
+        work_graph.get_vertex_ids_at_depth(current_depth);
 
     std::array<VertexId, 2> adjacent_vertices = {INVALID_ID, INVALID_ID};
-    for (const auto& vertex : uni_depth_vertices) {
+    for (const auto& vertex_id : vertex_ids_at_current_depth) {
       if (adjacent_vertices[0] == INVALID_ID) {
-        adjacent_vertices[0] = vertex.first;
+        adjacent_vertices[0] = vertex_id;
       } else if (adjacent_vertices[1] == INVALID_ID) {
-        adjacent_vertices[1] = vertex.first;
+        adjacent_vertices[1] = vertex_id;
         if (get_real_random_number() < BLUE_TRASHOULD) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(adjacent_vertices[0],
@@ -61,7 +59,7 @@ void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
         }
       } else {
         adjacent_vertices[0] = adjacent_vertices[1];
-        adjacent_vertices[1] = vertex.first;
+        adjacent_vertices[1] = vertex_id;
         if (get_real_random_number() < BLUE_TRASHOULD) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(adjacent_vertices[0],
@@ -86,11 +84,8 @@ void add_red_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   for (const auto& start_vertex : work_graph.get_vertices_map()) {
     if (get_real_random_number() < RED_TRASHOULD) {
       if (start_vertex.second.depth + 2 <= graph_depth) {
-        vector<VertexId> red_vertices_ids;
-        for (const auto& end_vertex : work_graph.get_vertices_map()) {
-          if (end_vertex.second.depth == start_vertex.second.depth + 2)
-            red_vertices_ids.emplace_back(end_vertex.first);
-        }
+        const auto& red_vertices_ids =
+            work_graph.get_vertex_ids_at_depth(start_vertex.second.depth + 2);
         if (red_vertices_ids.size() > 0) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(start_vertex.first,
@@ -110,24 +105,25 @@ void add_yellow_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
                                static_cast<double>(graph_depth);
     if (get_real_random_number() < probability) {
       vector<VertexId> yellow_vertices_ids;
-      for (const auto& end_vertex : work_graph.get_vertices_map()) {
-        if (end_vertex.second.depth == start_vertex.second.depth + 1) {
+      if (start_vertex.second.depth + 1 <= graph_depth) {
+        const auto& vertex_on_next_depth =
+            work_graph.get_vertex_ids_at_depth(start_vertex.second.depth + 1);
+        for (const auto& vertex_id : vertex_on_next_depth) {
           const auto is_connected = [&work_graph, &add_edge_mutex,
-                                     &start_vertex, &end_vertex]() {
+                                     &start_vertex, &vertex_id]() {
             const std::lock_guard lock(add_edge_mutex);
-            return work_graph.is_connected(start_vertex.first,
-                                           end_vertex.first);
+            return work_graph.is_connected(start_vertex.first, vertex_id);
           }();
           if (!is_connected)
-            yellow_vertices_ids.push_back(end_vertex.first);
+            yellow_vertices_ids.push_back(vertex_id);
         }
-      }
-      if (yellow_vertices_ids.size() > 0) {
-        std::lock_guard lock(add_edge_mutex);
-        work_graph.connect_vertices(start_vertex.first,
-                                    yellow_vertices_ids[get_int_random_number(
-                                        yellow_vertices_ids.size() - 1)],
-                                    false);
+        if (yellow_vertices_ids.size() > 0) {
+          std::lock_guard lock(add_edge_mutex);
+          work_graph.connect_vertices(start_vertex.first,
+                                      yellow_vertices_ids[get_int_random_number(
+                                          yellow_vertices_ids.size() - 1)],
+                                      false);
+        }
       }
     }
   }
