@@ -1,7 +1,15 @@
 #include "graph_printer.hpp"
 #include "graph.hpp"
 
+#include <iostream>
+
 namespace uni_cource_cpp {
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::vector;
+
 std::string color_to_string(const EdgeColor& color) {
   switch (color) {
     case EdgeColor::Gray:

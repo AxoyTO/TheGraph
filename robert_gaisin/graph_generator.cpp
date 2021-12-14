@@ -53,10 +53,11 @@ void generate_blue_edges(Graph& graph) {
   }
 }
 
-vector<VertexId> get_unconnected_vertex_ids(const vector<VertexId>& layer,
-                                            const VertexId& vert_id,
-                                            const Graph& graph) {
-  vector<VertexId> returned_vector;
+std::vector<VertexId> get_unconnected_vertex_ids(
+    const std::vector<VertexId>& layer,
+    const VertexId& vert_id,
+    const Graph& graph) {
+  std::vector<VertexId> returned_vector;
   for (auto& vertex_id : layer) {
     if (graph.is_connected(vert_id, vertex_id))
       continue;
@@ -65,7 +66,7 @@ vector<VertexId> get_unconnected_vertex_ids(const vector<VertexId>& layer,
   return returned_vector;
 }
 
-VertexId get_random_vertex_id(vector<VertexId> set_of_vertices_id) {
+VertexId get_random_vertex_id(std::vector<VertexId> set_of_vertices_id) {
   std::random_device rd;
   std::mt19937 mersenne(rd());
   return set_of_vertices_id[mersenne() % set_of_vertices_id.size()];
@@ -83,7 +84,7 @@ void generate_yellow_edges(Graph& graph) {
     for (auto vertex_id = (*vertex_ids_at_depth).begin();
          vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_yellow)) {
-        vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
+        std::vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
             *(vertex_ids_at_depth + 1), *vertex_id, graph);
         const int vertex_to_attach = get_random_vertex_id(vertices_to_connect);
         graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Yellow);

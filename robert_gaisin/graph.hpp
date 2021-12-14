@@ -1,14 +1,9 @@
 #pragma once
-#include <cassert>
-#include <iostream>
+
 #include <unordered_map>
 #include <vector>
 
 namespace uni_cource_cpp {
-using std::cin;
-using std::cout;
-using std::endl;
-using std::vector;
 
 using VertexId = int;
 using EdgeId = int;
@@ -20,11 +15,11 @@ struct Vertex {
   const VertexId id = 0;
   int depth = 0;
   void add_edge_id(const EdgeId& id);
-  const vector<EdgeId>& edge_ids() const { return edge_ids_; }
+  const std::vector<EdgeId>& edge_ids() const { return edge_ids_; }
   bool has_edge_id(const EdgeId& id) const;
 
  private:
-  vector<EdgeId> edge_ids_;
+  std::vector<EdgeId> edge_ids_;
 };
 
 struct Edge {
@@ -49,9 +44,11 @@ class Graph {
 
   int depth() const { return depth_map_.size() - 1; }
 
-  const vector<Vertex>& vertices() const { return vertices_; }
-  const vector<Edge>& edges() const { return edges_; }
-  const vector<vector<VertexId>>& depth_map() const { return depth_map_; }
+  const std::vector<Vertex>& vertices() const { return vertices_; }
+  const std::vector<Edge>& edges() const { return edges_; }
+  const std::vector<std::vector<VertexId>>& depth_map() const {
+    return depth_map_;
+  }
   bool has_vertex(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& begin, const VertexId& end) const;
   Vertex& get_vertex(const VertexId& id);
@@ -65,9 +62,9 @@ class Graph {
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
-  vector<Vertex> vertices_;
-  vector<Edge> edges_;
-  vector<vector<VertexId>> depth_map_;
-  std::unordered_map<EdgeColor, vector<EdgeId>> edges_color_map_;
+  std::vector<Vertex> vertices_;
+  std::vector<Edge> edges_;
+  std::vector<std::vector<VertexId>> depth_map_;
+  std::unordered_map<EdgeColor, std::vector<EdgeId>> edges_color_map_;
 };
 }  // namespace uni_cource_cpp

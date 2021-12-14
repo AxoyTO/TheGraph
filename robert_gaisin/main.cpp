@@ -8,19 +8,19 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
-using config::log_file_path;
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerationParams;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::Logger;
+using uni_cource_cpp::config::log_file_path;
 using uni_cource_cpp::graph_printing::print_graph;
 using uni_cource_cpp::graph_printing::print_graph_description;
 
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
-constexpr int GRAPHS_NUMBER = 0;
-const std::string FILENAME_LOG = "log.txt";
+constexpr int INVALID_GRAPHS_NUMBER = 0;
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -29,12 +29,6 @@ std::string get_current_date_time() {
   date_time_string << std::put_time(std::localtime(&date_time_t),
                                     "%Y.%m.%d %H:%M:%S");
   return date_time_string.str();
-}
-
-Logger& prepare_logger() {
-  auto& logger = Logger::get_logger();
-  logger.set_file(log_file_path() + FILENAME_LOG);
-  return logger;
 }
 
 std::string generation_started_string(int graph_num) {
@@ -66,20 +60,20 @@ int handle_new_vertices_count_input() {
 }
 
 int handle_graphs_count_input() {
-  int graphs_quantity = GRAPHS_NUMBER;
+  int graphs_quantity = INVALID_GRAPHS_NUMBER;
   do {
     std::cout << "Enter amount of graphs to generate: ";
     std::cin >> graphs_quantity;
-  } while (graphs_quantity < GRAPHS_NUMBER);
+  } while (graphs_quantity < INVALID_GRAPHS_NUMBER);
   return graphs_quantity;
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory(log_file_path());
+  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
 }
 
-void write_to_file(std::string graph_json, std::string filename) {
-  std::ofstream out(log_file_path() + filename);
+void write_to_file(const std::string& graph_json, const std::string& filename) {
+  std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
   out << graph_json;
   out.close();
 }
@@ -92,7 +86,7 @@ int main() {
 
   const auto params = GraphGenerationParams(depth, new_vertices_count);
   const auto generator = GraphGenerator(params);
-  auto& logger = prepare_logger();
+  auto& logger = Logger::get_logger();
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(generation_started_string(i));

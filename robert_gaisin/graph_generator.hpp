@@ -9,7 +9,7 @@ struct Params {
 Params GraphGenerationParams(int depth, int new_vertices_count);
 class GraphGenerator {
  public:
-  explicit GraphGenerator(Params params) : params_(params){};
+  explicit GraphGenerator(const Params& params) : params_(params){};
   Graph generate() const;
 
  private:

@@ -1,4 +1,5 @@
 #include "graph.hpp"
+#include <cassert>
 
 namespace uni_cource_cpp {
 bool Vertex::has_edge_id(const EdgeId& id) const {
