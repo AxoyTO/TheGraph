@@ -1,6 +1,6 @@
 #include "graph.hpp"
 #include <cassert>
-
+#include <iostream>
 namespace uni_cource_cpp {
 bool Vertex::has_edge_id(const EdgeId& id) const {
   for (const auto& edge_id : edge_ids_)
