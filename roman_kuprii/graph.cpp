@@ -88,6 +88,11 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
       return min_depth;
     }();
     vertices_map_.find(to_vertex_id)->second.depth = minimum_depth + 1;
+
+    if (minimum_depth + 1 == depth_map_.size())
+      depth_map_.push_back(std::vector<VertexId>({to_vertex_id}));
+    else
+      depth_map_[minimum_depth + 1].push_back(to_vertex_id);
     depth_ = std::max(depth_, minimum_depth + 1);
   }
 
@@ -127,6 +132,11 @@ std::vector<EdgeId> Graph::get_edge_ids_with_color(
   }
 
   return edge_ids;
+}
+
+const std::vector<VertexId>& Graph::get_vertex_ids_at_depth(int depth) const {
+  assert(depth <= depth_map_.size());
+  return depth_map_[depth];
 }
 
 }  // namespace uni_cpp_practice

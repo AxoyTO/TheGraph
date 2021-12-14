@@ -19,17 +19,6 @@ constexpr int UNVISITED = 0;
 constexpr int VISITED = 1;
 constexpr int MAX_DISTANCE = 10000;
 const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
-
-std::vector<uni_cpp_practice::VertexId> get_max_depth_vertices_ids(
-    const uni_cpp_practice::Graph& graph) {
-  const auto& vertices_map = graph.get_vertices_map();
-  std::vector<uni_cpp_practice::VertexId> vertex_ids;
-  for (const auto& vertex : vertices_map)
-    if (vertex.second.depth == graph.get_depth())
-      vertex_ids.push_back(vertex.first);
-  return vertex_ids;
-}
-
 }  // namespace
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
@@ -38,6 +27,13 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     const VertexId& destination_vertex_id,
     std::mutex& graph_mutex) const {
   int vertices_number;
+
+  {
+    std::lock_guard lock(graph_mutex);
+    assert(graph.is_vertex_exist(source_vertex_id));
+    assert(graph.is_vertex_exist(destination_vertex_id));
+  }
+
   const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
                                &source_vertex_id]() {
     std::lock_guard lock(graph_mutex);
@@ -98,7 +94,7 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   std::atomic<int> completed_jobs = 0;
   std::mutex graph_mutex;
   std::mutex path_mutex;
-  auto vertex_ids = get_max_depth_vertices_ids(graph_);
+  auto vertex_ids = graph_.get_vertex_ids_at_depth(graph_.get_depth());
   std::vector<GraphTraverser::Path> pathes;
   pathes.reserve(vertex_ids.size());
 
@@ -108,8 +104,7 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
       auto path = find_shortest_path(graph_, 0, vertex_id, graph_mutex);
       {
         std::lock_guard lock(path_mutex);
-        if (path.has_value())
-          pathes.emplace_back(path.value());
+        pathes.emplace_back(path.value());
       }
       completed_jobs++;
     });
