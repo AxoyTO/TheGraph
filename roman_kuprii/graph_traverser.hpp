@@ -21,13 +21,17 @@ class GraphTraverser {
     Distance distance = 0;
   };
 
-  std::vector<Path> traverse_graph(const Graph& graph);
+  std::vector<Path> traverse_graph();
 
- private:
   std::optional<Path> find_shortest_path(const Graph& graph,
                                          const VertexId& source_vertex_id,
                                          const VertexId& destination_vertex_id,
                                          std::mutex& graph_mutex) const;
+
+  GraphTraverser(const Graph& graph) : graph_(graph) {}
+
+ private:
+  const Graph& graph_;
 };
 
 }  // namespace uni_cpp_practice

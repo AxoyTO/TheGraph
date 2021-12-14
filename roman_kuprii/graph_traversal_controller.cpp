@@ -14,9 +14,10 @@ namespace uni_cpp_practice {
 
 namespace graph_traversal_controller {
 
-GraphTraversalController::GraphTraversalController(int threads_count,
-                                                   int graphs_count)
-    : graphs_count_(graphs_count) {
+GraphTraversalController::GraphTraversalController(
+    int threads_count,
+    const std::vector<Graph>& graphs)
+    : graphs_(graphs) {
   for (int iter = 0; iter < threads_count; iter++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
@@ -33,7 +34,6 @@ GraphTraversalController::GraphTraversalController(int threads_count,
 }
 
 void GraphTraversalController::traverse_graphs(
-    const std::vector<Graph>& graphs,
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
   std::atomic<int> completed_jobs = 0;
@@ -44,29 +44,30 @@ void GraphTraversalController::traverse_graphs(
 
   {
     std::lock_guard lock(get_job_mutex_);
-    for (int i = 0; i < graphs_count_; i++) {
+    for (int i = 0; i < graphs_.size(); i++) {
       jobs_.emplace_back([&gen_started_callback = gen_started_callback,
                           &gen_finished_callback = gen_finished_callback, i,
                           &finish_callback_mutex_ = finish_callback_mutex_,
                           &start_callback_mutex_ = start_callback_mutex_,
-                          &completed_jobs = completed_jobs, &graphs]() {
+                          &completed_jobs = completed_jobs,
+                          &graphs_ = graphs_]() {
         {
           const std::lock_guard lock(start_callback_mutex_);
           gen_started_callback(i);
         }
 
-        GraphTraverser graph_traverser;
-        auto pathes = graph_traverser.traverse_graph(graphs[i]);
+        GraphTraverser graph_traverser(graphs_[i]);
+        auto paths = graph_traverser.traverse_graph();
 
         {
           const std::lock_guard lock(finish_callback_mutex_);
-          gen_finished_callback(i, std::move(pathes));
+          gen_finished_callback(i, std::move(paths));
         }
         completed_jobs++;
       });
     }
   }
-  while (completed_jobs != graphs_count_) {
+  while (completed_jobs != graphs_.size()) {
   }
 
   for (auto& worker : workers_) {

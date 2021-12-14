@@ -93,7 +93,7 @@ std::string graph_to_json(const Graph& graph) {
   return res;
 }
 
-std::string print_path(const GraphTraverser::Path& path) {
+std::string path_to_json(const GraphTraverser::Path& path) {
   std::string res;
   res = "{vertices: [";
   for (const auto& vertex_id : path.vertex_ids) {

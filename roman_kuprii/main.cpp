@@ -98,10 +98,8 @@ int main() {
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
 
-  auto traversal_controller =
-      GraphTraversalController(threads_count, graphs_count);
+  auto traversal_controller = GraphTraversalController(threads_count, graphs);
   traversal_controller.traverse_graphs(
-      graphs,
       [&logger](int index) {
         logger.log(
             uni_cpp_practice::logging_helping::write_traverse_start(index));

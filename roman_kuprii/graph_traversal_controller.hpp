@@ -41,16 +41,15 @@ class GraphTraversalController {
     std::atomic<State> state_ = State::Idle;
   };
 
-  GraphTraversalController(int threads_count, int graphs_count);
+  GraphTraversalController(int threads_count, const std::vector<Graph>& graphs);
 
-  void traverse_graphs(const std::vector<Graph>& graphs,
-                       const GenStartedCallback& gen_started_callback,
+  void traverse_graphs(const GenStartedCallback& gen_started_callback,
                        const GenFinishedCallback& gen_finished_callback);
 
  private:
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
-  int graphs_count_;
+  const std::vector<Graph>& graphs_;
   std::mutex start_callback_mutex_;
   std::mutex finish_callback_mutex_;
   std::mutex get_job_mutex_;

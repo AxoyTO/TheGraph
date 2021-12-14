@@ -112,20 +112,19 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
   return std::nullopt;
 }
 
-std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph(
-    const Graph& graph) {
+std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   std::list<std::function<void()>> jobs;
   std::atomic<int> completed_jobs = 0;
   std::mutex graph_mutex;
   std::mutex path_mutex;
-  auto vertex_ids = get_max_depth_vertices_ids(graph);
+  auto vertex_ids = get_max_depth_vertices_ids(graph_);
   std::vector<GraphTraverser::Path> pathes;
   pathes.reserve(vertex_ids.size());
 
   for (const auto& vertex_id : vertex_ids)
-    jobs.emplace_back([this, &graph, &completed_jobs, &graph_mutex, &vertex_id,
-                       &pathes, &path_mutex]() {
-      auto path = find_shortest_path(graph, 0, vertex_id, graph_mutex);
+    jobs.emplace_back([this, &graph_ = graph_, &completed_jobs, &graph_mutex,
+                       &vertex_id, &pathes, &path_mutex]() {
+      auto path = find_shortest_path(graph_, 0, vertex_id, graph_mutex);
       {
         std::lock_guard lock(path_mutex);
         if (path.has_value())
