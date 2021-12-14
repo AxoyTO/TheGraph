@@ -26,9 +26,6 @@ class Graph {
         : vertex_ids(new_vertex_ids), id(edge_id), color(new_color) {}
 
     std::string to_string() const;
-    const pair<VertexId, VertexId>& get_vertex_ids() const {
-      return vertex_ids;
-    }
     const EdgeId id = 0;
     const pair<VertexId, VertexId> vertex_ids = {-1, -1};
     const Color color = Color::Gray;

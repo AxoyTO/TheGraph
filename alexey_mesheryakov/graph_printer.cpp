@@ -3,7 +3,7 @@
 std::string GraphPrinter::edge_to_string(const Graph::Edge& edge) const {
   std::stringstream buffer;
   buffer << "{\"id\":" << edge.id << ",\"vertex_ids\":["
-         << edge.get_vertex_ids().first << "," << edge.get_vertex_ids().second
+         << edge.vertex_ids.first << "," << edge.vertex_ids.second
          << "],\"color\":\"" << color_to_string(edge.color) << "\"}";
   return buffer.str();
 }
