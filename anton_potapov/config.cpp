@@ -4,6 +4,7 @@
 
 namespace config {
 std::string log_file_path() {
-  return "";
+  return std::string(config::kTempDirectoryPath) +
+         std::string(config::kLogFilename);
 }
 }  // namespace config

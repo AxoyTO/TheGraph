@@ -4,7 +4,7 @@ namespace uni_cource_cpp {
 class Logger {
  public:
   void log(const std::string& string);
-  static Logger& get_instance();
+  static Logger& get_logger();
 
  private:
   Logger() = default;

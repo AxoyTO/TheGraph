@@ -1,14 +1,20 @@
+#include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
+#include "logger.hpp"
 
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::GraphPrinter;
+using uni_cource_cpp::Logger;
 
 int handle_depth_input() {
   while (true) {
@@ -48,7 +54,43 @@ int handle_graphs_count_input() {
   }
 }
 
-void prepare_temp_directory() {}
+void prepare_temp_directory() {
+  const auto& temp_directory_path = config::kTempDirectoryPath;
+  if (!std::filesystem::is_directory(temp_directory_path) ||
+      !std::filesystem::exists(temp_directory_path)) {
+    std::filesystem::create_directory(temp_directory_path);
+  }
+}
+
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
+}
+
+namespace graph_printing {
+std::string print_graph_description(const Graph& graph) {
+  return "{}";
+}
+}  // namespace graph_printing
+
+std::string generation_started_string(int id) {
+  std::stringstream generation_started_stringstream;
+  generation_started_stringstream << get_current_date_time << ": Graph " << id
+                                  << ", Generation Started" << std::endl;
+  return generation_started_stringstream.str();
+}
+
+std::string generation_finished_string(int id, const Graph& graph) {
+  std::stringstream generation_finished_stringstream;
+  generation_finished_stringstream
+      << get_current_date_time << ": Graph " << id << ", Generation Finished "
+      << graph_printing::print_graph_description(graph) << std::endl;
+  return generation_finished_stringstream.str();
+}
 
 void write_to_file(const std::string& file_text, const std::string& file_path) {
   std::fstream json_file;
@@ -68,16 +110,16 @@ int main() {
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
   const auto generator = GraphGenerator(params);
-  // auto& logger = Logger::get_logger();
+  auto& logger = Logger::get_logger();
 
   for (int i = 0; i < graphs_count; i++) {
-    // logger.log(generation_started_string(i));
+    logger.log(generation_started_string(i));
     const auto graph = generator.generate_graph();
     if (graph.max_depth() < depth) {
       std::cerr << "generated graph's depth=" << graph.max_depth()
                 << " is less than specified one =" << depth << std::endl;
     }
-    // logger.log(generation_finished_string(i, graph));
+    logger.log(generation_finished_string(i, graph));
 
     auto graph_printer = GraphPrinter(graph);
     const auto graph_json = graph_printer.print();
