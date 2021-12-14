@@ -18,10 +18,8 @@ using GraphPrinter = uni_cpp_practice::GraphPrinter;
 using GraphGenerator = uni_cpp_practice::GraphGenerator;
 using GraphGenerationController = uni_cpp_practice::GraphGenerationController;
 using Logger = uni_cpp_practice::Logger;
-using GraphTraversal = uni_cpp_practice::GraphTraversal;
+using GraphTraverser = uni_cpp_practice::GraphTraverser;
 using GraphTraversalController = uni_cpp_practice::GraphTraversalController;
-
-const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
 std::string get_date_and_time() {
   std::time_t now =
@@ -117,9 +115,8 @@ void log_end(Logger& logger, const Graph& graph, int graph_number) {
   logger.log("}\n}\n");
 }
 
-void log_paths(Logger& logger, const GraphTraversal graph_traversal) {
-  const auto shortest_paths = graph_traversal.get_shortest_paths();
-  for (const auto& shortest_path : shortest_paths) {
+void log_paths(Logger& logger, const std::vector<GraphTraverser::Path>& paths) {
+  for (const auto& shortest_path : paths) {
     logger.log("{vertices: [");
     for (int i = 0; i < shortest_path.vertex_ids.size(); i++) {
       logger.log(std::to_string(shortest_path.vertex_ids[i]));
@@ -137,11 +134,11 @@ void log_traversal_start(Logger& logger, int graph_number) {
 }
 
 void log_traversal_end(Logger& logger,
-                       const GraphTraversal& traversal,
-                       int graph_number) {
+                       const int graph_number,
+                       const std::vector<GraphTraverser::Path>& paths) {
   logger.log(get_date_and_time() + ": Graph " + std::to_string(graph_number) +
              ", Traversal Finished, Paths: [  \n");
-  log_paths(logger, traversal);
+  log_paths(logger, paths);
   logger.log("]\n");
 }
 
@@ -158,8 +155,25 @@ void prepare_temp_directory() {
   std::filesystem::create_directory("./temp");
 }
 
-void prepare_log_file(Logger& logger) {
+Logger& prepare_logger() {
+  auto& logger = Logger::get_logger();
   logger.set_file("./temp/log.txt");
+  return logger;
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs) {
+  auto traversal_controller = GraphTraversalController(graphs);
+
+  traversal_controller.traverse(
+      [](int index, const Graph& traversed_graph) {
+        auto& logger = Logger::get_logger();
+        log_traversal_start(logger, index);
+      },
+      [](int index, const Graph& traversed_graph,
+         std::vector<GraphTraverser::Path> paths) {
+        auto& logger = Logger::get_logger();
+        log_traversal_end(logger, index, paths);
+      });
 }
 
 int main() {
@@ -173,10 +187,8 @@ int main() {
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
 
-  auto& logger = Logger::get_instance();
-
   prepare_temp_directory();
-  prepare_log_file(logger);
+  auto& logger = prepare_logger();
 
   graphs.reserve(graphs_count);
   generation_controller.generate(
@@ -184,25 +196,12 @@ int main() {
       [&logger, &graphs](int index, Graph graph) {
         log_end(logger, graph, index);
         graphs.push_back(graph);
-        // GraphTraversal traversal(graph);
-        // log_traversal_start(logger, index);
-        // log_traversal_end(logger, traversal, index);
         const auto graph_printer = GraphPrinter(graph);
         write_to_file(graph_printer,
                       "./temp/graph_" + std::to_string(index) + ".json");
       });
 
-  // traverse_graphs(graphs, logger);
-
-  auto traversal_controller = GraphTraversalController(graphs);
-  traversal_controller.traverse(
-      [&logger](int index) { log_traversal_start(logger, index); },
-      [&logger, &graphs](int index, std::vector<GraphTraversal::Path> path) {
-        GraphTraversal traversal(graphs[index]);
-        log_traversal_end(logger, traversal, index);
-      }
-
-  );
+  traverse_graphs(graphs);
 
   return 0;
 }

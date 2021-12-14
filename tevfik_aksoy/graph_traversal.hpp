@@ -3,37 +3,28 @@
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
-class GraphTraversal {
+class GraphTraverser {
  public:
   using Distance = int;
 
   struct Path {
-    explicit Path(Distance _distance = 0) : distance(_distance) {}
+    Path(std::vector<VertexId> _vertex_ids, Distance _distance = 0)
+        : vertex_ids(_vertex_ids), distance(_distance) {}
     std::vector<VertexId> vertex_ids;
     Distance distance = 0;
   };
 
-  GraphTraversal(const Graph& graph);
+  GraphTraverser(const Graph& graph);
 
-  std::vector<GraphTraversal::Path> get_shortest_paths() const;
-
- private:
-  Path path_ = Path();
-  std::vector<Vertex> vertices_;
-  std::vector<Edge> edges_;
-  std::vector<Path> shortest_paths_;
-
-  std::vector<std::pair<VertexId, EdgeId>> get_adjacent_vertices_and_distances(
-      const VertexId& vertex_id);
+  std::vector<Path> traverse_graph();
 
   std::optional<Path> find_shortest_path(VertexId source_vertex_id,
                                          VertexId destination_vertex_id);
 
-  void parse_shortest_path(std::vector<VertexId> path_vertices,
-                           VertexId vertex_id);
-  void save_shortest_paths(std::vector<int> distances,
-                           int destination,
-                           std::vector<int> path_vertices);
+ private:
+  const Graph graph_;
+
+  std::vector<VertexId> get_adjacent_vertices(const Vertex& vertex);
 };
 
 }  // namespace uni_cpp_practice

@@ -9,9 +9,12 @@ namespace uni_cpp_practice {
 class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
-  using TraversalStartedCallback = std::function<void(int)>;
+  using TraversalStartedCallback =
+      std::function<void(int /* index */, const Graph& graph /* graph */)>;
   using TraversalFinishedCallback =
-      std::function<void(int, std::vector<GraphTraversal::Path>)>;
+      std::function<void(int /* index */,
+                         const Graph& graph /* graph */,
+                         std::vector<GraphTraverser::Path> /* paths */)>;
 
   GraphTraversalController(const std::vector<Graph>& graphs);
 

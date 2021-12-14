@@ -1,44 +1,88 @@
 #include "graph_traversal.hpp"
+#include <atomic>
 #include <climits>
+#include <functional>
+#include <iostream>
 #include <list>
+#include <map>
+#include <mutex>
 #include <queue>
+#include <thread>
 
-constexpr int DUMMY_DISTANCE_VALUE = -1;
+namespace {
+const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+}  // namespace
 
 namespace uni_cpp_practice {
 
-GraphTraversal::GraphTraversal(const Graph& graph)
-    : vertices_(graph.get_vertices()), edges_(graph.get_edges()) {
-  for (const auto& destination_vertex_id :
-       graph.get_vertices_in_depth(graph.depth())) {
-    find_shortest_path(0, destination_vertex_id);
+GraphTraverser::GraphTraverser(const Graph& graph) : graph_(graph) {}
+
+std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
+  std::list<std::function<void()>> jobs;
+  std::mutex path_mutex;
+  std::vector<GraphTraverser::Path> paths;
+  paths.reserve(graph_.get_vertices_in_depth(graph_.depth()).size());
+  std::atomic<int> jobs_count =
+      graph_.get_vertices_in_depth(graph_.depth()).size();
+
+  for (const auto& vertex_id : graph_.get_vertices_in_depth(graph_.depth()))
+    jobs.emplace_back([this, &jobs_count, &vertex_id, &paths, &path_mutex]() {
+      auto path = find_shortest_path(0, vertex_id);
+      {
+        std::lock_guard lock(path_mutex);
+        if (path.has_value())
+          paths.emplace_back(path.value());
+      }
+      jobs_count--;
+    });
+
+  std::atomic<bool> should_terminate = false;
+  std::mutex jobs_mutex;
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional =
+          [&jobs_mutex, &jobs]() -> std::optional<std::function<void()>> {
+        const std::lock_guard lock(jobs_mutex);
+        if (jobs.empty()) {
+          return std::nullopt;
+        }
+        const auto job = jobs.front();
+        jobs.pop_front();
+        return job;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  const auto threads_number = MAX_WORKERS_COUNT;
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_number);
+
+  for (int i = 0; i < threads_number; i++) {
+    threads.emplace_back(worker);
   }
-}
 
-void GraphTraversal::parse_shortest_path(std::vector<VertexId> path_vertices,
-                                         VertexId vertex_id) {
-  if (path_vertices[vertex_id] == DUMMY_DISTANCE_VALUE) {
-    path_.vertex_ids.push_back(vertex_id);
-    return;
+  while (jobs_count != 0) {
   }
 
-  parse_shortest_path(path_vertices, path_vertices[vertex_id]);
-  path_.vertex_ids.push_back(vertex_id);
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  return paths;
 }
 
-void GraphTraversal::save_shortest_paths(std::vector<int> distances,
-                                         VertexId destination,
-                                         std::vector<int> path_vertices) {
-  parse_shortest_path(path_vertices, destination);
-  path_.distance = distances[destination];
-  shortest_paths_.emplace_back(path_);
-  path_.vertex_ids.clear();
-}
-
-std::optional<GraphTraversal::Path> GraphTraversal::find_shortest_path(
+std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
-  if (vertices_.size() == 1)
+  if (graph_.get_vertices().size() == 1)
     return std::nullopt;
 
   std::priority_queue<std::pair<VertexId, Distance>,
@@ -46,52 +90,57 @@ std::optional<GraphTraversal::Path> GraphTraversal::find_shortest_path(
                       std::greater<std::pair<VertexId, Distance>>>
       priority_queue;
 
-  std::vector<Distance> distances(vertices_.size(), INT_MAX);
-  std::vector<VertexId> dummy_path_vertices;
+  std::map<VertexId, VertexId> closest_vertices_map;
+  std::vector<VertexId> path;
 
-  for (int i = 0; i < vertices_.size(); i++) {
-    dummy_path_vertices.push_back(DUMMY_DISTANCE_VALUE);
-  }
+  std::vector<Distance> distances(graph_.get_vertices().size(), INT_MAX);
 
   priority_queue.push(std::make_pair(source_vertex_id, 0));
   distances[source_vertex_id] = 0;
 
   while (!priority_queue.empty()) {
-    VertexId closest_vertex = priority_queue.top().first;
+    VertexId closest_vertex_id = priority_queue.top().first;
     priority_queue.pop();
-    for (const auto& vertices_and_distances :
-         get_adjacent_vertices_and_distances(closest_vertex)) {
-      VertexId vertex_id = vertices_and_distances.first;
-      Distance distance = vertices_and_distances.second;
-      if (distances[vertex_id] > distances[closest_vertex] + distance) {
-        dummy_path_vertices[vertex_id] = closest_vertex;
-        distances[vertex_id] = distances[closest_vertex] + distance;
+    for (const auto& vertex_id :
+         get_adjacent_vertices(graph_.get_vertex(closest_vertex_id))) {
+      Distance distance = 1;
+      if (distances[vertex_id] > distances[closest_vertex_id] + distance) {
+        closest_vertices_map[vertex_id] = closest_vertex_id;
+        distances[vertex_id] = distances[closest_vertex_id] + distance;
         priority_queue.push(std::make_pair(vertex_id, distances[vertex_id]));
       }
     }
   }
 
-  save_shortest_paths(distances, destination_vertex_id, dummy_path_vertices);
-  return path_;
+  auto vertex_id = destination_vertex_id;
+  while (true) {
+    path.push_back(vertex_id);
+    vertex_id = closest_vertices_map[vertex_id];
+    if (vertex_id == 0) {
+      path.push_back(vertex_id);
+      break;
+    }
+  }
+  std::reverse(path.begin(), path.end());
+
+  Path shortest_path(path, distances[destination_vertex_id]);
+  return shortest_path;
 }
 
-std::vector<GraphTraversal::Path> GraphTraversal::get_shortest_paths() const {
-  return shortest_paths_;
-}
+std::vector<VertexId> GraphTraverser::get_adjacent_vertices(
+    const Vertex& vertex) {
+  std::vector<VertexId> adjacent_vertices;
+  auto vertex_edges = vertex.get_edge_ids();
 
-std::vector<std::pair<VertexId, EdgeId>>
-GraphTraversal::get_adjacent_vertices_and_distances(const VertexId& vertex_id) {
-  std::vector<std::pair<VertexId, EdgeId>> adjacent_vertices;
-  auto vertex_edges = vertices_[vertex_id].get_edge_ids();
   for (const auto& edge_id : vertex_edges) {
-    if (edges_[edge_id].color == Edge::Color::Green)
+    if (graph_.get_edges()[edge_id].color == Edge::Color::Green)
       continue;
     else {
-      if (edges_[edge_id].source == vertex_id)
-        adjacent_vertices.push_back(
-            std::make_pair(edges_[edge_id].destination, 1));
-      else
-        adjacent_vertices.push_back(std::make_pair(edges_[edge_id].source, 1));
+      if (graph_.get_edges()[edge_id].source == vertex.id) {
+        adjacent_vertices.push_back(graph_.get_edges()[edge_id].destination);
+      } else {
+        adjacent_vertices.push_back(graph_.get_edges()[edge_id].source);
+      }
     }
   }
 

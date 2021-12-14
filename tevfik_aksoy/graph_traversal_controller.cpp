@@ -1,6 +1,9 @@
 #include "graph_traversal_controller.hpp"
+#include <iostream>
 
+namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+}
 
 namespace uni_cpp_practice {
 GraphTraversalController::GraphTraversalController(
@@ -40,13 +43,14 @@ void GraphTraversalController::traverse(
            &mutex_started_callback = mutex_started_callback_, &jobs_count]() {
             {
               const std::lock_guard lock(mutex_started_callback);
-              traversalStartedCallback(i);
+              traversalStartedCallback(i, graphs[i]);
             }
-            GraphTraversal graph_traversal(graphs[i]);
-            auto path = graph_traversal.get_shortest_paths();
+            GraphTraverser graph_traversal(graphs[i]);
+            auto path = graph_traversal.traverse_graph();
             {
               const std::lock_guard lock(mutex_finished_callback);
-              traversalFinishedCallback(i, std::move(path));
+              traversalFinishedCallback(i, std::move(graphs[i]),
+                                        std::move(path));
             }
             jobs_count++;
           });
