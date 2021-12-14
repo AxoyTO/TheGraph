@@ -95,7 +95,7 @@ std::string write_traverse_end(
   res += ": Graph " + to_string(graph_num) + ", Traversal Finished, Paths: [\n";
   for (const auto& path : pathes) {
     res += "  ";
-    res += graph_printing::print_path(path);
+    res += graph_printing::path_to_json(path);
     res += ",\n";
   }
   if (pathes.size()) {
