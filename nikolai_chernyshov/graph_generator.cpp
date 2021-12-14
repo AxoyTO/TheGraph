@@ -56,6 +56,7 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
 
   std::mutex jobs_mutex;
   std::atomic<int> finished_jobs_num = 0;
+  std::atomic<bool> should_terminate = false;
 
   const VertexId root_vertex_id = graph.add_vertex();
 
@@ -67,19 +68,16 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
         });
   }
 
-  std::mutex worker_mutex;
-  std::atomic<bool> should_terminate = false;
-
-  auto worker = [&should_terminate, &worker_mutex, &jobs]() {
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       if (should_terminate) {
         return;
       }
-      const auto job_optional =
-          [&jobs, &worker_mutex]() -> std::optional<JobCallback> {
-        const std::lock_guard lock(worker_mutex);
+      const auto job_optional = [&jobs,
+                                 &jobs_mutex]() -> std::optional<JobCallback> {
+        const std::lock_guard lock(jobs_mutex);
         if (!jobs.empty()) {
-          const auto job = *jobs.begin();
+          const auto job = jobs.front();
           jobs.pop_front();
           return job;
         }
@@ -160,6 +158,7 @@ void GraphGenerator::generate_yellow_edges(Graph& graph,
     for (const auto& vertex_id : *vertex_ids_in_depth) {
       std::vector<VertexId> unconnected_vertex_ids;
       for (const auto& vertex_id_in_next_depth : *(vertex_ids_in_depth + 1)) {
+        const std::lock_guard lock(mutex);
         if (!graph.are_connected(vertex_id, vertex_id_in_next_depth)) {
           unconnected_vertex_ids.push_back(vertex_id_in_next_depth);
         }
@@ -172,35 +171,21 @@ void GraphGenerator::generate_yellow_edges(Graph& graph,
       }
     }
   }
-};
+}
 
 void GraphGenerator::generate_red_edges(Graph& graph, std::mutex& mutex) const {
   if (graph.get_depth() < 2)
     return;
-  //   for (auto vertex_ids_in_depth = graph.get_depth_map().begin();
-  //        vertex_ids_in_depth != graph.get_depth_map().end() - 2;
-  //        vertex_ids_in_depth++)
-  //     for (const auto& vertex_id : *vertex_ids_in_depth)
-  //       if (get_random_boolean(RED_EDGE_PROBA)) {
-  //         const VertexId new_id =
-  //             get_random_vertex_id(*(vertex_ids_in_depth + 2));
-  //         const std::lock_guard lock(mutex);
-  //         graph.add_edge(vertex_id, new_id);
-  //       }
-  // }
 
-  const auto depth_map = graph.get_depth_map();
-  for (int cur_depth = 0; cur_depth < depth_map.size() - 2; cur_depth++) {
-    const auto& vertex_ids_at_depth = depth_map[cur_depth];
-    for (const VertexId cur_id : vertex_ids_at_depth) {
+  for (auto vertex_ids_in_depth = graph.get_depth_map().begin();
+       vertex_ids_in_depth != graph.get_depth_map().end() - 2;
+       vertex_ids_in_depth++)
+    for (const auto& vertex_id : *vertex_ids_in_depth)
       if (get_random_boolean(RED_EDGE_PROBA)) {
-        const VertexId binding_id =
-            get_random_vertex_id(depth_map[cur_depth + 2]);
+        const VertexId new_id =
+            get_random_vertex_id(*(vertex_ids_in_depth + 2));
         const std::lock_guard lock(mutex);
-        graph.add_edge(cur_id, binding_id);
+        graph.add_edge(vertex_id, new_id);
       }
-    }
-  }
 }
-
 }  // namespace uni_course_cpp
