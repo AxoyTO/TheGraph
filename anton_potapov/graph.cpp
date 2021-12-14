@@ -125,6 +125,10 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   return new_edge_id;
 }
 
+int Graph::edge_with_color_cnt(const EdgeColor& edge_color) const {
+  return 0;
+}
+
 VertexId Graph::get_next_vertex_id() {
   return next_vertex_id_++;
 }
