@@ -116,7 +116,8 @@ void GraphGenerator::generate_gray_branch(Graph& graph,
     return;
   }
 
-  if (!get_random_boolean(1 - (double)depth / (double)params_.depth)) {
+  const double probability = 1 - (double)depth / (double)params_.depth;
+  if (!get_random_boolean(probability)) {
     return;
   }
 
