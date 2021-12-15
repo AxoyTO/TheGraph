@@ -163,7 +163,7 @@ class Graph {
 
   const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
 
-  Depth depth() const { return vertices_on_depth_.size(); }
+  Depth depth() const { return vertices_on_depth_.size() - 1; }
 
  private:
   std::unordered_map<VertexId, Vertex> vertices_;
@@ -210,7 +210,8 @@ string print_edge(const Graph::Edge& edge) {
          "]" + ", " + "\"color\": \"" + print_edge_color(edge.color) + "\"";
 }
 string print_graph(const Graph& graph) {
-  string graph_output = "{\n\t\"vertices\": [\n\t\t";
+  string graph_output = "{\n\t\"depth\": " + to_string(graph.depth()) +
+                        ",\n\t\"vertices\": [\n\t\t";
   for (const auto& [key, vertex] : graph.get_vertices()) {
     graph_output += "{" + print_vertex(vertex) + "},\n\t\t";
   }
@@ -243,7 +244,7 @@ void generate_gray_edges(Graph& graph, int depth, int new_vertices_num) {
   for (int current_depth = 0; current_depth < depth; current_depth++) {
     double step = 100 / (double)depth;
     double probability = 100 - step * current_depth;
-    if (current_depth < graph.depth()) {
+    if (current_depth < graph.depth() + 1) {
       //Создаю копию, чтобы не менять объект по которому итерирую
       const auto vertex_ids_on_depth =
           graph.get_vertex_ids_on_depth(current_depth);
@@ -268,13 +269,13 @@ void generate_green_edges(Graph& graph) {
 }
 
 void generate_yellow_edges(Graph& graph) {
-  for (int current_depth = 0; current_depth < graph.depth(); current_depth++) {
-    if (current_depth != graph.depth() - 1) {
+  for (int current_depth = 0; current_depth <= graph.depth(); current_depth++) {
+    if (current_depth != graph.depth()) {
       for (const auto& from_vertex_id :
            graph.get_vertex_ids_on_depth(current_depth)) {
         const double probability =
             (double)graph.get_vertex(from_vertex_id).depth *
-            (100 / (double)(graph.depth() - 2));
+            (100 / (double)(graph.depth() - 1));
         if (is_generated(probability)) {
           vector<VertexId> vertices_on_deeper_depth;
           for (const auto& to_vertex_id :
@@ -295,8 +296,8 @@ void generate_yellow_edges(Graph& graph) {
 }
 
 void generate_red_edges(Graph& graph) {
-  for (int current_depth = 0; current_depth < graph.depth(); current_depth++) {
-    if (current_depth >= graph.depth() - 2) {
+  for (int current_depth = 0; current_depth <= graph.depth(); current_depth++) {
+    if (current_depth >= graph.depth() - 1) {
       break;
     } else {
       for (const auto& from_vertex_id :
