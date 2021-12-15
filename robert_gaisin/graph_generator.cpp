@@ -3,11 +3,12 @@
 
 #include <random>
 
+namespace {
+
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::VertexId;
 
-namespace {
 constexpr int PROBA_GRAY_BEGIN = 100;
 constexpr int PROBA_RED = 33;
 constexpr int PROBA_GREEN = 10;

@@ -1,12 +1,11 @@
 #include "graph_printer.hpp"
 #include <iostream>
 
+namespace {
 using uni_cource_cpp::Edge;
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::Vertex;
-
-namespace {
 
 using std::cin;
 using std::cout;
