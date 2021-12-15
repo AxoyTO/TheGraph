@@ -50,7 +50,7 @@ std::string GraphPrinter::print() const {
 
 std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
   std::stringstream ss;
-  std::string path_string = "{vertices: [";
+  std::string path_string = "  {vertices: [";
   ss << path_string;
   for (int i = 0; i < path.vertex_ids.size(); i++) {
     ss << std::to_string(path.vertex_ids[i]);
