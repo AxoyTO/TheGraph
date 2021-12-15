@@ -73,7 +73,7 @@ std::string GraphPrinter::print() const {
 std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
   std::stringstream ss_out;
   std::string tab_1 = "    ";
-  ss_out << tab_1 << "{\"vertices\": [";
+  ss_out << tab_1 << "{vertices: [";
   const auto& vertex_ids = path.vertex_ids;
   for (auto it = vertex_ids.begin(); it != vertex_ids.end(); ++it) {
     if (it != vertex_ids.begin()) {
@@ -81,8 +81,8 @@ std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
     }
     ss_out << *it;
   }
-  ss_out << "], \"distance\": ";
-  ss_out << path.distance << "}\n";
+  ss_out << "], distance: ";
+  ss_out << path.distance << "}";
   return ss_out.str();
 }
 }  // namespace uni_cpp_practice
