@@ -34,4 +34,3 @@ class GraphGenerator {
   void generate_red_edges(Graph& graph, std::mutex& mutex) const;
 };
 }  // namespace uni_cpp_practice
-
