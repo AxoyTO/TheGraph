@@ -39,8 +39,7 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
                                &source_vertex_id]() {
     std::lock_guard lock(graph_mutex);
     vertices_number = graph.get_vertices_num();
-    const auto& vertex =
-        graph.get_vertices_map().find(source_vertex_id)->second;
+    const auto& vertex = graph.get_vertices().find(source_vertex_id)->second;
     return vertex;
   }();
   // unvisited vertices
@@ -67,10 +66,10 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
       const auto& next_vertex = [&graph_mutex, &graph, &edge_id,
                                  &next_vertex_id]() {
         std::lock_guard lock(graph_mutex);
-        const auto& edge = graph.get_edges_map().find(edge_id)->second;
+        const auto& edge = graph.get_edges().find(edge_id)->second;
         next_vertex_id = edge.connected_vertices.back();
         const auto& next_vertex =
-            graph.get_vertices_map().find(next_vertex_id)->second;
+            graph.get_vertices().find(next_vertex_id)->second;
         return next_vertex;
       }();
       // update distances

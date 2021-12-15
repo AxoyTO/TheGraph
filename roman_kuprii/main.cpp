@@ -70,11 +70,13 @@ void prepare_temp_directory() {
   std::filesystem::create_directory(DIRECTORY_NAME);
 }
 
-void generate_graphs(std::vector<Graph>& graphs,
-                     Logger& logger,
-                     const int threads_count,
-                     const int graphs_count,
-                     const GraphGenerator::Params& params) {
+std::vector<Graph> generate_graphs(Logger& logger,
+                                   const int threads_count,
+                                   const int graphs_count,
+                                   const GraphGenerator::Params& params) {
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
   generation_controller.generate(
@@ -87,6 +89,8 @@ void generate_graphs(std::vector<Graph>& graphs,
         graphs.push_back(graph);
         uni_cpp_practice::logging_helping::write_graph(graph, index);
       });
+
+  return graphs;
 }
 
 void traverse_graphs(const std::vector<Graph>& graphs,
@@ -115,10 +119,7 @@ int main() {
   const int threads_count = handle_threads_number_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
 
-  auto graphs = std::vector<Graph>();
-  graphs.reserve(graphs_count);
-
-  generate_graphs(graphs, logger, threads_count, graphs_count, params);
+  auto graphs = generate_graphs(logger, threads_count, graphs_count, params);
   traverse_graphs(graphs, logger, threads_count);
 
   return 0;

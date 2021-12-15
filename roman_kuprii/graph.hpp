@@ -57,25 +57,22 @@ class Graph {
                         const VertexId& to_vertex_id,
                         bool initialization);
 
-  const std::unordered_map<EdgeId, Edge>& get_edges_map() const {
-    return edges_map_;
-  }
-  const std::unordered_map<VertexId, Vertex>& get_vertices_map() const {
-    return vertices_map_;
+  const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
+  const std::unordered_map<VertexId, Vertex>& get_vertices() const {
+    return vertices_;
   }
   const std::vector<VertexId>& get_vertex_ids_at_depth(int depth) const;
 
-  int get_depth() const { return depth_; }
-  int get_vertices_num() const { return vertices_map_.size(); }
-  int get_edges_num() const { return edges_map_.size(); }
+  int get_depth() const { return depth_map_.size(); }
+  int get_vertices_num() const { return vertices_.size(); }
+  int get_edges_num() const { return edges_.size(); }
 
   std::vector<EdgeId> get_edge_ids_with_color(const Edge::Color& color) const;
 
  private:
-  std::unordered_map<VertexId, Vertex> vertices_map_;
-  std::unordered_map<EdgeId, Edge> edges_map_;
+  std::unordered_map<VertexId, Vertex> vertices_;
+  std::unordered_map<EdgeId, Edge> edges_;
   std::vector<std::vector<VertexId>> depth_map_ = {{0}};
-  int depth_ = 0;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
