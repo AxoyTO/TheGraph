@@ -55,7 +55,7 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  const auto& temp_directory_path = config::kTempDirectoryPath;
+  const auto& temp_directory_path = config::TEMP_DIRECTORY_PATH;
   if (!std::filesystem::is_directory(temp_directory_path) ||
       !std::filesystem::exists(temp_directory_path)) {
     std::filesystem::create_directory(temp_directory_path);
@@ -162,7 +162,7 @@ int main() {
 
     auto graph_printer = GraphPrinter(graph);
     const auto graph_json = graph_printer.print();
-    write_to_file(graph_json, std::string(config::kTempDirectoryPath) +
+    write_to_file(graph_json, std::string(config::TEMP_DIRECTORY_PATH) +
                                   "graph_" + std::to_string(i) + ".json");
   }
 
