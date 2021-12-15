@@ -116,8 +116,11 @@ void log_end(Logger& logger, const Graph& graph, int graph_number) {
 }
 
 void log_paths(Logger& logger, const std::vector<GraphTraverser::Path>& paths) {
-  for (const auto& shortest_path : paths) {
-    logger.log(GraphPrinter::print_path(shortest_path));
+  for (int i = 0; i < paths.size(); i++) {
+    logger.log(GraphPrinter::print_path(paths[i]));
+    if (i != paths.size() - 1)
+      logger.log(",");
+    logger.log("\n");
   }
 }
 

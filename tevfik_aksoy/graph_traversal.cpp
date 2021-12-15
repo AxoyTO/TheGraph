@@ -31,8 +31,7 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
       auto path = find_shortest_path(0, vertex_id);
       {
         std::lock_guard lock(path_mutex);
-        if (path.has_value())
-          paths.emplace_back(path.value());
+        paths.emplace_back(path);
       }
       jobs_count--;
     });
@@ -80,11 +79,13 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   return paths;
 }
 
-std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
+GraphTraverser::Path GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
-  assert(graph_.get_vertices().size() > 1 &&
-         "Graph has no more than 1 vertex!\n");
+  assert(graph_.does_vertex_exist(source_vertex_id) &&
+         "Source vertex doesn't exist!");
+  assert(graph_.does_vertex_exist(destination_vertex_id) &&
+         "Destination vertex doesn't exist!");
 
   std::priority_queue<std::pair<VertexId, Distance>,
                       std::vector<std::pair<VertexId, Distance>>,
@@ -103,7 +104,7 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId closest_vertex_id = priority_queue.top().first;
     priority_queue.pop();
     for (const auto& vertex_id :
-         graph_.get_adjacent_vertex_ids(graph_.get_vertex(closest_vertex_id))) {
+         graph_.get_adjacent_vertex_ids(closest_vertex_id)) {
       Distance distance = 1;
       if (distances[vertex_id] > distances[closest_vertex_id] + distance) {
         closest_vertices_map[vertex_id] = closest_vertex_id;

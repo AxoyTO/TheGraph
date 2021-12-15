@@ -57,7 +57,7 @@ std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
     if (i != path.vertex_ids.size() - 1)
       ss << ",";
   }
-  ss << "], distance: " + std::to_string(path.distance) + "},\n";
+  ss << "], distance: " + std::to_string(path.distance) + "}";
   return ss.str();
 }
 

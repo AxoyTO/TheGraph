@@ -18,8 +18,8 @@ class GraphTraverser {
 
   std::vector<Path> traverse_graph();
 
-  std::optional<Path> find_shortest_path(VertexId source_vertex_id,
-                                         VertexId destination_vertex_id);
+  Path find_shortest_path(VertexId source_vertex_id,
+                          VertexId destination_vertex_id);
 
  private:
   const Graph graph_;

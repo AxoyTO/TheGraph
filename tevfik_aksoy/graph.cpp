@@ -148,19 +148,16 @@ bool Graph::are_vertices_connected(const VertexId& source,
 }
 
 std::vector<VertexId> Graph::get_adjacent_vertex_ids(
-    const Vertex& vertex) const {
+    const VertexId& vertex_id) const {
   std::vector<VertexId> adjacent_vertices;
+  const auto vertex = get_vertex(vertex_id);
   const auto vertex_edges = vertex.get_edge_ids();
 
   for (const auto& edge_id : vertex_edges) {
     Edge edge = get_edge(edge_id);
-    if (edge.color == Edge::Color::Green)
-      continue;
-    else {
-      const auto connected_vertex_id =
-          edge.source == vertex.id ? edge.destination : edge.source;
-      adjacent_vertices.push_back(connected_vertex_id);
-    }
+    const auto connected_vertex_id =
+        edge.source == vertex.id ? edge.destination : edge.source;
+    adjacent_vertices.push_back(connected_vertex_id);
   }
 
   return adjacent_vertices;
