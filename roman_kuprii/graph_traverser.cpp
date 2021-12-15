@@ -25,7 +25,6 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
     const Graph& graph,
     const VertexId& source_vertex_id,
     const VertexId& destination_vertex_id) const {
-
   assert(graph.is_vertex_exist(source_vertex_id) &&
          graph.is_vertex_exist(destination_vertex_id));
 
@@ -82,8 +81,8 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   pathes.reserve(vertex_ids.size());
 
   for (const auto& vertex_id : vertex_ids)
-    jobs.emplace_back([this, &graph_ = graph_, &completed_jobs,
-                       &vertex_id, &pathes, &path_mutex]() {
+    jobs.emplace_back([this, &graph_ = graph_, &completed_jobs, &vertex_id,
+                       &pathes, &path_mutex]() {
       auto path = find_shortest_path(graph_, 0, vertex_id);
       {
         std::lock_guard lock(path_mutex);
