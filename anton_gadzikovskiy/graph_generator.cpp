@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -69,14 +70,14 @@ class Graph {
     const EdgeId new_edge_id = get_new_edge_id();
     const auto& new_edge_color =
         define_edge_color(from_vertex_id, to_vertex_id);
-    edges_.emplace_back(new_edge_id, from_vertex_id, to_vertex_id,
-                        new_edge_color);
+    edges_.emplace(new_edge_id, Edge(new_edge_id, from_vertex_id, to_vertex_id,
+                                     new_edge_color));
     vertices_.at(from_vertex_id).add_edge_id(new_edge_id);
     if (new_edge_color != Edge::Color::Green) {
       vertices_.at(to_vertex_id).add_edge_id(new_edge_id);
     }
     if (new_edge_color == Edge::Color::Gray) {
-      const auto new_vertex_depth = vertices_.at(from_vertex_id).depth + 1;
+      const auto new_vertex_depth = get_vertex(from_vertex_id).depth + 1;
       vertices_.at(to_vertex_id).depth = new_vertex_depth;
       if (vertices_on_depth_.size() - 1 < new_vertex_depth) {
         vertices_on_depth_.push_back(vector<VertexId>());
@@ -92,6 +93,11 @@ class Graph {
     }
   };
 
+  const Vertex& get_vertex(const VertexId& id) const {
+    return vertices_.at(id);
+  }
+  const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
+
   Depth get_vertex_depth(const VertexId& vertex_id) const {
     return vertices_.at(vertex_id).depth;
   }
@@ -99,18 +105,17 @@ class Graph {
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const {
     if (from_vertex_id != to_vertex_id) {
-      for (const auto& edge_id_1 :
-           vertices_.at(from_vertex_id).get_edge_ids()) {
-        for (const auto& edge_id_2 :
-             vertices_.at(to_vertex_id).get_edge_ids()) {
+      for (const auto& edge_id_1 : get_vertex_edge_ids(from_vertex_id)) {
+        for (const auto& edge_id_2 : get_vertex_edge_ids(to_vertex_id)) {
           if (edge_id_1 == edge_id_2) {
             return true;
           }
         }
       }
     } else {
-      for (const auto& edge_id : vertices_.at(from_vertex_id).get_edge_ids()) {
-        if (edges_[edge_id].from_vertex_id == edges_[edge_id].to_vertex_id) {
+      for (const auto& edge_id : get_vertex_edge_ids(from_vertex_id)) {
+        if (get_edge(edge_id).from_vertex_id ==
+            get_edge(edge_id).to_vertex_id) {
           return true;
         }
       }
@@ -125,7 +130,7 @@ class Graph {
     if (from_vertex_id == to_vertex_id) {
       return Edge::Color::Green;
     }
-    if (get_vertex_edges(to_vertex_id).size() == 0) {
+    if (get_vertex_edge_ids(to_vertex_id).size() == 0) {
       return Edge::Color::Gray;
     }
     if (to_vertex_depth - from_vertex_depth == 1 &&
@@ -138,7 +143,7 @@ class Graph {
     throw std::runtime_error("Failed to determine color");
   }
 
-  const vector<EdgeId>& get_vertex_edges(const VertexId& vertex_id) const {
+  const vector<EdgeId>& get_vertex_edge_ids(const VertexId& vertex_id) const {
     return vertices_.at(vertex_id).get_edge_ids();
   }
 
@@ -154,14 +159,14 @@ class Graph {
     return vertices_on_depth_[depth];
   }
 
-  const vector<Edge>& get_edges() const { return edges_; }
+  const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
 
   Depth depth() const { return vertices_on_depth_.size(); }
 
  private:
   std::unordered_map<VertexId, Vertex> vertices_;
   vector<vector<VertexId>> vertices_on_depth_;
-  vector<Edge> edges_;
+  std::unordered_map<EdgeId, Edge> edges_;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
@@ -209,15 +214,10 @@ string print_graph(const Graph& graph) {
   }
   graph_output = graph_output.substr(0, graph_output.size() - 4) +
                  "\n\t],\n\t\"edges\": [\n\t\t";
-  for (const auto& edge : graph.get_edges()) {
-    graph_output += "{" + print_edge(edge) + "}";
-    if (edge.id != graph.get_edges().back().id) {
-      graph_output += ",\n\t\t";
-    } else {
-      graph_output += "\n\t";
-    }
+  for (const auto& [key, edge] : graph.get_edges()) {
+    graph_output += "{" + print_edge(edge) + "},\n\t\t";
   }
-  graph_output += "]\n}\n";
+  graph_output = graph_output.substr(0, graph_output.size() - 4) + "\n\t]\n}\n";
   return graph_output;
 }
 
@@ -225,8 +225,8 @@ string print_graph(const Graph& graph) {
 
 bool is_generated(double probability) {
   std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution is_gen(probability);
+  std::default_random_engine gen(rd());
+  std::bernoulli_distribution is_gen(probability * 0.01);
   return is_gen(gen);
 }
 
@@ -239,7 +239,7 @@ const VertexId& get_random_vertex_id(const vector<VertexId>& vertices) {
 
 void generate_gray_edges(Graph& graph, int depth, int new_vertices_num) {
   for (int current_depth = 0; current_depth < depth; current_depth++) {
-    double step = 100 / depth;
+    double step = 100 / (double)depth;
     double probability = 100 - step * current_depth;
     if (current_depth < graph.depth()) {
       //Создаю копию, чтобы не менять объект по которому итерирую
@@ -271,8 +271,8 @@ void generate_yellow_edges(Graph& graph) {
       for (const auto& from_vertex_id :
            graph.get_vertex_ids_on_depth(current_depth)) {
         const double probability =
-            graph.get_vertices().at(from_vertex_id).depth *
-            (100 / (graph.depth() - 1));
+            (double)graph.get_vertex(from_vertex_id).depth *
+            (100 / (double)(graph.depth() - 1));
         if (is_generated(probability)) {
           vector<VertexId> vertices_on_deeper_depth;
           for (const auto& to_vertex_id :
