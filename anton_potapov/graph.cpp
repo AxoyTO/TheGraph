@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <algorithm>
 #include <cassert>
 #include <random>
@@ -73,8 +75,7 @@ bool Graph::is_connected(const VertexId& vertex1_id,
   assert(is_vertex_exists(vertex1_id) && "Vertex 1 doesn't exist");
   assert(is_vertex_exists(vertex2_id) && "Vertex 2 doesn't exist");
   if (vertex1_id == vertex2_id) {
-    for (const auto& vertex_edge_id :
-         get_vertex(vertex1_id).connected_edges()) {
+    for (const auto& vertex_edge_id : connected_edges(vertex1_id)) {
       const auto& vertex_edge = get_edge(vertex_edge_id);
       if (vertex_edge.vertex1_id == vertex_edge.vertex2_id) {
         return true;
@@ -82,8 +83,7 @@ bool Graph::is_connected(const VertexId& vertex1_id,
     }
     return false;
   } else {
-    for (const auto& vertex1_edge_id :
-         get_vertex(vertex1_id).connected_edges()) {
+    for (const auto& vertex1_edge_id : connected_edges(vertex1_id)) {
       if (vertices_.find(vertex2_id)->second.has_edge_id(vertex1_edge_id)) {
         return true;
       }
@@ -111,9 +111,9 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   edges_.emplace(new_edge_id,
                  Edge(new_edge_id, vertex1_id, vertex2_id, edge_color));
 
-  get_vertex(vertex1_id).add_edge(new_edge_id);
+  vertices_.at(vertex1_id).add_edge(new_edge_id);
   if (vertex1_id != vertex2_id) {
-    get_vertex(vertex2_id).add_edge(new_edge_id);
+    vertices_.at(vertex2_id).add_edge(new_edge_id);
   }
 
   is_depth_dirty_ = true;
@@ -121,7 +121,6 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
     updated_depth_ =
         std::min(updated_depth_, get_new_depth(vertex1_id, vertex2_id));
   }
-
   return new_edge_id;
 }
 
@@ -178,8 +177,8 @@ VertexId get_random_vertex_id(const std::set<VertexId>& vertex_id_set) {
 
 int Graph::get_new_depth(const VertexId& vertex1_id,
                          const VertexId& vertex2_id) const {
-  const auto vertex1_depth = get_vertex(vertex1_id).depth;
-  const auto vertex2_depth = get_vertex(vertex2_id).depth;
+  const auto vertex1_depth = vertices_.at(vertex1_id).depth;
+  const auto vertex2_depth = vertices_.at(vertex2_id).depth;
   if (vertex1_depth == INIT_DEPTH && vertex2_depth == INIT_DEPTH) {
     return INIT_DEPTH;
   }
