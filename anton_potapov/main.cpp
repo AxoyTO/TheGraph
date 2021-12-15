@@ -152,7 +152,8 @@ int main() {
 
     auto graph_printer = GraphPrinter(graph);
     const auto graph_json = graph_printer.print();
-    write_to_file(graph_json, "graph_" + std::to_string(i) + ".json");
+    write_to_file(graph_json, std::string(config::kTempDirectoryPath) +
+                                  "graph_" + std::to_string(i) + ".json");
   }
 
   return 0;
