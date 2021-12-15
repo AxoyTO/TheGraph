@@ -68,14 +68,14 @@ int handle_graphs_count_input() {
   return graphs_quantity;
 }
 
-void prepare_temp_directory() {
-  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
-}
-
 void write_to_file(const std::string& graph_json, const std::string& filename) {
   std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
   out << graph_json;
   out.close();
+}
+
+void prepare_temp_directory() {
+  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
 }
 
 int main() {

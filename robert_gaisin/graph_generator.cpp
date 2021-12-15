@@ -3,14 +3,16 @@
 
 #include <random>
 
+using uni_cource_cpp::EdgeColor;
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::VertexId;
+
 namespace {
 constexpr int PROBA_GRAY_BEGIN = 100;
 constexpr int PROBA_RED = 33;
 constexpr int PROBA_GREEN = 10;
 constexpr int PROBA_BLUE = 25;
-}  // namespace
-namespace uni_cource_cpp {
-namespace generation_graph {
+
 bool to_be_or_not_to_be(int proba) {
   std::random_device rd;
   std::mt19937 mersenne(rd());
@@ -112,7 +114,9 @@ void generate_red_edges(Graph& graph) {
     }
   }
 }
-}  // namespace generation_graph
+
+}  // namespace
+namespace uni_cource_cpp {
 
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
@@ -120,12 +124,11 @@ Graph GraphGenerator::generate() const {
   //Генерация нулевой вершины:
   graph.add_vertex();
 
-  generation_graph::generate_gray_edges(params_.depth,
-                                        params_.new_vertices_count, graph);
-  generation_graph::generate_green_edges(graph);
-  generation_graph::generate_yellow_edges(graph);
-  generation_graph::generate_red_edges(graph);
-  generation_graph::generate_blue_edges(graph);
+  generate_gray_edges(params_.depth, params_.new_vertices_count, graph);
+  generate_green_edges(graph);
+  generate_yellow_edges(graph);
+  generate_red_edges(graph);
+  generate_blue_edges(graph);
   return graph;
 }
 }  // namespace uni_cource_cpp
