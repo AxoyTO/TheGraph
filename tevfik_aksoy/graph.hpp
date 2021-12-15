@@ -60,7 +60,8 @@ class Graph {
                               const VertexId& destination) const;
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
   int depth() const;
-  std::vector<VertexId> get_adjacent_vertex_ids(const VertexId& vertex_id) const;
+  std::vector<VertexId> get_adjacent_vertex_ids(
+      const VertexId& vertex_id) const;
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
   const std::vector<VertexId>& get_vertices_in_depth(
