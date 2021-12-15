@@ -74,7 +74,7 @@ class Graph {
                                      new_edge_color));
     get_vertex(from_vertex_id).add_edge_id(new_edge_id);
     if (new_edge_color != Edge::Color::Green) {
-     get_vertex(to_vertex_id).add_edge_id(new_edge_id);
+      get_vertex(to_vertex_id).add_edge_id(new_edge_id);
     }
     if (new_edge_color == Edge::Color::Gray) {
       const auto new_vertex_depth = get_vertex(from_vertex_id).depth + 1;
@@ -94,7 +94,6 @@ class Graph {
   };
 
   Vertex& get_vertex(const VertexId& id) {
-    
     const auto& const_this = *this;
 
     return const_cast<Vertex&>(const_this.vertices_.at(id));
