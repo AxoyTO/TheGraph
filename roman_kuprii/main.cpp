@@ -74,35 +74,6 @@ void generate_graphs(std::vector<Graph>& graphs,
                      Logger& logger,
                      const int threads_count,
                      const int graphs_count,
-                     const GraphGenerator::Params& params);
-void traverse_graphs(const std::vector<Graph>& graphs,
-                     Logger& logger,
-                     const int threads_count);
-
-int main() {
-  auto& logger = Logger::get_logger();
-  prepare_temp_directory();
-  logger.set_output(LOG_FILENAME);
-
-  const int graphs_count = handle_graphs_number_input();
-  const int depth = handle_depth_input();
-  const int new_vertices_num = handle_vertices_number_input();
-  const int threads_count = handle_threads_number_input();
-  const auto params = GraphGenerator::Params(depth, new_vertices_num);
-
-  auto graphs = std::vector<Graph>();
-  graphs.reserve(graphs_count);
-
-  generate_graphs(graphs, logger, threads_count, graphs_count, params);
-  traverse_graphs(graphs, logger, threads_count);
-
-  return 0;
-}
-
-void generate_graphs(std::vector<Graph>& graphs,
-                     Logger& logger,
-                     const int threads_count,
-                     const int graphs_count,
                      const GraphGenerator::Params& params) {
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
@@ -131,4 +102,24 @@ void traverse_graphs(const std::vector<Graph>& graphs,
         logger.log(uni_cpp_practice::logging_helping::write_traverse_end(
             index, pathes));
       });
+}
+
+int main() {
+  auto& logger = Logger::get_logger();
+  prepare_temp_directory();
+  logger.set_output(LOG_FILENAME);
+
+  const int graphs_count = handle_graphs_number_input();
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_vertices_number_input();
+  const int threads_count = handle_threads_number_input();
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  generate_graphs(graphs, logger, threads_count, graphs_count, params);
+  traverse_graphs(graphs, logger, threads_count);
+
+  return 0;
 }
