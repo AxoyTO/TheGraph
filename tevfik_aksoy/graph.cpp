@@ -150,7 +150,7 @@ bool Graph::are_vertices_connected(const VertexId& source,
 std::vector<VertexId> Graph::get_adjacent_vertex_ids(
     const VertexId& vertex_id) const {
   std::vector<VertexId> adjacent_vertices;
-  const auto vertex = get_vertex(vertex_id);
+  const auto& vertex = get_vertex(vertex_id);
   const auto vertex_edges = vertex.get_edge_ids();
 
   for (const auto& edge_id : vertex_edges) {
