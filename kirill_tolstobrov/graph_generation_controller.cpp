@@ -17,8 +17,8 @@ GraphGenerationController::GraphGenerationController(
           if (jobs_.empty()) {
             return std::nullopt;
           }
-          const auto first_job = jobs_.back();
-          jobs_.pop_back();
+          const auto first_job = jobs_.front();
+          jobs_.pop_front();
           return first_job;
         });
   }
