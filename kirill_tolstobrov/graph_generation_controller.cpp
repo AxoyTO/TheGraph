@@ -82,4 +82,4 @@ void GraphGenerationController::generate(
   }
 }
 
-}  // namespace uni_cpp_practice.
+}  // namespace uni_cpp_practice
