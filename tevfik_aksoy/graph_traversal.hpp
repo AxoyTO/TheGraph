@@ -23,8 +23,6 @@ class GraphTraverser {
 
  private:
   const Graph graph_;
-
-  std::vector<VertexId> get_adjacent_vertices(const Vertex& vertex);
 };
 
 }  // namespace uni_cpp_practice

@@ -1,5 +1,6 @@
 #include "graph_traversal.hpp"
 #include <atomic>
+#include <cassert>
 #include <climits>
 #include <functional>
 #include <iostream>
@@ -82,8 +83,8 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) {
-  if (graph_.get_vertices().size() == 1)
-    return std::nullopt;
+  assert(graph_.get_vertices().size() > 1 &&
+         "Graph has no more than 1 vertex!\n");
 
   std::priority_queue<std::pair<VertexId, Distance>,
                       std::vector<std::pair<VertexId, Distance>>,
@@ -102,7 +103,7 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     VertexId closest_vertex_id = priority_queue.top().first;
     priority_queue.pop();
     for (const auto& vertex_id :
-         get_adjacent_vertices(graph_.get_vertex(closest_vertex_id))) {
+         graph_.get_adjacent_vertex_ids(graph_.get_vertex(closest_vertex_id))) {
       Distance distance = 1;
       if (distances[vertex_id] > distances[closest_vertex_id] + distance) {
         closest_vertices_map[vertex_id] = closest_vertex_id;
@@ -125,25 +126,5 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
 
   Path shortest_path(path, distances[destination_vertex_id]);
   return shortest_path;
-}
-
-std::vector<VertexId> GraphTraverser::get_adjacent_vertices(
-    const Vertex& vertex) {
-  std::vector<VertexId> adjacent_vertices;
-  auto vertex_edges = vertex.get_edge_ids();
-
-  for (const auto& edge_id : vertex_edges) {
-    if (graph_.get_edges()[edge_id].color == Edge::Color::Green)
-      continue;
-    else {
-      if (graph_.get_edges()[edge_id].source == vertex.id) {
-        adjacent_vertices.push_back(graph_.get_edges()[edge_id].destination);
-      } else {
-        adjacent_vertices.push_back(graph_.get_edges()[edge_id].source);
-      }
-    }
-  }
-
-  return adjacent_vertices;
 }
 }  // namespace uni_cpp_practice

@@ -117,14 +117,7 @@ void log_end(Logger& logger, const Graph& graph, int graph_number) {
 
 void log_paths(Logger& logger, const std::vector<GraphTraverser::Path>& paths) {
   for (const auto& shortest_path : paths) {
-    logger.log("{vertices: [");
-    for (int i = 0; i < shortest_path.vertex_ids.size(); i++) {
-      logger.log(std::to_string(shortest_path.vertex_ids[i]));
-      if (i != shortest_path.vertex_ids.size() - 1)
-        logger.log(",");
-    }
-    logger.log("], distance: " + std::to_string(shortest_path.distance) +
-               "},\n");
+    logger.log(GraphPrinter::print_path(shortest_path));
   }
 }
 

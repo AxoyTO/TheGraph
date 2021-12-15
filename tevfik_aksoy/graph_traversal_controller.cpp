@@ -36,21 +36,20 @@ void GraphTraversalController::traverse(
     std::lock_guard lock(mutex_);
     for (int i = 0; i < graphs_count_; i++) {
       jobs_.emplace_back(
-          [&graphs = graphs_,
+          [&graph = graphs_[i],
            &traversalStartedCallback = traversalStartedCallback,
            &traversalFinishedCallback = traversalFinishedCallback, i,
            &mutex_finished_callback = mutex_finished_callback_,
            &mutex_started_callback = mutex_started_callback_, &jobs_count]() {
             {
               const std::lock_guard lock(mutex_started_callback);
-              traversalStartedCallback(i, graphs[i]);
+              traversalStartedCallback(i, graph);
             }
-            GraphTraverser graph_traversal(graphs[i]);
-            auto path = graph_traversal.traverse_graph();
+            GraphTraverser graph_traversal(graph);
+            const auto path = graph_traversal.traverse_graph();
             {
               const std::lock_guard lock(mutex_finished_callback);
-              traversalFinishedCallback(i, std::move(graphs[i]),
-                                        std::move(path));
+              traversalFinishedCallback(i, graph, std::move(path));
             }
             jobs_count++;
           });
