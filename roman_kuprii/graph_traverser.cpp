@@ -38,7 +38,7 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
   const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
                                &source_vertex_id]() {
     std::lock_guard lock(graph_mutex);
-    vertices_number = graph.get_vertices_num();
+    vertices_number = graph.get_vertices().size();
     const auto& vertex = graph.get_vertices().find(source_vertex_id)->second;
     return vertex;
   }();

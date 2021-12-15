@@ -53,7 +53,7 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "  depth: " + to_string(work_graph.get_depth()) + ",\n";
-  res += "  vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
+  res += "  vertices: " + to_string(work_graph.get_vertices().size()) + ", [";
 
   std::vector<int> depth_count;
   for (int iter = 0; iter <= work_graph.get_depth(); iter++)
@@ -67,7 +67,7 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
   res.pop_back();
   res.pop_back();
   res += "],\n";
-  res += "  edges: " + to_string(work_graph.get_edges_num()) + ", {";
+  res += "  edges: " + to_string(work_graph.get_edges().size()) + ", {";
 
   const auto colors = std::vector<Edge::Color>(
       {Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,

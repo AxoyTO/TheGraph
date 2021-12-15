@@ -73,24 +73,15 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   assert(!is_connected(from_vertex_id, to_vertex_id));
 
   if (initialization) {
-    const int minimum_depth = [&from_vertex_id, &to_vertex_id,
-                               vertices_ = &vertices_, edges_ = &edges_]() {
-      int min_depth = vertices_->find(from_vertex_id)->second.depth;
-      for (const auto& edge_id :
-           vertices_->find(to_vertex_id)->second.get_edges_ids()) {
-        const VertexId vert =
-            edges_->find(edge_id)->second.connected_vertices[0];
-        min_depth = min(min_depth, vertices_->find(vert)->second.depth);
-      }
-      return min_depth;
-    }();
-    vertices_.find(to_vertex_id)->second.depth = minimum_depth + 1;
+    int new_depth = vertices_.find(from_vertex_id)->second.depth + 1;
+    vertices_.find(to_vertex_id)->second.depth = new_depth;
+
     if (!depth_map_.size())
       depth_map_.push_back(std::vector<VertexId>({0}));
-    if (minimum_depth + 1 == depth_map_.size())
+    if (new_depth == depth_map_.size())
       depth_map_.push_back(std::vector<VertexId>({to_vertex_id}));
     else
-      depth_map_[minimum_depth + 1].push_back(to_vertex_id);
+      depth_map_[new_depth].push_back(to_vertex_id);
   }
 
   const int diff = vertices_.find(to_vertex_id)->second.depth -
