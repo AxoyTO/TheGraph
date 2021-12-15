@@ -35,9 +35,9 @@ class GraphGenerationController {
   };
 
   GraphGenerationController(
-      int _threads_count,
-      int _graphs_count,
-      const GraphGenerator::Params& _graph_generator_params);
+      int threads_count,
+      int graphs_count,
+      const GraphGenerator::Params& graph_generator_params);
 
   void generate(const GenStartedCallback& gen_started_callback,
                 const GenFinishedCallback& gen_finished_callback);

@@ -114,6 +114,13 @@ void prepare_temp_directory() {
       uni_course_cpp::config::TEMP_DIRECTORY_PATH);
 }
 
+void write_to_file(const std::string& string, const std::string& filename) {
+  std::ofstream filestream;
+  filestream.open(filename);
+  filestream << string;
+  filestream.close();
+}
+
 std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
                                    int graphs_count,
                                    int threads_count) {
@@ -130,11 +137,10 @@ std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
       [&logger, &graphs](int index, Graph graph) {
         logger.log(gen_finished_string(index, graph));
         graphs.push_back(graph);
-        std::ofstream myfile;
-        myfile.open(uni_course_cpp::config::TEMP_DIRECTORY_PATH +
-                    FILENAME_PREFIX + std::to_string(index) + FILENAME_SUFFIX);
-        myfile << uni_course_cpp::graph_printing::print_graph(graph);
-        myfile.close();
+        write_to_file(uni_course_cpp::graph_printing::print_graph(graph),
+                      uni_course_cpp::config::TEMP_DIRECTORY_PATH +
+                          FILENAME_PREFIX + std::to_string(index) +
+                          FILENAME_SUFFIX);
       });
 
   return graphs;
