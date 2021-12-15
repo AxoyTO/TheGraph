@@ -159,8 +159,12 @@ void GraphGenerator::generate_yellow_edges(Graph& graph,
     for (const auto& vertex_id : *vertex_ids_in_depth) {
       std::vector<VertexId> unconnected_vertex_ids;
       for (const auto& vertex_id_in_next_depth : *(vertex_ids_in_depth + 1)) {
-        const std::lock_guard lock(mutex);
-        if (!graph.are_connected(vertex_id, vertex_id_in_next_depth)) {
+        const auto are_connected = [&vertex_id, &vertex_id_in_next_depth,
+                                    &mutex, &graph]() {
+          const std::lock_guard lock(mutex);
+          return graph.are_connected(vertex_id, vertex_id_in_next_depth);
+        }();
+        if (!are_connected) {
           unconnected_vertex_ids.push_back(vertex_id_in_next_depth);
         }
       }
