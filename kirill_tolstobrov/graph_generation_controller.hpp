@@ -31,7 +31,7 @@ class GraphGenerationController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   GraphGenerationController(
