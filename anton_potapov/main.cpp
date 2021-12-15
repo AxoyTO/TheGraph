@@ -121,6 +121,17 @@ std::string generation_finished_string(int id, const Graph& graph) {
   return generation_finished_stringstream.str();
 }
 
+std::string generation_max_depth_warning(int id,
+                                         int max_generated_depth,
+                                         int given_depth) {
+  std::stringstream generation_max_depth_warning_stringstream;
+  generation_max_depth_warning_stringstream
+      << get_current_date_time() << ": Graph " << id
+      << "generated graph's depth=" << max_generated_depth
+      << " is less than specified one =" << given_depth << std::endl;
+  return generation_max_depth_warning_stringstream.str();
+}
+
 void write_to_file(const std::string& file_text, const std::string& file_path) {
   std::fstream json_file;
   json_file.open(file_path, std::ios::out);
@@ -145,8 +156,7 @@ int main() {
     logger.log(generation_started_string(i));
     const auto graph = generator.generate_graph();
     if (graph.max_depth() < depth) {
-      std::cerr << "generated graph's depth=" << graph.max_depth()
-                << " is less than specified one =" << depth << std::endl;
+      logger.log(generation_max_depth_warning(i, graph.max_depth(), depth));
     }
     logger.log(generation_finished_string(i, graph));
 
