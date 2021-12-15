@@ -1,41 +1,43 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
 
 using Depth = int;
 using VertexId = int;
 using EdgeId = int;
 
-struct Vertex {
-  const VertexId id = 0;
-  Depth depth = 0;
-
-  explicit Vertex(const VertexId& vertex_id);
-
-  void add_edge_id(const EdgeId& edge_id);
-  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-  bool has_edge_id(const EdgeId& edge_id) const;
-
- private:
-  std::vector<EdgeId> edge_ids_;
-};
-
-struct Edge {
-  enum class Color { Grey, Green, Yellow, Red };
-
-  const EdgeId id = 0;
-  const VertexId vertex_start = 0;
-  const VertexId vertex_end = 0;
-  const Color color = Color::Grey;
-
-  Edge(const EdgeId& edge_id,
-       const VertexId& vertex_connection_start,
-       const VertexId& vertex_connection_end,
-       const Color& edge_color);
-};
-
+namespace uni_cource_cpp {
 class Graph {
  public:
+  struct Vertex {
+    const VertexId id = 0;
+    Depth depth = 0;
+
+    explicit Vertex(const VertexId& vertex_id);
+
+    void add_edge_id(const EdgeId& edge_id);
+    const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+    bool has_edge_id(const EdgeId& edge_id) const;
+
+   private:
+    std::vector<EdgeId> edge_ids_;
+  };
+
+  struct Edge {
+    enum class Color { Grey, Green, Yellow, Red };
+
+    const EdgeId id = 0;
+    const VertexId vertex_start = 0;
+    const VertexId vertex_end = 0;
+    const Color color = Color::Grey;
+
+    Edge(const EdgeId& edge_id,
+         const VertexId& vertex_connection_start,
+         const VertexId& vertex_connection_end,
+         const Color& edge_color);
+  };
+
   const Vertex& add_vertex();
   void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id);
 
@@ -44,11 +46,13 @@ class Graph {
   const std::vector<std::vector<VertexId>>& get_depth_map() const {
     return depth_map_;
   }
+  const Depth get_depth() const { return depth_map_.size() - 1; }
   const std::vector<VertexId>& get_vertex_ids_at(const Depth& depth) const {
     return depth_map_[depth];
   }
   const Vertex& get_vertex(const VertexId& id) const { return vertices_[id]; }
   const Edge& get_edge(const EdgeId& id) const { return edges_[id]; }
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
   bool has_vertex_id(const VertexId& id) const;
   bool is_connected(const VertexId& from_vertex_id,
@@ -56,6 +60,7 @@ class Graph {
 
  private:
   std::vector<std::vector<VertexId>> depth_map_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> edges_color_map_;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
 
@@ -70,3 +75,4 @@ class Graph {
   Edge::Color get_edge_color(const Vertex& from_vertex,
                              const Vertex& to_vertex);
 };
+}  // namespace uni_cource_cpp
