@@ -79,7 +79,7 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
   }
   res.pop_back();
   res.pop_back();
-  res += "\n}\n";
+  res += "}\n}\n";
   return res;
 }
 
