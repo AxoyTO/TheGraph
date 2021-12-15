@@ -1,7 +1,6 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "graph.hpp"
@@ -33,6 +32,10 @@ void Vertex::add_edge_id(const EdgeId& _id) {
 VertexId Graph::add_vertex() {
   const VertexId new_vertex_id = get_next_vertex_id();
   vertices_.emplace(new_vertex_id, new_vertex_id);
+  if (!depth_map_.size())
+    depth_map_.push_back(std::vector<VertexId>({new_vertex_id}));
+  else
+    depth_map_[0].push_back(new_vertex_id);
   return new_vertex_id;
 }
 
@@ -46,13 +49,12 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
   assert(is_vertex_exist(to_vertex_id));
 
   const auto& from_vertex_edges_ids =
-      vertices_.find(from_vertex_id)->second.get_edges_ids();
-  const auto& to_vertex_edges_ids =
-      vertices_.find(to_vertex_id)->second.get_edges_ids();
+      vertices_.at(from_vertex_id).get_edges_ids();
+  const auto& to_vertex_edges_ids = vertices_.at(to_vertex_id).get_edges_ids();
   for (const auto& from_vertex_edge_id : from_vertex_edges_ids)
     if (from_vertex_id == to_vertex_id) {
       const auto& connected_vertices =
-          edges_.find(from_vertex_edge_id)->second.connected_vertices;
+          edges_.at(from_vertex_edge_id).connected_vertices;
       if (connected_vertices[0] == connected_vertices[1])
         return true;
     } else
@@ -71,19 +73,19 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   assert(!is_connected(from_vertex_id, to_vertex_id));
 
   if (initialization) {
-    int new_depth = vertices_.find(from_vertex_id)->second.depth + 1;
-    vertices_.find(to_vertex_id)->second.depth = new_depth;
+    depth_map_[0].pop_back();
 
-    if (!depth_map_.size())
-      depth_map_.push_back(std::vector<VertexId>({0}));
+    const int new_depth = vertices_.at(from_vertex_id).depth + 1;
+    vertices_.at(to_vertex_id).depth = new_depth;
+
     if (new_depth == depth_map_.size())
       depth_map_.push_back(std::vector<VertexId>({to_vertex_id}));
     else
       depth_map_[new_depth].push_back(to_vertex_id);
   }
 
-  const int diff = vertices_.find(to_vertex_id)->second.depth -
-                   vertices_.find(from_vertex_id)->second.depth;
+  const int diff =
+      vertices_.at(to_vertex_id).depth - vertices_.at(from_vertex_id).depth;
 
   const Edge::Color color = [&initialization, &diff, &from_vertex_id,
                              &to_vertex_id]() {
@@ -102,11 +104,13 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   }();
 
   const auto new_edge_id = get_next_edge_id();
-  edges_.emplace(std::make_pair(
-      new_edge_id, Edge(from_vertex_id, to_vertex_id, new_edge_id, color)));
-  vertices_.find(from_vertex_id)->second.add_edge_id(new_edge_id);
+
+  edges_.emplace(new_edge_id,
+                 Edge(from_vertex_id, to_vertex_id, new_edge_id, color));
+
+  vertices_.at(from_vertex_id).add_edge_id(new_edge_id);
   if (from_vertex_id != to_vertex_id)
-    vertices_.find(to_vertex_id)->second.add_edge_id(new_edge_id);
+    vertices_.at(to_vertex_id).add_edge_id(new_edge_id);
 }
 
 std::vector<EdgeId> Graph::get_edge_ids_with_color(

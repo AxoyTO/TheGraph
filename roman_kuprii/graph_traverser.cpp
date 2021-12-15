@@ -25,12 +25,11 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
     const Graph& graph,
     const VertexId& source_vertex_id,
     const VertexId& destination_vertex_id) const {
-  assert(graph.is_vertex_exist(source_vertex_id) &&
-         graph.is_vertex_exist(destination_vertex_id));
+  assert(graph.is_vertex_exist(source_vertex_id));
+  assert(graph.is_vertex_exist(destination_vertex_id));
 
   int vertices_number = graph.get_vertices().size();
-  const auto& source_vertex =
-      graph.get_vertices().find(source_vertex_id)->second;
+  const auto& source_vertex = graph.get_vertices().at(source_vertex_id);
   // unvisited vertices
   std::vector<VertexId> vertices(vertices_number, UNVISITED);
   vertices[source_vertex_id] = VISITED;
@@ -51,10 +50,9 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
 
     // check all outcoming edges
     for (const auto& edge_id : current_vertex.get_edges_ids()) {
-      const auto& edge = graph.get_edges().find(edge_id)->second;
+      const auto& edge = graph.get_edges().at(edge_id);
       VertexId next_vertex_id = edge.connected_vertices.back();
-      const auto& next_vertex =
-          graph.get_vertices().find(next_vertex_id)->second;
+      const auto& next_vertex = graph.get_vertices().at(next_vertex_id);
       // update distances
       if (distance[current_vertex.get_id()] + 1 < distance[next_vertex_id]) {
         vertices_queue.push(next_vertex);
@@ -76,7 +74,7 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   std::list<std::function<void()>> jobs;
   std::atomic<int> completed_jobs = 0;
   std::mutex path_mutex;
-  const auto vertex_ids = graph_.get_vertex_ids_at_depth(graph_.get_depth());
+  const auto& vertex_ids = graph_.get_vertex_ids_at_depth(graph_.get_depth());
   std::vector<GraphTraverser::Path> pathes;
   pathes.reserve(vertex_ids.size());
 

@@ -55,14 +55,8 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
   res += "  depth: " + to_string(work_graph.get_depth()) + ",\n";
   res += "  vertices: " + to_string(work_graph.get_vertices().size()) + ", [";
 
-  std::vector<int> depth_count;
-  for (int iter = 0; iter <= work_graph.get_depth(); iter++)
-    depth_count.emplace_back(0);
-  for (const auto& [vertex_id, vertex] : work_graph.get_vertices()) {
-    depth_count[vertex.depth]++;
-  }
-  for (const auto& depth : depth_count) {
-    res += to_string(depth) + ", ";
+  for (int depth = 0; depth <= work_graph.get_depth(); depth++) {
+    res += to_string(work_graph.get_vertex_ids_at_depth(depth).size()) + ", ";
   }
   res.pop_back();
   res.pop_back();
