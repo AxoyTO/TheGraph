@@ -63,7 +63,7 @@ class Graph {
   }
   const std::vector<VertexId>& get_vertex_ids_at_depth(int depth) const;
 
-  int get_depth() const { return depth_map_.size(); }
+  int get_depth() const { return depth_map_.size() - 1; }
   int get_vertices_num() const { return vertices_.size(); }
   int get_edges_num() const { return edges_.size(); }
 
@@ -72,7 +72,7 @@ class Graph {
  private:
   std::unordered_map<VertexId, Vertex> vertices_;
   std::unordered_map<EdgeId, Edge> edges_;
-  std::vector<std::vector<VertexId>> depth_map_ = {{0}};
+  std::vector<std::vector<VertexId>> depth_map_;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 

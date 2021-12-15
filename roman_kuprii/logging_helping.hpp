@@ -78,6 +78,7 @@ std::string write_log_end(const Graph& work_graph, int graph_num) {
            to_string(work_graph.get_edge_ids_with_color(color).size()) + ", ";
   }
   res.pop_back();
+  res.pop_back();
   res += "\n}\n";
   return res;
 }

@@ -6,6 +6,8 @@
 
 #include "graph.hpp"
 
+#include <iostream>
+
 namespace {
 
 bool is_edge_id_included(
@@ -110,7 +112,7 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
       return Edge::Color::Gray;
   }();
 
-  auto new_edge_id = get_next_edge_id();
+  const auto new_edge_id = get_next_edge_id();
   edges_.emplace(std::make_pair(
       new_edge_id, Edge(from_vertex_id, to_vertex_id, new_edge_id, color)));
   vertices_.find(from_vertex_id)->second.add_edge_id(new_edge_id);
@@ -121,9 +123,9 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
 std::vector<EdgeId> Graph::get_edge_ids_with_color(
     const Edge::Color& color) const {
   std::vector<EdgeId> edge_ids;
-  for (const auto& edge_pair : get_edges()) {
-    if (edge_pair.second.color == color)
-      edge_ids.emplace_back(edge_pair.first);
+  for (const auto& [edge_id, edge] : get_edges()) {
+    if (edge.color == color)
+      edge_ids.emplace_back(edge_id);
   }
 
   return edge_ids;
