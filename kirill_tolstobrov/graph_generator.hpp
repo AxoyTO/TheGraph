@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "graph.hpp"
 
 namespace uni_cpp_practice {
@@ -22,9 +24,13 @@ class GraphGenerator {
 
   void generate_grey_edges(Graph& graph, int depth, int new_vertices_num) const;
 
-  void generate_green_edges(Graph& graph) const;
-  void generate_blue_edges(Graph& graph) const;
-  void generate_yellow_edges(Graph& graph) const;
-  void generate_red_edges(Graph& graph) const;
+  void generate_gray_branch(Graph& graph,
+                            const int cur_depth,
+                            const VertexId& start_vertex_id,
+                            std::mutex& mutex) const;
+
+  void generate_green_edges(Graph& graph, std::mutex& mutex) const;
+  void generate_yellow_edges(Graph& graph, std::mutex& mutex) const;
+  void generate_red_edges(Graph& graph, std::mutex& mutex) const;
 };
 }  // namespace uni_cpp_practice
