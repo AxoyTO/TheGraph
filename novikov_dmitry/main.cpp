@@ -132,10 +132,13 @@ int handle_threads_count_input() {
 
 void prepare_temp_directory() {
   try {
-    std::filesystem::create_directory("./temp");
+    std::filesystem::create_directory(temp_folder_path);
   } catch (const std::exception& ex) {
     std::cout << ex.what() << "\n";
   }
+}
+
+void prepare_logger() {
   auto& logger = Logger::get_instance();
   logger.set_file("./temp/log.txt");
 }
@@ -206,11 +209,12 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
   auto traversal_controller = GraphTraversalController(graphs);
 
   traversal_controller.traverse(
-      [](int index) {
+      [](int index, const Graph& traversed_graph) {
         auto& logger = Logger::get_instance();
         logger.log(traversal_started_string(index));
       },
-      [](int index, std::vector<GraphTraverser::Path> paths) {
+      [](int index, std::vector<GraphTraverser::Path> paths,
+         const Graph& traversed_graph) {
         auto& logger = Logger::get_instance();
         logger.log(traversal_finished_string(index, paths));
       });
@@ -222,6 +226,7 @@ int main() {
   const int graphs_count = handle_graphs_count_input();
   const int threads_count = handle_threads_count_input();
   prepare_temp_directory();
+  prepare_logger();
 
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);

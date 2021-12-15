@@ -1,15 +1,17 @@
-#include <cassert>
-
 #include "graph_traversal_controller.hpp"
+#include <cassert>
 
 namespace uni_cpp_practice {
 
+namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+}
 
 GraphTraversalController::GraphTraversalController(
     const std::vector<Graph>& graphs)
     : graphs_(graphs) {
-  for (int i = 0; i < MAX_WORKERS_COUNT; ++i) {
+  const auto workers_number = std::min(MAX_WORKERS_COUNT, (int)graphs_.size());
+  for (int i = 0; i < workers_number; ++i) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
          &mutex_jobs_ = mutex_jobs_]() -> std::optional<JobCallback> {
@@ -42,13 +44,13 @@ void GraphTraversalController::traverse(
                           &jobs_counter = jobs_counter, i]() {
         {
           const std::lock_guard lock(mutex_start_callback_);
-          traversal_started_callback(i);
+          traversal_started_callback(i, graphs_[i]);
         }
         const auto graph_traverser = GraphTraverser(graphs_[i]);
         const auto paths = graph_traverser.find_all_paths();
         {
           const std::lock_guard lock(mutex_finish_callback_);
-          traversal_finished_callback(i, std::move(paths));
+          traversal_finished_callback(i, std::move(paths), graphs_[i]);
         }
         ++jobs_counter;
       });

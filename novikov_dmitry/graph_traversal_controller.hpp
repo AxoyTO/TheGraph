@@ -13,9 +13,9 @@ class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
   using GetJobCallback = std::function<std::optional<JobCallback>()>;
-  using TraversalStartedCallback = std::function<void(int)>;
+  using TraversalStartedCallback = std::function<void(int, const Graph&)>;
   using TraversalFinishedCallback =
-      std::function<void(int, std::vector<GraphTraverser::Path>)>;
+      std::function<void(int, std::vector<GraphTraverser::Path>, const Graph&)>;
 
   class Worker {
    public:

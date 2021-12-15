@@ -2,7 +2,6 @@
 #include <atomic>
 #include <cassert>
 #include <climits>
-#include <iostream>
 #include <list>
 #include <mutex>
 #include <queue>
@@ -10,9 +9,11 @@
 
 namespace uni_cpp_practice {
 
+namespace {
 constexpr int DISTANCE_MAX = INT_MAX;
 constexpr int UNDEFINED_VERTEX_ID = -1;
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+}  // namespace
 
 std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     const VertexId& source_vertex_id,
@@ -114,9 +115,11 @@ std::vector<GraphTraverser::Path> GraphTraverser::find_all_paths() const {
     }
   };
 
+  const auto threads_number =
+      std::min(MAX_THREADS_COUNT, (int)verticies_at_depth.size());
   std::vector<std::thread> threads;
-  threads.reserve(MAX_THREADS_COUNT);
-  for (int i = 0; i < MAX_THREADS_COUNT; ++i) {
+  threads.reserve(threads_number);
+  for (int i = 0; i < threads_number; ++i) {
     threads.emplace_back(worker);
   }
 
