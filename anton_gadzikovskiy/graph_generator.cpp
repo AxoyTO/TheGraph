@@ -72,13 +72,13 @@ class Graph {
         define_edge_color(from_vertex_id, to_vertex_id);
     edges_.emplace(new_edge_id, Edge(new_edge_id, from_vertex_id, to_vertex_id,
                                      new_edge_color));
-    vertices_.at(from_vertex_id).add_edge_id(new_edge_id);
+    get_vertex(from_vertex_id).add_edge_id(new_edge_id);
     if (new_edge_color != Edge::Color::Green) {
-      vertices_.at(to_vertex_id).add_edge_id(new_edge_id);
+     get_vertex(to_vertex_id).add_edge_id(new_edge_id);
     }
     if (new_edge_color == Edge::Color::Gray) {
       const auto new_vertex_depth = get_vertex(from_vertex_id).depth + 1;
-      vertices_.at(to_vertex_id).depth = new_vertex_depth;
+      get_vertex(to_vertex_id).depth = new_vertex_depth;
       if (vertices_on_depth_.size() - 1 < new_vertex_depth) {
         vertices_on_depth_.push_back(vector<VertexId>());
       }
@@ -93,8 +93,11 @@ class Graph {
     }
   };
 
-  const Vertex& get_vertex(const VertexId& id) const {
-    return vertices_.at(id);
+  Vertex& get_vertex(const VertexId& id) {
+    
+    const auto& const_this = *this;
+
+    return const_cast<Vertex&>(const_this.vertices_.at(id));
   }
   const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
 
