@@ -6,8 +6,6 @@
 
 #include "graph.hpp"
 
-#include <iostream>
-
 namespace {
 
 bool is_edge_id_included(

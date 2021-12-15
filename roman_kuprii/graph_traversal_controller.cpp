@@ -18,6 +18,7 @@ GraphTraversalController::GraphTraversalController(
     int threads_count,
     const std::vector<Graph>& graphs)
     : graphs_(graphs) {
+  threads_count = std::min(threads_count, static_cast<int>(graphs.size()));
   for (int iter = 0; iter < threads_count; iter++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
@@ -57,7 +58,7 @@ void GraphTraversalController::traverse_graphs(
         }
 
         GraphTraverser graph_traverser(graphs_[i]);
-        auto paths = graph_traverser.traverse_graph();
+        const auto paths = graph_traverser.traverse_graph();
 
         {
           const std::lock_guard lock(finish_callback_mutex_);

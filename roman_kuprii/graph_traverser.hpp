@@ -23,10 +23,9 @@ class GraphTraverser {
 
   std::vector<Path> traverse_graph();
 
-  std::optional<Path> find_shortest_path(const Graph& graph,
-                                         const VertexId& source_vertex_id,
-                                         const VertexId& destination_vertex_id,
-                                         std::mutex& graph_mutex) const;
+  Path find_shortest_path(const Graph& graph,
+                          const VertexId& source_vertex_id,
+                          const VertexId& destination_vertex_id) const;
 
   GraphTraverser(const Graph& graph) : graph_(graph) {}
 

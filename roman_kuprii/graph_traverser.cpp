@@ -21,27 +21,17 @@ constexpr int MAX_DISTANCE = 10000;
 const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }  // namespace
 
-std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
+GraphTraverser::Path GraphTraverser::find_shortest_path(
     const Graph& graph,
     const VertexId& source_vertex_id,
-    const VertexId& destination_vertex_id,
-    std::mutex& graph_mutex) const {
-  int vertices_number;
+    const VertexId& destination_vertex_id) const {
 
-  {
-    std::lock_guard lock(graph_mutex);
-    if (!graph.is_vertex_exist(source_vertex_id) ||
-        !graph.is_vertex_exist(destination_vertex_id))
-      return std::nullopt;
-  }
+  assert(graph.is_vertex_exist(source_vertex_id) &&
+         graph.is_vertex_exist(destination_vertex_id));
 
-  const auto& source_vertex = [&vertices_number, &graph_mutex, &graph,
-                               &source_vertex_id]() {
-    std::lock_guard lock(graph_mutex);
-    vertices_number = graph.get_vertices().size();
-    const auto& vertex = graph.get_vertices().find(source_vertex_id)->second;
-    return vertex;
-  }();
+  int vertices_number = graph.get_vertices().size();
+  const auto& source_vertex =
+      graph.get_vertices().find(source_vertex_id)->second;
   // unvisited vertices
   std::vector<VertexId> vertices(vertices_number, UNVISITED);
   vertices[source_vertex_id] = VISITED;
@@ -62,16 +52,10 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
 
     // check all outcoming edges
     for (const auto& edge_id : current_vertex.get_edges_ids()) {
-      VertexId next_vertex_id;
-      const auto& next_vertex = [&graph_mutex, &graph, &edge_id,
-                                 &next_vertex_id]() {
-        std::lock_guard lock(graph_mutex);
-        const auto& edge = graph.get_edges().find(edge_id)->second;
-        next_vertex_id = edge.connected_vertices.back();
-        const auto& next_vertex =
-            graph.get_vertices().find(next_vertex_id)->second;
-        return next_vertex;
-      }();
+      const auto& edge = graph.get_edges().find(edge_id)->second;
+      VertexId next_vertex_id = edge.connected_vertices.back();
+      const auto& next_vertex =
+          graph.get_vertices().find(next_vertex_id)->second;
       // update distances
       if (distance[current_vertex.get_id()] + 1 < distance[next_vertex_id]) {
         vertices_queue.push(next_vertex);
@@ -86,25 +70,24 @@ std::optional<GraphTraverser::Path> GraphTraverser::find_shortest_path(
     }
   }
 
-  return std::nullopt;
+  throw std::logic_error("Vertices dont connected");
 }
 
 std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
   std::list<std::function<void()>> jobs;
   std::atomic<int> completed_jobs = 0;
-  std::mutex graph_mutex;
   std::mutex path_mutex;
-  auto vertex_ids = graph_.get_vertex_ids_at_depth(graph_.get_depth());
+  const auto vertex_ids = graph_.get_vertex_ids_at_depth(graph_.get_depth());
   std::vector<GraphTraverser::Path> pathes;
   pathes.reserve(vertex_ids.size());
 
   for (const auto& vertex_id : vertex_ids)
-    jobs.emplace_back([this, &graph_ = graph_, &completed_jobs, &graph_mutex,
+    jobs.emplace_back([this, &graph_ = graph_, &completed_jobs,
                        &vertex_id, &pathes, &path_mutex]() {
-      auto path = find_shortest_path(graph_, 0, vertex_id, graph_mutex);
+      auto path = find_shortest_path(graph_, 0, vertex_id);
       {
         std::lock_guard lock(path_mutex);
-        pathes.emplace_back(path.value());
+        pathes.emplace_back(path);
       }
       completed_jobs++;
     });
