@@ -9,10 +9,10 @@
 #include "graph.hpp"
 #include "graph_generator.hpp"
 
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::VertexId;
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::get_random_vertex_id;
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::VertexId;
 
 namespace {
 constexpr float FLOAT_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
