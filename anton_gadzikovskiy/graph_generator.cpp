@@ -274,7 +274,7 @@ void generate_yellow_edges(Graph& graph) {
            graph.get_vertex_ids_on_depth(current_depth)) {
         const double probability =
             (double)graph.get_vertex(from_vertex_id).depth *
-            (100 / (double)(graph.depth() - 1));
+            (100 / (double)(graph.depth() - 2));
         if (is_generated(probability)) {
           vector<VertexId> vertices_on_deeper_depth;
           for (const auto& to_vertex_id :
