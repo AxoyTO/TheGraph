@@ -9,6 +9,11 @@
 #include "graph.hpp"
 #include "graph_generator.hpp"
 
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::VertexId;
+using uni_cource_cpp::EdgeColor;
+using uni_cource_cpp::get_random_vertex_id;
+
 namespace {
 constexpr float FLOAT_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
 constexpr float GREEN_EDGE_PROB = 0.1;
@@ -24,9 +29,7 @@ bool is_lucky(float probability) {
   std::bernoulli_distribution bernoullu_distribution_var(probability);
   return bernoullu_distribution_var(rng);
 }
-}  // namespace
 
-namespace uni_cource_cpp {
 void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
   graph.add_vertex();
   for (int current_depth = 0;
@@ -118,7 +121,9 @@ void generate_red_edges(Graph& graph) {
     }
   }
 }
+}  // namespace
 
+namespace uni_cource_cpp {
 GraphGenerator::Params::Params(int depth_val, int new_vertices_num_val)
     : depth(depth_val), new_vertices_num(new_vertices_num_val) {}
 
