@@ -1,5 +1,5 @@
+#include <array>
 #include <sstream>
-#include <vector>
 
 #include "graph.hpp"
 #include "graph_printer.hpp"
@@ -65,7 +65,7 @@ std::string GraphPrinter::print_graph_description() const {
                                  << "\t"
                                  << "edges: {amount: " << graph_.edges().size()
                                  << ", distribution: {";
-  const std::vector<EdgeColor> edge_colors = {
+  const std::array<EdgeColor, EDGE_COLORS_COUNT> edge_colors = {
       EdgeColor::Gray, EdgeColor::Green, EdgeColor::Blue, EdgeColor::Yellow,
       EdgeColor::Red};
   for (auto it = edge_colors.begin(); it != edge_colors.end(); ++it) {

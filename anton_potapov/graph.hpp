@@ -9,6 +9,7 @@ using VertexId = int;
 using EdgeId = int;
 
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
+constexpr size_t EDGE_COLORS_COUNT = 5;
 
 std::string get_edge_color_string(const EdgeColor& color);
 
