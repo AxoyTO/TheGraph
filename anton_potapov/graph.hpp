@@ -67,7 +67,7 @@ class Graph {
                   const VertexId& vertex2_id,
                   const EdgeColor& edge_color = EdgeColor::Gray);
 
-  int edge_with_color_cnt(const EdgeColor& edge_color) const;
+  std::set<EdgeId> edge_ids_with_color(const EdgeColor& edge_color) const;
 
   const VertexId& get_root_vertex_id() const;
 

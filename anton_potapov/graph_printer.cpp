@@ -49,15 +49,16 @@ std::string GraphPrinter::print_graph_description() const {
   graph_description_stringstream
       << "\t"
       << "edges: {amount: " << graph_.edges().size() << ", distribution: {"
-      << "gray: " << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Gray)
+      << "gray: "
+      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Gray).size()
       << ", green: "
-      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Green)
+      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Green).size()
       << ", blue: "
-      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Blue)
+      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Blue).size()
       << ", yellow: "
-      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Yellow)
+      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Yellow).size()
       << ", red: "
-      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Red);
+      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Red).size();
   graph_description_stringstream << "}}" << std::endl;
   graph_description_stringstream << "}" << std::endl;
   return graph_description_stringstream.str();

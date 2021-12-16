@@ -9,4 +9,4 @@ std::string log_file_path() {
          std::string(config::LOG_FILENAME);
 }
 }  // namespace config
-}  // namespace uni_course_cpp
+}  // namespace uni_cource_cpp

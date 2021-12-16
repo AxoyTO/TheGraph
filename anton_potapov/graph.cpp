@@ -128,11 +128,11 @@ const std::set<EdgeId> Graph::connected_edges(const VertexId& vertex_id) const {
   return vertices_.at(vertex_id).connected_edges();
 }
 
-int Graph::edge_with_color_cnt(const EdgeColor& edge_color) const {
-  int ans = 0;
+std::set<EdgeId> Graph::edge_ids_with_color(const EdgeColor& edge_color) const {
+  std::set<EdgeId> ans;
   for (const auto& [edge_id, edge] : edges_) {
     if (edge.color == edge_color) {
-      ++ans;
+      ans.insert(edge_id);
     }
   }
   return ans;
