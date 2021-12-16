@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 
@@ -5,12 +6,15 @@
 #include "logger.hpp"
 
 namespace uni_cource_cpp {
+Logger::Logger() : output_filestream_(config::log_file_path()) {
+  if (!output_filestream_.is_open()) {
+    throw std::runtime_error("can't open log file");
+  }
+}
+
 void Logger::log(const std::string& string) {
   std::cout << string;
-  static std::ofstream output_filestream;
-  output_filestream.open(config::log_file_path(), std::ios_base::app);
-  output_filestream << string;
-  output_filestream.close();
+  output_filestream_ << string;
 }
 
 Logger& Logger::get_logger() {

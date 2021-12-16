@@ -8,10 +8,12 @@ class Logger {
   static Logger& get_logger();
 
  private:
-  Logger() = default;
+  Logger();
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
+
+  std::ofstream output_filestream_;
 };
 }  // namespace uni_cource_cpp
