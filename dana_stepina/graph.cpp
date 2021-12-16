@@ -60,7 +60,7 @@ void Graph::add_edge(const VertexId& from_vertex_id,
 
   if (new_edge.color == Edge::Color::Grey) {
     to_vertex.depth = from_vertex.depth + 1;
-    set_vertex_depth(from_vertex_id, to_vertex_id);
+    set_vertex_depth(to_vertex_id, to_vertex.depth);
   }
 
   edges_color_map_[edge_color].push_back(new_edge.id);
@@ -83,19 +83,23 @@ Graph::Edge::Color Graph::get_edge_color(const Vertex& from_vertex,
   throw std::runtime_error("Can't determine color");
 }
 
-void Graph::set_vertex_depth(const VertexId& from_vertex_id,
-                             const VertexId& to_vertex_id) {
-  assert((depth_map_.size() - 1 - get_vertex(from_vertex_id).depth <= 1) &&
-         "Error! Depth map size is larger than required");
+void Graph::set_vertex_depth(const VertexId& vertex_id, Depth depth) {
+  const Vertex& vertex = get_vertex(vertex_id);
+  vertices_[vertex_id].depth = depth;
 
-  auto& depth_zero = depth_map_.front();
-  const auto new_end =
-      std::remove(depth_zero.begin(), depth_zero.end(), to_vertex_id);
-  depth_zero.erase(new_end);
-
-  if (depth_map_.size() - 1 == get_vertex(from_vertex_id).depth)
+  while (depth_map_.size() <= depth) {
     depth_map_.push_back({});
-  depth_map_[get_vertex(to_vertex_id).depth].push_back(to_vertex_id);
+  }
+  depth_map_[depth].push_back(vertex_id);
+
+  for (auto vertex_id_on_zero_depth = depth_map_[0].begin();
+       vertex_id_on_zero_depth != depth_map_[0].end();
+       vertex_id_on_zero_depth++) {
+    if (*vertex_id_on_zero_depth == vertex_id) {
+      depth_map_[0].erase(vertex_id_on_zero_depth);
+      break;
+    }
+  }
 }
 
 const std::vector<EdgeId>& Graph::get_colored_edges(
