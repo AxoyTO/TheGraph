@@ -7,24 +7,26 @@
 
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
 using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
 using uni_course_cpp::Logger;
 
 constexpr int MIN_DEPTH = 0;
-constexpr int MIN_NEW_VERTICES_NUM = 0;
+constexpr int MIN_NEW_VERTICES_COUNT = 0;
 constexpr int MIN_GRAPHS_COUNT = 0;
+constexpr int MIN_THREADS_COUNT = 1;
 
 const std::string FILENAME_PREFIX = "graph_";
 const std::string FILENAME_SUFFIX = ".json";
 
 const int handle_depth_input() {
   int depth;
-
   std::cout << "Input depth:" << std::endl;
   while (!(std::cin >> depth) || (depth < MIN_DEPTH)) {
     std::cout << "Invalid value, please input natural number or zero:"
@@ -37,10 +39,11 @@ const int handle_depth_input() {
   return depth;
 }
 
-const int handle_new_vertices_num_input() {
-  int vertices_num;
-  std::cout << "Input vertices num:" << std::endl;
-  while (!(std::cin >> vertices_num) || (vertices_num < MIN_NEW_VERTICES_NUM)) {
+const int handle_new_vertices_count_input() {
+  int new_vertices_count;
+  std::cout << "Input new vertices count:" << std::endl;
+  while (!(std::cin >> new_vertices_count) ||
+         (new_vertices_count < MIN_NEW_VERTICES_COUNT)) {
     std::cout << "Invalid value, please input natural number or zero:"
               << std::endl;
     if (!std::cin) {
@@ -48,7 +51,7 @@ const int handle_new_vertices_num_input() {
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
   }
-  return vertices_num;
+  return new_vertices_count;
 }
 
 const int handle_graphs_count_input() {
@@ -63,6 +66,20 @@ const int handle_graphs_count_input() {
     }
   }
   return graphs_count;
+}
+
+const int handle_threads_count_input() {
+  int threads_count;
+  std::cout << "Input threads count:" << std::endl;
+  while (!(std::cin >> threads_count) || (threads_count < MIN_THREADS_COUNT)) {
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
+    if (!std::cin) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+  }
+  return threads_count;
 }
 
 std::string get_current_date_time() {
@@ -97,28 +114,47 @@ void prepare_temp_directory() {
       uni_course_cpp::config::TEMP_DIRECTORY_PATH);
 }
 
-int main() {
-  const int depth = handle_depth_input();
-  const int new_vertices_num = handle_new_vertices_num_input();
-  const int graphs_count = handle_graphs_count_input();
-  prepare_temp_directory();
+void write_to_file(const std::string& string, const std::string& filename) {
+  std::ofstream filestream;
+  filestream.open(filename);
+  filestream << string;
+  filestream.close();
+}
 
-  const auto params = GraphGenerator::Params(depth, new_vertices_num);
-  const auto generator = GraphGenerator(params);
+std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
+                                   int graphs_count,
+                                   int threads_count) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
 
   auto& logger = Logger::get_instance();
 
-  for (int i = 0; i < graphs_count; i++) {
-    logger.log(gen_started_string(i));
-    const auto graph = generator.generate();
-    logger.log(gen_finished_string(i, graph));
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
 
-    std::ofstream myfile;
-    myfile.open(uni_course_cpp::config::TEMP_DIRECTORY_PATH + FILENAME_PREFIX +
-                std::to_string(i) + FILENAME_SUFFIX);
-    myfile << uni_course_cpp::graph_printing::print_graph(graph);
-    myfile.close();
-  }
+  generation_controller.generate(
+      [&logger](int index) { logger.log(gen_started_string(index)); },
+      [&logger, &graphs](int index, Graph graph) {
+        logger.log(gen_finished_string(index, graph));
+        graphs.push_back(graph);
+        write_to_file(uni_course_cpp::graph_printing::print_graph(graph),
+                      uni_course_cpp::config::TEMP_DIRECTORY_PATH +
+                          FILENAME_PREFIX + std::to_string(index) +
+                          FILENAME_SUFFIX);
+      });
+
+  return graphs;
+}
+
+int main() {
+  const int depth = handle_depth_input();
+  const int new_vertices_count = handle_new_vertices_count_input();
+  const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
+  prepare_temp_directory();
+
+  const auto params = GraphGenerator::Params(depth, new_vertices_count);
+  const auto graphs = generate_graphs(params, graphs_count, threads_count);
 
   return 0;
 }

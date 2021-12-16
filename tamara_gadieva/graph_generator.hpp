@@ -1,0 +1,22 @@
+#pragma once
+#include "graph.hpp"
+
+namespace uni_cource_cpp {
+class GraphGenerator {
+ public:
+  struct Params {
+    const int depth = 0;
+    const int new_vertices_num = 0;
+
+    explicit Params(int _depth = 0, int _new_vertices_num = 0)
+        : depth(_depth), new_vertices_num(_new_vertices_num) {}
+  };
+
+  explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
+
+  Graph generate() const;
+
+ private:
+  const Params params_ = Params();
+};
+}  // namespace uni_cource_cpp
