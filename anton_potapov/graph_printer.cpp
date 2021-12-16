@@ -1,10 +1,26 @@
 #include <sstream>
+#include <vector>
 
 #include "graph.hpp"
 #include "graph_printer.hpp"
 
 namespace uni_cource_cpp {
 GraphPrinter::GraphPrinter(Graph& input_graph) : graph_(input_graph) {}
+
+static std::string print_edge_color(const EdgeColor& color) {
+  switch (color) {
+    case EdgeColor::Gray:
+      return "gray";
+    case EdgeColor::Green:
+      return "green";
+    case EdgeColor::Blue:
+      return "blue";
+    case EdgeColor::Yellow:
+      return "yellow";
+    case EdgeColor::Red:
+      return "red";
+  }
+}
 
 std::string GraphPrinter::print() const {
   std::stringstream json_stringstream;
@@ -45,20 +61,20 @@ std::string GraphPrinter::print_graph_description() const {
       graph_description_stringstream << ", ";
     }
   }
-  graph_description_stringstream << "]}," << std::endl;
-  graph_description_stringstream
-      << "\t"
-      << "edges: {amount: " << graph_.edges().size() << ", distribution: {"
-      << "gray: "
-      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Gray).size()
-      << ", green: "
-      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Green).size()
-      << ", blue: "
-      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Blue).size()
-      << ", yellow: "
-      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Yellow).size()
-      << ", red: "
-      << graph_.edge_ids_with_color(uni_cource_cpp::EdgeColor::Red).size();
+  graph_description_stringstream << "]}," << std::endl
+                                 << "\t"
+                                 << "edges: {amount: " << graph_.edges().size()
+                                 << ", distribution: {";
+  const std::vector<EdgeColor> edge_colors = {
+      EdgeColor::Gray, EdgeColor::Green, EdgeColor::Blue, EdgeColor::Yellow,
+      EdgeColor::Red};
+  for (auto it = edge_colors.begin(); it != edge_colors.end(); ++it) {
+    graph_description_stringstream << print_edge_color(*it) << ": "
+                                   << graph_.edge_ids_with_color(*it).size();
+    if (std::next(it) != edge_colors.end()) {
+      graph_description_stringstream << ", ";
+    }
+  }
   graph_description_stringstream << "}}" << std::endl;
   graph_description_stringstream << "}" << std::endl;
   return graph_description_stringstream.str();
@@ -82,11 +98,10 @@ std::string GraphPrinter::print_vertex(const Vertex& vertex) const {
 
 std::string GraphPrinter::print_edge(const Edge& Edge) const {
   std::stringstream json_stringstream;
-  std::string color_string = get_edge_color_string(Edge.color);
   json_stringstream << "{\"id\":" << Edge.id << ","
                     << "\"vertex_ids\":[" << Edge.vertex1_id << ","
-                    << Edge.vertex2_id << "],\"color\":\"" << color_string
-                    << "\"}";
+                    << Edge.vertex2_id << "],\"color\":\""
+                    << print_edge_color(Edge.color) << "\"}";
   return json_stringstream.str();
 }
 }  // namespace uni_cource_cpp

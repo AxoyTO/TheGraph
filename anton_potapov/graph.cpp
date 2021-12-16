@@ -10,21 +10,6 @@
 #include "graph_traverser.hpp"
 
 namespace uni_cource_cpp {
-std::string get_edge_color_string(const EdgeColor& color) {
-  switch (color) {
-    case EdgeColor::Gray:
-      return "gray";
-    case EdgeColor::Green:
-      return "green";
-    case EdgeColor::Blue:
-      return "blue";
-    case EdgeColor::Yellow:
-      return "yellow";
-    case EdgeColor::Red:
-      return "red";
-  }
-}
-
 Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 
 Edge::Edge(const EdgeId& edge_id,
