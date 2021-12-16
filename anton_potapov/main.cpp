@@ -55,11 +55,7 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  const auto& temp_directory_path = config::TEMP_DIRECTORY_PATH;
-  if (!std::filesystem::is_directory(temp_directory_path) ||
-      !std::filesystem::exists(temp_directory_path)) {
-    std::filesystem::create_directory(temp_directory_path);
-  }
+  std::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
 }
 
 std::string get_current_date_time() {
