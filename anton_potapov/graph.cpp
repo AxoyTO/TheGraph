@@ -110,7 +110,7 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   return new_edge_id;
 }
 
-const std::set<EdgeId> Graph::connected_edges(const VertexId& vertex_id) const {
+const std::set<EdgeId>& Graph::connected_edges(const VertexId& vertex_id) const {
   return vertices_.at(vertex_id).connected_edges();
 }
 

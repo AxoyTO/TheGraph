@@ -55,7 +55,7 @@ class Graph {
 
   const std::map<EdgeId, Edge>& edges() const;
 
-  const std::set<EdgeId> connected_edges(const VertexId& vertex_id) const;
+  const std::set<EdgeId>& connected_edges(const VertexId& vertex_id) const;
 
   const std::set<VertexId>& get_vertices_at_depth(int depth);
 
