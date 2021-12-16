@@ -56,8 +56,8 @@ std::string graph_printing::print_graph(const Graph& graph) {
   return graph_output;
 }
 
-string graph_printing::print_graph_description(const Graph& graph) {
-  string graph_description =
+std::string graph_printing::print_graph_description(const Graph& graph) {
+  std::string graph_description =
       "  depth: " + std::to_string(graph.depth()) +
       ",\n  vertices: {amount: " + std::to_string(graph.get_vertices_amount()) +
       ", distribution: [";
