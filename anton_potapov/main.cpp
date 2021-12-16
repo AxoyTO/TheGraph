@@ -128,6 +128,6 @@ int main() {
                   std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
                       "graph_" + std::to_string(i) + ".json");
   }
-
+  
   return 0;
 }
