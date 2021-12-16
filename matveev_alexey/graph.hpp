@@ -43,12 +43,6 @@ class Graph {
 
   VertexId addVertex();
 
-  Edge::Colors calculateEdgeColor(const VertexId& vertex_id1,
-                                  const VertexId& vertex_id2) const;
-
-  void grayEdgeInitialization(const VertexId& vertex_id1,
-                              const VertexId& vertex_id2);
-
   void addEdge(const VertexId& vertex_id1, const VertexId& vertex_id2);
 
   const Edge& getEdge(const EdgeId& edge_id) const;
@@ -72,5 +66,9 @@ class Graph {
   std::unordered_map<Edge::Colors, std::vector<EdgeId>> color_list_;
   VertexId getNewVertexId() { return vertex_new_id_++; }
   EdgeId getNewEdgeId() { return edge_new_id_++; }
+  Edge::Colors calculateEdgeColor(const VertexId& vertex_id1,
+                                  const VertexId& vertex_id2) const;
+  void grayEdgeInitialization(const VertexId& vertex_id1,
+                              const VertexId& vertex_id2);
 };
 }  // namespace uni_course_cpp

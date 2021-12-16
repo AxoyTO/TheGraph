@@ -14,12 +14,11 @@ class GraphGenerator {
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
-
-  Graph generateMainBody() const;
-  void generateColorEdges(Graph& graph) const;
   Graph generate() const;
 
  private:
+  Graph generateMainBody() const;
+  void generateColorEdges(Graph& graph) const;
   const Params params_ = Params();
   bool randomValue(float probability) const;
   int getRandomVertexId(const std::vector<VertexId> vertex_ids) const;
