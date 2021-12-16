@@ -29,9 +29,7 @@ std::map<VertexId, int> GraphTraverser::get_updated_depths(
       used.insert(vertex_id);
     }
     if (max_correct_depth > 0) {
-      const auto vertices_at_depth_before_max_correct =
-          known_depths.at(max_correct_depth - 1);
-      for (const auto& vertex_id : vertices_at_depth_before_max_correct) {
+      for (const auto& vertex_id : known_depths.at(max_correct_depth - 1)) {
         used.insert(vertex_id);
       }
     }
