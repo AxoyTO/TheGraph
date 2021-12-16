@@ -71,41 +71,6 @@ std::string get_current_date_time() {
   return date_time_string.str();
 }
 
-namespace graph_printing {
-std::string print_graph_description(const Graph& graph) {
-  std::stringstream graph_description_stringstream;
-  graph_description_stringstream << "{" << std::endl;
-  graph_description_stringstream << "\t"
-                                 << "depth: " << graph.max_depth() << ","
-                                 << std::endl;
-  graph_description_stringstream
-      << "\t"
-      << "vertices: {amount: " << graph.vertices().size()
-      << ", distribution: [";
-  for (int depth = 0; depth <= graph.max_depth(); ++depth) {
-    graph_description_stringstream << graph.get_vertices_at_depth(depth).size();
-    if (depth != graph.max_depth()) {
-      graph_description_stringstream << ", ";
-    }
-  }
-  graph_description_stringstream << "]}," << std::endl;
-  graph_description_stringstream
-      << "\t"
-      << "edges: {amount: " << graph.edges().size() << ", distribution: {"
-      << "gray: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Gray)
-      << ", green: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Green)
-      << ", blue: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Blue)
-      << ", yellow: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Yellow)
-      << ", red: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Red);
-  graph_description_stringstream << "}}" << std::endl;
-  graph_description_stringstream << "}" << std::endl;
-  return graph_description_stringstream.str();
-}
-}  // namespace graph_printing
-
 std::string generation_started_string(int id) {
   std::stringstream generation_started_stringstream;
   generation_started_stringstream << get_current_date_time() << ": Graph " << id
@@ -113,11 +78,11 @@ std::string generation_started_string(int id) {
   return generation_started_stringstream.str();
 }
 
-std::string generation_finished_string(int id, const Graph& graph) {
+std::string generation_finished_string(int id, Graph& graph) {
   std::stringstream generation_finished_stringstream;
   generation_finished_stringstream
       << get_current_date_time() << ": Graph " << id << ", Generation Finished "
-      << graph_printing::print_graph_description(graph) << std::endl;
+      << GraphPrinter(graph).print_graph_description() << std::endl;
   return generation_finished_stringstream.str();
 }
 
@@ -154,7 +119,7 @@ int main() {
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(generation_started_string(i));
-    const auto graph = generator.generate_graph();
+    auto graph = generator.generate_graph();
     if (graph.max_depth() < depth) {
       logger.log(generation_max_depth_warning(i, graph.max_depth(), depth));
     }

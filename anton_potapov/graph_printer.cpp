@@ -4,7 +4,7 @@
 #include "graph_printer.hpp"
 
 namespace uni_cource_cpp {
-GraphPrinter::GraphPrinter(const Graph& input_graph) : graph(input_graph) {}
+GraphPrinter::GraphPrinter(Graph& input_graph) : graph(input_graph) {}
 
 std::string GraphPrinter::print() const {
   std::stringstream json_stringstream;
@@ -26,6 +26,39 @@ std::string GraphPrinter::print() const {
   }
   json_stringstream << "]}";
   return json_stringstream.str();
+}
+
+std::string GraphPrinter::print_graph_description() const {
+  std::stringstream graph_description_stringstream;
+  graph_description_stringstream << "{" << std::endl;
+  graph_description_stringstream << "\t"
+                                 << "depth: " << graph.max_depth() << ","
+                                 << std::endl;
+  graph_description_stringstream
+      << "\t"
+      << "vertices: {amount: " << graph.vertices().size()
+      << ", distribution: [";
+  for (int depth = 0; depth <= graph.max_depth(); ++depth) {
+    graph_description_stringstream << graph.get_vertices_at_depth(depth).size();
+    if (depth != graph.max_depth()) {
+      graph_description_stringstream << ", ";
+    }
+  }
+  graph_description_stringstream << "]}," << std::endl;
+  graph_description_stringstream
+      << "\t"
+      << "edges: {amount: " << graph.edges().size() << ", distribution: {"
+      << "gray: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Gray)
+      << ", green: "
+      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Green)
+      << ", blue: "
+      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Blue)
+      << ", yellow: "
+      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Yellow)
+      << ", red: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Red);
+  graph_description_stringstream << "}}" << std::endl;
+  graph_description_stringstream << "}" << std::endl;
+  return graph_description_stringstream.str();
 }
 
 std::string GraphPrinter::print_vertex(const Vertex& vertex) const {

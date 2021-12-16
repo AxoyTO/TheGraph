@@ -12,20 +12,6 @@ class GraphTraverser {
       const Graph& graph,
       const std::map<int, std::set<VertexId>>& known_depths,
       int start_depth);
-  static std::set<VertexId> get_updated_vertices_at_depth(
-      const Graph& graph,
-      const std::map<int, std::set<VertexId>>& known_depths,
-      int depth,
-      int start_depth);
-  static int get_updated_vertex_depth(
-      const Graph& graph,
-      const std::map<int, std::set<VertexId>>& known_depths,
-      VertexId vertex_id,
-      int start_depth);
-  static int get_max_depth(
-      const Graph& graph,
-      const std::map<int, std::set<VertexId>>& known_depths,
-      int start_depth);
 
  private:
   static std::

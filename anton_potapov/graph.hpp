@@ -42,16 +42,13 @@ class Edge {
 
 class Graph {
  public:
-  Vertex get_vertex(const VertexId& id) const;
   Vertex& get_vertex(const VertexId& id);
 
-  const Edge& get_edge(const EdgeId& id) const;
+  const Edge& Graph::get_edge(const EdgeId& id) const;
   Edge& get_edge(const EdgeId& id);
 
   int max_depth();
-  int max_depth() const;
 
-  std::map<VertexId, Vertex> vertices() const;
   const std::map<VertexId, Vertex>& vertices();
 
   const std::map<EdgeId, Edge>& edges() const;
@@ -59,9 +56,9 @@ class Graph {
   const std::set<EdgeId> connected_edges(const VertexId& vertex_id) const;
 
   const std::set<VertexId>& get_vertices_at_depth(int depth);
-  std::set<VertexId> get_vertices_at_depth(int depth) const;
 
   bool is_vertex_exists(const VertexId& vertex_id) const;
+
   bool is_connected(const VertexId& vertex1_id,
                     const VertexId& vertex2_id) const;
 

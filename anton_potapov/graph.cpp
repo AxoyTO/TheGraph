@@ -210,15 +210,6 @@ void Graph::update_vertices_depth() {
   is_depth_dirty_ = false;
 }
 
-Vertex Graph::get_vertex(const VertexId& id) const {
-  Vertex vertex_copy = vertices_.at(id);
-  if (is_depth_dirty_) {
-    vertex_copy.depth = GraphTraverser::get_updated_vertex_depth(
-        *this, vertices_at_depth_, id, updated_depth_);
-  }
-  return vertex_copy;
-}
-
 Vertex& Graph::get_vertex(const VertexId& id) {
   update_vertices_depth();
   return vertices_.at(id);
@@ -229,37 +220,9 @@ int Graph::max_depth() {
   return vertices_at_depth_.size() - 1;
 }
 
-int Graph::max_depth() const {
-  if (is_depth_dirty_) {
-    return GraphTraverser::get_max_depth(*this, vertices_at_depth_,
-                                         updated_depth_);
-  } else {
-    return vertices_at_depth_.size() - 1;
-  }
-}
-
-std::map<VertexId, Vertex> Graph::vertices() const {
-  auto vertices_updated_copy = vertices_;
-  const auto updated_depths = GraphTraverser::get_updated_depths(
-      *this, vertices_at_depth_, updated_depth_);
-  for (auto& [vertex_id, vertex] : vertices_updated_copy) {
-    vertex.depth = updated_depths.at(vertex_id);
-  }
-  return vertices_updated_copy;
-}
-
 const std::map<VertexId, Vertex>& Graph::vertices() {
   update_vertices_depth();
   return vertices_;
-}
-
-std::set<VertexId> Graph::get_vertices_at_depth(int depth) const {
-  if (is_depth_dirty_) {
-    return GraphTraverser::get_updated_vertices_at_depth(
-        *this, vertices_at_depth_, depth, INIT_DEPTH);
-  } else {
-    return vertices_at_depth_.at(depth);
-  }
 }
 
 const std::set<VertexId>& Graph::get_vertices_at_depth(int depth) {
