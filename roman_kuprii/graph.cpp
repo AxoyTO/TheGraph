@@ -17,10 +17,12 @@ bool is_edge_id_included(
 }
 
 uni_cpp_practice::Edge::Color calculate_edge_color(
-    const int depth_diff,
+    const int from_vertex_depth,
+    const int to_vertex_depth,
     const uni_cpp_practice::VertexId& from_vertex_id,
     const uni_cpp_practice::VertexId& to_vertex_id) {
-  if (depth_diff <= 0)
+  const int depth_diff = to_vertex_depth - from_vertex_depth;
+  if (to_vertex_depth == 0)
     return uni_cpp_practice::Edge::Color::Gray;
   else if (from_vertex_id == to_vertex_id)
     return uni_cpp_practice::Edge::Color::Green;
@@ -91,10 +93,9 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
   assert(is_vertex_exist(to_vertex_id));
   assert(!is_connected(from_vertex_id, to_vertex_id));
 
-  const int diff =
-      vertices_.at(to_vertex_id).depth - vertices_.at(from_vertex_id).depth;
-  const Edge::Color color =
-      calculate_edge_color(diff, from_vertex_id, to_vertex_id);
+  const Edge::Color color = calculate_edge_color(
+      vertices_.at(from_vertex_id).depth, vertices_.at(to_vertex_id).depth,
+      from_vertex_id, to_vertex_id);
 
   if (color == Edge::Color::Gray) {
     for (auto it = depth_map_[0].begin(); it != depth_map_[0].end(); it++)
