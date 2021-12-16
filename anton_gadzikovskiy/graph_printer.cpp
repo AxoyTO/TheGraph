@@ -6,10 +6,7 @@
 
 namespace uni_cource_cpp {
 
-using std::string;
-using std::to_string;
-
-string graph_printing::print_edge_color(const Graph::Edge::Color& color) {
+std::string graph_printing::print_edge_color(const Graph::Edge::Color& color) {
   switch (color) {
     case Graph::Edge::Color::Gray:
       return "gray";
@@ -23,28 +20,30 @@ string graph_printing::print_edge_color(const Graph::Edge::Color& color) {
   throw std::runtime_error("Failed to determine color");
 }
 
-string graph_printing::print_vertex(const Graph::Vertex& vertex) {
-  string vertex_output =
-      "\"id\": " + to_string(vertex.id) + ", " + "\"edge_ids\": [";
+std::string graph_printing::print_vertex(const Graph::Vertex& vertex) {
+  std::string vertex_output =
+      "\"id\": " + std::to_string(vertex.id) + ", " + "\"edge_ids\": [";
   for (const auto& edge_id : vertex.get_edge_ids()) {
-    vertex_output += to_string(edge_id);
+    vertex_output += std::to_string(edge_id);
     if (edge_id != vertex.get_edge_ids().back()) {
       vertex_output += ", ";
     }
   }
-  vertex_output += "], \"depth\": " + to_string(vertex.depth);
+  vertex_output += "], \"depth\": " + std::to_string(vertex.depth);
   return vertex_output;
 }
 
-string graph_printing::print_edge(const Graph::Edge& edge) {
+std::string graph_printing::print_edge(const Graph::Edge& edge) {
   return "\"id\": " + std::to_string(edge.id) + ", " + "\"vertex_ids\": [" +
-         to_string(edge.from_vertex_id) + ", " + to_string(edge.to_vertex_id) +
-         "]" + ", " + "\"color\": \"" + print_edge_color(edge.color) + "\"";
+         std::to_string(edge.from_vertex_id) + ", " +
+         std::to_string(edge.to_vertex_id) + "]" + ", " + "\"color\": \"" +
+         print_edge_color(edge.color) + "\"";
 }
 
-string graph_printing::print_graph(const Graph& graph) {
-  string graph_output = "{\n\t\"depth\": " + to_string(graph.depth()) +
-                        ",\n\t\"vertices\": [\n\t\t";
+std::string graph_printing::print_graph(const Graph& graph) {
+  std::string graph_output =
+      "{\n\t\"depth\": " + std::to_string(graph.depth()) +
+      ",\n\t\"vertices\": [\n\t\t";
   for (const auto& [key, vertex] : graph.get_vertices()) {
     graph_output += "{" + print_vertex(vertex) + "},\n\t\t";
   }
@@ -59,12 +58,12 @@ string graph_printing::print_graph(const Graph& graph) {
 
 string graph_printing::print_graph_description(const Graph& graph) {
   string graph_description =
-      "  depth: " + to_string(graph.depth()) +
-      ",\n  vertices: {amount: " + to_string(graph.get_vertices_amount()) +
+      "  depth: " + std::to_string(graph.depth()) +
+      ",\n  vertices: {amount: " + std::to_string(graph.get_vertices_amount()) +
       ", distribution: [";
 
   for (const auto& vertex_ids_on_depth : graph.get_vertices_on_depth()) {
-    graph_description += to_string(vertex_ids_on_depth.size());
+    graph_description += std::to_string(vertex_ids_on_depth.size());
     if (vertex_ids_on_depth != graph.get_vertices_on_depth().back()) {
       graph_description += ", ";
     } else {
@@ -73,18 +72,18 @@ string graph_printing::print_graph_description(const Graph& graph) {
   }
 
   graph_description = graph_description + "  edges: {amount: " +
-                      to_string(graph.get_edges_amount()) + ", distribution: {";
-  std::map<uni_cource_cpp::Graph::Edge::Color, int> edges_distribution = {
-      {uni_cource_cpp::Graph::Edge::Color::Gray, 0},
-      {uni_cource_cpp::Graph::Edge::Color::Green, 0},
-      {uni_cource_cpp::Graph::Edge::Color::Yellow, 0},
-      {uni_cource_cpp::Graph::Edge::Color::Red, 0}};
-  for (const auto& [key, edge] : graph.get_edges()) {
-    edges_distribution[edge.color] += 1;
-  }
-  for (const auto& [color, amount] : edges_distribution) {
-    graph_description = graph_description + print_edge_color(color) + ": " +
-                        to_string(amount) + ", ";
+                      std::to_string(graph.get_edges_amount()) +
+                      ", distribution: {";
+  std::array<uni_cource_cpp::Graph::Edge::Color, 4> colors = {
+      uni_cource_cpp::Graph::Edge::Color::Gray,
+      uni_cource_cpp::Graph::Edge::Color::Green,
+      uni_cource_cpp::Graph::Edge::Color::Yellow,
+      uni_cource_cpp::Graph::Edge::Color::Red};
+
+  for (const auto& color : colors) {
+    graph_description =
+        graph_description + print_edge_color(color) + ": " +
+        std::to_string(graph.get_colored_edge_ids(color).size()) + ", ";
   }
   graph_description =
       graph_description.substr(0, graph_description.size() - 2) + "}}";

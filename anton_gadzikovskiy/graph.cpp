@@ -7,7 +7,7 @@ namespace uni_cource_cpp {
 
 using std::vector;
 
-VertexId Graph::add_vertex() {
+Graph::VertexId Graph::add_vertex() {
   if (vertices_on_depth_.empty()) {
     vertices_on_depth_.push_back(vector<VertexId>());
   }
@@ -23,6 +23,7 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   const auto& new_edge_color = define_edge_color(from_vertex_id, to_vertex_id);
   edges_.emplace(new_edge_id, Edge(new_edge_id, from_vertex_id, to_vertex_id,
                                    new_edge_color));
+  colored_edge_ids_[new_edge_color].push_back(new_edge_id);
   get_vertex(from_vertex_id).add_edge_id(new_edge_id);
   if (new_edge_color != Edge::Color::Green) {
     get_vertex(to_vertex_id).add_edge_id(new_edge_id);

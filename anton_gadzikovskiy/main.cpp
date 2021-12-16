@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
@@ -92,7 +93,7 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory("temp/");
+  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
 }
 
 int main() {
@@ -105,7 +106,6 @@ int main() {
       uni_cource_cpp::GraphGenerator::Params(depth, new_vertices_count);
   const auto generator = uni_cource_cpp::GraphGenerator(params);
   auto& logger = uni_cource_cpp::Logger::get_logger();
-  logger.set_file_path();
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(generation_started_string(i));
@@ -113,7 +113,9 @@ int main() {
     logger.log(generation_finished_string(i, graph));
 
     const auto graph_json = uni_cource_cpp::graph_printing::print_graph(graph);
-    write_to_file(graph_json, "temp/graph_" + std::to_string(i) + ".json");
+    write_to_file(graph_json,
+                  std::string(uni_cource_cpp::config::kTempDirectoryPath) +
+                      "/graph_" + std::to_string(i) + ".json");
   }
 
   return 0;

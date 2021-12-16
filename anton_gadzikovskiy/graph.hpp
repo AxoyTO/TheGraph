@@ -5,12 +5,10 @@
 
 namespace uni_cource_cpp {
 
-using std::vector;
-using VertexId = int;
-using EdgeId = int;
-
 class Graph {
  public:
+  using VertexId = int;
+  using EdgeId = int;
   using Depth = int;
 
   struct Vertex {
@@ -22,10 +20,10 @@ class Graph {
 
     void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
 
-    const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
+    const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
 
    private:
-    vector<EdgeId> edge_ids_;
+    std::vector<EdgeId> edge_ids_;
   };
 
   struct Edge {
@@ -52,9 +50,7 @@ class Graph {
 
   const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
 
-  Vertex& get_vertex(const VertexId& id) {
-    return const_cast<Graph::Vertex&>(vertices_.at(id));
-  }
+  Vertex& get_vertex(const VertexId& id) { return vertices_.at(id); }
 
   Depth get_vertex_depth(const VertexId& vertex_id) const {
     return vertices_.at(vertex_id).depth;
@@ -66,7 +62,8 @@ class Graph {
   Edge::Color define_edge_color(const VertexId& from_vertex_id,
                                 const VertexId& to_vertex_id) const;
 
-  const vector<EdgeId>& get_vertex_edge_ids(const VertexId& vertex_id) const {
+  const std::vector<EdgeId>& get_vertex_edge_ids(
+      const VertexId& vertex_id) const {
     return vertices_.at(vertex_id).get_edge_ids();
   }
 
@@ -74,15 +71,21 @@ class Graph {
     return vertices_;
   }
 
-  const vector<vector<VertexId>>& get_vertices_on_depth() const {
+  const std::vector<std::vector<VertexId>>& get_vertices_on_depth() const {
     return vertices_on_depth_;
   }
 
-  const vector<VertexId>& get_vertex_ids_on_depth(const Depth& depth) const {
+  const std::vector<VertexId>& get_vertex_ids_on_depth(
+      const Depth& depth) const {
     return vertices_on_depth_[depth];
   }
 
   const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
+
+  const std::vector<EdgeId>& get_colored_edge_ids(
+      const Edge::Color& color) const {
+    return colored_edge_ids_.at(color);
+  }
 
   const Depth depth() const { return vertices_on_depth_.size() - 1; }
 
@@ -93,7 +96,8 @@ class Graph {
  private:
   std::unordered_map<VertexId, Vertex> vertices_;
   std::unordered_map<EdgeId, Edge> edges_;
-  vector<vector<VertexId>> vertices_on_depth_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> colored_edge_ids_;
+  std::vector<std::vector<VertexId>> vertices_on_depth_;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 
