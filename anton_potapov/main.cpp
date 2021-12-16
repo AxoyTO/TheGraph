@@ -55,7 +55,8 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
+  std::filesystem::create_directory(
+      uni_cource_cpp::config::TEMP_DIRECTORY_PATH);
 }
 
 std::string get_current_date_time() {
@@ -123,8 +124,9 @@ int main() {
 
     auto graph_printer = GraphPrinter(graph);
     const auto graph_json = graph_printer.print();
-    write_to_file(graph_json, std::string(config::TEMP_DIRECTORY_PATH) +
-                                  "graph_" + std::to_string(i) + ".json");
+    write_to_file(graph_json,
+                  std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
+                      "graph_" + std::to_string(i) + ".json");
   }
 
   return 0;
