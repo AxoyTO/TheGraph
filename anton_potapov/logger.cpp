@@ -14,7 +14,7 @@ void Logger::log(const std::string& string) {
 }
 
 Logger& Logger::get_logger() {
-  static Logger* logger = new Logger();
-  return *logger;
+  static Logger logger;
+  return logger;
 }
 }  // namespace uni_cource_cpp
