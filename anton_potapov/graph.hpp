@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 namespace uni_cource_cpp {
 using VertexId = int;
@@ -68,7 +69,8 @@ class Graph {
                   const VertexId& vertex2_id,
                   const EdgeColor& edge_color = EdgeColor::Gray);
 
-  std::set<EdgeId> edge_ids_with_color(const EdgeColor& edge_color) const;
+  const std::set<EdgeId>& edge_ids_with_color(
+      const EdgeColor& edge_color) const;
 
   const VertexId& get_root_vertex_id() const;
 
@@ -79,6 +81,7 @@ class Graph {
   EdgeId next_edge_id_{};
   std::map<VertexId, Vertex> vertices_;
   std::map<EdgeId, Edge> edges_;
+  std::unordered_map<EdgeColor, std::set<EdgeId>> edge_color_map_;
   std::map<int, std::set<VertexId>> vertices_at_depth_;
 
   VertexId get_next_vertex_id();

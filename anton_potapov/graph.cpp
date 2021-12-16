@@ -95,6 +95,7 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   const EdgeId new_edge_id = get_next_edge_id();
   edges_.emplace(new_edge_id,
                  Edge(new_edge_id, vertex1_id, vertex2_id, edge_color));
+  edge_color_map_[edge_color].insert(new_edge_id);
 
   vertices_.at(vertex1_id).add_edge(new_edge_id);
   if (vertex1_id != vertex2_id) {
@@ -113,12 +114,11 @@ const std::set<EdgeId> Graph::connected_edges(const VertexId& vertex_id) const {
   return vertices_.at(vertex_id).connected_edges();
 }
 
-std::set<EdgeId> Graph::edge_ids_with_color(const EdgeColor& edge_color) const {
-  std::set<EdgeId> ans;
-  for (const auto& [edge_id, edge] : edges_) {
-    if (edge.color == edge_color) {
-      ans.insert(edge_id);
-    }
+const std::set<EdgeId>& Graph::edge_ids_with_color(
+    const EdgeColor& edge_color) const {
+  static std::set<EdgeId> ans;
+  if (edge_color_map_.find(edge_color) != edge_color_map_.end()) {
+    return edge_color_map_.at(edge_color);
   }
   return ans;
 }
