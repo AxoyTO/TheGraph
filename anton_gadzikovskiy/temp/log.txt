@@ -1,0 +1,18 @@
+2021.12.16 08:46:11: Graph 0, Generation Started
+2021.12.16 08:46:11: Graph 0, Generation Finished {
+  depth: 3,
+  vertices: {amount: 33, distribution: [1, 4, 11, 17]},
+  edges: {amount: 54, distribution: {gray: 32, green: 5, yellow: 15, red: 2}}
+}
+2021.12.16 08:46:11: Graph 1, Generation Started
+2021.12.16 08:46:11: Graph 1, Generation Finished {
+  depth: 3,
+  vertices: {amount: 29, distribution: [1, 4, 12, 12]},
+  edges: {amount: 49, distribution: {gray: 28, green: 4, yellow: 14, red: 3}}
+}
+2021.12.16 08:46:11: Graph 2, Generation Started
+2021.12.16 08:46:11: Graph 2, Generation Finished {
+  depth: 3,
+  vertices: {amount: 29, distribution: [1, 4, 9, 15]},
+  edges: {amount: 43, distribution: {gray: 28, green: 2, yellow: 11, red: 2}}
+}
