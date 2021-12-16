@@ -54,8 +54,7 @@ class Graph {
                     const VertexId& to_vertex_id) const;
 
   void connect_vertices(const VertexId& from_vertex_id,
-                        const VertexId& to_vertex_id,
-                        bool initialization);
+                        const VertexId& to_vertex_id);
 
   const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
   const std::unordered_map<VertexId, Vertex>& get_vertices() const {

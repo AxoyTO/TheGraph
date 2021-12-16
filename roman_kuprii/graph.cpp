@@ -16,6 +16,26 @@ bool is_edge_id_included(
   return false;
 }
 
+uni_cpp_practice::Edge::Color calculate_edge_color(
+    const int depth_diff,
+    const uni_cpp_practice::VertexId& from_vertex_id,
+    const uni_cpp_practice::VertexId& to_vertex_id) {
+  if (depth_diff <= 0)
+    return uni_cpp_practice::Edge::Color::Gray;
+  else if (from_vertex_id == to_vertex_id)
+    return uni_cpp_practice::Edge::Color::Green;
+  else if (depth_diff == 0)
+    return uni_cpp_practice::Edge::Color::Blue;
+  else if (depth_diff == 1)
+    return uni_cpp_practice::Edge::Color::Yellow;
+  else if (depth_diff == 2)
+    return uni_cpp_practice::Edge::Color::Red;
+  else
+    return uni_cpp_practice::Edge::Color::Gray;
+
+  throw std::logic_error("Cant calculate color");
+}
+
 using std::min;
 using std::to_string;
 using std::vector;
@@ -32,8 +52,8 @@ void Vertex::add_edge_id(const EdgeId& _id) {
 VertexId Graph::add_vertex() {
   const VertexId new_vertex_id = get_next_vertex_id();
   vertices_.emplace(new_vertex_id, new_vertex_id);
-  if (!depth_map_.size())
-    depth_map_.push_back(std::vector<VertexId>({new_vertex_id}));
+  if (depth_map_.empty())
+    depth_map_.push_back({new_vertex_id});
   else
     depth_map_[0].push_back(new_vertex_id);
   return new_vertex_id;
@@ -66,15 +86,22 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
 }
 
 void Graph::connect_vertices(const VertexId& from_vertex_id,
-                             const VertexId& to_vertex_id,
-                             bool initialization) {
+                             const VertexId& to_vertex_id) {
   assert(is_vertex_exist(from_vertex_id));
   assert(is_vertex_exist(to_vertex_id));
   assert(!is_connected(from_vertex_id, to_vertex_id));
 
-  if (initialization) {
-    depth_map_[0].pop_back();
+  const int diff =
+      vertices_.at(to_vertex_id).depth - vertices_.at(from_vertex_id).depth;
+  const Edge::Color color =
+      calculate_edge_color(diff, from_vertex_id, to_vertex_id);
 
+  if (color == Edge::Color::Gray) {
+    for (auto it = depth_map_[0].begin(); it != depth_map_[0].end(); it++)
+      if (*it == to_vertex_id) {
+        depth_map_[0].erase(it);
+        break;
+      }
     const int new_depth = vertices_.at(from_vertex_id).depth + 1;
     vertices_.at(to_vertex_id).depth = new_depth;
 
@@ -83,25 +110,6 @@ void Graph::connect_vertices(const VertexId& from_vertex_id,
     else
       depth_map_[new_depth].push_back(to_vertex_id);
   }
-
-  const int diff =
-      vertices_.at(to_vertex_id).depth - vertices_.at(from_vertex_id).depth;
-
-  const Edge::Color color = [&initialization, &diff, &from_vertex_id,
-                             &to_vertex_id]() {
-    if (initialization)
-      return Edge::Color::Gray;
-    else if (from_vertex_id == to_vertex_id)
-      return Edge::Color::Green;
-    else if (diff == 0)
-      return Edge::Color::Blue;
-    else if (diff == 1)
-      return Edge::Color::Yellow;
-    else if (diff == 2)
-      return Edge::Color::Red;
-    else
-      return Edge::Color::Gray;
-  }();
 
   const auto new_edge_id = get_next_edge_id();
 

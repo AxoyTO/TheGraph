@@ -55,7 +55,7 @@ void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
         if (get_real_random_number() < BLUE_TRASHOULD) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(adjacent_vertices[0],
-                                      adjacent_vertices[1], false);
+                                      adjacent_vertices[1]);
         }
       } else {
         adjacent_vertices[0] = adjacent_vertices[1];
@@ -63,7 +63,7 @@ void add_blue_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
         if (get_real_random_number() < BLUE_TRASHOULD) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(adjacent_vertices[0],
-                                      adjacent_vertices[1], false);
+                                      adjacent_vertices[1]);
         }
       }
     }
@@ -74,7 +74,7 @@ void add_green_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
   for (const auto& [vertex_id, vertex] : work_graph.get_vertices())
     if (get_real_random_number() < GREEN_TRASHOULD) {
       std::lock_guard lock(add_edge_mutex);
-      work_graph.connect_vertices(vertex_id, vertex_id, false);
+      work_graph.connect_vertices(vertex_id, vertex_id);
     }
 }
 
@@ -90,8 +90,7 @@ void add_red_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(start_vertex_id,
                                       red_vertices_ids[get_int_random_number(
-                                          red_vertices_ids.size() - 1)],
-                                      false);
+                                          red_vertices_ids.size() - 1)]);
         }
       }
     }
@@ -123,8 +122,7 @@ void add_yellow_edges(Graph& work_graph, std::mutex& add_edge_mutex) {
           std::lock_guard lock(add_edge_mutex);
           work_graph.connect_vertices(start_vertex_id,
                                       yellow_vertices_ids[get_int_random_number(
-                                          yellow_vertices_ids.size() - 1)],
-                                      false);
+                                          yellow_vertices_ids.size() - 1)]);
         }
       }
     }
@@ -164,7 +162,7 @@ void GraphGenerator::generate_gray_branch(Graph& work_graph,
                                   &parent_vertex_id]() {
     const std::lock_guard lock(graph_mutex);
     const auto new_vertex_id = work_graph.add_vertex();
-    work_graph.connect_vertices(parent_vertex_id, new_vertex_id, true);
+    work_graph.connect_vertices(parent_vertex_id, new_vertex_id);
     return new_vertex_id;
   }();
 
