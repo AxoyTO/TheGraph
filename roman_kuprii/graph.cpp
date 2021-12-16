@@ -1,4 +1,5 @@
 #include <cassert>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,8 +18,8 @@ bool is_edge_id_included(
 }
 
 uni_cpp_practice::Edge::Color calculate_edge_color(
-    const int from_vertex_depth,
-    const int to_vertex_depth,
+    int from_vertex_depth,
+    int to_vertex_depth,
     const uni_cpp_practice::VertexId& from_vertex_id,
     const uni_cpp_practice::VertexId& to_vertex_id) {
   const int depth_diff = to_vertex_depth - from_vertex_depth;
