@@ -21,8 +21,7 @@ std::map<VertexId, int> GraphTraverser::get_updated_depths(
     used.insert(first_vertex_id);
   } else {
     int max_correct_depth = start_depth - 1;
-    // copy is needed since object is always changing
-    const auto vertices_at_max_correct_depth =
+    const auto& vertices_at_max_correct_depth =
         known_depths.at(max_correct_depth);
     for (const auto& vertex_id : vertices_at_max_correct_depth) {
       depths.emplace(vertex_id, max_correct_depth);
