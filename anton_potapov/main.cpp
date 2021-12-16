@@ -122,7 +122,7 @@ int main() {
     }
     logger.log(generation_finished_string(i, graph));
 
-    auto graph_printer = GraphPrinter(graph);
+    const auto graph_printer = GraphPrinter(graph);
     const auto graph_json = graph_printer.print();
     write_to_file(graph_json,
                   std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
