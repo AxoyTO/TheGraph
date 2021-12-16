@@ -49,7 +49,7 @@ class Graph {
   const Edge& get_edge(const EdgeId& id) const;
   Edge& get_edge(const EdgeId& id);
 
-  int max_depth();
+  int depth();
 
   const std::map<VertexId, Vertex>& vertices();
 

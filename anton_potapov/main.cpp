@@ -117,8 +117,8 @@ int main() {
   for (int i = 0; i < graphs_count; i++) {
     logger.log(generation_started_string(i));
     auto graph = generator.generate_graph();
-    if (graph.max_depth() < depth) {
-      logger.log(generation_max_depth_warning(i, graph.max_depth(), depth));
+    if (graph.depth() < depth) {
+      logger.log(generation_max_depth_warning(i, graph.depth(), depth));
     }
     logger.log(generation_finished_string(i, graph));
 

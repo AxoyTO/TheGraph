@@ -24,7 +24,7 @@ static std::string print_edge_color(const EdgeColor& color) {
 
 std::string GraphPrinter::print() const {
   std::stringstream json_stringstream;
-  json_stringstream << "{\"depth\":" << graph_.max_depth() << ",";
+  json_stringstream << "{\"depth\":" << graph_.depth() << ",";
   json_stringstream << "\"vertices\":[";
   const auto& vertices = graph_.vertices();
   for (auto it = vertices.begin(); it != vertices.end(); ++it) {
@@ -48,16 +48,16 @@ std::string GraphPrinter::print_graph_description() const {
   std::stringstream graph_description_stringstream;
   graph_description_stringstream << "{" << std::endl;
   graph_description_stringstream << "\t"
-                                 << "depth: " << graph_.max_depth() << ","
+                                 << "depth: " << graph_.depth() << ","
                                  << std::endl;
   graph_description_stringstream
       << "\t"
       << "vertices: {amount: " << graph_.vertices().size()
       << ", distribution: [";
-  for (int depth = 0; depth <= graph_.max_depth(); ++depth) {
+  for (int depth = 0; depth <= graph_.depth(); ++depth) {
     graph_description_stringstream
         << graph_.get_vertices_at_depth(depth).size();
-    if (depth != graph_.max_depth()) {
+    if (depth != graph_.depth()) {
       graph_description_stringstream << ", ";
     }
   }

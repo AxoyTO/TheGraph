@@ -110,7 +110,8 @@ EdgeId Graph::add_edge(const VertexId& vertex1_id,
   return new_edge_id;
 }
 
-const std::set<EdgeId>& Graph::connected_edges(const VertexId& vertex_id) const {
+const std::set<EdgeId>& Graph::connected_edges(
+    const VertexId& vertex_id) const {
   return vertices_.at(vertex_id).connected_edges();
 }
 
@@ -200,7 +201,7 @@ Vertex& Graph::get_vertex(const VertexId& id) {
   return vertices_.at(id);
 }
 
-int Graph::max_depth() {
+int Graph::depth() {
   update_vertices_depth();
   return vertices_at_depth_.size() - 1;
 }
