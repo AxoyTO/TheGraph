@@ -1,10 +1,10 @@
 #include "graph_generator.hpp"
 
-#include <mutex>
 #include <atomic>
 #include <functional>
 #include <iostream>
 #include <list>
+#include <mutex>
 #include <random>
 #include <thread>
 
@@ -12,8 +12,8 @@ namespace {
 
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
-using uni_cource_cpp::VertexId;
 using uni_cource_cpp::Params;
+using uni_cource_cpp::VertexId;
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
@@ -28,7 +28,11 @@ bool to_be_or_not_to_be(int proba) {
   return (int)(mersenne() % 100 + 1) <= proba;
 }
 
-void generate_gray_branch(Graph& graph, int depth, const Params& params, const VertexId& vertex_id, std::mutex& mutex) {
+void generate_gray_branch(Graph& graph,
+                          int depth,
+                          const Params& params,
+                          const VertexId& vertex_id,
+                          std::mutex& mutex) {
   if (depth == params.depth) {
     return;
   }
@@ -51,12 +55,12 @@ void generate_gray_branch(Graph& graph, int depth, const Params& params, const V
 }
 
 void generate_gray_edges(const Params& params, Graph& graph) {
-  
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
   std::mutex graph_mutex;
 
-  const VertexId first_vertex_id = graph.add_vertex();;
+  const VertexId first_vertex_id = graph.add_vertex();
+  ;
   std::atomic<int> done_jobs_number = 0;
   for (int i = 0; i < params.new_vertices_count; ++i) {
     jobs.push_back(
@@ -91,7 +95,8 @@ void generate_gray_edges(const Params& params, Graph& graph) {
     }
   };
 
-  const auto threads_count = std::min(MAX_THREADS_COUNT, params.new_vertices_count);
+  const auto threads_count =
+      std::min(MAX_THREADS_COUNT, params.new_vertices_count);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
