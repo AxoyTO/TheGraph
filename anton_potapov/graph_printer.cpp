@@ -10,7 +10,7 @@ std::string GraphPrinter::print() const {
   std::stringstream json_stringstream;
   json_stringstream << "{\"depth\":" << graph_.max_depth() << ",";
   json_stringstream << "\"vertices\":[";
-  const auto vertices = graph_.vertices();
+  const auto& vertices = graph_.vertices();
   for (auto it = vertices.begin(); it != vertices.end(); ++it) {
     json_stringstream << print_vertex(it->second);
     if (std::next(it) != graph_.vertices().end()) {
