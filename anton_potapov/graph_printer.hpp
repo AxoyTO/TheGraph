@@ -11,7 +11,7 @@ class GraphPrinter {
   std::string print_graph_description() const;
 
  private:
-  Graph& graph;
+  Graph& graph_;
   std::string print_vertex(const Vertex& vertex) const;
   std::string print_edge(const Edge& Edge) const;
 };

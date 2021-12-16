@@ -4,23 +4,23 @@
 #include "graph_printer.hpp"
 
 namespace uni_cource_cpp {
-GraphPrinter::GraphPrinter(Graph& input_graph) : graph(input_graph) {}
+GraphPrinter::GraphPrinter(Graph& input_graph) : graph_(input_graph) {}
 
 std::string GraphPrinter::print() const {
   std::stringstream json_stringstream;
-  json_stringstream << "{\"depth\":" << graph.max_depth() << ",";
+  json_stringstream << "{\"depth\":" << graph_.max_depth() << ",";
   json_stringstream << "\"vertices\":[";
-  const auto vertices = graph.vertices();
+  const auto vertices = graph_.vertices();
   for (auto it = vertices.begin(); it != vertices.end(); ++it) {
     json_stringstream << print_vertex(it->second);
-    if (std::next(it) != graph.vertices().end()) {
+    if (std::next(it) != graph_.vertices().end()) {
       json_stringstream << ",";
     }
   }
   json_stringstream << "],\"edges\":[";
-  for (auto it = graph.edges().begin(); it != graph.edges().end(); ++it) {
+  for (auto it = graph_.edges().begin(); it != graph_.edges().end(); ++it) {
     json_stringstream << print_edge(it->second);
-    if (std::next(it) != graph.edges().end()) {
+    if (std::next(it) != graph_.edges().end()) {
       json_stringstream << ",";
     }
   }
@@ -32,30 +32,32 @@ std::string GraphPrinter::print_graph_description() const {
   std::stringstream graph_description_stringstream;
   graph_description_stringstream << "{" << std::endl;
   graph_description_stringstream << "\t"
-                                 << "depth: " << graph.max_depth() << ","
+                                 << "depth: " << graph_.max_depth() << ","
                                  << std::endl;
   graph_description_stringstream
       << "\t"
-      << "vertices: {amount: " << graph.vertices().size()
+      << "vertices: {amount: " << graph_.vertices().size()
       << ", distribution: [";
-  for (int depth = 0; depth <= graph.max_depth(); ++depth) {
-    graph_description_stringstream << graph.get_vertices_at_depth(depth).size();
-    if (depth != graph.max_depth()) {
+  for (int depth = 0; depth <= graph_.max_depth(); ++depth) {
+    graph_description_stringstream
+        << graph_.get_vertices_at_depth(depth).size();
+    if (depth != graph_.max_depth()) {
       graph_description_stringstream << ", ";
     }
   }
   graph_description_stringstream << "]}," << std::endl;
   graph_description_stringstream
       << "\t"
-      << "edges: {amount: " << graph.edges().size() << ", distribution: {"
-      << "gray: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Gray)
+      << "edges: {amount: " << graph_.edges().size() << ", distribution: {"
+      << "gray: " << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Gray)
       << ", green: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Green)
+      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Green)
       << ", blue: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Blue)
+      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Blue)
       << ", yellow: "
-      << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Yellow)
-      << ", red: " << graph.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Red);
+      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Yellow)
+      << ", red: "
+      << graph_.edge_with_color_cnt(uni_cource_cpp::EdgeColor::Red);
   graph_description_stringstream << "}}" << std::endl;
   graph_description_stringstream << "}" << std::endl;
   return graph_description_stringstream.str();
