@@ -1,10 +1,5 @@
 #include "graph_printer.hpp"
-#include <algorithm>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <string>
-#include <utility>
 #include <vector>
 #include "graph.hpp"
 

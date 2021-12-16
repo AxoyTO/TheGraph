@@ -1,10 +1,11 @@
 #include "logger.hpp"
+#include <cassert>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <string>
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_printer.hpp"
 
@@ -13,18 +14,7 @@ void Logger::log(const std::string& string) {
   std::string log_info = getCurrentDateTime();
   log_info += ": " + string;
   std::cout << log_info;
-  if (file_stream) {
-    *file_stream << log_info;
-  }
-}
-
-void Logger::setFile(std::optional<std::string> file_path) {
-  if (file_stream) {
-    file_stream->close();
-  }
-  if (file_path) {
-    file_stream = std::ofstream(file_path.value());
-  }
+  file_stream_ << log_info;
 }
 
 Logger& Logger::getLogger() {
@@ -33,10 +23,15 @@ Logger& Logger::getLogger() {
 }
 
 Logger::~Logger() {
-  if (file_stream) {
-    (*file_stream).close();
+  file_stream_.close();
+}
+
+Logger::Logger() : file_stream_(config::getLogFilePath()) {
+  if (!file_stream_.is_open()) {
+    throw "Error during log file opening";
   }
 }
+
 std::string Logger::getCurrentDateTime() {
   const auto date_time = std::chrono::system_clock::now();
   const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);

@@ -1,12 +1,20 @@
 #include "graph_generator.hpp"
-#include <algorithm>
-#include <cstdlib>
 #include <iostream>
 #include <random>
-#include <string>
-#include <utility>
 #include <vector>
 #include "graph.hpp"
+
+namespace {
+constexpr float GREEN_PROBABILITY = 0.1, BLUE_PROBABILITY = 0.25,
+                RED_PROBABILITY = 0.33;
+float getGreyProbability(float step, int depth) {
+  return 1.0 - step * depth;
+}
+float getYellowProbability(const uni_course_cpp::Graph& graph,
+                           const uni_course_cpp::VertexId& vertex_id) {
+  return 1.0 * graph.vertexDepth(vertex_id) / (graph.depth() - 1);
+}
+}  // namespace
 
 namespace uni_course_cpp {
 

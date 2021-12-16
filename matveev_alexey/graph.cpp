@@ -2,12 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace uni_course_cpp {
@@ -129,5 +124,12 @@ const std::vector<VertexId>& Graph::vertexIdsAtLayer(int depth) const {
 int Graph::vertexDepth(const VertexId& vertex_id) const {
   assert(hasVertex(vertex_id) && "Vertex id is out of range");
   return vertexes_depths_.at(vertex_id);
+}
+const std::vector<EdgeId>& Graph::colorEdges(const Edge::Colors& color) const {
+  if (color_list_.find(color) == color_list_.end()) {
+    static std::vector<EdgeId> empty_vector;
+    return empty_vector;
+  }
+  return color_list_.at(color);
 }
 }  // namespace uni_course_cpp

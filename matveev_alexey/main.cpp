@@ -1,19 +1,14 @@
-#include <algorithm>
-#include <cstdlib>
+//#include <algorithm>
+//#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <utility>
+//#include <utility>
 #include <vector>
 #include "graph.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
-
-/*using uni_course_cpp::Graph;
-using uni_course_cpp::GraphGenerator;
-using uni_course_cpp::GraphPrinter;
-using uni_course_cpp::Logger;*/
 
 namespace {
 int handle_depth_input() {
@@ -55,7 +50,7 @@ int handleNewGraphsCountInput() {
 
 uni_course_cpp::Logger& prepareLogger(std::string file_path) {
   uni_course_cpp::Logger& log = uni_course_cpp::Logger::getLogger();
-  log.setFile(file_path);
+  // log.setFile(file_path);
   return log;
 }
 
@@ -69,7 +64,7 @@ std::string genStartedString(int i) {
   return "Graph " + std::to_string(i) + ", Generation Started\n";
 }
 
-std::string genFinishedString(int i, uni_course_cpp::Graph& graph) {
+std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
   std::string string =
       "Graph " + std::to_string(i) + ", Generation Finished {\n";
   int depth = graph.depth();
@@ -82,14 +77,13 @@ std::string genFinishedString(int i, uni_course_cpp::Graph& graph) {
   string.pop_back();
   string += "],\n";
   string += " edges: " + std::to_string(graph.edges().size()) + ", {";
-  for (const auto& color : uni_course_cpp::Edge::all_colors) {
+  for (const auto& color : uni_course_cpp::Edge::ALL_COLORS) {
     string += uni_course_cpp::GraphPrinter::colorToString(color) + ": ";
     string += std::to_string(graph.colorEdges(color).size()) + ", ";
   }
   string.pop_back();
   string.pop_back();
   string += "},\n}\n";
-  std::cout << "end of gen" << std::endl;
   return string;
 }
 }  // namespace
@@ -106,7 +100,7 @@ int main() {
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(genStartedString(i));
-    auto graph = generator.generate();
+    const auto graph = generator.generate();
     logger.log(genFinishedString(i, graph));
 
     const auto graph_printer = uni_course_cpp::GraphPrinter(graph);
