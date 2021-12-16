@@ -94,7 +94,6 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
 }  // namespace
 namespace uni_cource_cpp {
 namespace graph_printing {
-// std::string print_graph_description(const Graph& graph);
 std::string print_graph(const Graph& graph) {
   using std::ostringstream;
   ostringstream out_message;
