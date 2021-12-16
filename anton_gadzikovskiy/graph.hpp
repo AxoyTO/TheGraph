@@ -83,9 +83,7 @@ class Graph {
   const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
 
   const std::vector<EdgeId>& get_colored_edge_ids(
-      const Edge::Color& color) const {
-    return colored_edge_ids_.at(color);
-  }
+      const Edge::Color& color) const;
 
   const Depth depth() const { return vertices_on_depth_.size() - 1; }
 

@@ -45,6 +45,15 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   }
 }
 
+const std::vector<Graph::EdgeId>& Graph::get_colored_edge_ids(
+    const Edge::Color& color) const {
+  if (colored_edge_ids_.find(color) == colored_edge_ids_.end()) {
+    static const std::vector<Graph::EdgeId> empty_result;
+    return empty_result;
+  }
+  return colored_edge_ids_.at(color);
+}
+
 bool Graph::is_connected(const VertexId& from_vertex_id,
                          const VertexId& to_vertex_id) const {
   if (from_vertex_id != to_vertex_id) {

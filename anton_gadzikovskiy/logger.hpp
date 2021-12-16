@@ -20,12 +20,7 @@ class Logger {
 
  private:
   std::ofstream file_stream_;
-  Logger() : file_stream_(config::logger_file_path()) {
-    if (!file_stream_.is_open()) {
-      throw std::runtime_error("...");
-    }
-    file_stream_.clear();
-  }
+  Logger();
 
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
@@ -34,4 +29,3 @@ class Logger {
 };
 
 }  // namespace uni_cource_cpp
-   // namespace uni_cource_cpp

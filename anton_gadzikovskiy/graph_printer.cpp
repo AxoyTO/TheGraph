@@ -74,7 +74,7 @@ string graph_printing::print_graph_description(const Graph& graph) {
   graph_description = graph_description + "  edges: {amount: " +
                       std::to_string(graph.get_edges_amount()) +
                       ", distribution: {";
-  std::array<uni_cource_cpp::Graph::Edge::Color, 4> colors = {
+  const std::array<uni_cource_cpp::Graph::Edge::Color, 4> colors = {
       uni_cource_cpp::Graph::Edge::Color::Gray,
       uni_cource_cpp::Graph::Edge::Color::Green,
       uni_cource_cpp::Graph::Edge::Color::Yellow,
