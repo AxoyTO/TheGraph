@@ -117,11 +117,11 @@ const std::set<EdgeId>& Graph::connected_edges(
 
 const std::set<EdgeId>& Graph::edge_ids_with_color(
     const EdgeColor& edge_color) const {
-  static std::set<EdgeId> ans;
+  static std::set<EdgeId> result;
   if (edge_color_map_.find(edge_color) != edge_color_map_.end()) {
     return edge_color_map_.at(edge_color);
   }
-  return ans;
+  return result;
 }
 
 VertexId Graph::get_next_vertex_id() {
