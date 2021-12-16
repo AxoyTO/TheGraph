@@ -1,7 +1,7 @@
 #include "graph_printer.hpp"
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 #include "graph.hpp"
 
 namespace uni_course_cpp {
