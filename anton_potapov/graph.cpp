@@ -147,11 +147,11 @@ EdgeId Graph::get_next_edge_id() {
 
 bool Graph::new_edge_color_is_correct(const VertexId& vertex1_id,
                                       const VertexId& vertex2_id,
-                                      const EdgeColor& color) const {
+                                      const EdgeColor& color) {
   switch (color) {
     case EdgeColor::Gray:
-      return get_vertex(vertex1_id).connected_edges().empty() ||
-             get_vertex(vertex2_id).connected_edges().empty();
+      return connected_edges(vertex1_id).empty() ||
+             connected_edges(vertex2_id).empty();
     case EdgeColor::Green:
       return vertex1_id == vertex2_id;
     case EdgeColor::Blue:

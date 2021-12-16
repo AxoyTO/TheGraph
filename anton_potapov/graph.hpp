@@ -44,7 +44,7 @@ class Graph {
  public:
   Vertex& get_vertex(const VertexId& id);
 
-  const Edge& Graph::get_edge(const EdgeId& id) const;
+  const Edge& get_edge(const EdgeId& id) const;
   Edge& get_edge(const EdgeId& id);
 
   int max_depth();
@@ -88,7 +88,7 @@ class Graph {
 
   bool new_edge_color_is_correct(const VertexId& vertex1_id,
                                  const VertexId& vertex2_id,
-                                 const EdgeColor& color) const;
+                                 const EdgeColor& color);
 
   void update_vertices_depth();
 };
