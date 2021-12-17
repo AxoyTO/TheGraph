@@ -14,7 +14,10 @@
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
+#include "graph_path.hpp"
 #include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 std::string get_current_date_time() {
@@ -69,6 +72,23 @@ const std::string logger_finish_string(int graph_number,
 
   string << "}\n\n";
 
+  return string.str();
+}
+
+const std::string traversal_start_string(int graph_number) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Traversal Started\n";
+  return string.str();
+}
+
+const std::string traversal_finish_string(
+    int graph_number,
+    std::vector<uni_cpp_practice::GraphPath> paths) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Traversal Finished, Paths: [\n";
+  string << uni_cpp_practice::GraphPrinter::print_paths(paths) << "\n]\n";
   return string.str();
 }
 
@@ -166,6 +186,21 @@ std::vector<uni_cpp_practice::Graph> generate_graphs(
   return graphs;
 }
 
+void traverse_graphs(const std::vector<uni_cpp_practice::Graph>& graphs) {
+  auto traversal_controller =
+      uni_cpp_practice::GraphTraversalController(graphs);
+
+  traversal_controller.traverse(
+      [](int index) {
+        auto& logger = prepare_logger();
+        logger.log(traversal_start_string(index + 1));
+      },
+      [](int index, std::vector<uni_cpp_practice::GraphPath> paths) {
+        auto& logger = prepare_logger();
+        logger.log(traversal_finish_string(index + 1, paths));
+      });
+}
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
@@ -176,6 +211,8 @@ int main() {
                                                         new_vertices_num);
 
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
+
+  traverse_graphs(graphs);
 
   return 0;
 }
