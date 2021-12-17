@@ -147,7 +147,7 @@ void GraphGenerator::generate_gray_edges(Graph& graph,
   }
   std::atomic<bool> should_terminate = false;
   mutex jobs_mutex;
-  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       if (should_terminate) {
         return;
