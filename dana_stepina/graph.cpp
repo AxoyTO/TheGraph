@@ -82,7 +82,6 @@ Graph::Edge::Color Graph::get_edge_color(const Vertex& from_vertex,
 }
 
 void Graph::set_vertex_depth(const VertexId& vertex_id, Depth depth) {
-  const Vertex& vertex = get_vertex(vertex_id);
   vertices_[vertex_id].depth = depth;
 
   while (depth_map_.size() <= depth) {

@@ -12,7 +12,7 @@ using Probability = int;
 
 constexpr int MAX_PROBABILITY = 100, GREEN_PROBABILITY = 10,
               RED_PROBABILITY = 33;
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+constexpr int MAX_THREADS_COUNT = 4;
 
 namespace {
 using Graph = uni_cource_cpp::Graph;
@@ -111,10 +111,11 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
           finished_jobs_num++;
         });
 
-  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       if (should_terminate)
         return;
+
       const auto job_optional = [&jobs,
                                  &jobs_mutex]() -> std::optional<JobCallback> {
         const std::lock_guard lock(jobs_mutex);
@@ -125,6 +126,7 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
         }
         return std::nullopt;
       }();
+
       if (job_optional.has_value()) {
         const auto& job = job_optional.value();
         job();
