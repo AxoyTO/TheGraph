@@ -185,11 +185,11 @@ Graph GraphGenerator::generate() const {
   generate_grey_edges(graph);
 
   std::thread green_thread(
-      [&graph, &mutex, this]() { generate_green_edges(graph, mutex); });
+      [&graph, &mutex]() { generate_green_edges(graph, mutex); });
   std::thread yellow_thread(
-      [&graph, &mutex, this]() { generate_yellow_edges(graph, mutex); });
+      [&graph, &mutex]() { generate_yellow_edges(graph, mutex); });
   std::thread red_thread(
-      [&graph, &mutex, this]() { generate_red_edges(graph, mutex); });
+      [&graph, &mutex]() { generate_red_edges(graph, mutex); });
 
   green_thread.join();
   yellow_thread.join();

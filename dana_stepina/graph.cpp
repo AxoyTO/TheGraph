@@ -58,10 +58,8 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   if (from_vertex_id != to_vertex_id)
     to_vertex.add_edge_id(new_edge.id);
 
-  if (new_edge.color == Edge::Color::Grey) {
-    to_vertex.depth = from_vertex.depth + 1;
-    set_vertex_depth(to_vertex_id, to_vertex.depth);
-  }
+  if (new_edge.color == Edge::Color::Grey)
+    set_vertex_depth(to_vertex_id, from_vertex.depth + 1);
 
   edges_color_map_[edge_color].push_back(new_edge.id);
 }
