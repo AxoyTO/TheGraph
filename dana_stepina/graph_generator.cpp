@@ -12,7 +12,7 @@ using Probability = int;
 
 constexpr int MAX_PROBABILITY = 100, GREEN_PROBABILITY = 10,
               RED_PROBABILITY = 33;
-constexpr int MAX_THREADS_COUNT = 4;
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
 namespace {
 using Graph = uni_cource_cpp::Graph;
@@ -36,17 +36,6 @@ VertexId choose_random_vertex_id(const std::vector<VertexId>& vertex_ids) {
   return vertex_ids[distribution(generator)];
 }
 
-void generate_green_edges(Graph& graph, std::mutex& mutex) {
-  const auto& depth_map = graph.get_depth_map();
-
-  for (const auto& vertex_ids : depth_map)
-    for (const auto& vertex_id : vertex_ids)
-      if (is_lucky(GREEN_PROBABILITY)) {
-        const std::lock_guard lock(mutex);
-        graph.add_edge(vertex_id, vertex_id);
-      }
-}
-
 std::vector<VertexId> get_unconnected_vertex_ids(
     const VertexId& from_vertex_id,
     const std::vector<VertexId>& vertex_ids,
@@ -56,6 +45,17 @@ std::vector<VertexId> get_unconnected_vertex_ids(
     if (!graph.is_connected(from_vertex_id, vertex_id))
       unconnected_vertex_ids.push_back(vertex_id);
   return unconnected_vertex_ids;
+}
+
+void generate_green_edges(Graph& graph, std::mutex& mutex) {
+  const auto& depth_map = graph.get_depth_map();
+
+  for (const auto& vertex_ids : depth_map)
+    for (const auto& vertex_id : vertex_ids)
+      if (is_lucky(GREEN_PROBABILITY)) {
+        const std::lock_guard lock(mutex);
+        graph.add_edge(vertex_id, vertex_id);
+      }
 }
 
 void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
