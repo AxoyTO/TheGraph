@@ -124,6 +124,26 @@ std::string print_graph(const Graph& graph) {
   return res;
 }
 
+std::string print_path(const GraphTraverser::Path& path) {
+  std::stringstream res;
+
+  res << "{vertices: [";
+
+  for (const auto& vertex_id : path.vertex_ids) {
+    res << vertex_id;
+    res << ", ";
+  }
+  if (path.vertex_ids.size()) {
+    res.seekp(-2, res.cur);
+  }
+
+  res << "], distance: ";
+  res << path.distance();
+  res << "}";
+
+  return res.str();
+}
+
 }  // namespace graph_printing
 
 }  // namespace uni_course_cpp
