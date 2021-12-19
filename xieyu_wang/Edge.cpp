@@ -1,5 +1,6 @@
 #include "Edge.hpp"
 #include <stdexcept>
+namespace uni_cpp_practice {
 Edge::Edge(int id, int fromVertexId, int toVertexId, const Color color)
     : id(id),
       fromVertexId(fromVertexId),
@@ -29,3 +30,5 @@ std::string edgeColorToString(const Edge::Color& color) {
   }
   throw std::runtime_error("Failed to convert the color");
 }
+
+}  // namespace uni_cpp_practice
