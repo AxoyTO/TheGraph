@@ -1,4 +1,5 @@
 #include "graph_traversal_controller.hpp"
+#include <algorithm>
 #include <cassert>
 
 namespace {
@@ -43,7 +44,7 @@ GraphTraversalController::Worker::~Worker() {
 GraphTraversalController::GraphTraversalController(
     const std::vector<Graph>& graphs)
     : graphs_(graphs) {
-  const auto count = std::min(MAX_WORKERS_COUNT, graphs_.size());
+  const auto count = std::min(MAX_WORKERS_COUNT, (int)graphs_.size());
   for (int i = 0; i < count; ++i) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
@@ -65,21 +66,21 @@ void GraphTraversalController::traverse(
   std::atomic<int> finished_jobs_count = 0;
 
   for (int i = 0; i < graphs_.size(); i++) {
-    const auto& traversed_graph = graphs_[i];
+    const auto& graph = graphs_[i];
     jobs_.emplace_back([&mutex_start_callback_ = mutex_start_callback_,
                         &mutex_finish_callback_ = mutex_finish_callback_,
-                        &traversal_started_callback, &traversal_finished_callback, i,
-                        &finished_jobs_count = finished_jobs_count,
-                        &traversed_graph]() {
+                        &traversal_started_callback,
+                        &traversal_finished_callback, i,
+                        &finished_jobs_count = finished_jobs_count, &graph]() {
       {
         const std::lock_guard lock(mutex_start_callback_);
-        traversal_started_callback(i, traversed_graph);
+        traversal_started_callback(i, graph);
       }
-      const auto graph_traverser = GraphTraverser(traversed_graph);
+      const auto graph_traverser = GraphTraverser(graph);
       const auto paths = graph_traverser.find_all_paths();
       {
         const std::lock_guard lock(mutex_finish_callback_);
-        traversal_finished_callback(i, traversed_graph, paths);
+        traversal_finished_callback(i, graph, paths);
       }
       finished_jobs_count++;
     });

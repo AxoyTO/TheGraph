@@ -55,6 +55,8 @@ class Graph {
   const int get_depth() const;
   const int get_edges_count_by_color(const Edge::Color color) const;
   std::vector<std::pair<Edge::Color, int>> get_color_edge_count_pairs() const;
+  const std::vector<VertexId> get_linked_vertex_ids(
+      const VertexId& vertex_id) const;
 
  private:
   std::vector<Edge> edges_;

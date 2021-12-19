@@ -10,17 +10,19 @@ class GraphTraverser {
   using Distance = int;
 
   struct GraphPath {
-    Distance distance() const {return vertex_ids.size() - 1}
+    GraphPath(std::vector<VertexId> _vertex_ids) : vertex_ids(_vertex_ids) {}
+
+    Distance distance() const { return vertex_ids.size() - 1; }
 
     std::vector<VertexId> vertex_ids;
   };
 
   GraphTraverser(const Graph& graph) : graph_(graph) {}
 
-  GraphPath find_shortest_path(VertexId source_vertex_id,
-                               VertexId destination_vertex_id) const;
+  GraphPath find_shortest_path(const VertexId& source_vertex_id,
+                               const VertexId& destination_vertex_id) const;
   std::vector<GraphPath> find_all_paths() const;
-  
+
  private:
   const Graph& graph_;
 };

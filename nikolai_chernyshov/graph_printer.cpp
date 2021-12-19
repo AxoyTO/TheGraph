@@ -124,7 +124,7 @@ std::string print_graph(const Graph& graph) {
   return res;
 }
 
-std::string print_path(const GraphTraverser::Path& path) {
+std::string print_path(const GraphTraverser::GraphPath& path) {
   std::stringstream res;
 
   res << "{vertices: [";

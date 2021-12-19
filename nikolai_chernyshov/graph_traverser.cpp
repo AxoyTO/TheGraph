@@ -1,56 +1,135 @@
 #include "graph_traverser.hpp"
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <climits>
+#include <list>
+#include <queue>
+#include <thread>
 
 namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 constexpr int MAX_DISTANCE = INT_MAX;
+constexpr int UNDEFINED_ID = -1;
 }  // namespace
 
 namespace uni_course_cpp {
-  
-GraphPath GraphTraverser::find_shortest_path(const VertexId& source_vertex_id,
-                              const VertexId& destination_vertex_id) const {
+
+GraphTraverser::GraphPath GraphTraverser::find_shortest_path(
+    const VertexId& source_vertex_id,
+    const VertexId& destination_vertex_id) const {
   assert(graph_.has_vertex(source_vertex_id));
   assert(graph_.has_vertex(destination_vertex_id));
 
-  const int vertices_count = graph.get_vertices().size()
+  const int vertices_count = graph_.get_vertices().size();
+
+  std::vector<bool> marked(vertices_count, false);
+  marked[source_vertex_id] = true;
+
   std::vector<Distance> distances(vertices_count, MAX_DISTANCE);
   distances[source_vertex_id] = 0;
 
-  VertexId linked_vertex_id;
+  std::queue<VertexId> queue;
+  queue.push(source_vertex_id);
 
-  std::vector<bool> marked(vertices_count, false);
-  std::vector<VertexId> vertices_to_check;
+  std::vector<VertexId> previous_ids(vertices_count, UNDEFINED_ID);
 
-  VertexId closest_vertex_id = source_vertex_id;
+  while (!queue.empty()) {
+    const auto current_vertex_id = queue.front();
+    queue.pop();
 
-  // Distance min_distance_to_unmarked = 0;
-  while (std::find(marked.begin(), marked.end(), false) != marked.end()) {
-    for (const auto& edge_id : graph.get_vertex(closest_vertex_id).get_edge_ids()) {
-      const auto& edge = graph.get_edge(edge_id);
-      if (edge.color != Edge::Color::Green) {
-        if (edge.vertex1_id != closest_vertex_id) {
-          linked_vertex_id = edge.vertex1_id;
-        }
-        else linked_vertex_id = edge.vertex2_id;
-        if (!marked[linked_vertex_id]) {
-          vertices_to_check.push_back(linked_vertex_id);
+    for (const auto& vertex_id :
+         graph_.get_linked_vertex_ids(current_vertex_id)) {
+      if (distances[current_vertex_id] + 1 < distances[vertex_id]) {
+        queue.push(vertex_id);
+        distances[vertex_id] = distances[current_vertex_id] + 1;
+        previous_ids[vertex_id] = current_vertex_id;
+        if (destination_vertex_id == vertex_id) {
+          break;
         }
       }
     }
-
-    for (const auto& vertex_id : vertices_to_check) {
-      if (distances[closest_vertex_id] + 1 < distances[vertex_id]) {
-        distances[vertex_id] = distances[closest_vertex_id] + 1;
-      }
-    }
-    vertices_to_check.clear();
-
-    marked[closest_vertex_id] = true;
-    closest_vertex_id = std::min_element(distances.begin(), distances.end()) - distances.begin();
   }
+
+  VertexId vertex_id = destination_vertex_id;
+  std::vector<VertexId> path;
+
+  while (vertex_id != source_vertex_id) {
+    path.push_back(vertex_id);
+    vertex_id = previous_ids[vertex_id];
+  }
+  path.push_back(source_vertex_id);
+
+  std::reverse(path.begin(), path.end());
+
+  return GraphPath(path);
 }
 
-std::vector<GraphPath> GraphTraverser::find_all_paths() const {
+std::vector<GraphTraverser::GraphPath> GraphTraverser::find_all_paths() const {
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
 
+  std::mutex jobs_mutex;
+  std::atomic<int> finished_jobs_num = 0;
+  std::atomic<bool> should_terminate = false;
+
+  const auto& last_depth_vertex_ids = graph_.get_depth_map().back();
+
+  std::vector<GraphTraverser::GraphPath> paths;
+  paths.reserve(last_depth_vertex_ids.size());
+
+  for (const auto& vertex_id : last_depth_vertex_ids) {
+    jobs.push_back(
+        [&paths, &jobs_mutex, &vertex_id, &finished_jobs_num, this]() {
+          GraphPath path = find_shortest_path(0, vertex_id);
+          {
+            std::lock_guard lock(jobs_mutex);
+            paths.push_back(path);
+          }
+          finished_jobs_num++;
+        });
+  }
+
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional = [&jobs,
+                                 &jobs_mutex]() -> std::optional<JobCallback> {
+        const std::lock_guard lock(jobs_mutex);
+        if (!jobs.empty()) {
+          const auto job = jobs.front();
+          jobs.pop_front();
+          return job;
+        }
+        return std::nullopt;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  const auto threads_count =
+      std::min(MAX_WORKERS_COUNT, (int)last_depth_vertex_ids.size());
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
+
+  for (int i = 0; i < threads_count; i++) {
+    threads.push_back(std::thread(worker));
+  }
+
+  while (finished_jobs_num < last_depth_vertex_ids.size()) {
+  }
+
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  return paths;
 }
+
 }  // namespace uni_course_cpp

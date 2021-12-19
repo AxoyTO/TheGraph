@@ -2,21 +2,20 @@
 
 #include "graph_traverser.hpp"
 
-#include <thread>
 #include <atomic>
-#include <list>
 #include <functional>
+#include <list>
 #include <optional>
+#include <thread>
 
 namespace uni_course_cpp {
 
 class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
-  using TraversalStartedCallback =
-      std::function<void(int, const Graph&)>;
-  using TraversalFinishedCallback =
-      std::function<void(int, const Graph&, std::vector<GraphTraverser::Path>)>;
+  using TraversalStartedCallback = std::function<void(int, const Graph&)>;
+  using TraversalFinishedCallback = std::function<
+      void(int, const Graph&, std::vector<GraphTraverser::GraphPath>)>;
 
   class Worker {
    public:
@@ -39,9 +38,8 @@ class GraphTraversalController {
 
   GraphTraversalController(const std::vector<Graph>& graphs);
 
-  void traverse(
-      const TraversalStartedCallback& traversal_started_callback,
-      const TraversalFinishedCallback& traversal_finished_callback);
+  void traverse(const TraversalStartedCallback& traversal_started_callback,
+                const TraversalFinishedCallback& traversal_finished_callback);
 
  private:
   const std::vector<Graph>& graphs_;

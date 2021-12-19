@@ -6,20 +6,20 @@
 #include <vector>
 
 #include "config.hpp"
-#include "graph_traverser.hpp"
-#include "graph_traversal_controller.hpp"
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 using uni_course_cpp::Graph;
 using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
-using uni_course_cpp::Logger;
-using uni_course_cpp::GraphTraverser;
 using uni_course_cpp::GraphTraversalController;
+using uni_course_cpp::GraphTraverser;
+using uni_course_cpp::Logger;
 
 constexpr int MIN_DEPTH = 0;
 constexpr int MIN_NEW_VERTICES_COUNT = 0;
@@ -157,7 +157,9 @@ std::string traversal_started_string(int graph_number) {
   return res.str();
 }
 
-std::string traversal_finished_string(int graph_number, std::vector<GraphTraverser::Path> paths) {
+std::string traversal_finished_string(
+    int graph_number,
+    std::vector<GraphTraverser::GraphPath> paths) {
   std::stringstream res;
   res << get_current_date_time() << ": Graph " << graph_number
       << ", Traversal Finished, Paths: [";
@@ -184,7 +186,7 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
         logger.log(traversal_started_string(index));
       },
       [](int index, const Graph& traversed_graph,
-         std::vector<GraphTraverser::Path> paths) {
+         std::vector<GraphTraverser::GraphPath> paths) {
         auto& logger = Logger::get_instance();
         logger.log(traversal_finished_string(index, paths));
       });
