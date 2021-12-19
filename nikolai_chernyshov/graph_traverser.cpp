@@ -4,6 +4,7 @@
 #include <cassert>
 #include <climits>
 #include <list>
+#include <optional>
 #include <queue>
 #include <thread>
 
