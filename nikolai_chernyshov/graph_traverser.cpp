@@ -23,9 +23,6 @@ GraphTraverser::GraphPath GraphTraverser::find_shortest_path(
 
   const int vertices_count = graph_.get_vertices().size();
 
-  std::vector<bool> marked(vertices_count, false);
-  marked[source_vertex_id] = true;
-
   std::vector<Distance> distances(vertices_count, MAX_DISTANCE);
   distances[source_vertex_id] = 0;
 
