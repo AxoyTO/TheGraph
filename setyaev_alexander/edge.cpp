@@ -20,7 +20,7 @@ std::string Edge::to_string() const {
   std::stringstream json;
   json << "{\n  \"id\": " << get_id() << ",\n  \"vertex_ids\": ["
        << get_first_vertex_id() << ", " << get_second_vertex_id()
-       << "],\n\"color\": ";
+       << "],\n  \"color\": ";
   if (color_ == Edge::Color::Gray) {
     json << "\"gray\"\n";
   }
