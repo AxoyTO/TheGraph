@@ -101,7 +101,7 @@ void generate_red_edges(uni_cource_cpp::Graph& graph, mutex& new_edge_mutex) {
 
 namespace uni_cource_cpp {
 
-void GraphGenerator::generate_gray_branch_(
+void GraphGenerator::generate_gray_branch(
     Graph& graph,
     const Graph::VertexId& parent_vertex_id,
     mutex& new_edge_mutex) const {
@@ -120,12 +120,12 @@ void GraphGenerator::generate_gray_branch_(
 
   for (int i = 0; i < params_.new_vertices_count(); i++) {
     if (is_generated(probability)) {
-      generate_gray_branch_(graph, new_vertex_id, new_edge_mutex);
+      generate_gray_branch(graph, new_vertex_id, new_edge_mutex);
     }
   }
 }
 
-void GraphGenerator::generate_gray_edges_(
+void GraphGenerator::generate_gray_edges(
     Graph& graph,
     const Graph::VertexId& root_vertex_id) const {
   using JobCallback = std::function<void()>;
@@ -136,7 +136,7 @@ void GraphGenerator::generate_gray_edges_(
   for (int i = 0; i < params_.new_vertices_count(); i++) {
     jobs.push_back(
         [this, &graph, &new_edge_mutex, &jobs_done, root_vertex_id]() {
-          generate_gray_branch_(graph, root_vertex_id, new_edge_mutex);
+          generate_gray_branch(graph, root_vertex_id, new_edge_mutex);
           jobs_done++;
         });
   }
@@ -187,7 +187,7 @@ Graph GraphGenerator::generate() const {
 
   const auto root_vertex_id = graph.add_vertex();
 
-  generate_gray_edges_(graph, root_vertex_id);
+  generate_gray_edges(graph, root_vertex_id);
 
   mutex new_edge_mutex;
 
