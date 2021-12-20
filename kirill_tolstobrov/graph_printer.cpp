@@ -78,9 +78,10 @@ std::string GraphPrinter::print() const {
 
 std::string GraphPrinter::print_path(const GraphPath& path) {
   std::string result = "{vertices: [";
-  for (int i = 0; i < path.vertex_ids.size(); i++) {
-    result += std::to_string(path.vertex_ids[i]);
-    if (i != path.vertex_ids.size() - 1) {
+  const auto& path_vertex_ids = path.get_vertex_ids();
+  for (int i = 0; i < path_vertex_ids.size(); i++) {
+    result += std::to_string(path_vertex_ids[i]);
+    if (i != path_vertex_ids.size() - 1) {
       result += ", ";
     }
   }

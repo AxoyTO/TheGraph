@@ -12,7 +12,7 @@
 #include "graph_traverser.hpp"
 
 namespace {
-const uni_cpp_practice::GraphPath::Distance DISTANCE_BETWEEN_NEIGHBOURS = 1;
+constexpr uni_cpp_practice::GraphPath::Distance DISTANCE_BETWEEN_NEIGHBOURS = 1;
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }  // namespace
 
@@ -46,9 +46,7 @@ GraphPath GraphTraverser::find_shortest_path(
 
   std::map<VertexId, VertexInfo> vertices_info;
 
-  const auto& vertices = graph_.get_vertices();
-
-  for (const auto& vertex_id : vertices) {
+  for (const auto& vertex_id : graph_.get_vertices()) {
     vertices_info[vertex_id.id].distance = INT32_MAX;
     vertices_info[vertex_id.id].visited = false;
   }
@@ -68,7 +66,7 @@ GraphPath GraphTraverser::find_shortest_path(
         vertices_info[neighbour].distance =
             vertices_info[current_vertex_id].distance +
             DISTANCE_BETWEEN_NEIGHBOURS;
-        vertices_info[neighbour].nearest_neighbour = current_vertex_id;
+        vertices_info[neighbour].previous_vertex_in_path = current_vertex_id;
       }
     }
 
@@ -81,36 +79,36 @@ GraphPath GraphTraverser::find_shortest_path(
   current_vertex_id = destination_vertex_id;
   while (current_vertex_id != source_verex_id) {
     path.push_back(current_vertex_id);
-    current_vertex_id = vertices_info[current_vertex_id].nearest_neighbour;
+    current_vertex_id =
+        vertices_info[current_vertex_id].previous_vertex_in_path;
   }
   path.push_back(source_verex_id);
 
   std::reverse(path.begin(), path.end());
 
-  GraphPath result(path);
-
-  return result;
+  return GraphPath(path);
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths() const {
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
-  std::mutex mutex;
+  std::mutex paths_mutex;
 
   std::vector<GraphPath> paths;
 
-  VertexId root_vertex = graph_.depths_map_[0][0];
+  const VertexId root_vertex_id = graph_.depths_map_[0][0];
   const auto& last_depth_vertices =
       graph_.depths_map_[graph_.depths_map_.size() - 1];
 
   std::atomic<int> done_jobs_number = 0;
 
   for (int i = 0; i < last_depth_vertices.size(); i++) {
-    jobs.push_back([&root_vertex, &last_depth_vertices, &done_jobs_number,
-                    &mutex, i, &paths, this]() {
-      GraphPath path = find_shortest_path(root_vertex, last_depth_vertices[i]);
+    jobs.push_back([&root_vertex_id, &last_depth_vertices, &done_jobs_number,
+                    &paths_mutex, i, &paths, this]() {
+      GraphPath path =
+          find_shortest_path(root_vertex_id, last_depth_vertices[i]);
       {
-        const std::lock_guard lock(mutex);
+        const std::lock_guard lock(paths_mutex);
         paths.push_back(path);
       }
       done_jobs_number++;

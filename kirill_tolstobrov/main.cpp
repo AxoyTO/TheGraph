@@ -17,7 +17,7 @@
 #include "graph_path.hpp"
 #include "graph_printer.hpp"
 #include "graph_traversal_controller.hpp"
-#include "graph_traverser.hpp"
+
 #include "logger.hpp"
 
 std::string get_current_date_time() {
@@ -75,14 +75,14 @@ const std::string logger_finish_string(int graph_number,
   return string.str();
 }
 
-const std::string traversal_start_string(int graph_number) {
+std::string traversal_start_string(int graph_number) {
   std::stringstream string;
   string << get_current_date_time() << ": Graph " << graph_number
          << ", Traversal Started\n";
   return string.str();
 }
 
-const std::string traversal_finish_string(
+std::string traversal_finish_string(
     int graph_number,
     std::vector<uni_cpp_practice::GraphPath> paths) {
   std::stringstream string;
@@ -191,11 +191,12 @@ void traverse_graphs(const std::vector<uni_cpp_practice::Graph>& graphs) {
       uni_cpp_practice::GraphTraversalController(graphs);
 
   traversal_controller.traverse(
-      [](int index) {
+      [](int index, uni_cpp_practice::Graph graph) {
         auto& logger = prepare_logger();
         logger.log(traversal_start_string(index + 1));
       },
-      [](int index, std::vector<uni_cpp_practice::GraphPath> paths) {
+      [](int index, std::vector<uni_cpp_practice::GraphPath> paths,
+         uni_cpp_practice::Graph graph) {
         auto& logger = prepare_logger();
         logger.log(traversal_finish_string(index + 1, paths));
       });

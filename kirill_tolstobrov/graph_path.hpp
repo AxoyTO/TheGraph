@@ -12,7 +12,11 @@ struct GraphPath {
   explicit GraphPath(const std::vector<VertexId>& init_vertex_ids)
       : vertex_ids(init_vertex_ids) {}
 
-  Distance distance() const;
+  Distance distance() const { return vertex_ids.size() - 1; };
+
+  std::vector<VertexId> get_vertex_ids() const { return vertex_ids; }
+
+ private:
   std::vector<VertexId> vertex_ids;
 };
 

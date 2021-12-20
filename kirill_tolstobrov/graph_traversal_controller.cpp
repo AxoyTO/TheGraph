@@ -14,8 +14,8 @@ namespace uni_cpp_practice {
 
 GraphTraversalController::GraphTraversalController(
     const std::vector<Graph>& graphs)
-    : graphs_(graphs), graphs_count_(graphs.size()) {
-  int threads_count = std::min(MAX_WORKERS_COUNT, graphs_count_);
+    : graphs_(graphs) {
+  const int threads_count = std::min(MAX_WORKERS_COUNT, (int)graphs_.size());
   for (int i = 0; i < threads_count; i++) {
     workers_.emplace_back(
         [&jobs_ = jobs_, &mutex_ = mutex_]() -> std::optional<JobCallback> {
@@ -64,22 +64,22 @@ GraphTraversalController::Worker::~Worker() {
 }
 
 void GraphTraversalController::traverse(
-    const TraversalStartedCallback& trav_started_callback,
-    const TraversalFinishedCallback& trav_finished_callback) {
+    const TraversalStartedCallback& started_callback,
+    const TraversalFinishedCallback& finished_callback) {
   std::atomic<int> done_jobs_number = 0;
-  for (int i = 0; i < graphs_count_; i++) {
-    jobs_.emplace_back([&trav_started_callback, &trav_finished_callback,
+  for (int i = 0; i < graphs_.size(); i++) {
+    jobs_.emplace_back([&started_callback, &finished_callback,
                         &done_jobs_number, &mutex_ = mutex_, &graphs_ = graphs_,
                         i]() {
       {
         const std::lock_guard lock(mutex_);
-        trav_started_callback(i);
+        started_callback(i, std::move(graphs_[i]));
       }
       GraphTraverser traveser(graphs_[i]);
       auto paths = traveser.find_all_paths();
       {
         const std::lock_guard lock(mutex_);
-        trav_finished_callback(i, std::move(paths));
+        finished_callback(i, std::move(paths), std::move(graphs_[i]));
       }
       done_jobs_number++;
     });
@@ -89,7 +89,7 @@ void GraphTraversalController::traverse(
     worker.start();
   }
 
-  while (done_jobs_number < graphs_count_) {
+  while (done_jobs_number < graphs_.size()) {
   }
 
   for (auto& worker : workers_) {
