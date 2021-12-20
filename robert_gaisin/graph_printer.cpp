@@ -122,7 +122,8 @@ std::string print_graph_description(const Graph& graph) {
              << ", distribution: {";
 
   const std::vector<EdgeColor> colors_of_edges = {
-      EdgeColor::Gray, EdgeColor::Green, EdgeColor::Yellow, EdgeColor::Red};
+      EdgeColor::Gray, EdgeColor::Green, EdgeColor::Yellow, EdgeColor::Red,
+      EdgeColor::Blue};
 
   for (const auto& color : colors_of_edges) {
     log_string << color_to_string(color) << ": "
