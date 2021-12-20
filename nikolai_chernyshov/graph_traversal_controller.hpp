@@ -5,6 +5,7 @@
 #include <atomic>
 #include <functional>
 #include <list>
+#include <mutex>
 #include <optional>
 #include <thread>
 
@@ -14,8 +15,8 @@ class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
   using TraversalStartedCallback = std::function<void(int, const Graph&)>;
-  using TraversalFinishedCallback = std::function<
-      void(int, const Graph&, std::vector<GraphTraverser::GraphPath>)>;
+  using TraversalFinishedCallback =
+      std::function<void(int, const Graph&, std::vector<GraphPath>)>;
 
   class Worker {
    public:

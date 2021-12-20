@@ -1,22 +1,26 @@
 #pragma once
 
-#include <mutex>
 #include "graph.hpp"
 
 namespace uni_course_cpp {
 
-class GraphTraverser {
+struct GraphPath {
  public:
   using Distance = int;
 
-  struct GraphPath {
-    GraphPath(std::vector<VertexId> _vertex_ids) : vertex_ids(_vertex_ids) {}
+  GraphPath(const std::vector<VertexId>& vertex_ids)
+      : vertex_ids_(vertex_ids) {}
 
-    Distance distance() const { return vertex_ids.size() - 1; }
+  Distance distance() const { return vertex_ids_.size() - 1; }
 
-    std::vector<VertexId> vertex_ids;
-  };
+  const std::vector<VertexId>& get_vertex_ids() const { return vertex_ids_; }
 
+ private:
+  std::vector<VertexId> vertex_ids_;
+};
+
+class GraphTraverser {
+ public:
   GraphTraverser(const Graph& graph) : graph_(graph) {}
 
   GraphPath find_shortest_path(const VertexId& source_vertex_id,

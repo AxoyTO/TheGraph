@@ -124,16 +124,18 @@ std::string print_graph(const Graph& graph) {
   return res;
 }
 
-std::string print_path(const GraphTraverser::GraphPath& path) {
+std::string print_path(const GraphPath& path) {
   std::stringstream res;
 
   res << "{vertices: [";
 
-  for (const auto& vertex_id : path.vertex_ids) {
+  const auto& vertex_ids = path.get_vertex_ids();
+
+  for (const auto& vertex_id : vertex_ids) {
     res << vertex_id;
     res << ", ";
   }
-  if (path.vertex_ids.size()) {
+  if (vertex_ids.size()) {
     res.seekp(-2, res.cur);
   }
 

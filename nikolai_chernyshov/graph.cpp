@@ -210,7 +210,7 @@ std::vector<std::pair<Edge::Color, int>> Graph::get_color_edge_count_pairs()
   return color_counts;
 }
 
-const std::vector<VertexId> Graph::get_linked_vertex_ids(
+std::vector<VertexId> Graph::get_linked_vertex_ids(
     const VertexId& vertex_id) const {
   const auto& vertex = get_vertex(vertex_id);
   std::vector<VertexId> linked_ids;
@@ -218,10 +218,9 @@ const std::vector<VertexId> Graph::get_linked_vertex_ids(
   for (const auto& edge_id : vertex.get_edge_ids()) {
     const auto& edge = get_edge(edge_id);
     if (edge.color != Edge::Color::Green) {
-      if (edge.vertex1_id != vertex_id) {
-        linked_ids.push_back(edge.vertex1_id);
-      } else
-        linked_ids.push_back(edge.vertex2_id);
+      const auto linked_id =
+          edge.vertex1_id != vertex_id ? edge.vertex1_id : edge.vertex2_id;
+      linked_ids.push_back(linked_id);
     }
   }
 
