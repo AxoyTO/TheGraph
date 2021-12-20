@@ -1,5 +1,6 @@
 #include <array>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -18,8 +19,9 @@ std::string getTimeByString() {
   TimeInString << std::put_time(std::localtime(&presentTime), "%d/%m/%Y %T");
   return TimeInString.str();
 }
-void logStart(Logger& logger) {
-  logger.log(getTimeByString() + ": Graph 0" + ", Generation Started\n");
+void logStart(Logger& logger, int graphIndex) {
+  logger.log(getTimeByString() + ": Graph " + std::to_string(graphIndex) +
+             ", Generation Started\n");
 }
 int getMaxDepth(Logger& logger, Graph graph) {
   int depth = 0;
@@ -51,9 +53,8 @@ void logColors(Logger& logger, Graph graph) {
       logger.log(", ");
   }
 }
-void logEnd(Logger& logger, Graph graph) {
-  logger.log(getTimeByString() +
-             ": Graph 0"
+void logEnd(Logger& logger, Graph graph, int graphIndex) {
+  logger.log(getTimeByString() + ": Graph " + std::to_string(graphIndex) +
              ", Generation Finished {  \n");
   logger.log("  depth: " + std::to_string(getMaxDepth(logger, graph)) + ",\n");
   logger.log("  vertices: " + std::to_string(graph.getVertices().size()) +
@@ -69,8 +70,10 @@ Logger& setUpLogger() {
   return logger;
 }
 int main() {
-  Logger& logger = setUpLogger();
-  int maxDepth = 0, newVerticesNum = 0;
+  Logger& logger = Logger::getLogger();
+  std::filesystem::create_directory("./temp");
+  logger.setFile("./temp/log.txt");
+  int maxDepth = 0, newVerticesNum = 0, newGraphNum = 0;
   std::cout << "Enter Max Depth:";
   std::cin >> maxDepth;
   if (maxDepth < 0) {
@@ -87,13 +90,23 @@ int main() {
       std::cin >> newVerticesNum;
     }
   }
-  [&logger] { logStart(logger); };
-  const GraphGenerator graphGenerator(maxDepth, newVerticesNum);
-  const auto graph = graphGenerator.generate();
-  [&logger, &graph] { logEnd(logger, graph); };
-  std::ofstream writePT;
-  writePT.open("Graph.json", std::ios::out);
-  writePT << graph.toString() << std::endl;
-  writePT.close();
+  std::cout << "Enter new Graph num:";
+  std::cin >> newGraphNum;
+  if (newGraphNum < 0) {
+    while (newGraphNum < 0) {
+      std::cout << "Error new Vertices number must be above or equal 0: ";
+      std::cin >> newGraphNum;
+    }
+  }
+  for (int i = 0; i < newGraphNum; i++) {
+    logStart(logger, i);
+    const GraphGenerator graphGenerator(maxDepth, newVerticesNum);
+    const auto graph = graphGenerator.generate();
+    std::ofstream writePT;
+    logEnd(logger, graph, i);
+    writePT.open("./temp/Graph_" + std::to_string(i) + ".json", std::ios::out);
+    writePT << graph.toString() << std::endl;
+    writePT.close();
+  }
   return 0;
 }
