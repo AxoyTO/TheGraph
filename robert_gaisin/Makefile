@@ -1,16 +1,14 @@
-CC=g++
-CFLAGS=-c -std=c++17 -Wall -Werror
-LDFLAGS=
-SOURCES=main.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=grf
+CXX = clang++
+CXXFLAGS = -Wall -std=c++17 -g 
 
-all: $(SOURCES) $(EXECUTABLE)
-	./grf
-$(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+all: clean graph
+	./graph
+graph:
+	$(CXX) $(CXXFLAGS) main.cpp graph.cpp graph_generator.cpp graph_printer.cpp logger.cpp  config.cpp -o graph
 
-.cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+format:
+	clang-format -i -style=Chromium *.hpp
+	clang-format -i -style=Chromium *.cpp
+
 clean:
-	rm -rf *.o
+	rm -f graph
