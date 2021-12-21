@@ -1,14 +1,12 @@
-//#include <algorithm>
-//#include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <string>
-//#include <utility>
 #include <vector>
+#include <experimental/filesystem>
 #include "graph.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
+#include "config.hpp"
 
 namespace {
 int handle_depth_input() {
@@ -48,9 +46,8 @@ int handleNewGraphsCountInput() {
   return new_graphs_num;
 }
 
-uni_course_cpp::Logger& prepareLogger(std::string file_path) {
+uni_course_cpp::Logger& prepareLogger() {
   uni_course_cpp::Logger& log = uni_course_cpp::Logger::getLogger();
-  // log.setFile(file_path);
   return log;
 }
 
@@ -86,17 +83,23 @@ std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
   string += "},\n}\n";
   return string;
 }
+
+void prepareTempDirectory() {
+  std::experimental::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
+}
 }  // namespace
 
 int main() {
   const int depth = handle_depth_input();
   const int new_vertexes_num = handle_new_vertexes_num_input();
   const int graphs_count = handleNewGraphsCountInput();
+  prepareTempDirectory();
 
   const auto params =
       uni_course_cpp::GraphGenerator::Params(depth, new_vertexes_num);
   const auto generator = uni_course_cpp::GraphGenerator(params);
-  auto& logger = prepareLogger("temp/log.txt");
+
+  auto& logger = prepareLogger();
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(genStartedString(i));
@@ -105,7 +108,7 @@ int main() {
 
     const auto graph_printer = uni_course_cpp::GraphPrinter(graph);
     write_to_file(graph_printer.print(),
-                  "temp/graph_" + std::to_string(i) + ".json");
+                config::TEMP_DIRECTORY_PATH + "graph_" + std::to_string(i) + ".json");
   }
 
   return 0;

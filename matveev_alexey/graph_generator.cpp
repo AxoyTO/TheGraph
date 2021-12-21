@@ -14,6 +14,19 @@ float getYellowProbability(const uni_course_cpp::Graph& graph,
                            const uni_course_cpp::VertexId& vertex_id) {
   return 1.0 * graph.vertexDepth(vertex_id) / (graph.depth() - 1);
 }
+bool randomValue(float probability) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::bernoulli_distribution distribution(probability);
+  return distribution(gen);
+}
+int getRandomVertexId(
+    const std::vector<uni_course_cpp::VertexId>& vertex_ids) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> random_number(0, vertex_ids.size() - 1);
+  return vertex_ids.at(random_number(gen));
+}
 }  // namespace
 
 namespace uni_course_cpp {
@@ -77,19 +90,5 @@ Graph GraphGenerator::generate() const {
   Graph graph = generateMainBody();
   generateColorEdges(graph);
   return graph;
-}
-
-bool GraphGenerator::randomValue(float probability) const {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution distribution(probability);
-  return distribution(gen);
-}
-int GraphGenerator::getRandomVertexId(
-    const std::vector<VertexId> vertex_ids) const {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> random_number(0, vertex_ids.size() - 1);
-  return vertex_ids.at(random_number(gen));
 }
 }  // namespace uni_course_cpp

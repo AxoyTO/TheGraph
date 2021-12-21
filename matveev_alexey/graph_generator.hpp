@@ -1,7 +1,7 @@
-#include <vector>
+#pragma once
+
 #include "graph.hpp"
 
-#pragma once
 namespace uni_course_cpp {
 class GraphGenerator {
  public:
@@ -20,7 +20,5 @@ class GraphGenerator {
   Graph generateMainBody() const;
   void generateColorEdges(Graph& graph) const;
   const Params params_ = Params();
-  bool randomValue(float probability) const;
-  int getRandomVertexId(const std::vector<VertexId> vertex_ids) const;
 };
 }  // namespace uni_course_cpp

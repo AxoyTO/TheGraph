@@ -1,8 +1,6 @@
-#include <string>
-#include <vector>
-#include "graph.hpp"
-
 #pragma once
+
+#include "graph.hpp"
 
 namespace uni_course_cpp {
 class GraphPrinter {
@@ -10,10 +8,10 @@ class GraphPrinter {
   explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
   std::string print() const;
   static std::string colorToString(const Edge::Colors& color);
+  std::string printVertex(const VertexId& id) const;
+  std::string printEdge(const Edge& edge) const;
 
  private:
   const Graph& graph_;
-  std::string printVertex(const VertexId& id) const;
-  std::string printEdge(const Edge& edge) const;
 };
 }  // namespace uni_course_cpp

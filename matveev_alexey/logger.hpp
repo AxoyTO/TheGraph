@@ -1,14 +1,6 @@
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <optional>
-#include <string>
-#include "config.hpp"
-#include "graph.hpp"
-#include "graph_printer.hpp"
-
 #pragma once
 
+#include <fstream>
 namespace uni_course_cpp {
 class Logger {
  public:
@@ -25,6 +17,5 @@ class Logger {
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
-  std::string getCurrentDateTime();
 };
 }  // namespace uni_course_cpp
