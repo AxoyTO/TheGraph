@@ -30,7 +30,7 @@ class Edge {
   const EdgeId id;
   const VertexId vertex_id1;
   const VertexId vertex_id2;
-  enum class Color { gray, Green, Yellow, Red };
+  enum class Color { Gray, Green, Yellow, Red };
   const Color color;
 
   Edge(const EdgeId& _id,
