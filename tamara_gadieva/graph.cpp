@@ -82,7 +82,7 @@ Edge::Color Graph::define_edge_color(const VertexId& from_vertex_id,
   auto& from_vertex = get_vertex(from_vertex_id);
   auto& to_vertex = get_vertex(to_vertex_id);
   if (get_edge_ids(to_vertex_id).size() == 0)
-    return Edge::Color::gray;
+    return Edge::Color::Gray;
   if (from_vertex_id == to_vertex_id)
     return Edge::Color::Green;
   if (to_vertex.depth - from_vertex.depth == 1 &&
@@ -117,7 +117,7 @@ void Graph::add_edge(const VertexId& from_vertex_id,
   from_vertex.add_edge_id(new_edge.id);
   if (edge_color != Edge::Color::Green)
     to_vertex.add_edge_id(new_edge.id);
-  if (edge_color == Edge::Color::gray) {
+  if (edge_color == Edge::Color::Gray) {
     const int new_depth = from_vertex.depth + 1;
     update_vertex_depth(to_vertex.id, new_depth);
   }

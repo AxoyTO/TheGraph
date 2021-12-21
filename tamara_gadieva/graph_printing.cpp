@@ -7,7 +7,7 @@ constexpr int COLORS_NUM = 4;
 namespace graph_printing {
 std::string color_to_string(const Edge::Color& color) {
   switch (color) {
-    case Edge::Color::gray:
+    case Edge::Color::Gray:
       return "gray";
     case Edge::Color::Green:
       return "green";
@@ -32,7 +32,7 @@ std::string vertices_distribution(const Graph& graph) {
 std::string edges_distribution(const Graph& graph) {
   std::string result_string;
   const std::array<Edge::Color, COLORS_NUM> colors = {
-      Edge::Color::gray, Edge::Color::Green, Edge::Color::Yellow,
+      Edge::Color::Gray, Edge::Color::Green, Edge::Color::Yellow,
       Edge::Color::Red};
   for (const auto& color : colors) {
     result_string += color_to_string(color);
