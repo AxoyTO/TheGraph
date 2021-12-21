@@ -1,4 +1,7 @@
-#include <experimental/filesystem>
+//#include <experimental/filesystem> - в комметариях то, с чем я реально
+//компилировал но на что ругается гит в соседних строчках - вариант, на который
+//ругается локальная машина
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -85,7 +88,8 @@ std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
 }
 
 void prepareTempDirectory() {
-  std::experimental::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
+  // std::experimental::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
+  std::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
 }
 }  // namespace
 
