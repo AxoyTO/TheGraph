@@ -29,6 +29,17 @@ std::string get_current_date_time() {
   return date_time_string.str();
 }
 
+std::string print_paths(const std::vector<uni_cpp_practice::GraphPath>& paths) {
+  std::string result = "";
+  for (int i = 0; i < paths.size(); i++) {
+    result += uni_cpp_practice::GraphPrinter::print_path(paths[i]);
+    if (i != paths.size() - 1) {
+      result += ",\n";
+    }
+  }
+  return result;
+}
+
 const std::string logger_start_string(int graph_number) {
   std::stringstream string;
   string << get_current_date_time() << ": Graph " << graph_number
@@ -88,7 +99,7 @@ std::string traversal_finish_string(
   std::stringstream string;
   string << get_current_date_time() << ": Graph " << graph_number
          << ", Traversal Finished, Paths: [\n";
-  string << uni_cpp_practice::GraphPrinter::print_paths(paths) << "\n]\n";
+  string << print_paths(paths) << "\n]\n";
   return string.str();
 }
 

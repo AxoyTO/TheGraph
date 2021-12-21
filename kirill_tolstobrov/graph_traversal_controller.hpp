@@ -14,9 +14,9 @@ namespace uni_cpp_practice {
 class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
-  using TraversalStartedCallback = std::function<void(int, Graph)>;
+  using TraversalStartedCallback = std::function<void(int, const Graph&)>;
   using TraversalFinishedCallback =
-      std::function<void(int, std::vector<GraphPath>, Graph)>;
+      std::function<void(int, std::vector<GraphPath>, const Graph&)>;
 
   class Worker {
    public:
@@ -47,6 +47,6 @@ class GraphTraversalController {
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   std::mutex mutex_;
-  const std::vector<Graph> graphs_;
+  const std::vector<Graph>& graphs_;
 };
 }  // namespace uni_cpp_practice

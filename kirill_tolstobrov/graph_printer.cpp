@@ -92,15 +92,4 @@ std::string GraphPrinter::print_path(const GraphPath& path) {
   return result;
 }
 
-std::string GraphPrinter::print_paths(const std::vector<GraphPath>& paths) {
-  std::string result = "";
-  for (int i = 0; i < paths.size(); i++) {
-    result += print_path(paths[i]);
-    if (i != paths.size() - 1) {
-      result += ",\n";
-    }
-  }
-  return result;
-}
-
 }  // namespace uni_cpp_practice

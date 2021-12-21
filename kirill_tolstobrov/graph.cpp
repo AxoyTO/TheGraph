@@ -173,7 +173,7 @@ std::vector<VertexId> Graph::get_vertex_neighbours(
     if (vertex1_id == vertex2_id) {
       continue;
     }
-    VertexId new_neighbour_id =
+    const VertexId new_neighbour_id =
         vertex_id != vertex1_id ? vertex1_id : vertex2_id;
 
     neighbours.push_back(new_neighbour_id);

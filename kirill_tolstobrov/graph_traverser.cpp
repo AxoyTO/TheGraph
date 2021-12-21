@@ -75,18 +75,23 @@ GraphPath GraphTraverser::find_shortest_path(
     current_vertex_id = next_vertex_to_check(vertices_info);
   }
 
-  std::vector<VertexId> path;
-  current_vertex_id = destination_vertex_id;
-  while (current_vertex_id != source_verex_id) {
-    path.push_back(current_vertex_id);
-    current_vertex_id =
-        vertices_info[current_vertex_id].previous_vertex_in_path;
-  }
-  path.push_back(source_verex_id);
+  const auto path = [&current_vertex_id, &destination_vertex_id,
+                     &source_verex_id, &vertices_info]() {
+    std::vector<VertexId> result;
+    current_vertex_id = destination_vertex_id;
+    while (current_vertex_id != source_verex_id) {
+      result.push_back(current_vertex_id);
+      current_vertex_id =
+          vertices_info[current_vertex_id].previous_vertex_in_path;
+    }
+    result.push_back(source_verex_id);
 
-  std::reverse(path.begin(), path.end());
+    std::reverse(result.begin(), result.end());
 
-  return GraphPath(path);
+    return result;
+  };
+
+  return GraphPath(path());
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths() const {
