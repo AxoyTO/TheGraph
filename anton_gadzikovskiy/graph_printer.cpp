@@ -90,4 +90,14 @@ std::string graph_printing::print_graph_description(const Graph& graph) {
   return graph_description;
 }
 
+std::string graph_printing::print_path(const GraphPath& path) {
+  std::string path_string = "\t{vertices: [";
+  for (const auto& vertex_id : path.vertex_ids) {
+    path_string = path_string + std::to_string(vertex_id) + ", ";
+  }
+  path_string = path_string.substr(0, path_string.size() - 2) +
+                "],  distance: " + std::to_string(path.distance()) + "}";
+  return path_string;
+}
+
 }  // namespace uni_cource_cpp
