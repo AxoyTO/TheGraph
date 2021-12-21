@@ -4,9 +4,9 @@
 namespace {
 std::string print_vertex(const uni_course_cpp::Vertex& vertex) {
   std::string res;
-  res += "{\n\t\t\t\"id\": ";
+  res += "{\n      \"id\": ";
   res += std::to_string(vertex.id);
-  res += ",\n\t\t\t\"edge_ids\": [";
+  res += ",\n      \"edge_ids\": [";
 
   auto edge_ids = vertex.get_edge_ids();
 
@@ -18,9 +18,9 @@ std::string print_vertex(const uni_course_cpp::Vertex& vertex) {
     res.pop_back();
     res.pop_back();
   }
-  res += "],\n\t\t\t\"depth\": ";
+  res += "],\n      \"depth\": ";
   res += std::to_string(vertex.depth);
-  res += "\n\t\t}";
+  res += "\n    }";
 
   return res;
 }
@@ -28,15 +28,15 @@ std::string print_vertex(const uni_course_cpp::Vertex& vertex) {
 std::string print_edge(const uni_course_cpp::Edge& edge) {
   std::string res;
 
-  res += "{\n\t\t\t\"id\": ";
+  res += "{\n      \"id\": ";
   res += std::to_string(edge.id);
-  res += ",\n\t\t\t\"vertex_ids\": [";
+  res += ",\n      \"vertex_ids\": [";
   res += std::to_string(edge.vertex1_id);
   res += ", ";
   res += std::to_string(edge.vertex2_id);
-  res += "],\n\t\t\t\"color\": \"";
+  res += "],\n      \"color\": \"";
   res += uni_course_cpp::graph_printing::print_edge_color(edge.color);
-  res += "\"\n\t\t}, ";
+  res += "\"\n    }, ";
 
   return res;
 }
@@ -92,9 +92,9 @@ std::string print_edge_color(const Edge::Color& color) {
 
 std::string print_graph(const Graph& graph) {
   std::string res;
-  res += "{\n\t\"depth\": ";
+  res += "{\n  \"depth\": ";
   res += std::to_string(graph.get_depth());
-  res += ",\n\t\"vertices\": [\n\t\t";
+  res += ",\n  \"vertices\": [\n    ";
 
   auto vertices = graph.get_vertices();
 
@@ -107,7 +107,7 @@ std::string print_graph(const Graph& graph) {
     res.pop_back();
   }
 
-  res += "\n\t],\n\t\"edges\": [\n\t\t";
+  res += "\n  ],\n  \"edges\": [\n    ";
 
   auto edges = graph.get_edges();
 
@@ -119,7 +119,7 @@ std::string print_graph(const Graph& graph) {
     res.pop_back();
   }
 
-  res += "\n\t]\n}\n";
+  res += "\n  ]\n}\n";
 
   return res;
 }

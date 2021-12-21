@@ -166,7 +166,7 @@ std::string traversal_finished_string(int graph_number,
       << ", Traversal Finished, Paths: [";
 
   for (const auto& path : paths) {
-    res << "\n\t";
+    res << "\n  ";
     res << uni_course_cpp::graph_printing::print_path(path);
     res << ",";
   }
