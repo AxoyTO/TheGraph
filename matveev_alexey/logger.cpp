@@ -16,7 +16,7 @@ std::string getCurrentDateTime() {
                                     "%Y.%m.%d %H:%M:%S");
   return date_time_string.str();
 }
-}
+}  // namespace
 
 namespace uni_course_cpp {
 void Logger::log(const std::string& string) {

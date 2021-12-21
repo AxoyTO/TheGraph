@@ -1,12 +1,12 @@
+#include <experimental/filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <experimental/filesystem>
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
-#include "config.hpp"
 
 namespace {
 int handle_depth_input() {
@@ -107,8 +107,9 @@ int main() {
     logger.log(genFinishedString(i, graph));
 
     const auto graph_printer = uni_course_cpp::GraphPrinter(graph);
-    write_to_file(graph_printer.print(),
-                config::TEMP_DIRECTORY_PATH + "graph_" + std::to_string(i) + ".json");
+    write_to_file(
+        graph_printer.print(),
+        config::TEMP_DIRECTORY_PATH + "graph_" + std::to_string(i) + ".json");
   }
 
   return 0;

@@ -20,8 +20,7 @@ bool randomValue(float probability) {
   std::bernoulli_distribution distribution(probability);
   return distribution(gen);
 }
-int getRandomVertexId(
-    const std::vector<uni_course_cpp::VertexId>& vertex_ids) {
+int getRandomVertexId(const std::vector<uni_course_cpp::VertexId>& vertex_ids) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> random_number(0, vertex_ids.size() - 1);
