@@ -111,14 +111,15 @@ int main() {
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
 
-  const auto graph_generator = uni_cource_cpp::GraphGenerator();
+  const auto graph_generator =
+      uni_cource_cpp::GraphGenerator(depth, new_vertices_num);
   auto& logger = uni_cource_cpp::Logger::get_logger();
 
   logger.set_output_file_path("temp/log.txt");
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(gen_started_string(i));
-    const auto graph = graph_generator.generate_graph(depth, new_vertices_num);
+    const auto graph = graph_generator.generate_graph();
     logger.log(gen_finished_string(i, graph));
 
     const auto graph_printer = uni_cource_cpp::GraphPrinter();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <mutex>
 #include <optional>
 
 namespace uni_cpp_practice {
@@ -17,6 +18,7 @@ class Logger {
 
  private:
   std::optional<std::ofstream> file_stream_;
+  std::mutex mutex_;
 
   Logger() = default;
   Logger(const Logger&) = delete;

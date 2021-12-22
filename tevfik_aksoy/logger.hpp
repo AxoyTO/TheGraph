@@ -8,9 +8,9 @@
 namespace uni_cpp_practice {
 class Logger {
  public:
-  static Logger& get_instance() {
-    static Logger instance;
-    return instance;
+  static Logger& get_logger() {
+    static Logger logger;
+    return logger;
   }
 
   void set_file(const std::optional<std::string>& filename);

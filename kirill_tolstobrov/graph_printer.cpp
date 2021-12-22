@@ -75,4 +75,21 @@ std::string GraphPrinter::print() const {
   result += "\n  ]\n}";
   return result;
 }
+
+std::string GraphPrinter::print_path(const GraphPath& path) {
+  std::string result = "{vertices: [";
+  const auto& path_vertex_ids = path.get_vertex_ids();
+  for (int i = 0; i < path_vertex_ids.size(); i++) {
+    result += std::to_string(path_vertex_ids[i]);
+    if (i != path_vertex_ids.size() - 1) {
+      result += ", ";
+    }
+  }
+  result += "], distance: ";
+  result += std::to_string(path.distance());
+  result += "}";
+
+  return result;
+}
+
 }  // namespace uni_cpp_practice
