@@ -35,7 +35,8 @@ string generation_started_string(int graph_number) {
          ", Generation Started";
 }
 
-string generation_finished_string(int graph_number, string graph_description) {
+string generation_finished_string(int graph_number,
+                                  const string& graph_description) {
   string finished_string = get_current_date_time() + ": Graph " +
                            to_string(graph_number) +
                            ", Generation Finished {\n";

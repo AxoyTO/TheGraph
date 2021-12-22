@@ -32,15 +32,16 @@ class GraphGenerationController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
-  GraphGenerationController(int threads_count,
-                            int graphs_count,
-                            GraphGenerator::Params graph_generator_params)
+  GraphGenerationController(
+      int threads_count,
+      int graphs_count,
+      const GraphGenerator::Params& graph_generator_params)
       : graphs_count_(graphs_count),
         graph_generator_params_(graph_generator_params),
-        threads_count_(graphs_count){};
+        threads_count_(threads_count){};
 
   void generate(const GenStartedCallback& gen_started_callback,
                 const GenFinishedCallback& gen_finished_callback);
