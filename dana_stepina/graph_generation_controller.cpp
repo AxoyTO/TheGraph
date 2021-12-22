@@ -9,7 +9,6 @@ GraphGenerationController::GraphGenerationController(
     int graphs_count,
     const GraphGenerator::Params& graph_generator_params)
     : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
-  
   const auto workers_count = std::min(threads_count, graphs_count_);
 
   for (int i = 0; i < workers_count; ++i) {
@@ -32,7 +31,6 @@ GraphGenerationController::GraphGenerationController(
 void GraphGenerationController::generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
-  
   std::atomic<int> jobs_counter = 0;
 
   for (int graph_num = 0; graph_num < graphs_count_; ++graph_num) {
