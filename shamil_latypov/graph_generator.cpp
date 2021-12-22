@@ -175,7 +175,7 @@ void GraphGenerator::generate_vertices(Graph& graph,
   for (int i = 0; i < threads_count; i++) {
     threads.emplace_back(worker);
   }
-  
+
   while (jobs_done != new_vertices_num_) {
   }
 
