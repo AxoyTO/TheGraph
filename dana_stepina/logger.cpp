@@ -1,9 +1,6 @@
 #include "logger.hpp"
 
-#include <fstream>
 #include <iostream>
-#include <optional>
-#include <string>
 
 namespace uni_cource_cpp {
 void Logger::log(const std::string& log_string) {
