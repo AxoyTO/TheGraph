@@ -16,13 +16,14 @@ constexpr uni_cpp_practice::GraphPath::Distance DISTANCE_BETWEEN_NEIGHBOURS = 1;
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
 struct VertexInfo {
-    uni_cpp_practice::VertexId previous_vertex_in_path;
-    uni_cpp_practice::GraphPath::Distance distance;
-    bool visited;
-  };
+  uni_cpp_practice::VertexId previous_vertex_in_path;
+  uni_cpp_practice::GraphPath::Distance distance;
+  bool visited;
+};
 
 uni_cpp_practice::VertexId next_vertex_to_check(
-      std::map<uni_cpp_practice::VertexId, VertexInfo>& vertices_info, const uni_cpp_practice::Graph& graph){
+    std::map<uni_cpp_practice::VertexId, VertexInfo>& vertices_info,
+    const uni_cpp_practice::Graph& graph) {
   const auto& vertices = graph.get_vertices();
 
   uni_cpp_practice::GraphPath::Distance min_distance = INT32_MAX;

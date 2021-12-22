@@ -18,7 +18,6 @@ class GraphTraverser {
 
  private:
   const Graph& graph_;
-
 };
 
 }  // namespace uni_cpp_practice
