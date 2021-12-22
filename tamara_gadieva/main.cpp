@@ -5,20 +5,25 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printing.hpp"
 #include "logger.hpp"
 
 using uni_cource_cpp::Edge;
 using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerationController;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::Logger;
 
 constexpr int DEPTH_MIN = 0;
 constexpr int NEW_VERTICES_NUM_MIN = 0;
 constexpr int GRAPHS_NUM_MIN = 1;
+constexpr int THREADS_NUM_MIN = 1;
+const int THREADS_NUM_MAX = std::thread::hardware_concurrency();
 
 int handle_depth_input() {
   int depth = DEPTH_MIN - 1;
@@ -68,6 +73,22 @@ int handle_graphs_count_input() {
   return graphs_num;
 }
 
+int handle_threads_count_input() {
+  int threads_num = THREADS_NUM_MIN - 1;
+  while (threads_num < THREADS_NUM_MIN || threads_num > THREADS_NUM_MAX) {
+    std::cout << "Enter the number of threads (int, >= 0): ";
+    std::cin >> threads_num;
+    if (std::cin.fail()) {
+      std::cin.clear();
+      std::string dummy;
+      std::cin >> dummy;
+      threads_num = THREADS_NUM_MIN - 1;
+      continue;
+    }
+  }
+  return threads_num;
+}
+
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
   const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
@@ -88,27 +109,42 @@ std::string generation_finished_string(int graph_number, const Graph& graph) {
          graph_printing::graph_description(graph) + "}\n\n";
 }
 
+std::vector<Graph> generate_graphs(int graphs_count,
+                                   int threads_count,
+                                   const GraphGenerator::Params& params) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
+
+  auto& logger = Logger::get_instance();
+
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  generation_controller.generate(
+      [&logger](int i) { logger.log(generation_started_string(i)); },
+      [&logger, &graphs](int i, Graph graph) {
+        // const auto graph = generator.generate();
+        logger.log(generation_finished_string(i, graph));
+        graphs.push_back(graph);
+        const std::string file_name =
+            std::string(uni_cource_cpp::config::TEMP_FOLDER_PATH) + "graph_" +
+            std::to_string(i) + ".json";
+        std::ofstream graph_json(file_name);
+        graph_json << graph_printing::graph_to_json_string(graph) << std::endl;
+        graph_json.close();
+      });
+  return graphs;
+}
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
   std::filesystem::create_directory(uni_cource_cpp::config::TEMP_FOLDER_PATH);
 
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
-  const auto generator = GraphGenerator(params);
-  auto& logger = Logger::get_instance();
-
-  for (int i = 0; i < graphs_count; i++) {
-    logger.log(generation_started_string(i));
-    const auto graph = generator.generate();
-    logger.log(generation_finished_string(i, graph));
-    const std::string file_name =
-        std::string(uni_cource_cpp::config::TEMP_FOLDER_PATH) + "graph_" +
-        std::to_string(i) + ".json";
-    std::ofstream graph_json(file_name);
-    graph_json << graph_printing::graph_to_json_string(graph) << std::endl;
-    graph_json.close();
-  }
+  const auto graphs = generate_graphs(graphs_count, threads_count, params);
 
   return 0;
 }
