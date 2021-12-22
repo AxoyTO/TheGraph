@@ -1,7 +1,6 @@
 #include "graph_generator.hpp"
 #include <algorithm>
 #include <atomic>
-#include <iostream>
 #include <list>
 #include <mutex>
 #include <random>
