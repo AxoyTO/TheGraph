@@ -1,16 +1,9 @@
 #pragma once
-#include <assert.h>
-#include <stdlib.h>
-#include <time.h>
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include "graph.hpp"
-
-class Graph_generator {
+namespace uni_course_cpp {
+class GraphGenerator {
  public:
   struct Params {
     explicit Params(Depth _depth = 0, int _new_vertices_num = 0)
@@ -20,10 +13,11 @@ class Graph_generator {
     const int new_vertices_num = 0;
   };
 
-  explicit Graph_generator(const Params& params = Params()) : params_(params){};
-  void generate_vertices(Graph& graph) const;
+  explicit GraphGenerator(const Params& params = Params()) : params_(params){};
   Graph generate_graph() const;
 
  private:
   const Params params_ = Params();
+  void generate_vertices(Graph& graph) const;
 };
+}  // namespace uni_course_cpp
