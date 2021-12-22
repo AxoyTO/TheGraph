@@ -129,15 +129,12 @@ void GraphGenerator::generate_grey_edge(Graph& graph,
 
 void GraphGenerator::generate_vertices(Graph& graph,
                                        const VertexId& first_vertex_id) const {
-  // Job - это lambda функция,
-  // которая энкапсулирует в себе генерацию однйо ветви
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
 
   std::atomic<int> jobs_done = 0;
   std::mutex lock_graph;
 
-  // Заполняем список работ для воркеров
   for (int i = 0; i < new_vertices_num_; i++) {
     jobs.emplace_back(
         [this, &graph, first_vertex_id, &lock_graph, &jobs_done]() {
@@ -146,19 +143,14 @@ void GraphGenerator::generate_vertices(Graph& graph,
         });
   }
 
-  // Создаем воркера,
-  // который в бесконечном цикле проверяет,
-  // есть ли работа, и выполняет её
   std::atomic<bool> should_terminate = false;
   std::mutex jobs_lock;
 
   auto worker = [&should_terminate, &jobs_lock, &jobs]() {
     while (true) {
-      // Проверка флага, должны ли мы остановить поток
       if (should_terminate) {
         return;
       }
-      // Проверяем, есть ли для нас работа
       const auto job_optional = [&jobs_lock,
                                  &jobs]() -> std::optional<JobCallback> {
         std::lock_guard lock(jobs_lock);
@@ -170,14 +162,12 @@ void GraphGenerator::generate_vertices(Graph& graph,
         return std::nullopt;
       }();
       if (job_optional.has_value()) {
-        // Работа есть, выполняем её
         const auto& job = job_optional.value();
         job();
       }
     }
   };
 
-  // Создаем и запускаем потоки с воркерами
   const auto threads_count = std::min(MAX_THREADS_COUNT, new_vertices_num_);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
@@ -185,13 +175,10 @@ void GraphGenerator::generate_vertices(Graph& graph,
   for (int i = 0; i < threads_count; i++) {
     threads.emplace_back(worker);
   }
-  // fill threads
-
-  // Ждем, когда все ветви будут сгенерированы
+  
   while (jobs_done != new_vertices_num_) {
   }
 
-  // Останавливем всех воркеров и потоки
   should_terminate = true;
   for (auto& thread : threads) {
     thread.join();
