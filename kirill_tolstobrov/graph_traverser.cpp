@@ -14,16 +14,19 @@
 namespace {
 constexpr uni_cpp_practice::GraphPath::Distance DISTANCE_BETWEEN_NEIGHBOURS = 1;
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
-}  // namespace
 
-namespace uni_cpp_practice {
+struct VertexInfo {
+    uni_cpp_practice::VertexId previous_vertex_in_path;
+    uni_cpp_practice::GraphPath::Distance distance;
+    bool visited;
+  };
 
-VertexId GraphTraverser::next_vertex_to_check(
-    std::map<VertexId, VertexInfo>& vertices_info) const {
-  const auto& vertices = graph_.get_vertices();
+uni_cpp_practice::VertexId next_vertex_to_check(
+      std::map<uni_cpp_practice::VertexId, VertexInfo>& vertices_info, const uni_cpp_practice::Graph& graph){
+  const auto& vertices = graph.get_vertices();
 
-  GraphPath::Distance min_distance = INT32_MAX;
-  VertexId vertex_with_min_dist = vertices[0].id;
+  uni_cpp_practice::GraphPath::Distance min_distance = INT32_MAX;
+  uni_cpp_practice::VertexId vertex_with_min_dist = vertices[0].id;
 
   for (const auto& vertex : vertices) {
     if (!vertices_info[vertex.id].visited &&
@@ -35,6 +38,9 @@ VertexId GraphTraverser::next_vertex_to_check(
 
   return vertex_with_min_dist;
 }
+}  // namespace
+
+namespace uni_cpp_practice {
 
 GraphPath GraphTraverser::find_shortest_path(
     const VertexId& source_verex_id,
@@ -72,7 +78,7 @@ GraphPath GraphTraverser::find_shortest_path(
 
     vertices_info[current_vertex_id].visited = true;
 
-    current_vertex_id = next_vertex_to_check(vertices_info);
+    current_vertex_id = next_vertex_to_check(vertices_info, graph_);
   }
 
   const auto path = [&current_vertex_id, &destination_vertex_id,

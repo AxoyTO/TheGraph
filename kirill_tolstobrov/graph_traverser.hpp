@@ -19,14 +19,6 @@ class GraphTraverser {
  private:
   const Graph& graph_;
 
-  struct VertexInfo {
-    VertexId previous_vertex_in_path;
-    GraphPath::Distance distance;
-    bool visited;
-  };
-
-  VertexId next_vertex_to_check(
-      std::map<VertexId, VertexInfo>& vertices_info) const;
 };
 
 }  // namespace uni_cpp_practice
