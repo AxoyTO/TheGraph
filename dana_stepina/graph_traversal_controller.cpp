@@ -2,12 +2,11 @@
 
 #include <cassert>
 
-namespace uni_cource_cpp {
-
 namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }
 
+namespace uni_cource_cpp {
 GraphTraversalController::GraphTraversalController(
     const std::vector<Graph>& graphs)
     : graphs_(graphs) {
