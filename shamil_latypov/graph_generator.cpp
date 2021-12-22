@@ -205,18 +205,15 @@ Graph GraphGenerator::generate_graph() const {
   generate_vertices(graph, first_vertex_id);
 
   std::mutex paint_edges_block;
-  std::thread green_thread([&graph, &paint_edges_block]() {
-    generate_green_edges(graph, paint_edges_block);
-  });
-  std::thread blue_thread([&graph, &paint_edges_block]() {
-    generate_blue_edges(graph, paint_edges_block);
-  });
-  std::thread yellow_thread([&graph, &paint_edges_block]() {
-    generate_yellow_edges(graph, paint_edges_block);
-  });
-  std::thread red_thread([&graph, &paint_edges_block]() {
-    generate_red_edges(graph, paint_edges_block);
-  });
+  std::thread green_thread(generate_green_edges, std::ref(graph),
+                           std::ref(paint_edges_block));
+  std::thread blue_thread(generate_blue_edges, std::ref(graph),
+                          std::ref(paint_edges_block));
+  std::thread yellow_thread(generate_yellow_edges, std::ref(graph),
+                            std::ref(paint_edges_block));
+  std::thread red_thread(generate_red_edges, std::ref(graph),
+                         std::ref(paint_edges_block));
+
   green_thread.join();
   blue_thread.join();
   yellow_thread.join();
