@@ -5,7 +5,7 @@
 #include "logger.hpp"
 
 #include <chrono>
-// #include <filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -123,9 +123,9 @@ void write_to_file(const std::string& graph_string, const std::string& file) {
   out.close();
 }
 
-// void prepare_temp_directory() {
-//   std::filesystem::create_directory(FILENAME_FOLDER_PATH);
-// }
+void prepare_temp_directory() {
+  std::filesystem::create_directory(FILENAME_FOLDER_PATH);
+}
 
 std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
                                    int graphs_count,
@@ -159,7 +159,7 @@ int main() {
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
   const int threads_count = handle_threads_count_input();
-  // prepare_temp_directory();
+  prepare_temp_directory();
 
   const auto params = Params(depth, new_vertices_num);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
