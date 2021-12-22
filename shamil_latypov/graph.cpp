@@ -69,12 +69,13 @@ void Graph::add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
   }
 }
 
-void Graph::add_vertex() {
+VertexId Graph::add_vertex() {
   if (depth_map_.size() == 0) {
     depth_map_.push_back({});
   }
   const Vertex& new_vertex = vertices_.emplace_back(get_new_vertex_id());
   depth_map_[0].push_back(new_vertex.get_id());
+  return new_vertex.get_id();
 }
 
 const std::vector<Vertex>& Graph::get_vertices() const {
