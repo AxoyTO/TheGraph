@@ -46,7 +46,8 @@ string traversal_started_string(int graph_number) {
          ", Traversal Started";
 }
 
-string generation_finished_string(int graph_number, string graph_description) {
+string generation_finished_string(int graph_number,
+                                  const string& graph_description) {
   string finished_string = get_current_date_time() + ": Graph " +
                            to_string(graph_number) +
                            ", Generation Finished {\n";
@@ -57,7 +58,7 @@ string generation_finished_string(int graph_number, string graph_description) {
 }
 
 string traversal_finished_string(int graph_number,
-                                 std::vector<GraphPath> paths) {
+                                 const std::vector<GraphPath>& paths) {
   string finished_string = get_current_date_time() + ": Graph " +
                            to_string(graph_number) +
                            ", Traversal Finished, Paths: [\n";

@@ -34,7 +34,7 @@ class GraphTraversalController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   GraphTraversalController(const std::vector<Graph>& graphs)
