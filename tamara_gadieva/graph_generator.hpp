@@ -20,7 +20,9 @@ class GraphGenerator {
  private:
   const Params params_ = Params();
   void generate_gray_edges(Graph& graph, const VertexId& from_vertex_id) const;
-  void generate_gray_branch(Graph& graph, const VertexId& from_vertex_id, 
-    int current_depth, std::mutex& graph_mutex) const;
+  void generate_gray_branch(Graph& graph,
+                            const VertexId& from_vertex_id,
+                            int current_depth,
+                            std::mutex& graph_mutex) const;
 };
 }  // namespace uni_cource_cpp
