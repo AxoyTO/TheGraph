@@ -21,8 +21,8 @@ struct VertexInfo {
   bool visited;
 };
 
-uni_cpp_practice::VertexId next_vertex_to_check(
-    std::map<uni_cpp_practice::VertexId, VertexInfo>& vertices_info,
+uni_cpp_practice::VertexId next_vertex_id_to_check(
+    const std::map<uni_cpp_practice::VertexId, VertexInfo>& vertices_info,
     const uni_cpp_practice::Graph& graph) {
   const auto& vertices = graph.get_vertices();
 
@@ -30,9 +30,9 @@ uni_cpp_practice::VertexId next_vertex_to_check(
   uni_cpp_practice::VertexId vertex_with_min_dist = vertices[0].id;
 
   for (const auto& vertex : vertices) {
-    if (!vertices_info[vertex.id].visited &&
-        vertices_info[vertex.id].distance < min_distance) {
-      min_distance = vertices_info[vertex.id].distance;
+    if (!vertices_info.at(vertex.id).visited &&
+        vertices_info.at(vertex.id).distance < min_distance) {
+      min_distance = vertices_info.at(vertex.id).distance;
       vertex_with_min_dist = vertex.id;
     }
   }
@@ -79,7 +79,7 @@ GraphPath GraphTraverser::find_shortest_path(
 
     vertices_info[current_vertex_id].visited = true;
 
-    current_vertex_id = next_vertex_to_check(vertices_info, graph_);
+    current_vertex_id = next_vertex_id_to_check(vertices_info, graph_);
   }
 
   const auto path = [&current_vertex_id, &destination_vertex_id,
@@ -96,9 +96,9 @@ GraphPath GraphTraverser::find_shortest_path(
     std::reverse(result.begin(), result.end());
 
     return result;
-  };
+  }();
 
-  return GraphPath(path());
+  return GraphPath(path);
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths() const {
