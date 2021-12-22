@@ -35,12 +35,6 @@ std::string get_current_date_time() {
   return date_time_string.str();
 }
 
-Logger& prepare_logger() {
-  auto& logger = Logger::get_logger();
-  logger.set_file(FILENAME_FOLDER_PATH + FILENAME_LOG);
-  return logger;
-}
-
 std::string generation_started_string(int graph_num) {
   return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) +
          ", Generation Started";
@@ -160,7 +154,6 @@ int main() {
   const int graphs_count = handle_graphs_count_input();
   const int threads_count = handle_threads_count_input();
   prepare_temp_directory();
-  prepare_logger();
 
   const auto params = Params(depth, new_vertices_num);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
