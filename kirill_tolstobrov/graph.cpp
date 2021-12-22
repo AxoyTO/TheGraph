@@ -163,4 +163,23 @@ EdgeId Graph::get_new_edge_id() {
   return edge_id_counter_++;
 }
 
+std::vector<VertexId> Graph::get_vertex_neighbours(
+    const VertexId& vertex_id) const {
+  std::vector<VertexId> neighbours;
+
+  for (const auto& edge_id : vertices_[vertex_id].get_edge_ids()) {
+    const VertexId vertex1_id = edges_[edge_id].vertex1_id;
+    const VertexId vertex2_id = edges_[edge_id].vertex2_id;
+    if (vertex1_id == vertex2_id) {
+      continue;
+    }
+    const VertexId new_neighbour_id =
+        vertex_id != vertex1_id ? vertex1_id : vertex2_id;
+
+    neighbours.push_back(new_neighbour_id);
+  }
+
+  return neighbours;
+}
+
 }  // namespace uni_cpp_practice

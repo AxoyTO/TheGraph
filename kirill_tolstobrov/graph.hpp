@@ -46,6 +46,7 @@ class Graph {
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
   const std::map<Edge::Color, std::vector<EdgeId>>& get_colors_map() const;
+  std::vector<VertexId> get_vertex_neighbours(const VertexId& vertex_id) const;
 
   const Vertex& get_vertex(const VertexId& id) const;
   Vertex& get_vertex(const VertexId& id);
