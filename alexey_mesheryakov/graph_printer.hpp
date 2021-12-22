@@ -10,4 +10,10 @@ class GraphPrinter {
  private:
   const Graph& graph_;
 };
+
+namespace printing {
+std::string print_graph(const uni_course_cpp::Graph& graph);
+
+}  // namespace printing
+
 }  // namespace uni_course_cpp

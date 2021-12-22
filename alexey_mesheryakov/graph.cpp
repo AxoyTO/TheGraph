@@ -133,4 +133,13 @@ Edge::Color Graph::calculate_color(const VertexId& first_id,
     return Edge::Color::Red;
   throw std::runtime_error("Can't calculate color");
 }
+
+int Graph::get_count_of_colored_edges(const Edge::Color& color) const {
+  int count = 0;
+  for (const auto& edge : edges_)
+    if (edge.color == color)
+      count++;
+  return count;
+}
+
 }  // namespace uni_course_cpp

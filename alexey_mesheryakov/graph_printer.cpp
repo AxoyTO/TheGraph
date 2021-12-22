@@ -1,4 +1,5 @@
 #include "graph_printer.hpp"
+#include <array>
 #include <sstream>
 #include <string>
 namespace {
@@ -63,4 +64,34 @@ std::string GraphPrinter::print() const {
   buffer << "]}";
   return buffer.str();
 }
+
+namespace printing {
+
+std::string print_graph(const uni_course_cpp::Graph& graph) {
+  std::stringstream log_string;
+  log_string << "  depth: " << graph.get_depth() << ",\n";
+  log_string << "  vertices: " << graph.get_vertices().size() << ", [";
+
+  for (uni_course_cpp::Depth depth = 0; depth < graph.get_depth() - 1; depth++)
+    log_string << graph.get_vertex_ids_at_depth(depth).size() << ", ";
+  log_string << graph.get_vertex_ids_at_depth(graph.get_depth() - 1).size()
+             << "],\n"
+             << "  edges: " << graph.get_edges().size() << ", {";
+
+  const auto colors = std::array<uni_course_cpp::Edge::Color, 5>{
+      uni_course_cpp::Edge::Color::Gray, uni_course_cpp::Edge::Color::Green,
+      uni_course_cpp::Edge::Color::Blue, uni_course_cpp::Edge::Color::Yellow,
+      uni_course_cpp::Edge::Color::Red};
+  for (const auto& color : colors) {
+    log_string << edge_color_to_string(color) << ": "
+               << graph.get_count_of_colored_edges(color);
+    if (&color != colors.end() - 1) {
+      log_string << ", ";
+    }
+  }
+  log_string << "}\n}\n";
+  return log_string.str();
+}
+
+}  // namespace printing
 }  // namespace uni_course_cpp

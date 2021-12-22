@@ -56,6 +56,7 @@ class Graph {
   }  // without copy gives segfault
   const std::vector<VertexId>& get_vertex_ids_at_depth(
       const Depth& depth) const;
+  int get_count_of_colored_edges(const Edge::Color& color) const;
 
  private:
   std::vector<Edge> edges_;
