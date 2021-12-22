@@ -142,7 +142,7 @@ void Graph::bind_vertices(const VertexId& id1, const VertexId& id2) {
     depths_map_[0].erase(
         std::remove(depths_map_[0].begin(), depths_map_[0].end(), to_id),
         depths_map_[0].end());
-    depths_map_[depths_map_.size() - 1].push_back(to_id);
+    depths_map_[get_vertex(to_id).depth].push_back(to_id);
   }
 
   const auto& edge =
@@ -161,6 +161,25 @@ VertexId Graph::get_new_vertex_id() {
 }
 EdgeId Graph::get_new_edge_id() {
   return edge_id_counter_++;
+}
+
+std::vector<VertexId> Graph::get_vertex_neighbours(
+    const VertexId& vertex_id) const {
+  std::vector<VertexId> neighbours;
+
+  for (const auto& edge_id : vertices_[vertex_id].get_edge_ids()) {
+    const VertexId vertex1_id = edges_[edge_id].vertex1_id;
+    const VertexId vertex2_id = edges_[edge_id].vertex2_id;
+    if (vertex1_id == vertex2_id) {
+      continue;
+    }
+    const VertexId new_neighbour_id =
+        vertex_id != vertex1_id ? vertex1_id : vertex2_id;
+
+    neighbours.push_back(new_neighbour_id);
+  }
+
+  return neighbours;
 }
 
 }  // namespace uni_cpp_practice

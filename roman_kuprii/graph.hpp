@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace uni_cpp_practice {
@@ -53,22 +54,22 @@ class Graph {
                     const VertexId& to_vertex_id) const;
 
   void connect_vertices(const VertexId& from_vertex_id,
-                        const VertexId& to_vertex_id,
-                        bool initialization);
+                        const VertexId& to_vertex_id);
 
-  const std::vector<Edge>& get_edges() const { return edges_; }
-  const std::vector<Vertex>& get_vertices() const { return vertices_; }
+  const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
+  const std::unordered_map<VertexId, Vertex>& get_vertices() const {
+    return vertices_;
+  }
+  const std::vector<VertexId>& get_vertex_ids_at_depth(int depth) const;
 
-  int get_depth() const { return depth_; }
-  int get_vertices_num() const { return vertices_.size(); }
-  int get_edges_num() const { return edges_.size(); }
+  int get_depth() const { return depth_map_.size() - 1; }
 
   std::vector<EdgeId> get_edge_ids_with_color(const Edge::Color& color) const;
 
  private:
-  std::vector<Vertex> vertices_;
-  std::vector<Edge> edges_;
-  int depth_ = 0;
+  std::unordered_map<VertexId, Vertex> vertices_;
+  std::unordered_map<EdgeId, Edge> edges_;
+  std::vector<std::vector<VertexId>> depth_map_;
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
 

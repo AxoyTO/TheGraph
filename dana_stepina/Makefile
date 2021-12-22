@@ -4,7 +4,7 @@ CCFLAGS = -Werror -std=c++17 -g
 all: clean main format
 
 main:
-	$(CC) $(CCFLAGS) *.cpp -o main
+	$(CC) $(CCFLAGS) *.cpp -o main -lpthread
 
 format:
 	clang-format -i -style=Chromium *.hpp
