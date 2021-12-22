@@ -202,12 +202,12 @@ void traverse_graphs(const std::vector<uni_cpp_practice::Graph>& graphs) {
       uni_cpp_practice::GraphTraversalController(graphs);
 
   traversal_controller.traverse(
-      [](int index, uni_cpp_practice::Graph graph) {
+      [](int index, const uni_cpp_practice::Graph& graph) {
         auto& logger = prepare_logger();
         logger.log(traversal_start_string(index + 1));
       },
       [](int index, std::vector<uni_cpp_practice::GraphPath> paths,
-         uni_cpp_practice::Graph graph) {
+         const uni_cpp_practice::Graph& graph) {
         auto& logger = prepare_logger();
         logger.log(traversal_finish_string(index + 1, paths));
       });
