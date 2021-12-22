@@ -126,7 +126,7 @@ void write_file(const std::string& string, const std::string& name) {
 }  // namespace json
 }  // namespace printing
 
-Graph generate_graph(){
+Graph generate_graph() {
   Graph new_graph = Graph();
   for (int i = 0; i < kVerticesCount; i++) {
     new_graph.add_vertex();
