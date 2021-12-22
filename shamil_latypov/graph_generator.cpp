@@ -66,7 +66,7 @@ void generate_yellow_edges(Graph& graph, std::mutex& paint_edges_block) {
       for (const auto& vertex_id2 : *(depth + 1)) {
         const bool vertices_connected = [&graph, &paint_edges_block, vertex_id,
                                          vertex_id2]() {
-          std::lock_guard lock(paint_edges_block);
+          const std::lock_guard lock(paint_edges_block);
           return graph.vertices_connected(vertex_id, vertex_id2);
         }();
         if (!vertices_connected) {
@@ -146,14 +146,14 @@ void GraphGenerator::generate_vertices(Graph& graph,
   std::atomic<bool> should_terminate = false;
   std::mutex jobs_lock;
 
-  auto worker = [&should_terminate, &jobs_lock, &jobs]() {
+  const auto worker = [&should_terminate, &jobs_lock, &jobs]() {
     while (true) {
       if (should_terminate) {
         return;
       }
       const auto job_optional = [&jobs_lock,
                                  &jobs]() -> std::optional<JobCallback> {
-        std::lock_guard lock(jobs_lock);
+        const std::lock_guard lock(jobs_lock);
         if (!jobs.empty()) {
           const auto job = jobs.front();
           jobs.pop_front();
@@ -187,7 +187,7 @@ void GraphGenerator::generate_vertices(Graph& graph,
 
 Graph GraphGenerator::generate_graph() const {
   auto graph = Graph();
-  auto first_vertex_id = graph.add_vertex();
+  const auto first_vertex_id = graph.add_vertex();
 
   generate_vertices(graph, first_vertex_id);
 
