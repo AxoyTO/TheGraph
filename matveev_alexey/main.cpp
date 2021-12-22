@@ -80,7 +80,8 @@ std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
 }
 
 void prepareTempDirectory() {
-  std::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
+  std::filesystem::create_directory(
+      uni_course_cpp::config::TEMP_DIRECTORY_PATH);
 }
 }  // namespace
 
@@ -102,9 +103,9 @@ int main() {
     logger.log(genFinishedString(i, graph));
 
     const auto graph_printer = uni_course_cpp::GraphPrinter(graph);
-    write_to_file(
-        graph_printer.print(),
-        config::TEMP_DIRECTORY_PATH + "graph_" + std::to_string(i) + ".json");
+    write_to_file(graph_printer.print(),
+                  uni_course_cpp::config::TEMP_DIRECTORY_PATH + "graph_" +
+                      std::to_string(i) + ".json");
   }
 
   return 0;
