@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graph.hpp"
+#include "graph_traverser.hpp"
 
 #include <string>
 
@@ -9,6 +10,8 @@ class GraphPrinter {
  public:
   static std::string print_edge_color(const Graph::Edge::Color& color);
   static std::string print_graph_description(const Graph& graph);
+
+  static std::string print_path(const GraphTraverser::Path& path);
 
   explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
 

@@ -41,6 +41,25 @@ std::string GraphPrinter::print_graph_description(const Graph& graph) {
   return log_string.str();
 }
 
+std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
+  std::stringstream path_string;
+
+  path_string << "\t{vertices: [";
+  const auto& vertex_ids = path.vertex_ids;
+  const auto& last_vertex_id = vertex_ids.back();
+  for (const auto& vertex_id : vertex_ids) {
+    if (vertex_id != last_vertex_id)
+      path_string << ", ";
+    path_string << vertex_id;
+  }
+
+  path_string << "], distance: ";
+
+  path_string << path.distance << "}";
+
+  return path_string.str();
+}
+
 std::string GraphPrinter::print_vertex(const Graph::Vertex& vertex) const {
   std::string str_vertex = "\t  {\n\t\t\"id\":" + std::to_string(vertex.id) +
                            ",\n\t\t\"edge_ids\":[";
