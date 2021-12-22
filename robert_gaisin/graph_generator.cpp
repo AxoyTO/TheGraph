@@ -83,12 +83,15 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
     for (auto vertex_id = (*vertex_ids_at_depth).begin();
          vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_yellow)) {
-        const std::lock_guard lock(mutex);
+        const std::unique_lock ul(mutex);
         std::vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
             *(vertex_ids_at_depth + 1), *vertex_id, graph);
+        mutex.unlock();
         const int vertex_to_attach = get_random_vertex_id(vertices_to_connect);
         if (vertex_to_attach) {
+          mutex.lock();
           graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Yellow);
+          mutex.unlock();
         }
       }
     }
