@@ -2,6 +2,9 @@
 
 #include "graph.hpp"
 
+#include <mutex>
+
+namespace uni_cource_cpp {
 class GraphGenerator {
  public:
   struct Params {
@@ -17,5 +20,12 @@ class GraphGenerator {
   Graph generate() const;
 
  private:
+  void generate_grey_edges(Graph& graph) const;
+  void generate_gray_branch(Graph& graph,
+                            Depth depth,
+                            const VertexId& parent_vertex_id,
+                            std::mutex& mutex) const;
+
   const Params params_ = Params();
 };
+}  // namespace uni_cource_cpp
