@@ -35,6 +35,7 @@ float get_color_probability(const Edge::Color& color,
     case Edge::Color::Gray:
       return 1.0 - static_cast<float>(current_depth) / (max_depth - 1);
   }
+  throw std::runtime_error("Color doesn't exist");
 }
 
 bool is_lucky(float probability) {

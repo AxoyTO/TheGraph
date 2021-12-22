@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -70,13 +71,13 @@ class Graph {
     for (auto& vertex : vertices_)
       if (vertex.id == vertex_id)
         return vertex;
-    return INVALID_ID;
+    throw std::runtime_error("Vertex doesn't exist");
   }
   Edge& get_edge(const EdgeId& edge_id) {
     for (auto& edge : edges_)
       if (edge.id == edge_id)
         return edge;
-    return INVALID_ID;
+    throw std::runtime_error("Edge doesn't exist");
   }
   void set_depth_by_id(const VertexId& vertex_id, const Depth& depth) {
     vertices_[vertex_id].depth = depth;

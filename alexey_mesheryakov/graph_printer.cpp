@@ -19,6 +19,7 @@ std::string edge_color_to_string(const Edge::Color& color) {
     case Edge::Color::Yellow:
       return "yellow";
   }
+  throw std::runtime_error("Color doesn't exist");
 }
 
 std::string edge_to_string(const Edge& edge) {
