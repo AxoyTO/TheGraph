@@ -103,16 +103,16 @@ std::string print_graph(const Graph& graph) {
   auto edges = graph.edges();
   assert(edges.size() != 0);
   std::string string;
-  string += "{\n\t\"vertices\": [\n";
+  string += "{\n  \"vertices\": [\n";
   for (auto i = vertices.begin(); i != vertices.end() - 1; i++) {
-    string += "\t\t" + print_vertex(*i) + ",\n";
+    string += "    " + print_vertex(*i) + ",\n";
   }
-  string += "\t\t" + print_vertex(*(vertices.end() - 1)) + "\n" +
-            "\t],\n\t\"edges\": [\n";
+  string += "    " + print_vertex(*(vertices.end() - 1)) + "\n" +
+            "  ],\n  \"edges\": [\n";
   for (auto i = edges.begin(); i != edges.end() - 1; i++) {
-    string += "\t\t" + print_edge(*i) + ",\n";
+    string += "    " + print_edge(*i) + ",\n";
   }
-  string += "\t\t" + print_edge(*(edges.end() - 1)) + "\n" + "\t]\n}\n";
+  string += "    " + print_edge(*(edges.end() - 1)) + "\n" + "  ]\n}\n";
   return string;
 }
 
