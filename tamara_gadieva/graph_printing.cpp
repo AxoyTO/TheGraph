@@ -45,11 +45,11 @@ std::string edges_distribution(const Graph& graph) {
 }
 
 std::string graph_description(const Graph& graph) {
-  return "\tdepth: " + std::to_string(graph.get_depth()) +
-         ",\n\tvertices: {amount: " +
+  return "  depth: " + std::to_string(graph.get_depth()) +
+         ",\n  vertices: {amount: " +
          std::to_string(graph.get_vertices().size()) + ", distribution: [" +
          graph_printing::vertices_distribution(graph) +
-         "]},\n\tedges: {amount: " + std::to_string(graph.get_edges().size()) +
+         "]},\n  edges: {amount: " + std::to_string(graph.get_edges().size()) +
          ", distribution: {" + graph_printing::edges_distribution(graph) +
          "}}\n";
 }
