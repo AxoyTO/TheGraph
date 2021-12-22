@@ -330,8 +330,8 @@ class GraphGenerator {
   void generate_grey_edges(Graph& graph) {
     Graph::Depth depth = params_.depth();
     int new_vertices_count = params_.new_vertices_count();
-    std::random_device rd;
-    std::mt19937 generate(rd());
+    std::random_device random_device;
+    std::mt19937 generate(random_device());
     for (Graph::Depth depth_i = 0; depth_i < depth; ++depth_i) {
       std::bernoulli_distribution distribution(float(depth - depth_i) / depth);
       for (const auto& vertex : graph.get_vertices_on_depth(depth_i)) {
@@ -350,8 +350,8 @@ class GraphGenerator {
 
   void generate_green_edges(Graph& graph) {
     const auto& vertices = graph.vertices();
-    std::random_device rd;
-    std::mt19937 generate(rd());
+    std::random_device random_device;
+    std::mt19937 generate(random_device());
     std::bernoulli_distribution distribution(0.1);
     for (const auto& vertex : vertices) {
       if (distribution(generate))
@@ -361,15 +361,15 @@ class GraphGenerator {
 
   void generate_yellow_edges(Graph& graph) {
     Graph::Depth depth = params_.depth();
-    std::random_device rd;
-    std::mt19937 generate(rd());
+    std::random_device random_device;
+    std::mt19937 generate(random_device());
     for (Graph::Depth depth_i = 0; depth_i < depth - 1; ++depth_i) {
       std::bernoulli_distribution distribution(
           float(1) - (float(depth - 1 - depth_i) / (depth - 1)));
       for (const auto& vertex : graph.get_vertices_on_depth(depth_i)) {
         const auto& to_vertices = graph.get_vertices_on_depth(depth_i + 1);
         auto to_vertices_no_neighbors = std::vector<Graph::Vertex>();
-        
+
         for (const auto& not_neighbor_vertex : to_vertices) {
           if (!graph.is_connected(vertex.id, not_neighbor_vertex.id)) {
             to_vertices_no_neighbors.push_back(not_neighbor_vertex);
@@ -388,8 +388,8 @@ class GraphGenerator {
 
   void generate_red_edges(Graph& graph) {
     const auto& depth = params_.depth();
-    std::random_device rd;
-    std::mt19937 generate(rd());
+    std::random_device random_device;
+    std::mt19937 generate(random_device());
     std::bernoulli_distribution distribution(0.33);
     for (auto& vertex : graph.vertices()) {
       if (depth - vertex.depth >= 2) {
