@@ -3,6 +3,7 @@
 #include <iterator>
 #include <limits>
 #include <map>
+#include <mutex>
 #include <random>
 #include <set>
 #include <thread>
