@@ -35,7 +35,8 @@ void GraphGenerationController::generate(
     });
   }
 
-  for (int i = 0; i < threads_count_; i++) {
+  const auto workers_count = std::min(threads_count_, graphs_count_);
+  for (int i = 0; i < workers_count; i++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
          &jobs_mutex_ = jobs_mutex_]() -> std::optional<JobCallback> {
