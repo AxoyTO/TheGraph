@@ -20,8 +20,7 @@ using std::vector;
 using VertexId = uni_cource_cpp::Graph::VertexId;
 using uni_cource_cpp::GraphPath;
 const GraphPath::Distance MAX_DISTANCE = std::numeric_limits<int>::max();
-;
-const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+const int kMaxWorkersCount = std::thread::hardware_concurrency();
 
 GraphPath GraphTraverser::find_shortest_path(
     const VertexId& source_vertex_id,
@@ -65,28 +64,27 @@ GraphPath GraphTraverser::find_shortest_path(
     }
   }
 
-  return GraphPath(vector<GraphPath::Distance>());
+  throw std::runtime_error("Unforeseen situation");
 }
 
 vector<GraphPath> GraphTraverser::find_all_paths() const {
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
-  vector<GraphPath> all_paths;
-  mutex new_path_mutex;
+  vector<GraphPath> paths;
+  mutex paths_mutex;
   std::atomic<int> jobs_done = 0;
   const auto vertex_ids_on_last_depth =
       graph_.get_vertex_ids_on_depth(graph_.depth());
 
   for (const auto& to_vertex_id : vertex_ids_on_last_depth) {
-    jobs.push_back(
-        [this, &to_vertex_id, &jobs_done, &new_path_mutex, &all_paths]() {
-          const auto new_path = find_shortest_path(0, to_vertex_id);
-          {
-            const lock_guard lock(new_path_mutex);
-            all_paths.push_back(new_path);
-          }
-          jobs_done++;
-        });
+    jobs.push_back([this, &to_vertex_id, &jobs_done, &paths_mutex, &paths]() {
+      const auto new_path = find_shortest_path(0, to_vertex_id);
+      {
+        const lock_guard lock(paths_mutex);
+        paths.push_back(new_path);
+      }
+      jobs_done++;
+    });
   }
   std::atomic<bool> should_terminate = false;
   mutex jobs_mutex;
@@ -113,7 +111,7 @@ vector<GraphPath> GraphTraverser::find_all_paths() const {
   };
 
   const auto threads_count =
-      std::min<int>(MAX_WORKERS_COUNT, vertex_ids_on_last_depth.size());
+      std::min<int>(kMaxWorkersCount, vertex_ids_on_last_depth.size());
   auto threads = vector<thread>();
   threads.reserve(threads_count);
 
@@ -128,7 +126,7 @@ vector<GraphPath> GraphTraverser::find_all_paths() const {
   for (auto& thread : threads) {
     thread.join();
   }
-  return all_paths;
+  return paths;
 };
 
 }  // namespace uni_cource_cpp

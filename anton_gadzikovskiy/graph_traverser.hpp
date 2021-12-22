@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graph.hpp"
 #include "graph_path.hpp"
 
 namespace uni_cource_cpp {
@@ -15,7 +16,7 @@ class GraphTraverser {
   std::vector<GraphPath> find_all_paths() const;
 
  private:
-  const Graph graph_;
+  const Graph& graph_;
 };
 
 }  // namespace uni_cource_cpp

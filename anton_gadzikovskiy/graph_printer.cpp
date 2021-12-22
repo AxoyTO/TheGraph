@@ -81,8 +81,8 @@ std::string graph_printing::print_graph_description(const Graph& graph) {
       uni_cource_cpp::Graph::Edge::Color::Red};
 
   for (const auto& color : colors) {
-    graph_description =
-        graph_description + print_edge_color(color) + ": " +
+    graph_description +=
+        print_edge_color(color) + ": " +
         std::to_string(graph.get_colored_edge_ids(color).size()) + ", ";
   }
   graph_description =
@@ -91,12 +91,12 @@ std::string graph_printing::print_graph_description(const Graph& graph) {
 }
 
 std::string graph_printing::print_path(const GraphPath& path) {
-  std::string path_string = "\t{vertices: [";
-  for (const auto& vertex_id : path.vertex_ids) {
-    path_string = path_string + std::to_string(vertex_id) + ", ";
+  std::string path_string = "  {vertices: [";
+  for (const auto& vertex_id : path.get_path_vertex_ids()) {
+    path_string += std::to_string(vertex_id) + ", ";
   }
   path_string = path_string.substr(0, path_string.size() - 2) +
-                "],  distance: " + std::to_string(path.distance()) + "}";
+                "], distance: " + std::to_string(path.distance()) + "}";
   return path_string;
 }
 

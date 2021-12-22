@@ -24,7 +24,6 @@ using uni_cource_cpp::GraphGenerationController;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::GraphPath;
 using uni_cource_cpp::GraphTraversalController;
-using uni_cource_cpp::GraphTraverser;
 using uni_cource_cpp::Logger;
 const int kMaxAvailableThreads = std::thread::hardware_concurrency();
 string get_current_date_time() {
@@ -52,7 +51,7 @@ string generation_finished_string(int graph_number,
                            to_string(graph_number) +
                            ", Generation Finished {\n";
 
-  finished_string = finished_string + graph_description + "\n}";
+  finished_string += graph_description + "\n}";
 
   return finished_string;
 }
@@ -64,8 +63,7 @@ string traversal_finished_string(int graph_number,
                            ", Traversal Finished, Paths: [\n";
 
   for (const auto& path : paths) {
-    finished_string = finished_string +
-                      uni_cource_cpp::graph_printing::print_path(path) + ",\n";
+    finished_string += uni_cource_cpp::graph_printing::print_path(path) + ",\n";
   }
 
   finished_string =
@@ -114,12 +112,10 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
   auto& logger = Logger::get_logger();
 
   traversal_controller.traverse(
-      [](int index) {
-        auto& logger = Logger::get_logger();
+      [&logger, &graphs](int index) {
         logger.log(traversal_started_string(index));
       },
-      [](int index, std::vector<GraphPath> paths) {
-        auto& logger = Logger::get_logger();
+      [&logger, &graphs](int index, std::vector<GraphPath> paths) {
         logger.log(traversal_finished_string(index, paths));
       });
 }
