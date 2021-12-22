@@ -57,7 +57,7 @@ class Graph {
   const std::vector<VertexId>& get_vertices_in_depth(int depth) const;
 
   void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id);
-  void add_vertex();
+  VertexId add_vertex();
 
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
