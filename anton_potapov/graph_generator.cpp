@@ -21,6 +21,7 @@ namespace {
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::get_random_vertex_id;
 using uni_cource_cpp::Graph;
+using uni_cource_cpp::Vertex;
 using uni_cource_cpp::VertexId;
 
 constexpr float FLOAT_COMPARISON_EPS = std::numeric_limits<float>::epsilon();
@@ -124,26 +125,33 @@ void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
 
 void generate_green_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
   graph_read_write_mutex.lock();
-  for (const auto& [vertex_id, vertex] : graph.vertices()) {
+  const auto& vertices = graph.vertices();
+  graph_read_write_mutex.unlock();
+  for (const auto& [vertex_id, vertex] : vertices) {
     if (is_lucky(GREEN_EDGE_PROB)) {
+      const std::lock_guard graph_lock(graph_read_write_mutex);
       graph.add_edge(vertex_id, vertex_id, EdgeColor::Green);
     }
   }
-  graph_read_write_mutex.unlock();
 }
 
 void generate_blue_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
   graph_read_write_mutex.lock();
-  for (int cur_depth = 0; cur_depth <= graph.depth(); ++cur_depth) {
+  const auto graph_depth = graph.depth();
+  graph_read_write_mutex.unlock();
+  for (int cur_depth = 0; cur_depth <= graph_depth; ++cur_depth) {
     // copy is needed since get_vertices_at_depth() returns a const reference to
     // a changing object
+    graph_read_write_mutex.lock();
     const auto same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
+    graph_read_write_mutex.unlock();
     for (auto it = same_depth_vertices.begin();
          std::next(it) != same_depth_vertices.end(); ++it) {
       const auto& vertex1_id = *it;
       const auto& vertex2_id = *std::next(it);
       if (is_lucky(BLUE_EDGE_PROB) &&
           !graph.is_connected(vertex1_id, vertex2_id)) {
+        const std::lock_guard graph_lock(graph_read_write_mutex);
         graph.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
       }
     }
@@ -153,16 +161,20 @@ void generate_blue_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
 
 void generate_yellow_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
   graph_read_write_mutex.lock();
-  if (graph.depth() <= 1) {
+  const auto graph_depth = graph.depth();
+  graph_read_write_mutex.unlock();
+  if (graph_depth <= 1) {
     return;
   }
-  for (int cur_depth = 0; cur_depth + 1 <= graph.depth(); ++cur_depth) {
+  for (int cur_depth = 0; cur_depth + 1 <= graph_depth; ++cur_depth) {
     // copies are needed since get_vertices_at_depth() returns a const reference
     // to a changing object
+    graph_read_write_mutex.lock();
     const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
     const auto next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
+    graph_read_write_mutex.unlock();
     for (const auto& cur_vertex_id : cur_depth_vertices) {
-      if (is_lucky((float)cur_depth / (graph.depth() - 1))) {
+      if (is_lucky((float)cur_depth / (graph_depth - 1))) {
         std::set<VertexId> not_connected_vertices;
         for (const auto& next_vertex_id : next_depth_vertices) {
           if (!graph.is_connected(cur_vertex_id, next_vertex_id)) {
@@ -170,6 +182,7 @@ void generate_yellow_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
           }
         }
         if (!not_connected_vertices.empty()) {
+          const std::lock_guard graph_lock(graph_read_write_mutex);
           graph.add_edge(cur_vertex_id,
                          get_random_vertex_id(not_connected_vertices),
                          EdgeColor::Yellow);
@@ -177,11 +190,9 @@ void generate_yellow_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
       }
     }
   }
-  graph_read_write_mutex.unlock();
 }
 
-void generate_red_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
-  graph_read_write_mutex.lock();
+void generate_red_edges(Graph& graph) {
   for (int cur_depth = 0; cur_depth + 2 <= graph.depth(); ++cur_depth) {
     // copy is needed since get_vertices_at_depth() returns a const reference to
     // a changing object
@@ -200,7 +211,6 @@ void generate_red_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
       }
     }
   }
-  graph_read_write_mutex.unlock();
 }
 }  // namespace
 
@@ -221,12 +231,10 @@ Graph GraphGenerator::generate_graph() const {
   std::thread yellow_edges_generation_thread(&generate_yellow_edges,
                                              std::ref(graph),
                                              std::ref(graph_read_write_mutex));
-  std::thread red_edges_generation_thread(&generate_red_edges, std::ref(graph),
-                                          std::ref(graph_read_write_mutex));
   green_edges_generation_thread.join();
   blue_edges_generation_thread.join();
   yellow_edges_generation_thread.join();
-  red_edges_generation_thread.join();
+  generate_red_edges(graph);
   return graph;
 }
 }  // namespace uni_cource_cpp
