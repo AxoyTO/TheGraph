@@ -63,8 +63,6 @@ Edge::Colors Graph::calculateEdgeColor(const VertexId& vertex_id1,
     return Edge::Colors::Gray;
   } else if (vertex_id1 == vertex_id2) {
     return Edge::Colors::Green;
-  } else if (vertexDepth(vertex_id2) == vertexDepth(vertex_id1)) {
-    return Edge::Colors::Blue;
   } else if (std::abs(vertexDepth(vertex_id2) - vertexDepth(vertex_id1)) == 1) {
     return Edge::Colors::Yellow;
   } else {

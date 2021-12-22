@@ -36,8 +36,8 @@ Logger::~Logger() {
 }
 
 Logger::Logger()
-    : file_stream_(uni_course_cpp::config::TEMP_DIRECTORY_PATH +
-                   uni_course_cpp::config::LOG_FILE_NAME) {
+    : file_stream_(config::TEMP_DIRECTORY_PATH +
+                   config::LOG_FILE_NAME) {
   if (!file_stream_.is_open()) {
     throw "Error during log file opening";
   }

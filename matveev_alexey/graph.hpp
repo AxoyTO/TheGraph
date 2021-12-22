@@ -16,9 +16,9 @@ struct Vertex {
 };
 
 struct Edge {
-  enum class Colors { Gray, Green, Blue, Yellow, Red };
-  static constexpr std::array<Edge::Colors, 5> ALL_COLORS = {
-      Colors::Gray, Colors::Green, Colors::Blue, Colors::Yellow, Colors::Red};
+  enum class Colors { Gray, Green, Yellow, Red };
+  static constexpr std::array<Edge::Colors, 4> ALL_COLORS = {
+      Colors::Gray, Colors::Green, Colors::Yellow, Colors::Red};
   const EdgeId id;
   const VertexId vertex_id1;
   const VertexId vertex_id2;

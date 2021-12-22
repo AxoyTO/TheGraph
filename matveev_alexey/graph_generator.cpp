@@ -5,8 +5,7 @@
 #include "graph.hpp"
 
 namespace {
-constexpr float GREEN_PROBABILITY = 0.1, BLUE_PROBABILITY = 0.25,
-                RED_PROBABILITY = 0.33;
+constexpr float GREEN_PROBABILITY = 0.1, RED_PROBABILITY = 0.33;
 float getGreyProbability(float step, int depth) {
   return 1.0 - step * depth;
 }
@@ -64,10 +63,6 @@ void GraphGenerator::generateColorEdges(Graph& graph) const {
       graph.addEdge(vertex.id, vertex.id);
     }
     const auto& next_vertex_id = vertex.id + 1;
-    if (randomValue(BLUE_PROBABILITY) && graph.hasVertex(next_vertex_id) &&
-        graph.vertexDepth(next_vertex_id) == vertex_depth) {
-      graph.addEdge(vertex.id, next_vertex_id);
-    }
     if (vertex_depth < graph.depth() &&
         randomValue(getYellowProbability(graph, vertex.id))) {
       std::vector<VertexId> next_layer;

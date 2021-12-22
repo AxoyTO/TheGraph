@@ -55,8 +55,6 @@ std::string GraphPrinter::colorToString(const Edge::Colors& color) {
       return "gray";
     case Edge::Colors::Green:
       return "green";
-    case Edge::Colors::Blue:
-      return "blue";
     case Edge::Colors::Yellow:
       return "yellow";
     case Edge::Colors::Red:
