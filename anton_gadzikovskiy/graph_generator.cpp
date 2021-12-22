@@ -104,7 +104,8 @@ namespace uni_cource_cpp {
 void GraphGenerator::generate_gray_branch(
     Graph& graph,
     const Graph::VertexId& parent_vertex_id,
-    mutex& new_edge_mutex) const {
+    mutex& new_edge_mutex,
+    const Graph::Depth& depth) const {
   const auto new_vertex_id = [&graph, &new_edge_mutex, &parent_vertex_id]() {
     const lock_guard lock(new_edge_mutex);
     const auto new_vertex_id = graph.add_vertex();
@@ -112,15 +113,15 @@ void GraphGenerator::generate_gray_branch(
     return new_vertex_id;
   }();
 
-  if (graph.depth() == params_.depth())
+  if (depth == params_.depth())
     return;
 
   const double step = 100 / (double)params_.depth();
-  const double probability = 100 - step * graph.depth();
+  const double probability = 100 - step * depth;
 
   for (int i = 0; i < params_.new_vertices_count(); i++) {
     if (is_generated(probability)) {
-      generate_gray_branch(graph, new_vertex_id, new_edge_mutex);
+      generate_gray_branch(graph, new_vertex_id, new_edge_mutex, depth + 1);
     }
   }
 }
@@ -136,7 +137,7 @@ void GraphGenerator::generate_gray_edges(
   for (int i = 0; i < params_.new_vertices_count(); i++) {
     jobs.push_back(
         [this, &graph, &new_edge_mutex, &jobs_done, root_vertex_id]() {
-          generate_gray_branch(graph, root_vertex_id, new_edge_mutex);
+          generate_gray_branch(graph, root_vertex_id, new_edge_mutex, 1);
           jobs_done++;
         });
   }
