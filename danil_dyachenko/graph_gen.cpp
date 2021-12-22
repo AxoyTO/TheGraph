@@ -9,6 +9,7 @@ using VertexId = int;
 using EdgeId = int;
 
 constexpr int INVALID_ID = -1;
+constexpr int kVerticesCount = 14;
 
 class Graph {
  public:
@@ -125,31 +126,34 @@ void write_file(const std::string& string, const std::string& name) {
 }  // namespace json
 }  // namespace printing
 
-constexpr int kVerticesCount = 14;
+Graph generate_graph(){
+  Graph new_graph = Graph();
+  for (int i = 0; i < kVerticesCount; i++) {
+    new_graph.add_vertex();
+  }
+  new_graph.add_edge(0, 1);
+  new_graph.add_edge(0, 2);
+  new_graph.add_edge(0, 3);
+  new_graph.add_edge(1, 4);
+  new_graph.add_edge(1, 5);
+  new_graph.add_edge(1, 6);
+  new_graph.add_edge(2, 7);
+  new_graph.add_edge(2, 8);
+  new_graph.add_edge(3, 9);
+  new_graph.add_edge(4, 10);
+  new_graph.add_edge(5, 10);
+  new_graph.add_edge(6, 10);
+  new_graph.add_edge(7, 11);
+  new_graph.add_edge(8, 11);
+  new_graph.add_edge(9, 12);
+  new_graph.add_edge(10, 13);
+  new_graph.add_edge(11, 13);
+  new_graph.add_edge(12, 13);
+  return new_graph;
+}
 
 int main(void) {
-  auto my_graph = Graph();
-  for (int i = 0; i < kVerticesCount; i++) {
-    my_graph.add_vertex();
-  }
-  my_graph.add_edge(0, 1);
-  my_graph.add_edge(0, 2);
-  my_graph.add_edge(0, 3);
-  my_graph.add_edge(1, 4);
-  my_graph.add_edge(1, 5);
-  my_graph.add_edge(1, 6);
-  my_graph.add_edge(2, 7);
-  my_graph.add_edge(2, 8);
-  my_graph.add_edge(3, 9);
-  my_graph.add_edge(4, 10);
-  my_graph.add_edge(5, 10);
-  my_graph.add_edge(6, 10);
-  my_graph.add_edge(7, 11);
-  my_graph.add_edge(8, 11);
-  my_graph.add_edge(9, 12);
-  my_graph.add_edge(10, 13);
-  my_graph.add_edge(11, 13);
-  my_graph.add_edge(12, 13);
+  const auto my_graph = generate_graph();
   printing::json::write_file(printing::print_graph(my_graph), "my_graph.json");
   return 0;
 }
