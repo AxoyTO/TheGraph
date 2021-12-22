@@ -91,7 +91,6 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
         if (vertex_to_attach) {
           mutex.lock();
           graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Yellow);
-          
         }
       }
     }
