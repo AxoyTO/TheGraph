@@ -111,16 +111,17 @@ void GraphGenerator::generate_gray_edges(Graph& graph,
 
   // Создаем и запускаем потоки с воркерами
   const auto threads_counter =
-      std::max(MAX_THREADS_COUNT, params_.new_vertices_num);
+      std::min(MAX_THREADS_COUNT, params_.new_vertices_num);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_counter);
   for (int i = 0; i < threads_counter; ++i) {
     threads.push_back(std::thread(worker));
   }
-
+  // Ждем, когда все ветви будут сгенерированы
   while (jobs_counter < params_.new_vertices_num) {
   }
 
+  // Останавливем всех воркеров и потоки
   should_terminate = true;
   for (auto& thread : threads) {
     thread.join();
