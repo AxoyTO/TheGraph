@@ -1,13 +1,18 @@
+#include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <mutex>
+#include <queue>
 #include <random>
 #include <set>
 #include <thread>
 #include <utility>
+#include <vector>
 
 #include "graph.hpp"
 #include "graph_generator.hpp"
@@ -34,22 +39,86 @@ bool is_lucky(float probability) {
   return bernoullu_distribution_var(rng);
 }
 
+void generate_vertices_branch(Graph& graph,
+                              std::mutex& graph_mutex,
+                              int max_depth,
+                              int new_vertices_num,
+                              const VertexId& previous_vertex_id,
+                              int current_depth) {
+  if (current_depth > max_depth) {
+    return;
+  }
+  VertexId new_vertex_id;
+  {
+    const std::lock_guard graph_lock(graph_mutex);
+    new_vertex_id = graph.add_vertex();
+    graph.add_edge(previous_vertex_id, new_vertex_id);
+  }
+  for (int i = 0; i < new_vertices_num; ++i) {
+    if (max_depth > 0 && is_lucky(1.0 - (float)current_depth / max_depth)) {
+      generate_vertices_branch(graph, graph_mutex, max_depth, new_vertices_num,
+                               new_vertex_id, current_depth + 1);
+    }
+  }
+}
+
 void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
-  graph.add_vertex();
-  for (int current_depth = 0;
-       current_depth <= graph.depth() && current_depth < depth;
-       ++current_depth) {
-    // copy is needed since get_vertices_at_depth() returns a const reference to
-    // a changing object
-    const auto same_depth_vertices = graph.get_vertices_at_depth(current_depth);
-    for (const auto& current_vertex_id : same_depth_vertices) {
-      for (int i = 0; i < new_vertices_num; ++i) {
-        if (depth > 0 && is_lucky(1.0 - (float)current_depth / depth)) {
-          const VertexId new_vertex_id = graph.add_vertex();
-          graph.add_edge(current_vertex_id, new_vertex_id);
+  const VertexId first_vertex_id = graph.add_vertex();
+  std::mutex graph_mutex;
+
+  using JobCallback = std::function<void()>;
+  auto jobs = std::queue<JobCallback>();
+
+  for (int i = 0; i < new_vertices_num; ++i) {
+    jobs.push(
+        [&graph, &depth, &new_vertices_num, &first_vertex_id, &graph_mutex]() {
+          generate_vertices_branch(graph, graph_mutex, depth, new_vertices_num,
+                                   first_vertex_id, 1);
+        });
+  }
+
+  std::atomic<bool> should_terminate = false;
+  std::mutex queue_mutex;
+  auto worker = [&should_terminate, &queue_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional = [&queue_mutex,
+                                 &jobs]() -> std::optional<JobCallback> {
+        const std::lock_guard queue_lock(queue_mutex);
+        if (!jobs.empty()) {
+          const auto job = jobs.front();
+          jobs.pop();
+          return job;
         }
+        return std::nullopt;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
       }
     }
+  };
+
+  const auto threads_count = std::min(MAX_THREADS_COUNT, new_vertices_num);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
+
+  for (int i = 0; i < threads_count; ++i) {
+    threads.emplace_back(worker);
+  }
+
+  while (true) {
+    const std::lock_guard queue_lock(queue_mutex);
+    if (jobs.empty()) {
+      break;
+    }
+  }
+
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
   }
 }
 
