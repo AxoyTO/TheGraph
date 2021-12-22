@@ -340,8 +340,6 @@ class GraphGenerator {
           if (distribution(generate)) {
             const auto& new_vertex = graph.add_vertex();
             graph.add_edge(vertex.id, new_vertex.id);
-            // std::cout << "New vertex:\n\tid = " << new_vertex.id << ",\tdepth
-            // = "<< new_vertex.depth << std::endl;
           }
         }
       }
