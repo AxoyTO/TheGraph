@@ -1,12 +1,10 @@
 #pragma once
-#include <string>
-#include <vector>
 #include "graph.hpp"
 namespace uni_course_cpp {
 class GraphGenerator {
  public:
   struct Params {
-    explicit Params(Depth _depth = 0, int _new_vertices_num = 0)
+    explicit Params(const Depth& _depth = 0, int _new_vertices_num = 0)
         : depth(_depth), new_vertices_num(_new_vertices_num) {}
 
     const Depth depth = 0;

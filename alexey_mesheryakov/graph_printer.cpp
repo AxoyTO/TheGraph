@@ -33,7 +33,7 @@ std::string edge_to_string(const Edge& edge) {
 std::string vertex_to_string(const Vertex& vertex) {
   std::stringstream buffer;
   buffer << "{\"id\":" << vertex.id << ",\"edge_ids\":[";
-  auto edge_ids = vertex.get_edge_ids();
+  const auto& edge_ids = vertex.get_edge_ids();
   for (int i = 0; i < edge_ids.size() - 1; i++)
     buffer << edge_ids[i] << ",";
   buffer << edge_ids[edge_ids.size() - 1] << "],\"depth\":" << vertex.depth
@@ -44,20 +44,20 @@ std::string vertex_to_string(const Vertex& vertex) {
 namespace uni_course_cpp {
 std::string GraphPrinter::print() const {
   std::stringstream buffer;
-  const vector<Vertex> vertices = graph_.get_vertices();
-  const vector<Edge> edges = graph_.get_edges();
+  const auto& vertices = graph_.get_vertices();
+  const auto& edges = graph_.get_edges();
   buffer << "{\"depth\":" << graph_.get_depth() << ",\"vertices\":[";
-  for (int j = 0; j < vertices.size(); j++) {
-    Vertex vertex = vertices[j];
+  for (unsigned int i = 0; i < vertices.size(); i++) {
+    const auto& vertex = vertices[i];
     buffer << vertex_to_string(vertex);
-    if (j != vertices.size() - 1)
+    if (i != vertices.size() - 1)
       buffer << ",";
   }
   buffer << "],\"edges\":[";
-  for (int j = 0; j < edges.size(); j++) {
-    Edge edge = edges[j];
+  for (unsigned int i = 0; i < edges.size(); i++) {
+    const auto& edge = edges[i];
     buffer << edge_to_string(edge);
-    if (j != edges.size() - 1)
+    if (i != edges.size() - 1)
       buffer << ",";
   }
   buffer << "]}";

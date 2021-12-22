@@ -7,7 +7,6 @@ using uni_course_cpp::Depth;
 using uni_course_cpp::Graph;
 using uni_course_cpp::GraphGenerator;
 using uni_course_cpp::GraphPrinter;
-// using uni_cpp_practice::Logger;
 
 Depth handle_depth_input() {
   Depth depth;
@@ -33,8 +32,8 @@ int handle_new_vertices_num_input() {
 }
 
 int main() {
-  int new_vertices_num = handle_new_vertices_num_input();
-  Depth depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const Depth depth = handle_depth_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
   const auto generator = GraphGenerator(params);
   const auto graph = generator.generate_graph();

@@ -1,12 +1,6 @@
 #include "graph_generator.hpp"
 #include <assert.h>
-#include <stdlib.h>
-#include <time.h>
-#include <algorithm>
-#include <fstream>
 #include <functional>
-#include <iostream>
-#include <limits>
 #include <random>
 #include <sstream>
 #include <string>
@@ -40,7 +34,8 @@ float get_color_probability(const Edge::Color& color,
 
 bool is_lucky(float probability) {
   assert(probability + std::numeric_limits<float>::epsilon() >= 0 &&
-         probability - std::numeric_limits<float>::epsilon() <= 1.0 &&
+         "given probability is incorrect");
+  assert(probability - std::numeric_limits<float>::epsilon() <= 1.0 &&
          "given probability is incorrect");
   static std::knuth_b rand_engine{};
   std::mt19937 rng{rand_engine()};
@@ -57,7 +52,7 @@ int get_random_number(int size) {
 
 void generate_green_edges(Graph& graph) {
   for (Depth depth = 1; depth < graph.get_depth(); depth++) {
-    for (const auto vertex_id : graph.get_vertex_ids_at_depth(depth))
+    for (const auto& vertex_id : graph.get_vertex_ids_at_depth(depth))
       if (is_lucky(get_color_probability(Edge::Color::Green))) {
         graph.add_edge(vertex_id, vertex_id);
       }
@@ -65,11 +60,10 @@ void generate_green_edges(Graph& graph) {
 }
 void generate_blue_edges(Graph& graph) {
   for (Depth depth = 1; depth < graph.get_depth(); depth++) {
-    const auto level = graph.get_vertex_ids_at_depth(depth);
-    for (int j = 0; j < level.size(); j++) {
-      if (j < level.size() - 1 &&
-          is_lucky(get_color_probability(Edge::Color::Blue))) {
-        graph.add_edge(level[j], level[j + 1]);
+    const auto& level = graph.get_vertex_ids_at_depth(depth);
+    for (int i = 0; i < level.size() - 1; i++) {
+      if (is_lucky(get_color_probability(Edge::Color::Blue))) {
+        graph.add_edge(level[i], level[i + 1]);
       }
     }
   }
@@ -77,9 +71,10 @@ void generate_blue_edges(Graph& graph) {
 
 void generate_red_edges(Graph& graph) {
   for (Depth depth = 1; depth < graph.get_depth() - 2; depth++) {
-    for (const auto vertex_id : graph.get_vertex_ids_at_depth(depth)) {
+    for (const auto& vertex_id : graph.get_vertex_ids_at_depth(depth)) {
       if (is_lucky(get_color_probability(Edge::Color::Red))) {
-        auto level_for_red_edge = graph.get_vertex_ids_at_depth(depth + 2);
+        const auto& level_for_red_edge =
+            graph.get_vertex_ids_at_depth(depth + 2);
         if (level_for_red_edge.size() > 0)
           graph.add_edge(
               vertex_id,
@@ -90,23 +85,23 @@ void generate_red_edges(Graph& graph) {
 }
 
 vector<VertexId> get_unconnected_vertex_ids(
-    Graph& graph,
+    const Graph& graph,
     const VertexId& vertex_id,
     const vector<VertexId>& vertex_ids) {
-  vector<VertexId> new_vertices(0);
+  vector<VertexId> new_vertices;
   for (const auto& new_vertex_id : vertex_ids)
     if (!graph.edge_exist(vertex_id, new_vertex_id))
       new_vertices.push_back(new_vertex_id);
   return new_vertices;
 }
 
-void generate_yellow_edges(Graph& graph, const Depth& max_depth) {
+void generate_yellow_edges(Graph& graph) {
   for (Depth depth = 1; depth < graph.get_depth() - 1; depth++) {
-    const auto level = graph.get_vertex_ids_at_depth(depth);
-    for (const auto vertex_id : level) {
-      if (is_lucky(
-              get_color_probability(Edge::Color::Yellow, depth, max_depth))) {
-        auto new_vertices = get_unconnected_vertex_ids(
+    const auto& level = graph.get_vertex_ids_at_depth(depth);
+    for (const auto& vertex_id : level) {
+      if (is_lucky(get_color_probability(Edge::Color::Yellow, depth,
+                                         graph.get_depth() - 1))) {
+        const auto new_vertices = get_unconnected_vertex_ids(
             graph, vertex_id, graph.get_vertex_ids_at_depth(depth + 1));
         if (new_vertices.size() > 0)
           graph.add_edge(vertex_id,
@@ -119,32 +114,31 @@ void generate_yellow_edges(Graph& graph, const Depth& max_depth) {
 namespace uni_course_cpp {
 void GraphGenerator::generate_vertices(Graph& graph) const {
   graph.add_vertex();
-  bool level_added = true;
   for (Depth depth = 1; depth < params_.depth; depth++) {
-    if (level_added) {
-      auto level = graph.get_vertex_ids_at_depth(depth - 1);
-      level_added = false;
-      for (const auto& vertex_id : level)
-        for (int j = 0; j < params_.new_vertices_num; j++) {
-          if (is_lucky(get_color_probability(Edge::Color::Gray, depth - 1,
-                                             params_.depth))) {
-            VertexId new_vertex_id = graph.add_vertex();
-            graph.add_edge(vertex_id, new_vertex_id);
-            level_added = true;
-          }
+    const auto level = graph.get_vertex_ids_at_depth(depth - 1);
+    // copy because 0 level is modifying
+    bool level_added = false;
+    for (const auto& vertex_id : level)
+      for (int j = 0; j < params_.new_vertices_num; j++) {
+        if (is_lucky(get_color_probability(Edge::Color::Gray, depth - 1,
+                                           params_.depth))) {
+          const VertexId new_vertex_id = graph.add_vertex();
+          graph.add_edge(vertex_id, new_vertex_id);
+          level_added = true;
         }
-    }
+      }
+    if (!level_added)
+      break;
   }
 }
 
 Graph GraphGenerator::generate_graph() const {
-  srand(time(0));
   Graph graph;
   generate_vertices(graph);
   generate_green_edges(graph);
   generate_blue_edges(graph);
   generate_red_edges(graph);
-  generate_yellow_edges(graph, params_.depth);
+  generate_yellow_edges(graph);
   return graph;
 }
 }  // namespace uni_course_cpp
