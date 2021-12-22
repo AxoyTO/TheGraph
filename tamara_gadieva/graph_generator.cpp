@@ -3,7 +3,6 @@
 #include <atomic>
 #include <functional>
 #include <list>
-#include <mutex>
 #include <random>
 #include <stdexcept>
 #include <thread>
@@ -47,43 +46,38 @@ const std::vector<VertexId> get_unconnected_vertices(
   }
   return unconnected_vertices;
 }
+} //namespace
 
-void generate_gray_branch(Graph& graph,
+namespace uni_cource_cpp {
+void GraphGenerator::generate_gray_branch(Graph& graph,
                           const VertexId& from_vertex_id,
                           int current_depth,
-                          int max_depth,
-                          int new_vertices_num,
-                          std::mutex& graph_mutex) {
+                          std::mutex& graph_mutex) const {
   const auto& new_vertex_id = [&graph, &from_vertex_id, &graph_mutex]() {
     const std::lock_guard lock(graph_mutex);
     const auto& to_vertex_id = graph.add_vertex();
     graph.add_edge(from_vertex_id, to_vertex_id);
     return to_vertex_id;
   }();
-  if (current_depth == max_depth)
+  if (current_depth == params_.depth)
     return;
   const float prob_of_creating_new_vertex =
-      (float)(max_depth - current_depth) / (float)max_depth;
-  for (int i = 0; i < new_vertices_num; i++)
+      (float)(params_.depth - current_depth) / (float)params_.depth;
+  for (int i = 0; i < params_.new_vertices_num; i++)
     if (should_create_new_element(prob_of_creating_new_vertex))
-      generate_gray_branch(graph, new_vertex_id, current_depth + 1, max_depth,
-                           new_vertices_num, graph_mutex);
+      generate_gray_branch(graph, new_vertex_id, current_depth + 1, graph_mutex);
 }
 
-void generate_gray_edges(Graph& graph,
-                         int max_depth,
-                         int new_vertices_num,
-                         const VertexId& from_vertex_id) {
+void GraphGenerator::generate_gray_edges(Graph& graph,
+                         const VertexId& from_vertex_id) const {
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
   std::atomic<int> jobs_counter = 0;
   std::mutex graph_mutex;
 
-  for (int i = 0; i < new_vertices_num; i++) {
-    jobs.emplace_back([&graph, &graph_mutex, &jobs_counter, &from_vertex_id,
-                       max_depth, new_vertices_num]() {
-      generate_gray_branch(graph, from_vertex_id, 1, max_depth,
-                           new_vertices_num, graph_mutex);
+  for (int i = 0; i < params_.new_vertices_num; i++) {
+    jobs.emplace_back([this, &graph, &graph_mutex, &jobs_counter, &from_vertex_id]() {
+      generate_gray_branch(graph, from_vertex_id, 1, graph_mutex);
       jobs_counter++;
     });
   }
@@ -114,14 +108,14 @@ void generate_gray_edges(Graph& graph,
   };
 
   // Создаем и запускаем потоки с воркерами
-  const auto threads_counter = std::max(MAX_THREADS_COUNT, new_vertices_num);
+  const auto threads_counter = std::max(MAX_THREADS_COUNT, params_.new_vertices_num);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_counter);
   for (int i = 0; i < threads_counter; ++i) {
     threads.push_back(std::thread(worker));
   }
 
-  while (jobs_counter < new_vertices_num) {
+  while (jobs_counter < params_.new_vertices_num) {
   }
 
   should_terminate = true;
@@ -180,15 +174,13 @@ void generate_red_edges(Graph& graph, std::mutex& graph_mutex) {
       }
   }
 }
-}  // namespace
 
-namespace uni_cource_cpp {
 Graph GraphGenerator::generate() const {
   Graph graph;
   if (params_.depth == 0 || params_.new_vertices_num == 0)
     return graph;
   const auto root_id = graph.add_vertex();
-  generate_gray_edges(graph, params_.depth, params_.new_vertices_num, root_id);
+  generate_gray_edges(graph, root_id);
   std::mutex graph_mutex;
   std::thread green_tread(generate_green_edges, std::ref(graph),
                           std::ref(graph_mutex));
