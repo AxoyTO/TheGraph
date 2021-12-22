@@ -135,10 +135,10 @@ bool Graph::vertices_connected(const VertexId& v1_id,
 }
 
 int Graph::get_vertices_cnt() const {
-  return vert_num_ - 1;
+  return vertices_.size();
 }
 int Graph::get_edges_cnt() const {
-  return edge_num_ - 1;
+  return edges_.size();
 }
 
 const std::vector<EdgeId>& Graph::get_colored_edges(
