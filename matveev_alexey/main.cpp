@@ -1,6 +1,3 @@
-//#include <experimental/filesystem> - в комметариях то, с чем я реально
-//компилировал но на что ругается гит в соседних строчках - вариант, на который
-//ругается локальная машина
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -49,11 +46,6 @@ int handleNewGraphsCountInput() {
   return new_graphs_num;
 }
 
-uni_course_cpp::Logger& prepareLogger() {
-  uni_course_cpp::Logger& log = uni_course_cpp::Logger::getLogger();
-  return log;
-}
-
 void write_to_file(const std::string& string, const std::string& file_name) {
   std::ofstream file(file_name);
   file << string;
@@ -88,7 +80,6 @@ std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
 }
 
 void prepareTempDirectory() {
-  // std::experimental::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
   std::filesystem::create_directory(config::TEMP_DIRECTORY_PATH);
 }
 }  // namespace
@@ -103,7 +94,7 @@ int main() {
       uni_course_cpp::GraphGenerator::Params(depth, new_vertexes_num);
   const auto generator = uni_course_cpp::GraphGenerator(params);
 
-  auto& logger = prepareLogger();
+  auto& logger = uni_course_cpp::Logger::getLogger();
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(genStartedString(i));

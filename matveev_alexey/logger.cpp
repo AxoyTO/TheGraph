@@ -35,7 +35,7 @@ Logger::~Logger() {
   file_stream_.close();
 }
 
-Logger::Logger() : file_stream_(config::getLogFilePath()) {
+Logger::Logger() : file_stream_(config::TEMP_DIRECTORY_PATH + config::LOG_FILE_NAME) {
   if (!file_stream_.is_open()) {
     throw "Error during log file opening";
   }
