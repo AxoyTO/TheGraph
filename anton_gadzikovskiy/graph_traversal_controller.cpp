@@ -23,13 +23,13 @@ void GraphTraversalController::traverse(
                      &jobs_done, &graphs_ = graphs_, i]() {
       {
         const lock_guard lock(traversal_started_mutex);
-        traversal_started_callback(i);
+        traversal_started_callback(i, graphs_[i]);
       }
       GraphTraverser graph_traverser(graphs_[i]);
       const auto found_paths = graph_traverser.find_all_paths();
       {
         const lock_guard lock(traversal_finished_mutex);
-        traversal_finished_callback(i, std::move(found_paths));
+        traversal_finished_callback(i, graphs_[i], std::move(found_paths));
       }
       jobs_done++;
     });

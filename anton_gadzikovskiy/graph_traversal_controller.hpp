@@ -13,9 +13,9 @@ namespace uni_cource_cpp {
 class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
-  using TraversalStartedCallback = std::function<void(int)>;
+  using TraversalStartedCallback = std::function<void(int, const Graph& graph)>;
   using TraversalFinishedCallback =
-      std::function<void(int, std::vector<GraphPath>)>;
+      std::function<void(int, const Graph& graph, std::vector<GraphPath>)>;
 
   class Worker {
    public:
