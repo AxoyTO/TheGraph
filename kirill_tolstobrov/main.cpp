@@ -1,199 +1,230 @@
-#include <array>
+#include <algorithm>
 #include <cassert>
+#include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <random>
+#include <sstream>
 #include <vector>
 
-using VertexId = int;
-using EdgeId = int;
+#include "graph.hpp"
+#include "graph_generation_controller.hpp"
+#include "graph_generator.hpp"
+#include "graph_path.hpp"
+#include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
 
-class Vertex {
- public:
-  explicit Vertex(const VertexId& init_id = 0) : id(init_id) {}
-  bool check_edge_presence(const EdgeId& edge_id) const {
-    for (const auto& id : edge_ids_) {
-      if (edge_id == id) {
-        return true;
-      }
+#include "logger.hpp"
+
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
+}
+
+std::string print_paths(const std::vector<uni_cpp_practice::GraphPath>& paths) {
+  std::string result = "";
+  for (int i = 0; i < paths.size(); i++) {
+    result += uni_cpp_practice::GraphPrinter::print_path(paths[i]);
+    if (i != paths.size() - 1) {
+      result += ",\n";
     }
-    return false;
   }
-  void add_edge_id(const EdgeId& edge_id) {
-    assert(!check_edge_presence(edge_id) &&
-           "Attemptig to add added edge to vertex: Error.");
-    edge_ids_.push_back(edge_id);
-  }
-  operator std::string() const {
-    std::string result = "";
-    result += "{\n\"id\": " + std::to_string(id);
-    result += ",\n\"edge_ids\": [";
+  return result;
+}
 
-    for (int i = 0; i < edge_ids_.size(); i++) {
-      result += std::to_string(edge_ids_[i]);
-      if (i == edge_ids_.size() - 1) {
-        result += "]\n";
-      } else {
-        result += ", ";
-      }
+const std::string logger_start_string(int graph_number) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Generation Started\n";
+  return string.str();
+}
+
+const std::string logger_finish_string(int graph_number,
+                                       const uni_cpp_practice::Graph& graph) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Generation Finished {\n";
+  const auto& depths_map = graph.depths_map_;
+  string << " depth: " << depths_map.size() - 1 << ",\n";
+
+  std::stringstream vertices_string;
+  vertices_string << "[";
+  for (int i = 0; i < depths_map.size(); i++) {
+    vertices_string << depths_map[i].size();
+    if (i != depths_map.size() - 1) {
+      vertices_string << ", ";
     }
-    result += "}";
-    return result;
   }
+  vertices_string << "]";
+  string << " vertices: " << graph.get_vertices().size() << ", "
+         << vertices_string.str() << ",\n";
 
-  const VertexId id;
-
- private:
-  std::vector<EdgeId> edge_ids_;
-};
-
-class Edge {
- public:
-  Edge(const EdgeId& init_id, const VertexId& v1_init, const VertexId& v2_init)
-      : id(init_id), vertex1_id(v1_init), vertex2_id(v2_init){};
-  operator std::string() const {
-    std::string result = "";
-    result += "{\n\"id\": " + std::to_string(id);
-    result += ",\n\"vertex_ids\": ";
-
-    result += "[" + std::to_string(vertex1_id);
-    result += ", " + std::to_string(vertex2_id);
-    result += "]\n}";
-
-    return result;
-  }
-
-  const EdgeId id;
-  const VertexId vertex1_id;
-  const VertexId vertex2_id;
-};
-
-class Graph {
- public:
-  void add_new_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
-
-  bool check_vertex_existence(const VertexId& vertex_id) const {
-    for (const auto& vertex : vertices_) {
-      if (vertex_id == vertex.id) {
-        return true;
-      }
+  std::stringstream edges_string;
+  edges_string << "{";
+  const auto& colors = graph.get_colors_map();
+  for (auto it = colors.begin(); it != colors.end(); it++) {
+    if (it != colors.begin()) {
+      edges_string << ", ";
     }
-    return false;
+    edges_string << uni_cpp_practice::GraphPrinter::color_to_string(it->first)
+                 << ": " << (it->second).size();
   }
+  edges_string << "}";
+  string << " edges: " << graph.get_edges().size() << ", " << edges_string.str()
+         << ",\n";
 
-  bool are_vertices_connected(const VertexId& id1, const VertexId& id2) const {
-    assert(check_vertex_existence(id1) &&
-           "Attemptig to access to nonexistent vertex: Error.");
-    assert(check_vertex_existence(id2) &&
-           "Attemptig to access to nonexistent vertex: Error.");
-    if (connections_map_.find(id1) == connections_map_.end()) {
-      return false;
-    }
-    for (const auto& edge_id : connections_map_.at(id1)) {
-      if (edges_[edge_id].vertex1_id == id2 ||
-          edges_[edge_id].vertex2_id == id2) {
-        return true;
-      }
-    }
-    return false;
+  string << "}\n\n";
+
+  return string.str();
+}
+
+std::string traversal_start_string(int graph_number) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Traversal Started\n";
+  return string.str();
+}
+
+std::string traversal_finish_string(
+    int graph_number,
+    std::vector<uni_cpp_practice::GraphPath> paths) {
+  std::stringstream string;
+  string << get_current_date_time() << ": Graph " << graph_number
+         << ", Traversal Finished, Paths: [\n";
+  string << print_paths(paths) << "\n]\n";
+  return string.str();
+}
+
+int handle_depth_input() {
+  int depth;
+  std::cout << "Enter the depth:" << std::endl;
+  std::cin >> depth;
+  while (depth < 0) {
+    std::cout << "Depth can't be negative" << std::endl;
+    std::cout << "Enter the depth:" << std::endl;
+    std::cin >> depth;
   }
+  return depth;
+}
 
-  void bind_vertices(const VertexId& id1, const VertexId& id2) {
-    assert(check_vertex_existence(id1) &&
-           "Attemptig to access to nonexistent vertex: Error.");
-    assert(check_vertex_existence(id2) &&
-           "Attemptig to access to nonexistent vertex: Error.");
-    assert(!are_vertices_connected(id1, id2) &&
-           "Attemptig to connect connected vertices: Error.");
-    const auto& edge = edges_.emplace_back(get_new_edge_id(), id1, id2);
-    connections_map_[id1].push_back(edge.id);
-    connections_map_[id2].push_back(edge.id);
-    vertices_[id1].add_edge_id(edge.id);
-    vertices_[id2].add_edge_id(edge.id);
+int handle_new_vertices_num_input() {
+  int new_vertices_num;
+  std::cout << "Enter max amount of vertices genereted from one vertex:"
+            << std::endl;
+  std::cin >> new_vertices_num;
+  while (new_vertices_num < 0) {
+    std::cout
+        << "Max amount of vertices genereted from one vertex can't be negative"
+        << std::endl;
+    std::cout << "Enter max amount of vertices genereted from one vertex:"
+              << std::endl;
+    std::cin >> new_vertices_num;
   }
+  return new_vertices_num;
+}
 
-  operator std::string() const {
-    std::string result = "{\n  \"vertices\": [\n";
-
-    for (int i = 0; i < vertices_.size(); i++) {
-      result += std::string(vertices_[i]);
-      if (i != vertices_.size() - 1)
-        result += ",\n";
-    }
-
-    result += "\n  ],\n  \"edges\": [\n";
-
-    for (int i = 0; i < edges_.size(); i++) {
-      result += std::string(edges_[i]);
-      if (i != edges_.size() - 1)
-        result += ",\n";
-    }
-
-    result += "\n  ]\n}";
-    return result;
+int handle_graphs_count_input() {
+  int graphs_count;
+  std::cout << "Enter number of graphs:" << std::endl;
+  std::cin >> graphs_count;
+  while (graphs_count < 0) {
+    std::cout << "Number of graphs can't be negative" << std::endl;
+    std::cout << "Enter number of graphs:" << std::endl;
+    std::cin >> graphs_count;
   }
+  return graphs_count;
+}
 
- private:
-  std::vector<Edge> edges_;
-  std::vector<Vertex> vertices_;
-
-  VertexId vertex_id_counter_ = 0;
-  EdgeId edge_id_counter_ = 0;
-
-  // connections_map: vertex1 -> edge -> vertex2
-  std::map<VertexId, std::vector<EdgeId>> connections_map_;
-
-  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-  EdgeId get_new_edge_id() { return edge_id_counter_++; }
-};
-
-constexpr int VERTICES_AMOUNT = 14;
-constexpr int CONNECTIONS_AMOUNT = 18;
-
-Graph generate_custom_graph(int vert_number,
-                            const std::array<std::pair<VertexId, VertexId>,
-                                             CONNECTIONS_AMOUNT>& connections) {
-  Graph graph = Graph();
-  for (int i = 0; i < vert_number; i++) {
-    graph.add_new_vertex();
+int handle_threads_count_input() {
+  int threads_count;
+  std::cout << "Enter number of threads:" << std::endl;
+  std::cin >> threads_count;
+  while (threads_count < 0) {
+    std::cout << "Number of threads can't be negative" << std::endl;
+    std::cout << "Enter number of threads:" << std::endl;
+    std::cin >> threads_count;
   }
-  for (const auto& connection : connections) {
-    graph.bind_vertices(connection.first, connection.second);
+  return threads_count;
+}
+
+uni_cpp_practice::Logger& prepare_logger() {
+  std::filesystem::create_directory("temp");
+  auto& logger = uni_cpp_practice::Logger::get_instance();
+  logger.set_file("temp/log.txt");
+  return logger;
+}
+
+void write_to_file(const std::string& string, const std::string& filename) {
+  std::ofstream file;
+  file.open(filename);
+
+  if (file.is_open()) {
+    file << string << std::endl;
+    file.close();
   }
-  return graph;
+}
+
+std::vector<uni_cpp_practice::Graph> generate_graphs(
+    const uni_cpp_practice::GraphGenerator::Params& params,
+    int graphs_count,
+    int threads_count) {
+  auto generation_controller = uni_cpp_practice::GraphGenerationController(
+      threads_count, graphs_count, params);
+
+  auto& logger = prepare_logger();
+
+  auto graphs = std::vector<uni_cpp_practice::Graph>();
+  graphs.reserve(graphs_count);
+
+  generation_controller.generate(
+      [&logger](int index) { logger.log(logger_start_string(index + 1)); },
+      [&logger, &graphs](int index, uni_cpp_practice::Graph graph) {
+        logger.log(logger_finish_string(index + 1, graph));
+        graphs.push_back(graph);
+        const uni_cpp_practice::GraphPrinter graph_printer(graph);
+        write_to_file(graph_printer.print(),
+                      "temp/graph_" + std::to_string(index + 1) + ".json");
+      });
+
+  return graphs;
+}
+
+void traverse_graphs(const std::vector<uni_cpp_practice::Graph>& graphs) {
+  auto traversal_controller =
+      uni_cpp_practice::GraphTraversalController(graphs);
+
+  traversal_controller.traverse(
+      [](int index, const uni_cpp_practice::Graph& graph) {
+        auto& logger = prepare_logger();
+        logger.log(traversal_start_string(index + 1));
+      },
+      [](int index, std::vector<uni_cpp_practice::GraphPath> paths,
+         const uni_cpp_practice::Graph& graph) {
+        auto& logger = prepare_logger();
+        logger.log(traversal_finish_string(index + 1, paths));
+      });
 }
 
 int main() {
-  const std::array<std::pair<VertexId, VertexId>, CONNECTIONS_AMOUNT>
-      graph_connections{{{0, 1},
-                         {0, 2},
-                         {0, 3},
-                         {1, 4},
-                         {1, 5},
-                         {1, 6},
-                         {2, 7},
-                         {2, 8},
-                         {3, 9},
-                         {4, 10},
-                         {5, 10},
-                         {6, 10},
-                         {7, 11},
-                         {8, 11},
-                         {9, 12},
-                         {10, 13},
-                         {11, 13},
-                         {12, 13}}};
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
 
-  const Graph graph = generate_custom_graph(VERTICES_AMOUNT, graph_connections);
+  const uni_cpp_practice::GraphGenerator::Params params(depth,
+                                                        new_vertices_num);
 
-  std::ofstream file;
-  file.open("graph.json");
+  const auto graphs = generate_graphs(params, graphs_count, threads_count);
 
-  if (file.is_open()) {
-    file << std::string(graph) << std::endl;
-    file.close();
-  }
+  traverse_graphs(graphs);
 
   return 0;
 }

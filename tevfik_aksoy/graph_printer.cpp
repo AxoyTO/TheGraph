@@ -1,4 +1,5 @@
 #include "graph_printer.hpp"
+#include <sstream>
 
 namespace {
 
@@ -46,4 +47,18 @@ std::string GraphPrinter::print() const {
   json_string += "\n  ]\n}\n";
   return json_string;
 }
+
+std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
+  std::stringstream ss;
+  std::string path_string = "  {vertices: [";
+  ss << path_string;
+  for (int i = 0; i < path.vertex_ids.size(); i++) {
+    ss << std::to_string(path.vertex_ids[i]);
+    if (i != path.vertex_ids.size() - 1)
+      ss << ",";
+  }
+  ss << "], distance: " + std::to_string(path.distance) + "}";
+  return ss.str();
+}
+
 }  // namespace uni_cpp_practice

@@ -82,12 +82,20 @@ Edge::Color Graph::calculate_color_for_edge(const Vertex& source,
   throw std::runtime_error("Failed to calculate edge color");
 }
 
-Vertex& Graph::get_vertex(const VertexId& id) {
+const Vertex& Graph::get_vertex(const VertexId& id) const {
   for (auto& vertex : vertices_) {
     if (id == vertex.id)
       return vertex;
   }
   throw std::runtime_error("Vertex not found!");
+}
+
+const Edge& Graph::get_edge(const EdgeId& id) const {
+  for (auto& edge : edges_) {
+    if (id == edge.id)
+      return edge;
+  }
+  throw std::runtime_error("Edge not found!");
 }
 
 void Graph::insert_edge(const VertexId& source_id,
@@ -137,6 +145,22 @@ bool Graph::are_vertices_connected(const VertexId& source,
           return true;
     }
   return false;
+}
+
+std::vector<VertexId> Graph::get_adjacent_vertex_ids(
+    const VertexId& vertex_id) const {
+  std::vector<VertexId> adjacent_vertices;
+  const auto& vertex = std::move(get_vertex(vertex_id));
+  const auto vertex_edges = vertex.get_edge_ids();
+
+  for (const auto& edge_id : vertex_edges) {
+    Edge edge = get_edge(edge_id);
+    const auto connected_vertex_id =
+        edge.source == vertex.id ? edge.destination : edge.source;
+    adjacent_vertices.push_back(connected_vertex_id);
+  }
+
+  return adjacent_vertices;
 }
 
 const std::vector<EdgeId>& Graph::get_colored_edges(
