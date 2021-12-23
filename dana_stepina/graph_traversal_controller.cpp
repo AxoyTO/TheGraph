@@ -91,7 +91,7 @@ void GraphTraversalController::Worker::start() {
           }
 
           const auto job_optional = get_job_callback_();
-          if (job_optional.has_value()) 
+          if (job_optional.has_value())
             job_optional.value()();
         }
       });

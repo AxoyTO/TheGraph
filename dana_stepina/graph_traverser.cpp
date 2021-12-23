@@ -29,16 +29,16 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
 
   int vertices_number = graph.get_vertices().size();
   const auto& source_vertex = graph.get_vertices().at(source_vertex_id);
-  
+
   std::vector<VertexId> vertices(vertices_number, UNVISITED);
   vertices[source_vertex_id] = VISITED;
-  
+
   std::vector<Distance> distance(vertices_number, MAX_DISTANCE);
   distance[source_vertex_id] = 0;
-  
+
   std::queue<Graph::Vertex> vertices_queue;
   vertices_queue.push(source_vertex);
-  
+
   std::vector<std::vector<VertexId>> all_pathes(vertices_number);
   std::vector<VertexId> source_vector(1, source_vertex_id);
   all_pathes[source_vertex_id] = source_vector;
@@ -108,7 +108,7 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
 
         return job;
       }();
-      
+
       if (job_optional.has_value()) {
         const auto& job = job_optional.value();
         job();

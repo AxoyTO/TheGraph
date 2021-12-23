@@ -45,7 +45,7 @@ class GraphTraversalController {
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   const std::vector<Graph>& graphs_;
-  
+
   std::mutex start_callback_mutex_;
   std::mutex finish_callback_mutex_;
   std::mutex get_job_mutex_;
