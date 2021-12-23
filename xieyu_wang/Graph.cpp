@@ -1,7 +1,7 @@
 #include "Graph.hpp"
 #include <cassert>
 #include <stdexcept>
-namespace uni_cpp_practice {
+namespace uni_course_cpp {
 const Vertex& Graph::addVertex() {
   return vertices_.emplace_back(getNextVertexId());
   ;
@@ -107,7 +107,7 @@ const Edge& Graph::getEdge(int id) {
   throw std::runtime_error("No such vertex");
 }
 
-int Graph::getNumEdgeByColor(Edge::Color color) {
+int Graph::getNumEdgeByColor(const Edge::Color color) {
   int sum = 0;
   for (const auto& edge : edges_) {
     if (edge.color == color) {
@@ -121,4 +121,4 @@ const std::vector<Edge>& Graph::getEdges() {
   return edges_;
 }
 
-}  // namespace uni_cpp_practice
+}  // namespace uni_course_cpp

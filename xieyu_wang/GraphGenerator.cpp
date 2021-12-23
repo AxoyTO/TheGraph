@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-namespace uni_cpp_practice {
+namespace uni_course_cpp {
 constexpr float GREEN_EDGE_PROBABILITY = 0.10;
 constexpr float BLUE_EDGE_PROBABILITY = 0.25;
 constexpr float RED_EDGE_PROBABILITY = 0.33;
@@ -143,4 +143,4 @@ int getRandomVertexId(const std::vector<int> destinationLevelIds) {
   return destinationLevelIds[vertexIndex(gen)];
 }
 
-}  // namespace uni_cpp_practice
+}  // namespace uni_course_cpp

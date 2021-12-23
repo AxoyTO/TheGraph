@@ -1,7 +1,7 @@
 #pragma once
 #include "Edge.hpp"
 #include "Vertex.hpp"
-namespace uni_cpp_practice {
+namespace uni_course_cpp {
 class Graph {
  public:
   const std::vector<Vertex>& getVertices() const;
@@ -11,7 +11,7 @@ class Graph {
   bool hasVertex(int idFind);
   bool isConnected(int fromVertexId, int toVertexId);
   std::vector<int> getVertexIdsAtDepth(int depth);
-  int getNumEdgeByColor(Edge::Color color);
+  int getNumEdgeByColor(const Edge::Color color);
   const std::vector<Edge>& getEdges();
 
  private:
@@ -24,4 +24,4 @@ class Graph {
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
 };
-}  // namespace uni_cpp_practice
+}  // namespace uni_course_cpp

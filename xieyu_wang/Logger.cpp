@@ -1,23 +1,13 @@
 #include "Logger.hpp"
 #include <iostream>
+#include "Config.hpp"
+namespace uni_course_cpp {
 
-namespace uni_cpp_practice {
-void Logger::setFile(const std::optional<std::string>& filename) {
-  if (!filename.has_value()) {
-    if (file_.has_value()) {
-      file_->close();
-      file_ = std::nullopt;
-    }
-    return;
+Logger::Logger() : file_(config::loggerFilePath()) {
+  if (!file_->is_open()) {
+    throw std::runtime_error("Error to open/read log");
   }
-
-  if (file_.has_value()) {
-    file_->close();
-  }
-
-  file_ = std::ofstream(filename.value());
-  if (!file_->is_open())
-    throw std::runtime_error("Unable to open file");
+  file_->clear();
 }
 
 void Logger::log(const std::string& string) {
@@ -35,4 +25,4 @@ Logger::~Logger() {
     }
 }
 
-}  // namespace uni_cpp_practice
+}  // namespace uni_course_cpp

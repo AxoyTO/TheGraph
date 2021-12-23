@@ -1,6 +1,6 @@
 #include "Vertex.hpp"
 #include <cassert>
-namespace uni_cpp_practice {
+namespace uni_course_cpp {
 Vertex::Vertex(int vId) : id(vId){};
 void Vertex::addEdgeId(int eId) {
   assert(!hasEdgeId(eId) && "Edge Id already exists");
@@ -30,4 +30,4 @@ const std::vector<int>& Vertex::getEdgeIds() const {
   return edgeIds_;
 }
 
-}  // namespace uni_cpp_practice
+}  // namespace uni_course_cpp
