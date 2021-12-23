@@ -48,9 +48,9 @@ std::string GraphPrinter::print_path(const GraphTraverser::Path& path) {
   const auto& vertex_ids = path.vertex_ids;
   const auto& last_vertex_id = vertex_ids.back();
   for (const auto& vertex_id : vertex_ids) {
+    path_string << vertex_id;
     if (vertex_id != last_vertex_id)
       path_string << ", ";
-    path_string << vertex_id;
   }
 
   path_string << "], distance: ";

@@ -1,22 +1,22 @@
 #pragma once
 
-#include "graph_traverser.hpp"
-
 #include <atomic>
 #include <functional>
 #include <list>
 #include <mutex>
+#include <optional>
 #include <thread>
 
-namespace uni_cource_cpp {
+#include "graph_traverser.hpp"
 
+namespace uni_cource_cpp {
 class GraphTraversalController {
  public:
   using JobCallback = std::function<void()>;
   using GetJobCallback = std::function<std::optional<JobCallback>()>;
-  using TraversalStartedCallback = std::function<void(int, const Graph&)>;
-  using TraversalFinishedCallback =
-      std::function<void(int, std::vector<GraphTraverser::Path>, const Graph&)>;
+  using GenStartedCallback = std::function<void(int)>;
+  using GenFinishedCallback =
+      std::function<void(int, const std::vector<GraphTraverser::Path>&)>;
 
   class Worker {
    public:
@@ -38,16 +38,16 @@ class GraphTraversalController {
 
   GraphTraversalController(const std::vector<Graph>& graphs);
 
-  void traverse(const TraversalStartedCallback& traversal_started_callback,
-                const TraversalFinishedCallback& traversal_finished_callback);
+  void traverse_graphs(const GenStartedCallback& gen_started_callback,
+                       const GenFinishedCallback& gen_finished_callback);
 
  private:
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   const std::vector<Graph>& graphs_;
-  std::mutex mutex_jobs_;
-  std::mutex mutex_start_callback_;
-  std::mutex mutex_finish_callback_;
+  
+  std::mutex start_callback_mutex_;
+  std::mutex finish_callback_mutex_;
+  std::mutex get_job_mutex_;
 };
-
 }  // namespace uni_cource_cpp
