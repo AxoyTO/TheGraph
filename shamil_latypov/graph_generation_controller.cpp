@@ -63,15 +63,16 @@ void GraphGenerationController::generate(
 
 void GraphGenerationController::Worker::start() {
   assert(state_ != State::Working && "Worker doesnt Idle");
+  state_ = State::Working;
   thread_ = std::thread(
       [this, &state_ = state_, &get_job_callback_ = get_job_callback_]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
+            state_ = State::Idle;
             return;
           }
           const auto job_optional = get_job_callback_();
           if (job_optional.has_value()) {
-            state_ = State::Working;
             const auto& job = job_optional.value();
             job();
           }
