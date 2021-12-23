@@ -10,10 +10,6 @@
 #include "graph.hpp"
 #include "graph_path.hpp"
 
-//
-#include <iostream>
-//
-
 namespace {
 
 using uni_cource_cpp::Graph;
@@ -108,13 +104,13 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
   std::atomic<int> paths_found = 0;
   std::mutex new_path_lock;
 
-  for (const auto& vert_ids : graph_.get_vertices_in_depth(graph_.get_depth())) {
+  for (const auto& vert_ids :
+       graph_.get_vertices_in_depth(graph_.get_depth())) {
     jobs.emplace_back(
         [this, &vert_ids, &paths_found, &new_path_lock, &graph_paths]() {
           GraphPath new_path = find_shortest_path(FIRST_VERTEX, vert_ids);
           {
             std::lock_guard lock(new_path_lock);
-            //print_path(new_path);
             graph_paths.push_back(new_path);
           }
           paths_found++;

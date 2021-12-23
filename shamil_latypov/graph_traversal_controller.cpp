@@ -1,5 +1,6 @@
 #include "graph_traversal_controller.hpp"
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <mutex>
 #include <optional>
