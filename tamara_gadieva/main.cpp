@@ -122,14 +122,11 @@ std::vector<Graph> generate_graphs(int graphs_count,
   auto& logger = Logger::get_instance();
 
   auto graphs = std::vector<Graph>(graphs_count);
-  // graphs.reserve(graphs_count);
-  // graphs.resize(graphs_count);
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
       [&logger, &graphs](int i, Graph graph) {
         logger.log(generation_finished_string(i, graph));
-        // graphs.emplace(graphs.begin() + i, graph);
         const std::string file_name =
             std::string(uni_cource_cpp::config::TEMP_FOLDER_PATH) + "graph_" +
             std::to_string(i) + ".json";
