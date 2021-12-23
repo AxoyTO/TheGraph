@@ -1,197 +1,101 @@
-#include <cassert>
+#include "config.hpp"
+#include "graph.hpp"
+#include "graph_generator.hpp"
+#include "graph_printer.hpp"
+#include "logger.hpp"
+
+#include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
-#include <vector>
 
-using std::cout;
-using std::endl;
-using std::vector;
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerator;
+using uni_cource_cpp::Logger;
+using uni_cource_cpp::Params;
+using uni_cource_cpp::config::log_file_path;
+using uni_cource_cpp::graph_printing::print_graph;
+using uni_cource_cpp::graph_printing::print_graph_description;
 
-using VertexId = int;
-using EdgeId = int;
+constexpr int INVALID_NEW_DEPTH = -1;
+constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
+constexpr int INVALID_GRAPHS_NUMBER = 0;
 
-std::ostream& operator<<(std::ostream& out, const vector<int>& int_vector) {
-  for (auto it = int_vector.begin(); it != int_vector.end(); ++it) {
-    out << *it;
-    if (it != int_vector.end() - 1) {
-      out << ", ";
-    }
-  }
-  return out;
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
 }
 
-struct Vertex {
-  explicit Vertex(const VertexId& new_id) : id(new_id) {}
-  const VertexId id = 0;
-  void add_edge_id(const EdgeId& id);
-  const vector<EdgeId>& edge_ids() const { return edge_ids_; }
-  bool has_edge_id(const EdgeId& id) const;
-
- private:
-  vector<EdgeId> edge_ids_;
-};
-
-bool Vertex::has_edge_id(const EdgeId& id) const {
-  for (const auto& edge_id : edge_ids_)
-    if (id == edge_id)
-      return true;
-  return false;
+std::string generation_started_string(int graph_num) {
+  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) +
+         ", Generation Started";
 }
 
-void Vertex::add_edge_id(const EdgeId& id) {
-  assert(!has_edge_id(id) && "Edge doesn't exist");
-  edge_ids_.push_back(id);
+std::string generation_finished_string(int graph_num, const Graph& graph) {
+  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) +
+         ", Generation Finished " + print_graph_description(graph);
 }
 
-std::ostream& operator<<(std::ostream& out, const Vertex& vertex) {
-  out << "{" << endl;
-  out << "      \"id\": " << vertex.id << "," << endl;
-  out << "      \"edge_ids\": [" << vertex.edge_ids() << "]" << endl;
-  out << "}";
-  return out;
+int handle_depth_input() {
+  int depth = INVALID_NEW_DEPTH;
+  do {
+    std::cout << "Enter generate graph depth from zero: ";
+    std::cin >> depth;
+  } while (depth <= INVALID_NEW_DEPTH);
+  return depth;
 }
 
-struct Edge {
-  Edge(const EdgeId& new_id,
-       const VertexId& begin_vertex,
-       const VertexId& end_vertex)
-      : id(new_id), begin(begin_vertex), end(end_vertex) {}
-  const EdgeId id = 0;
-  const VertexId begin = 0;
-  const VertexId end = 0;
-};
-
-std::ostream& operator<<(std::ostream& out, const Edge& edge) {
-  out << "{" << endl;
-  out << "      \"id\": " << edge.id << "," << endl;
-  out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "]"
-      << endl;
-  out << "}";
-  return out;
+int handle_new_vertices_count_input() {
+  int new_vertices_num = INVALID_NEW_VERTICES_NUMBER;
+  do {
+    std::cout << "Enter new_vertices_num from zero: ";
+    std::cin >> new_vertices_num;
+  } while (new_vertices_num < INVALID_NEW_VERTICES_NUMBER);
+  return new_vertices_num;
 }
 
-class Graph {
- public:
-  void add_vertex();
-
-  void add_edge(const VertexId& begin, const VertexId& end);
-
-  const vector<Vertex>& vertices() const { return vertices_; }
-  const vector<Edge>& edges() const { return edges_; }
-
-  bool has_vertex(const VertexId& vertex_id) const;
-  bool is_connected(const VertexId& begin, const VertexId& end) const;
-
- private:
-  VertexId num_of_vrt_ = 0;
-  EdgeId num_of_edg_ = 0;
-
-  VertexId next_vertex_id() { return num_of_vrt_++; }
-  EdgeId next_edge_id() { return num_of_edg_++; }
-
-  vector<Vertex> vertices_;
-  vector<Edge> edges_;
-};
-
-bool Graph::has_vertex(const VertexId& vertex_id) const {
-  for (const auto& vertex : vertices_) {
-    if (vertex_id == vertex.id)
-      return true;
-  }
-  return false;
+int handle_graphs_count_input() {
+  int graphs_quantity = INVALID_GRAPHS_NUMBER;
+  do {
+    std::cout << "Enter amount of graphs to generate: ";
+    std::cin >> graphs_quantity;
+  } while (graphs_quantity < INVALID_GRAPHS_NUMBER);
+  return graphs_quantity;
 }
 
-bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
-  assert(has_vertex(begin) && "Vertex doesn't exist");
-  assert(has_vertex(end) && "Vertex doesn't exist");
-  for (const EdgeId& edge_num : vertices_[begin].edge_ids()) {
-    if (edges_[edge_num].begin == end || edges_[edge_num].end == end) {
-      return true;
-    }
-  }
-  return false;
+void prepare_temp_directory() {
+  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
 }
 
-void Graph::add_vertex() {
-  vertices_.emplace_back(next_vertex_id());
-}
-
-void Graph::add_edge(const VertexId& begin, const VertexId& end) {
-  assert(has_vertex(begin) && "Vertex doesn't exist");
-  assert(has_vertex(end) && "Vertex doesn't exist");
-  assert(!is_connected(begin, end) && "Vertices already connected");
-
-  const auto& edge = edges_.emplace_back(next_edge_id(), begin, end);
-  vertices_[begin].add_edge_id(edge.id);
-  vertices_[end].add_edge_id(edge.id);
-}
-
-std::ostream& operator<<(std::ostream& out, const vector<Vertex>& layer) {
-  for (auto it = layer.begin(); it != layer.end(); ++it) {
-    out << *it;
-    if (it != layer.end() - 1) {
-      out << ", ";
-    }
-  }
-  return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const vector<Edge>& edges) {
-  for (auto it = edges.begin(); it != edges.end(); ++it) {
-    out << *it;
-    if (it != edges.end() - 1) {
-      out << ", ";
-    }
-  }
-  return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const Graph& graph) {
-  out << "{" << std::endl;
-  out << "  \"vertices\": [" << endl
-      << "   " << graph.vertices() << endl
-      << "  ]," << endl;
-  out << "  \"edges\": [" << endl
-      << "    " << graph.edges() << endl
-      << "  ]" << endl
-      << "}" << endl;
-  return out;
-}
-
-Graph task_1_graph_generation() {
-  auto returned_graph = Graph();
-  const VertexId num_of_vertices = 14;
-
-  for (int i = 0; i < num_of_vertices; ++i) {
-    returned_graph.add_vertex();
-  }
-
-  returned_graph.add_edge(0, 1);
-  returned_graph.add_edge(0, 2);
-  returned_graph.add_edge(0, 3);
-  returned_graph.add_edge(1, 4);
-  returned_graph.add_edge(1, 5);
-  returned_graph.add_edge(1, 6);
-  returned_graph.add_edge(2, 7);
-  returned_graph.add_edge(2, 8);
-  returned_graph.add_edge(3, 9);
-  returned_graph.add_edge(4, 10);
-  returned_graph.add_edge(5, 10);
-  returned_graph.add_edge(6, 10);
-  returned_graph.add_edge(7, 11);
-  returned_graph.add_edge(8, 11);
-  returned_graph.add_edge(9, 12);
-  returned_graph.add_edge(10, 13);
-  returned_graph.add_edge(11, 13);
-  returned_graph.add_edge(12, 13);
-
-  return returned_graph;
+void write_to_file(const std::string& graph_json, const std::string& filename) {
+  std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
+  out << graph_json;
+  out.close();
 }
 
 int main() {
-  const Graph graph = task_1_graph_generation();
-  std::ofstream out("graph_task_02.json");
-  out << graph;
-  out.close();
+  const int depth = handle_depth_input();
+  const int new_vertices_count = handle_new_vertices_count_input();
+  const int graphs_count = handle_graphs_count_input();
+  prepare_temp_directory();
+
+  const auto params = Params(depth, new_vertices_count);
+  const auto generator = GraphGenerator(params);
+  auto& logger = Logger::get_logger();
+
+  for (int i = 0; i < graphs_count; i++) {
+    logger.log(generation_started_string(i));
+    const auto graph = generator.generate();
+    logger.log(generation_finished_string(i, graph));
+
+    const auto graph_json = print_graph(graph);
+    write_to_file(graph_json, "graph_" + std::to_string(i) + ".json");
+  }
+
   return 0;
 }
