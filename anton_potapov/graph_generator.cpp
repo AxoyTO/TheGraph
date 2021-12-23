@@ -45,7 +45,7 @@ void generate_vertices_branch(Graph& graph,
                               int new_vertices_num,
                               const VertexId& previous_vertex_id,
                               int current_depth) {
-  if (current_depth > max_depth) {
+  if (current_depth > max_depth || max_depth == 0) {
     return;
   }
   VertexId new_vertex_id;
@@ -55,7 +55,7 @@ void generate_vertices_branch(Graph& graph,
     graph.add_edge(previous_vertex_id, new_vertex_id);
   }
   for (int i = 0; i < new_vertices_num; ++i) {
-    if (max_depth > 0 && is_lucky(1.0 - (float)current_depth / max_depth)) {
+    if (is_lucky(1.0 - (float)current_depth / max_depth)) {
       generate_vertices_branch(graph, graph_mutex, max_depth, new_vertices_num,
                                new_vertex_id, current_depth + 1);
     }
