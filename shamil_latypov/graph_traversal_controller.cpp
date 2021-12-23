@@ -36,10 +36,11 @@ GraphTraversalController::GraphTraversalController(
 void GraphTraversalController::traverse(
     const TraversalStartedCallback& traversalStartedCallback,
     const TraversalFinishedCallback& traversalFinishedCallback) {
+  std::atomic<int> graphs_travelled_ = 0;
   for (int i = 0; i < graphs_.size(); i++) {
     jobs_.emplace_back(
         [this, &traversalStartedCallback, &traversalFinishedCallback,
-         &graphs_travelled_ = graphs_travelled_, i,
+         &graphs_travelled_, i,
          &traversalStartedCallback_lock_ = traversalStartedCallback_lock_,
          &traversalFinishedCallback_lock_ = traversalFinishedCallback_lock_]() {
           {

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <atomic>
 #include <functional>
 #include <list>
@@ -34,7 +36,7 @@ class GraphTraversalController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   void traverse(const TraversalStartedCallback& traversalStartedCallback,
@@ -50,7 +52,6 @@ class GraphTraversalController {
   std::mutex jobs_lock_;
   std::mutex traversalStartedCallback_lock_;
   std::mutex traversalFinishedCallback_lock_;
-  std::atomic<int> graphs_travelled_ = 0;
 };
 
 }  // namespace uni_cource_cpp

@@ -97,8 +97,10 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
   std::atomic<int> paths_found = 0;
   std::mutex new_path_lock;
 
-  for (const auto& vert_ids :
-       graph_.get_vertices_in_depth(graph_.get_depth())) {
+  const auto vertices_ids_in_max_depth =
+      graph_.get_vertices_in_depth(graph_.get_depth());
+
+  for (const auto& vert_ids : vertices_ids_in_max_depth) {
     jobs.emplace_back(
         [this, &vert_ids, &paths_found, &new_path_lock, &graph_paths]() {
           GraphPath new_path = find_shortest_path(FIRST_VERTEX, vert_ids);
@@ -135,10 +137,8 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
     }
   };
 
-  const auto threads_count =
-      std::min(MAX_WORKERS_COUNT,
-               static_cast<int>(
-                   graph_.get_vertices_in_depth(graph_.get_depth()).size()));
+  const auto threads_count = std::min(
+      MAX_WORKERS_COUNT, static_cast<int>(vertices_ids_in_max_depth.size()));
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
@@ -146,8 +146,7 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
     threads.emplace_back(worker);
   }
 
-  while (paths_found !=
-         graph_.get_vertices_in_depth(graph_.get_depth()).size()) {
+  while (paths_found != vertices_ids_in_max_depth.size()) {
   }
 
   should_terminate = true;
