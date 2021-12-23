@@ -41,6 +41,10 @@ class Edge {
         vertex_id1(_vertex_id1),
         vertex_id2(_vertex_id2),
         color(_color) {}
+
+  std::pair<VertexId, VertexId> get_connected_vertex_pair() const {
+    return {vertex_id1, vertex_id2};
+  }
 };
 
 class Graph {
