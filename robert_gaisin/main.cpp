@@ -6,7 +6,7 @@
 #include "logger.hpp"
 
 #include <chrono>
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -78,10 +78,10 @@ int handle_graphs_count_input() {
   } while (graphs_quantity < INVALID_GRAPHS_NUMBER);
   return graphs_quantity;
 }
-
+/*
 void prepare_temp_directory() {
   std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
-}
+}*/
 
 void write_to_file(const std::string& graph_json, const std::string& filename) {
   std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
@@ -117,7 +117,7 @@ int main() {
   const int new_vertices_count = handle_new_vertices_count_input();
   const int graphs_count = handle_graphs_count_input();
   const int threads_count = handle_threads_count_input();
-  prepare_temp_directory();
+  //prepare_temp_directory();
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
