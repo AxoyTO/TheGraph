@@ -31,13 +31,6 @@ int get_current_vertex_num(const VertexId& vertex_id, const Graph& graph) {
 
 namespace uni_cource_cpp {
 
-void print_path(GraphPath a) {
-  for (auto& i : a.vertex_ids) {
-    std::cout << "VV " << i << " VV ";
-  }
-  std::cout << "\n";
-}
-
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 constexpr bool VERTEX_CHECKED = 1;
 constexpr int MAX_DISTANCE = 0x7fffffff;
