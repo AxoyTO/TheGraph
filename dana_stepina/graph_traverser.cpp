@@ -12,8 +12,6 @@
 #include <vector>
 
 namespace {
-constexpr int UNVISITED = 0;
-constexpr int VISITED = 1;
 constexpr int MAX_DISTANCE = 10000;
 const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }  // namespace
@@ -29,9 +27,6 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
 
   int vertices_number = graph.get_vertices().size();
   const auto& source_vertex = graph.get_vertices().at(source_vertex_id);
-
-  std::vector<VertexId> vertices(vertices_number, UNVISITED);
-  vertices[source_vertex_id] = VISITED;
 
   std::vector<Distance> distance(vertices_number, MAX_DISTANCE);
   distance[source_vertex_id] = 0;
