@@ -123,9 +123,10 @@ void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
 }
 
 void generate_green_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
-  graph_read_write_mutex.lock();
-  const auto& vertices = graph.vertices();
-  graph_read_write_mutex.unlock();
+  const auto& vertices = [&graph, &graph_read_write_mutex]() {
+    const std::lock_guard graph_lock(graph_read_write_mutex);
+    return graph.vertices();
+  }();
   for (const auto& [vertex_id, vertex] : vertices) {
     if (is_lucky(GREEN_EDGE_PROB)) {
       const std::lock_guard graph_lock(graph_read_write_mutex);
@@ -135,15 +136,18 @@ void generate_green_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
 }
 
 void generate_blue_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
-  graph_read_write_mutex.lock();
-  const auto graph_depth = graph.depth();
-  graph_read_write_mutex.unlock();
+  const auto graph_depth = [&graph, &graph_read_write_mutex]() {
+    const std::lock_guard graph_lock(graph_read_write_mutex);
+    return graph.depth();
+  }();
   for (int cur_depth = 0; cur_depth <= graph_depth; ++cur_depth) {
     // copy is needed since get_vertices_at_depth() returns a const reference to
     // a changing object
-    graph_read_write_mutex.lock();
-    const auto same_depth_vertices = graph.get_vertices_at_depth(cur_depth);
-    graph_read_write_mutex.unlock();
+    const auto same_depth_vertices = [&graph, &graph_read_write_mutex,
+                                      &cur_depth]() {
+      const std::lock_guard graph_lock(graph_read_write_mutex);
+      return graph.get_vertices_at_depth(cur_depth);
+    }();
     for (auto it = same_depth_vertices.begin();
          std::next(it) != same_depth_vertices.end(); ++it) {
       const auto& vertex1_id = *it;
@@ -155,34 +159,36 @@ void generate_blue_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
       }
     }
   }
-  graph_read_write_mutex.unlock();
 }
 
 void generate_yellow_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
-  graph_read_write_mutex.lock();
-  const auto graph_depth = graph.depth();
-  graph_read_write_mutex.unlock();
+  const auto graph_depth = [&graph, &graph_read_write_mutex]() {
+    const std::lock_guard graph_lock(graph_read_write_mutex);
+    return graph.depth();
+  }();
   if (graph_depth <= 1) {
     return;
   }
   for (int cur_depth = 0; cur_depth + 1 <= graph_depth; ++cur_depth) {
     // copies are needed since get_vertices_at_depth() returns a const reference
     // to a changing object
-    graph_read_write_mutex.lock();
-    const auto cur_depth_vertices = graph.get_vertices_at_depth(cur_depth);
-    const auto next_depth_vertices = graph.get_vertices_at_depth(cur_depth + 1);
-    graph_read_write_mutex.unlock();
+    const auto get_vertices_at_depth_synch =
+        [&graph, &graph_read_write_mutex](int cur_depth) {
+          const std::lock_guard graph_lock(graph_read_write_mutex);
+          return graph.get_vertices_at_depth(cur_depth);
+        };
+    const auto cur_depth_vertices = get_vertices_at_depth_synch(cur_depth);
+    const auto next_depth_vertices = get_vertices_at_depth_synch(cur_depth + 1);
     for (const auto& cur_vertex_id : cur_depth_vertices) {
       if (is_lucky((float)cur_depth / (graph_depth - 1))) {
         std::set<VertexId> not_connected_vertices;
+        const std::lock_guard graph_lock(graph_read_write_mutex);
         for (const auto& next_vertex_id : next_depth_vertices) {
-          const std::lock_guard graph_lock(graph_read_write_mutex);
           if (!graph.is_connected(cur_vertex_id, next_vertex_id)) {
             not_connected_vertices.insert(next_vertex_id);
           }
         }
         if (!not_connected_vertices.empty()) {
-          const std::lock_guard graph_lock(graph_read_write_mutex);
           graph.add_edge(cur_vertex_id,
                          get_random_vertex_id(not_connected_vertices),
                          EdgeColor::Yellow);
