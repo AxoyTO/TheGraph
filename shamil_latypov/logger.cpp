@@ -1,9 +1,9 @@
 #include "logger.hpp"
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
-#include <mutex>
 
 namespace uni_cource_cpp {
 
