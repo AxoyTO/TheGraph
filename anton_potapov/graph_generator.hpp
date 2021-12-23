@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "graph.hpp"
 
 namespace uni_cource_cpp {
