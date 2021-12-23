@@ -99,6 +99,7 @@ class Graph {
     if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) > 0) {
       return Edge::Color::Gray;
     }
+    return Edge::Color::Gray;
   }
   VertexId addVertex() {
     VertexId const newVertexId = getNewVertexId();
@@ -198,6 +199,7 @@ class GraphPrinter {
       case Graph::Edge::Color::Gray:
         return "gray";
     }
+    return "";
   }
   Graph const& graph_;
 };
