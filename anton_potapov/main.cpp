@@ -34,22 +34,21 @@ void write_to_file(const std::string& file_text, const std::string& file_path) {
   json_file.close();
 }
 
-std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
-                                   int graphs_count,
-                                   int threads_count) {
+std::map<int, Graph> generate_graphs(const GraphGenerator::Params& params,
+                                     int graphs_count,
+                                     int threads_count) {
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
 
   auto& logger = Logger::get_logger();
 
-  auto graphs = std::vector<Graph>();
-  graphs.reserve(graphs_count);
+  auto graphs = std::map<int, Graph>();
 
   generation_controller.generate(
       [&logger](int index) {
         logger.log(LogMessagesGenerator::generation_started_string(index));
       },
-      [&logger, &graphs, &params](int index, Graph& graph) {
+      [&logger, &graphs, &params](int index, Graph graph) {
         const auto graph_printer = GraphPrinter(graph);
         logger.log(LogMessagesGenerator::generation_finished_string(
             index, graph_printer.print_graph_description()));
@@ -57,7 +56,7 @@ std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
           logger.log(LogMessagesGenerator::generation_max_depth_warning(
               index, graph.depth(), params.depth));
         }
-        graphs.push_back(graph);
+        graphs.emplace(index, graph);
         write_to_file(graph_printer.print(),
                       std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
                           "graph_" + std::to_string(index) + ".json");

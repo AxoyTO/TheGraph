@@ -13,7 +13,7 @@ class GraphGenerationController {
  public:
   using JobCallback = std::function<void()>;
   using GenStartedCallback = std::function<void(int index)>;
-  using GenFinishedCallback = std::function<void(int index, Graph& graph)>;
+  using GenFinishedCallback = std::function<void(int index, Graph graph)>;
 
   class Worker {
    public:
@@ -44,6 +44,7 @@ class GraphGenerationController {
   std::list<Worker> workers_;
   std::queue<JobCallback> jobs_;
   std::mutex jobs_queue_mutex_;
+  std::mutex controller_mutex_;
   const int graphs_count_;
   GraphGenerator graph_generator_;
 };
