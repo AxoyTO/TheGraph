@@ -6,11 +6,11 @@
 namespace uni_course_cpp {
 
 GraphGenerationController::GraphGenerationController(
-    int _threads_num,
-    int _graphs_num,
+    int threads_num,
+    int graphs_num,
     const GraphGenerator::Params& graph_generator_params)
-    : threads_num_(_threads_num),
-      graphs_num_(_graphs_num),
+    : threads_num_(threads_num),
+      graphs_num_(graphs_num),
       graph_generator_(graph_generator_params) {
   for (int i = 0; i < threads_num_; i++) {
     workers_.emplace_back([&jobs_ = jobs_, &mutex_jobs_ = mutex_jobs_,
@@ -64,18 +64,10 @@ void GraphGenerationController::generate(
   for (int i = 0; i < graphs_num_; i++) {
     jobs_.emplace_back([&gen_started_callback, &gen_finished_callback,
                         &graph_generator_ = graph_generator_,
-                        &graphs_generated_ = graphs_generated_, i,
-                        &start_mutex_ = start_mutex_,
-                        &finish_mutex_ = finish_mutex_, this]() {
-      {
-        const std::lock_guard lock(start_mutex_);
-        gen_started_callback(i);
-      }
+                        &graphs_generated_ = graphs_generated_, i, this]() {
+      { gen_started_callback(i); }
       auto graph = graph_generator_.generate();
-      {
-        const std::lock_guard lock(finish_mutex_);
-        gen_finished_callback(i, std::move(graph));
-      }
+      { gen_finished_callback(i, graph); }
       graphs_generated_++;
     });
   }
