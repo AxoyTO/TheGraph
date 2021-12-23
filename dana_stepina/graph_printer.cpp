@@ -44,7 +44,7 @@ std::string GraphPrinter::print_graph_description(const Graph& graph) {
 std::string GraphPrinter::print_path(const GraphPath& path) {
   std::stringstream path_string;
 
-  path_string << "\t{vertices: [";
+  path_string << "  {vertices: [";
   const auto& vertex_ids = path.get_path_vertex_ids();
   const auto& last_vertex_id = vertex_ids.back();
   for (const auto& vertex_id : vertex_ids) {
