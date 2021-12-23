@@ -12,8 +12,5 @@ class Edge {
        int fromVertexId,
        int toVertexId,
        const Color color = Color::Gray);
-  std::string toString() const;
 };
-std::string edgeColorToString(const Edge::Color& color);
-
 }  // namespace uni_course_cpp

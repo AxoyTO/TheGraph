@@ -15,7 +15,7 @@ class Logger {
   ~Logger();
 
  private:
-  std::optional<std::ofstream> file_;
+  std::ofstream file_;
   std::mutex mutex_;
   Logger();
   Logger(const Logger&) = delete;

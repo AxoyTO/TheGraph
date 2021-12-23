@@ -23,26 +23,6 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-std::string Graph::toString() const {
-  // vertex
-  std::string strGraph = "";
-  strGraph += "{\n\t\"vertices\": [\n";
-  for (const auto& vertex : vertices_) {
-    strGraph += vertex.toString() + ",\n";
-  }
-  strGraph.pop_back();
-  strGraph.pop_back();
-  strGraph += "\n\t],\n";
-  // edges
-  strGraph += "\t\"edges\": [\n";
-  for (const auto& edge : edges_) {
-    strGraph += edge.toString() + ",\n";
-  }
-  strGraph.pop_back();
-  strGraph.pop_back();
-  strGraph += "\n\t]\n}\n";
-  return strGraph;
-}
 bool Graph::hasVertex(int idFind) {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
@@ -107,17 +87,17 @@ const Edge& Graph::getEdge(int id) {
   throw std::runtime_error("No such vertex");
 }
 
-int Graph::getNumEdgeByColor(const Edge::Color color) {
-  int sum = 0;
+std::vector<Edge> Graph::getNumEdgeByColor(const Edge::Color& color) {
+  std::vector<Edge> colorEdges;
   for (const auto& edge : edges_) {
     if (edge.color == color) {
-      sum++;
+      colorEdges.push_back(edge);
     }
   }
-  return sum;
+  return colorEdges;
 }
 
-const std::vector<Edge>& Graph::getEdges() {
+const std::vector<Edge>& Graph::getEdges() const {
   return edges_;
 }
 

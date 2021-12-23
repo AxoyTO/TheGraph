@@ -4,13 +4,15 @@
 #include <iostream>
 #include <sstream>
 #include "GraphGenerator.hpp"
-#include "GraphPrinting.hpp"
+#include "GraphPrinter.hpp"
 #include "Logger.hpp"
+#include "LoggingHelper.hpp"
 using GraphGenerator = uni_course_cpp::GraphGenerator;
 using Logger = uni_course_cpp::Logger;
 using Graph = uni_course_cpp::Graph;
 using Edge = uni_course_cpp::Edge;
-using GraphPrinting = uni_course_cpp::GraphPrinting;
+using LoggingHelper = uni_course_cpp::LoggingHelper;
+using GraphPrinter = uni_course_cpp::GraphPrinter;
 int ctrlMaxDepthEntry() {
   int maxDepth = 0;
   std::cout << "Enter Max Depth:";
@@ -47,6 +49,13 @@ int ctrlNewGraphNum() {
   }
   return newGraphNum;
 }
+void writeGraphToFile(const Graph& graph, int index) {
+  std::ofstream writePT;
+  writePT.open("./temp/Graph_" + std::to_string(index) + ".json",
+               std::ios::out);
+  writePT << GraphPrinter::printGraph(graph) << std::endl;
+  writePT.close();
+}
 int main() {
   Logger& logger = Logger::getLogger();
   std::filesystem::create_directory("./temp");
@@ -54,11 +63,11 @@ int main() {
   int newVerticesNum = ctrlNewVertexNum();
   int newGraphNum = ctrlNewGraphNum();
   for (int i = 0; i < newGraphNum; i++) {
-    GraphPrinting::logStart(logger, i);
+    LoggingHelper::logStart(logger, i);
     const GraphGenerator graphGenerator(maxDepth, newVerticesNum);
     const auto graph = graphGenerator.generate();
-    GraphPrinting::logEnd(logger, graph, i);
-    GraphPrinting ::writeGraphToFile(graph, i);
+    LoggingHelper::logEnd(logger, graph, i);
+    writeGraphToFile(graph, i);
   }
   return 0;
 }
