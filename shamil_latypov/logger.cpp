@@ -3,10 +3,12 @@
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <mutex>
 
 namespace uni_cource_cpp {
 
 void Logger::set_output_file_path(const std::optional<std::string>& file_path) {
+  std::lock_guard lock(logger_lock_);
   if (!file_path.has_value()) {
     if (output_stream_.has_value()) {
       output_stream_.value().close();
@@ -22,6 +24,7 @@ void Logger::set_output_file_path(const std::optional<std::string>& file_path) {
 }
 
 void Logger::log(const std::string& text) {
+  std::lock_guard lock(logger_lock_);
   std::cout << text << std::endl;
   if (output_stream_.has_value()) {
     output_stream_.value() << text << std::endl;

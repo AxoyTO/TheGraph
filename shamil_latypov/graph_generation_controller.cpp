@@ -1,4 +1,5 @@
 #include "graph_generation_controller.hpp"
+#include <cassert>
 #include <functional>
 #include <mutex>
 #include <optional>
@@ -33,14 +34,15 @@ void GraphGenerationController::generate(
     jobs_.emplace_back([this, &gen_started_callback, &gen_finished_callback,
                         &graph_generator_ = graph_generator_,
                         &graphs_generated_ = graphs_generated_, i,
-                        &logger_lock_ = logger_lock_]() {
+                        &function1_lock_ = function1_lock_,
+                        &function2_lock_ = function2_lock_]() {
       {
-        const std::lock_guard lock(logger_lock_);
+        const std::lock_guard lock(function1_lock_);
         gen_started_callback(i);
       }
       auto graph = graph_generator_.generate_graph();
       {
-        const std::lock_guard lock(logger_lock_);
+        const std::lock_guard lock(function2_lock_);
         gen_finished_callback(i, std::move(graph));
       }
       graphs_generated_++;
@@ -60,22 +62,21 @@ void GraphGenerationController::generate(
 }
 
 void GraphGenerationController::Worker::start() {
-  if (state_ != State::Working) {
-    thread_ = std::thread(
-        [this, &state_ = state_, &get_job_callback_ = get_job_callback_]() {
-          while (true) {
-            if (state_ == State::ShouldTerminate) {
-              return;
-            }
-            const auto job_optional = get_job_callback_();
-            if (job_optional.has_value()) {
-              state_ = State::Working;
-              const auto& job = job_optional.value();
-              job();
-            }
+  assert(state_ != State::Working && "Worker doesnt Idle");
+  thread_ = std::thread(
+      [this, &state_ = state_, &get_job_callback_ = get_job_callback_]() {
+        while (true) {
+          if (state_ == State::ShouldTerminate) {
+            return;
           }
-        });
-  }
+          const auto job_optional = get_job_callback_();
+          if (job_optional.has_value()) {
+            state_ = State::Working;
+            const auto& job = job_optional.value();
+            job();
+          }
+        }
+      });
 }
 
 void GraphGenerationController::Worker::stop() {

@@ -33,7 +33,7 @@ class GraphGenerationController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   GraphGenerationController(
@@ -52,7 +52,8 @@ class GraphGenerationController {
   GraphGenerator graph_generator_;
   std::mutex jobs_lock_;
   std::atomic<int> graphs_generated_ = 0;
-  std::mutex logger_lock_;
+  std::mutex function1_lock_;
+  std::mutex function2_lock_;
 };
 
 }  // namespace uni_cource_cpp
