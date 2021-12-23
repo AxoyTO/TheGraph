@@ -3,12 +3,12 @@
 #include <atomic>
 #include <functional>
 #include <list>
+#include <optional>
 #include <random>
 #include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
-#include <optional>
 #include "graph.hpp"
 
 namespace {
