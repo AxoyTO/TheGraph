@@ -134,7 +134,9 @@ void Graph::add_edge(VertexId first_vertex_id,
   auto& first_vertex = get_vertex(first_vertex_id);
   first_vertex.add_connected_edge_id(new_edge.get_id());
   auto& second_vertex = get_vertex(second_vertex_id);
-  second_vertex.add_connected_edge_id(new_edge.get_id());
+  if (second_vertex.get_id() != first_vertex.get_id()){
+    second_vertex.add_connected_edge_id(new_edge.get_id());
+  }
 }
 
 std::string Graph::to_string() const {

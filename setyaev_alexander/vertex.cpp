@@ -27,7 +27,7 @@ std::string Vertex::to_string() const {
     }
   }
 
-  json << "],\n\"depth\": " << get_level() << "\n}";
+  json << "],\n  \"depth\": " << get_level() << "\n}";
 
   return json.str();
 }
