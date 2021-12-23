@@ -24,4 +24,3 @@ struct Edge {
   VertexId second_vertex_id_ = 0;
   Edge::Color color_ = Edge::Color::Gray;
 };
-

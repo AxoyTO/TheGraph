@@ -67,4 +67,3 @@ class GraphGenerator {
   void generate_red_edges(Graph& graph) const;
   const Params params_ = Params();
 };
-

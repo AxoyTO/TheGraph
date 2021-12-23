@@ -23,4 +23,3 @@ class Vertex {
   int level_ = 0;
   std::vector<EdgeId> connected_edge_ids_;
 };
-
