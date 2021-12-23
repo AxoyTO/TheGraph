@@ -68,7 +68,7 @@ class Graph {
     EdgeId const newEdgeId = getNewEdgeId();
     Edge::Color color = calculate_color(fromVertexId, toVertexId);
     const auto& fromVertex = vertexes_[fromVertexId];
-    auto& toVertex = vertexes_[toVertexId];
+    const auto& toVertex = vertexes_[toVertexId];
     edgeConectionMap_[fromVertexId].push_back(newEdgeId);
     if (color != Edge::Color::Green)
       edgeConectionMap_[toVertexId].push_back(newEdgeId);
@@ -77,30 +77,31 @@ class Graph {
         if (vertexIdByDepth_[0][i] == toVertexId)
           vertexIdByDepth_.erase(vertexIdByDepth_.begin() + i);
       }
-      if ((int)vertexIdByDepth_.size() - 1 < (getDepth(fromVertex.id) + 1))
+      const auto newDepth = getDepth(fromVertex.id) + 1;
+      if ((int)vertexIdByDepth_.size() - 1 < (newDepth))
         vertexIdByDepth_.emplace_back();
 
-      vertexIdByDepth_[getDepth(fromVertex.id) + 1].emplace_back(toVertexId);
-      setDepth(toVertex.id, getDepth(fromVertex.id) + 1);
+      vertexIdByDepth_[newDepth].emplace_back(toVertexId);
+      setDepth(toVertex.id, newDepth);
     }
     edges_.emplace_back(newEdgeId, fromVertexId, toVertexId, color);
   }
   Edge::Color calculate_color(VertexId fromVertexId, VertexId toVertexId) {
     const auto& fromVertex = vertexes_[fromVertexId];
-    auto& toVertex = vertexes_[toVertexId];
+    const auto& toVertex = vertexes_[toVertexId];
     Edge::Color color;
-    switch (getDepth(fromVertex.id) - getDepth(toVertex.id)) {
-      case -1:
-        color = Edge::Color::Yellow;
-        break;
-      case -2:
-        color = Edge::Color::Red;
-        break;
-      default:
-        color = Edge::Color::Gray;
+    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -1) {
+      color = Edge::Color::Yellow;
     }
-    if (toVertexId == fromVertexId)
+    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -2) {
+      color = Edge::Color::Red;
+    }
+    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) > 0) {
+      color = Edge::Color::Gray;
+    }
+    if (toVertexId == fromVertexId) {
       color = Edge::Color::Green;
+    }
     return color;
   }
   VertexId addVertex() {
@@ -119,15 +120,14 @@ class Graph {
     return newVertexId;
   }
   bool isConnected(VertexId firstVertexId, VertexId secondVertexId) const {
+    // if (firstVertexId==secondVertexId) соединён сам с собой только при
+    // наличии зелёной грани
     for (auto connection : getConnections(firstVertexId)) {
       auto connectedfrom = getEdge(connection).fromVertexId;
       auto connectedTo = getEdge(connection).toVertexId;
-      if (connectedfrom != connectedTo &&
-          connectedfrom != firstVertexId)  //Не зелёная
+      if (connectedfrom != connectedTo)  //Не зелёная
       {
-        if (connectedfrom == secondVertexId)
-          return true;
-        if (connectedTo == secondVertexId)
+        if (connectedfrom == secondVertexId || connectedTo == secondVertexId)
           return true;
       }
     }
@@ -204,7 +204,6 @@ class GraphPrinter {
         return "gray";
     }
   }
-
   Graph const& graph_;
 };
 
@@ -223,10 +222,10 @@ class GraphGenerator {
   Graph generate() const {
     auto graph = Graph();
     graph.addVertex();
-    generate_gray_edges(graph);
-    generate_green_edges(graph);
-    generate_yellow_edges(graph);
-    generate_red_edges(graph);
+    generateGrayEdges(graph);
+    generateGreenEdges(graph);
+    generateYellowEdges(graph);
+    generateRedEdges(graph);
     return graph;
   }
 
@@ -242,7 +241,7 @@ class GraphGenerator {
       return -1;
     return (notConnected[randomIntNumber(notConnected.size() - 1)]);
   };
-  void generate_gray_edges(Graph& graph) const {
+  void generateGrayEdges(Graph& graph) const {
     float const step = 100.0 / (params_.depth - 1);
     for (int currentDepth = 0; currentDepth < params_.depth; currentDepth++) {
       bool generated = false;
@@ -259,13 +258,13 @@ class GraphGenerator {
         break;
     }
   }
-  void generate_green_edges(Graph& graph) const {
+  void generateGreenEdges(Graph& graph) const {
     for (Graph::Vertex const& vertex : graph.getVertexes()) {
       if (checkProbability(GREEN_GENERATION_PROBABILITY))
         graph.addEdge(vertex.id, vertex.id);
     }
   }
-  void generate_yellow_edges(Graph& graph) const {
+  void generateYellowEdges(Graph& graph) const {
     float const step = 100.0 / (params_.depth - 1);
     for (auto vertex : graph.getVertexes()) {
       if (checkProbability(
@@ -280,11 +279,11 @@ class GraphGenerator {
       }
     }
   }
-  void generate_red_edges(Graph& graph) const {
+  void generateRedEdges(Graph& graph) const {
     for (auto vertex : graph.getVertexes()) {
       if (graph.getDepth(vertex.id) < params_.depth - 2 &&
           checkProbability(RED_GENERATION_PROBABILITY)) {
-        auto randomNextVertexId = getUnconnectedVertexId(
+        const auto randomNextVertexId = getUnconnectedVertexId(
             vertex.id, graph.getVertexIdByDepth(graph.getDepth(vertex.id) + 2),
             graph);
         if (randomNextVertexId > 0)
@@ -312,7 +311,7 @@ int intInput(string inputMessage) {
   }
   return input;
 };
-void write_to_file(string const& output, string const& filename) {
+void writeToFile(string const& output, string const& filename) {
   ofstream fileToWrite(filename);
   fileToWrite << output;
 }
@@ -327,6 +326,6 @@ int main() {
   auto const graph_printer = GraphPrinter(graph);
   auto const graph_json = graph_printer.print();
   std::cout << graph_json << std::endl;
-  write_to_file(graph_json, "graph.json");
+  writeToFile(graph_json, "graph.json");
   return 0;
 }
