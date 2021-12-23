@@ -25,6 +25,7 @@ GraphGenerationController::GraphGenerationController(
     });
   }
 }
+
 void GraphGenerationController::generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
