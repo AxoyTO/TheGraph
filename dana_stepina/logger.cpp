@@ -1,9 +1,13 @@
 #include "logger.hpp"
 
 #include <iostream>
+#include <mutex>
 
 namespace uni_cource_cpp {
 void Logger::log(const std::string& log_string) {
+  std::mutex mutex_log;
+  const std::lock_guard lock(mutex_log);
+
   std::cout << log_string << std::endl;
 
   if (file_stream_.has_value())
