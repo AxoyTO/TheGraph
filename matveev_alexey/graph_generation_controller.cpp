@@ -67,7 +67,7 @@ void GraphGenerationController::generate(
                         &graphs_generated_ = graphs_generated_, i, this]() {
       { gen_started_callback(i); }
       auto graph = graph_generator_.generate();
-      { gen_finished_callback(i, graph); }
+      { gen_finished_callback(i, std::move(graph)); }
       graphs_generated_++;
     });
   }
