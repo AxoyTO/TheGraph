@@ -148,9 +148,9 @@ void generate_blue_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
          std::next(it) != same_depth_vertices.end(); ++it) {
       const auto& vertex1_id = *it;
       const auto& vertex2_id = *std::next(it);
+      const std::lock_guard graph_lock(graph_read_write_mutex);
       if (is_lucky(BLUE_EDGE_PROB) &&
           !graph.is_connected(vertex1_id, vertex2_id)) {
-        const std::lock_guard graph_lock(graph_read_write_mutex);
         graph.add_edge(vertex1_id, vertex2_id, EdgeColor::Blue);
       }
     }
