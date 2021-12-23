@@ -4,12 +4,13 @@
 
 namespace uni_course_cpp {
 
+using std:thread;
+
 void GraphGenerationController::Worker::start() {
   assert(state_ != State::Working && "Worker is already working");
   state_ = State::Working;
 
-  thread_ = std::thread(
-      [& state_ = state_, &get_job_callback_ = get_job_callback_]() {
+  thread_ = thread([&state_ = state_, &get_job_callback_ = get_job_callback_]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
             state_ = State::Idle;
@@ -47,7 +48,7 @@ GraphGenerationController::GraphGenerationController(
   const auto count = std::min(threads_count_, graphs_count_);
   for (int i = 0; i < count; ++i) {
     workers_.emplace_back(
-        [& jobs_ = jobs_,
+        [&jobs_ = jobs_,
          &mutex_jobs_ = mutex_jobs_]() -> std::optional<JobCallback> {
           const std::lock_guard lock(mutex_jobs_);
           if (jobs_.empty()) {
@@ -66,7 +67,7 @@ void GraphGenerationController::generate(
   std::atomic<int> finished_jobs_count = 0;
 
   for (int i = 0; i < graphs_count_; i++) {
-    jobs_.emplace_back([& mutex_start_callback_ = mutex_start_callback_,
+    jobs_.emplace_back([&mutex_start_callback_ = mutex_start_callback_,
                         &mutex_finish_callback_ = mutex_finish_callback_,
                         &gen_started_callback, &gen_finished_callback, i,
                         &finished_jobs_count = finished_jobs_count,
