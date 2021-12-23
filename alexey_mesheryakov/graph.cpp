@@ -45,9 +45,9 @@ bool Graph::edge_exist(const VertexId& first, const VertexId& second) const {
 }
 
 VertexId Graph::add_vertex() {
-  VertexId vertex_id = get_new_vertex_id();
+  const VertexId vertex_id = get_new_vertex_id();
   if (levels_.size() == 0)
-    levels_.emplace_back(vector<VertexId>(1, vertex_id));
+    levels_.push_back({vertex_id});
   else
     levels_[0].emplace_back(vertex_id);
   vertices_.emplace_back(vertex_id);
@@ -121,15 +121,15 @@ Edge::Color Graph::calculate_color(const VertexId& first_id,
     return Edge::Color::Gray;
   const Depth& first_depth = get_vertex(first_id).depth;
   const Depth& second_depth = get_vertex(second_id).depth;
-  if (first_depth == second_depth)
+  if (first_depth == second_depth) {
     return Edge::Color::Green;
+  }
   if (abs(first_depth - second_depth) == 1)
     return Edge::Color::Yellow;
   if (abs(first_depth - second_depth) == 2)
     return Edge::Color::Red;
   throw std::runtime_error("Can't calculate color");
 }
-
 int Graph::get_count_of_colored_edges(const Edge::Color& color) const {
   int count = 0;
   for (const auto& edge : edges_)
