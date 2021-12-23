@@ -44,8 +44,13 @@ void generateYellowEdges(uni_course_cpp::Graph& graph, std::mutex& mutex) {
     if (vertex_depth < graph.depth() &&
         randomValue(getYellowProbability(graph, vertex.id))) {
       std::vector<uni_course_cpp::VertexId> next_layer;
+      // bool are_connected;
       for (const auto& vertex_id : graph.vertexIdsAtLayer(vertex_depth + 1)) {
-        if (!graph.areConnected(vertex.id, vertex_id)) {
+        const bool are_connected = [&graph, &vertex_id, &vertex, &mutex]() {
+          const std::lock_guard lock(mutex);
+          return graph.areConnected(vertex.id, vertex_id);
+        }();
+        if (!are_connected) {
           next_layer.push_back(vertex_id);
         }
       }
@@ -102,7 +107,7 @@ Graph GraphGenerator::generateMainBody() const {
       created_branches++;
     });
   }
-  auto worker = [&should_terminate, &mutex, &jobs]() {
+  const auto worker = [&should_terminate, &mutex, &jobs]() {
     while (true) {
       if (should_terminate) {
         return;
@@ -152,11 +157,11 @@ Graph GraphGenerator::generate() const {
   Graph graph = generateMainBody();
   std::mutex mutex;
   std::thread green_thread(
-      [&graph, &mutex, this]() { generateGreenEdges(graph, mutex); });
+      [&graph, &mutex]() { generateGreenEdges(graph, mutex); });
   std::thread yellow_thread(
-      [&graph, &mutex, this]() { generateYellowEdges(graph, mutex); });
+      [&graph, &mutex]() { generateYellowEdges(graph, mutex); });
   std::thread red_thread(
-      [&graph, &mutex, this]() { generateRedEdges(graph, mutex); });
+      [&graph, &mutex]() { generateRedEdges(graph, mutex); });
   green_thread.join();
   yellow_thread.join();
   red_thread.join();
