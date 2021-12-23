@@ -1,7 +1,7 @@
 #include <functional>
+#include <list>
 #include <optional>
 #include <queue>
-#include <stack>
 #include <thread>
 
 #include "graph.hpp"
@@ -39,7 +39,7 @@ class GraphGenerationController {
                 const GenFinishedCallback& gen_finished_callback);
 
  private:
-  std::stack<Worker> workers_;
+  std::list<Worker> workers_;
   std::queue<JobCallback> jobs_;
   // std::mutex ...
 };
