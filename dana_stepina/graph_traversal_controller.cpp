@@ -56,7 +56,7 @@ void GraphTraversalController::traverse_graphs(
       }
 
       GraphTraverser graph_traverser(graphs_[i]);
-      const auto paths = graph_traverser.traverse_graph();
+      const auto paths = graph_traverser.find_all_paths();
 
       {
         const std::lock_guard lock(finish_callback_mutex_);

@@ -11,7 +11,7 @@ class GraphPrinter {
   static std::string print_edge_color(const Graph::Edge::Color& color);
   static std::string print_graph_description(const Graph& graph);
 
-  static std::string print_path(const GraphTraverser::Path& path);
+  static std::string print_path(const GraphPath& path);
 
   explicit GraphPrinter(const Graph& graph) : graph_(graph) {}
 

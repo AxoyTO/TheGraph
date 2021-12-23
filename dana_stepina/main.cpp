@@ -1,6 +1,7 @@
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
+#include "graph_path.hpp"
 #include "graph_printer.hpp"
 #include "graph_traversal_controller.hpp"
 #include "graph_traverser.hpp"
@@ -17,6 +18,7 @@
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerationController;
 using uni_cource_cpp::GraphGenerator;
+using uni_cource_cpp::GraphPath;
 using uni_cource_cpp::GraphPrinter;
 using uni_cource_cpp::GraphTraversalController;
 using uni_cource_cpp::GraphTraverser;
@@ -159,9 +161,8 @@ std::string traversal_started_string(int graph_number) {
   return log_string.str();
 }
 
-std::string traversal_finished_string(
-    int graph_number,
-    const std::vector<GraphTraverser::Path>& paths) {
+std::string traversal_finished_string(int graph_number,
+                                      const std::vector<GraphPath>& paths) {
   std::stringstream log_string;
   log_string << get_current_date_time() << ": Graph " << graph_number
              << ", Traversal Finished, Paths: [\n";
@@ -184,7 +185,7 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
         auto& logger = Logger::get_logger();
         logger.log(traversal_started_string(index));
       },
-      [](int index, const std::vector<GraphTraverser::Path>& pathes) {
+      [](int index, const std::vector<GraphPath>& pathes) {
         auto& logger = Logger::get_logger();
         logger.log(traversal_finished_string(index, pathes));
       });

@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cassert>
 #include <functional>
+#include <limits>
 #include <list>
 #include <mutex>
 #include <optional>
@@ -12,12 +13,12 @@
 #include <vector>
 
 namespace {
-constexpr int MAX_DISTANCE = 10000;
-const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+constexpr int MAX_DISTANCE = std::numeric_limits<int>::max();
+const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }  // namespace
 
 namespace uni_cource_cpp {
-GraphTraverser::Path GraphTraverser::find_shortest_path(
+GraphPath GraphTraverser::find_shortest_path(
     const Graph& graph,
     const VertexId& source_vertex_id,
     const VertexId& destination_vertex_id) const {
@@ -25,10 +26,10 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
   assert(graph_.has_vertex_id(destination_vertex_id) &&
          "Vertex doesn't exists");
 
-  int vertices_number = graph.get_vertices().size();
+  const int vertices_number = graph.get_vertices().size();
   const auto& source_vertex = graph.get_vertices().at(source_vertex_id);
 
-  std::vector<Distance> distance(vertices_number, MAX_DISTANCE);
+  std::vector<GraphPath::Distance> distance(vertices_number, MAX_DISTANCE);
   distance[source_vertex_id] = 0;
 
   std::queue<Graph::Vertex> vertices_queue;
@@ -55,7 +56,7 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
         all_pathes[next_vertex_id].push_back(next_vertex_id);
 
         if (destination_vertex_id == next_vertex_id) {
-          Path r_path(all_pathes[next_vertex_id], distance[next_vertex_id]);
+          GraphPath r_path(all_pathes[next_vertex_id]);
           return r_path;
         }
       }
@@ -65,12 +66,12 @@ GraphTraverser::Path GraphTraverser::find_shortest_path(
   throw std::logic_error("Vertices dont connected");
 }
 
-std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
+std::vector<GraphPath> GraphTraverser::find_all_paths() {
   std::list<std::function<void()>> jobs;
   std::atomic<int> finished_jobs_num = 0;
   std::mutex path_mutex;
   const auto& vertex_ids = graph_.get_vertex_ids_at(graph_.get_depth());
-  std::vector<GraphTraverser::Path> pathes;
+  std::vector<GraphPath> pathes;
   pathes.reserve(vertex_ids.size());
 
   for (const auto& vertex_id : vertex_ids)
@@ -111,7 +112,8 @@ std::vector<GraphTraverser::Path> GraphTraverser::traverse_graph() {
     }
   };
 
-  const auto threads_num = std::min(vertex_ids.size(), MAX_WORKERS_COUNT);
+  const auto threads_num =
+      std::min(static_cast<int>(vertex_ids.size()), MAX_WORKERS_COUNT);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_num);
 
