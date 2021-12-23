@@ -89,20 +89,18 @@ class Graph {
   Edge::Color calculate_color(VertexId fromVertexId, VertexId toVertexId) {
     const auto& fromVertex = vertexes_[fromVertexId];
     const auto& toVertex = vertexes_[toVertexId];
-    Edge::Color color;
     if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -1) {
-      color = Edge::Color::Yellow;
+      return Edge::Color::Yellow;
     }
     if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -2) {
-      color = Edge::Color::Red;
-    }
-    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) > 0) {
-      color = Edge::Color::Gray;
+      return Edge::Color::Red;
     }
     if (toVertexId == fromVertexId) {
-      color = Edge::Color::Green;
+      return Edge::Color::Green;
     }
-    return color;
+    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) > 0) {
+      return Edge::Color::Gray;
+    }
   }
   VertexId addVertex() {
     VertexId const newVertexId = getNewVertexId();
@@ -120,13 +118,12 @@ class Graph {
     return newVertexId;
   }
   bool isConnected(VertexId firstVertexId, VertexId secondVertexId) const {
-    // if (firstVertexId==secondVertexId) соединён сам с собой только при
-    // наличии зелёной грани
+    if (firstVertexId == secondVertexId)
+      return false;
     for (auto connection : getConnections(firstVertexId)) {
       auto connectedfrom = getEdge(connection).fromVertexId;
       auto connectedTo = getEdge(connection).toVertexId;
-      if (connectedfrom != connectedTo)  //Не зелёная
-      {
+      if (connectedfrom != connectedTo) {
         if (connectedfrom == secondVertexId || connectedTo == secondVertexId)
           return true;
       }
@@ -238,7 +235,7 @@ class GraphGenerator {
       if (!graph.isConnected(vertexId, randomNextVertexId))
         notConnected.emplace_back(randomNextVertexId);
     if (!notConnected.size())
-      return -1;
+      return vertexId;
     return (notConnected[randomIntNumber(notConnected.size() - 1)]);
   };
   void generateGrayEdges(Graph& graph) const {
