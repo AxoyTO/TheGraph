@@ -61,7 +61,7 @@ std::string GraphPrinter::print() const {
     if (i != edges.size() - 1)
       buffer << ",";
   }
-  buffer << "]}";
+  buffer << "]}\n";
   return buffer.str();
 }
 
