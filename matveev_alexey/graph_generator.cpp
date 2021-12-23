@@ -44,7 +44,6 @@ void generateYellowEdges(uni_course_cpp::Graph& graph, std::mutex& mutex) {
     if (vertex_depth < graph.depth() &&
         randomValue(getYellowProbability(graph, vertex.id))) {
       std::vector<uni_course_cpp::VertexId> next_layer;
-      // bool are_connected;
       for (const auto& vertex_id : graph.vertexIdsAtLayer(vertex_depth + 1)) {
         const bool are_connected = [&graph, &vertex_id, &vertex, &mutex]() {
           const std::lock_guard lock(mutex);
