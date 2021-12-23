@@ -15,8 +15,8 @@ void GraphTraversalController::Worker::start() {
   assert(state_ != State::Working && "Worker is already working");
   state_ = State::Working;
 
-  thread_ = std::thread(
-      [& state_ = state_, &get_job_callback_ = get_job_callback_]() {
+  thread_ =
+      std::thread([&state_ = state_, &get_job_callback_ = get_job_callback_]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
             state_ = State::Idle;
@@ -50,7 +50,7 @@ GraphTraversalController::GraphTraversalController(
   const auto count = std::min(MAX_WORKERS_COUNT, (int)graphs_.size());
   for (int i = 0; i < count; ++i) {
     workers_.emplace_back(
-        [& jobs_ = jobs_,
+        [&jobs_ = jobs_,
          &mutex_jobs_ = mutex_jobs_]() -> std::optional<JobCallback> {
           const std::lock_guard lock(mutex_jobs_);
           if (jobs_.empty()) {
@@ -70,7 +70,7 @@ void GraphTraversalController::traverse(
 
   for (int i = 0; i < graphs_.size(); i++) {
     const auto& graph = graphs_[i];
-    jobs_.emplace_back([& mutex_start_callback_ = mutex_start_callback_,
+    jobs_.emplace_back([&mutex_start_callback_ = mutex_start_callback_,
                         &mutex_finish_callback_ = mutex_finish_callback_,
                         &traversal_started_callback,
                         &traversal_finished_callback, i,
