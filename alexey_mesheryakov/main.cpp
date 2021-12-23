@@ -83,7 +83,7 @@ void write_to_file(const std::string& graph_output,
 }
 
 int main() {
-  const auto new_vertices_num = handle_new_vertices_num_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
   const Depth depth = handle_depth_input();
   const int graphs_count = handle_graphs_count_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);

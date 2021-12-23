@@ -11,7 +11,7 @@ constexpr int INVALID_ID = -1;
 
 class Edge {
  public:
-  enum class Color { Gray, Green, Red, Blue, Yellow };
+  enum class Color { Gray, Green, Red, Yellow };
   Edge(const std::pair<VertexId, VertexId>& new_vertex_ids,
        const EdgeId& edge_id,
        const Color& new_color = Color::Gray)

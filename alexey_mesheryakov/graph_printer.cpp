@@ -15,8 +15,6 @@ std::string edge_color_to_string(const Edge::Color& color) {
       return "green";
     case Edge::Color::Red:
       return "red";
-    case Edge::Color::Blue:
-      return "blue";
     case Edge::Color::Yellow:
       return "yellow";
   }
@@ -78,10 +76,9 @@ std::string print_graph(const uni_course_cpp::Graph& graph) {
              << "],\n"
              << "  edges: " << graph.get_edges().size() << ", {";
 
-  const auto colors = std::array<uni_course_cpp::Edge::Color, 5>{
+  const auto colors = std::array<uni_course_cpp::Edge::Color, 4>{
       uni_course_cpp::Edge::Color::Gray, uni_course_cpp::Edge::Color::Green,
-      uni_course_cpp::Edge::Color::Blue, uni_course_cpp::Edge::Color::Yellow,
-      uni_course_cpp::Edge::Color::Red};
+      uni_course_cpp::Edge::Color::Yellow, uni_course_cpp::Edge::Color::Red};
   for (const auto& color : colors) {
     log_string << edge_color_to_string(color) << ": "
                << graph.get_count_of_colored_edges(color);

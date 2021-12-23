@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 #include "graph.hpp"
 namespace uni_course_cpp {
 class GraphGenerator {
@@ -16,6 +17,10 @@ class GraphGenerator {
 
  private:
   const Params params_ = Params();
-  void generate_vertices(Graph& graph) const;
+  void generate_gray_edges(Graph& graph) const;
+  void generate_gray_branch(Graph& graph,
+                            const VertexId& from_vertex_id,
+                            const Depth& depth,
+                            std::mutex& graph_mutex) const;
 };
 }  // namespace uni_course_cpp
