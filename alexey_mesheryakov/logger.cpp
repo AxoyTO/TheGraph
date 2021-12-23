@@ -8,6 +8,7 @@
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
+  const std::lock_guard lock(mutex_);
   std::cout << string;
   file_stream_ << string;
 }
