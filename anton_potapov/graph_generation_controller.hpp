@@ -1,0 +1,46 @@
+#include <functional>
+#include <optional>
+#include <queue>
+#include <stack>
+#include <thread>
+
+#include "graph.hpp"
+#include "graph_generator.hpp"
+
+namespace uni_cource_cpp {
+class GraphGenerationController {
+ public:
+  using JobCallback = std::function<void()>;
+  using GenStartedCallback = std::function<void(int index)>;
+  using GenFinishedCallback = std::function<void(int index, Graph graph)>;
+
+  class Worker {
+   public:
+    using GetJobCallback = std::function<std::optional<JobCallback>()>;
+
+    enum class State { Idle, Working, ShouldTerminate };
+
+    explicit Worker(const GetJobCallback& get_job_callback);
+
+    void start();
+    void stop();
+
+   private:
+    std::thread thread_;
+    GetJobCallback get_job_callback_;
+    State state_ = State::Idle;
+  };
+
+  GraphGenerationController(int threads_count,
+                            int graphs_count,
+                            GraphGenerator::Params graph_generator_params);
+
+  void generate(const GenStartedCallback& gen_started_callback,
+                const GenFinishedCallback& gen_finished_callback);
+
+ private:
+  std::stack<Worker> workers_;
+  std::queue<JobCallback> jobs_;
+  // std::mutex ...
+};
+}  // namespace uni_cource_cpp

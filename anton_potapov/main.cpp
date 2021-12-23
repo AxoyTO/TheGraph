@@ -1,71 +1,23 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
 
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
+#include "graph_input_handler.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
 using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerationController;
 using uni_cource_cpp::GraphGenerator;
+using uni_cource_cpp::GraphInputHandler;
 using uni_cource_cpp::GraphPrinter;
 using uni_cource_cpp::Logger;
-
-int handle_depth_input() {
-  while (true) {
-    std::cout << "Input the depth parameter: " << std::flush;
-    int depth;
-    std::cin >> depth;
-    if (depth >= 0) {
-      return depth;
-    }
-    std::cout << "depth should be > 0, please, redo the input:" << std::endl;
-  }
-}
-
-int handle_new_vertices_count_input() {
-  while (true) {
-    std::cout << "Input the amount of new vertices: " << std::flush;
-    int new_vertices_num;
-    std::cin >> new_vertices_num;
-    if (new_vertices_num >= 0) {
-      return new_vertices_num;
-    }
-    std::cout << "new vertices num should be > 0, please, redo the input:"
-              << std::endl;
-  }
-}
-
-int handle_graphs_count_input() {
-  while (true) {
-    std::cout << "Input the amount of graphs to be generated: " << std::flush;
-    int graphs_count;
-    std::cin >> graphs_count;
-    if (graphs_count >= 0) {
-      return graphs_count;
-    }
-    std::cout << "new vertices num should be > 0, please, redo the input:"
-              << std::endl;
-  }
-}
-
-int handle_threads_count_input() {
-  while (true) {
-    std::cout << "Input the amount of threads to be used: " << std::flush;
-    int threads_count;
-    std::cin >> threads_count;
-    if (threads_count >= 0) {
-      return threads_count;
-    }
-    std::cout << "threads count should be > 0, please, redo the input:"
-              << std::endl;
-  }
-}
 
 void prepare_temp_directory() {
   std::filesystem::create_directory(
@@ -118,10 +70,12 @@ void write_to_file(const std::string& file_text, const std::string& file_path) {
 }
 
 int main() {
-  const auto depth = handle_depth_input();
-  const auto new_vertices_count = handle_new_vertices_count_input();
-  const auto graphs_count = handle_graphs_count_input();
-  const auto threads_count = handle_threads_count_input();
+  const auto depth = GraphInputHandler::handle_depth_input();
+  const auto new_vertices_count =
+      GraphInputHandler::handle_new_vertices_count_input();
+  const auto graphs_count = GraphInputHandler::handle_graphs_count_input();
+  const auto threads_count = GraphInputHandler::handle_threads_count_input();
+
   prepare_temp_directory();
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
