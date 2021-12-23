@@ -1,3 +1,5 @@
+constexpr float RED_GENERATION_PROBABILITY = 0.33;
+constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -13,9 +15,6 @@ using std::vector;
 using VertexId = int;
 using EdgeId = int;
 using Depth = int;
-constexpr float RED_GENERATION_PROBABILITY = 0.33;
-constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
-
 bool checkProbability(float probability) {
   std::random_device seed{};
   std::default_random_engine generator(seed());
@@ -28,7 +27,6 @@ int randomIntNumber(float maximum) {
   std::uniform_int_distribution<> generationDistribution(0, maximum);
   return generationDistribution(generator);
 }
-
 class Graph {
  public:
   struct Edge {
@@ -318,7 +316,6 @@ int main() {
   int const new_vertices_num = intInput("new_vertex_num: ");
   auto const params = GraphGenerator::Params(depth, new_vertices_num);
   auto const generator = GraphGenerator(params);
-
   auto const graph = generator.generate();
   auto const graph_printer = GraphPrinter(graph);
   auto const graph_json = graph_printer.print();
