@@ -1,3 +1,4 @@
+#include <atomic>
 #include <functional>
 #include <list>
 #include <optional>
@@ -21,6 +22,7 @@ class GraphGenerationController {
     enum class State { Idle, Working, ShouldTerminate };
 
     explicit Worker(const GetJobCallback& get_job_callback);
+    ~Worker();
 
     void start();
     void stop();
@@ -28,7 +30,7 @@ class GraphGenerationController {
    private:
     std::thread thread_;
     GetJobCallback get_job_callback_;
-    State state_ = State::Idle;
+    std::atomic<State> state_ = State::Idle;
   };
 
   GraphGenerationController(int threads_count,
@@ -41,6 +43,8 @@ class GraphGenerationController {
  private:
   std::list<Worker> workers_;
   std::queue<JobCallback> jobs_;
-  // std::mutex ...
+  std::mutex jobs_queue_mutex_;
+  const int graphs_count_;
+  GraphGenerator graph_generator_;
 };
 }  // namespace uni_cource_cpp

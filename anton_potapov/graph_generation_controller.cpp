@@ -1,64 +1,87 @@
+#include <assert.h>
 #include <list>
+#include <thread>
 
 #include "graph_generation_controller.hpp"
 
 namespace uni_cource_cpp {
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+
 GraphGenerationController::GraphGenerationController(
     int threads_count,
     int graphs_count,
-    GraphGenerator::Params graph_generator_params) {}
+    GraphGenerator::Params graph_generator_params)
+    : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
+  const auto workers_count = std::min(MAX_THREADS_COUNT, threads_count);
+  for (int i = 0; i < workers_count; ++i) {
+    workers_.emplace_back([this]() -> std::optional<JobCallback> {
+      const std::lock_guard queue_lock(jobs_queue_mutex_);
+      if (!jobs_.empty()) {
+        const auto job = jobs_.front();
+        jobs_.pop();
+        return job;
+      }
+      return std::nullopt;
+    });
+  }
+}
 void GraphGenerationController::generate(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
-  // Заполняем список работ для воркеров
-  for (int i = 0; i < graphs_count_; i++) {
-    jobs_.emplace_back([...]() {
+  for (int i = 0; i < graphs_count_; ++i) {
+    jobs_.emplace([this, &gen_started_callback, &gen_finished_callback, i]() {
       gen_started_callback(i);
-      auto graph = graph_generator_.generate();
+      auto graph = graph_generator_.generate_graph();
       gen_finished_callback(i, std::move(graph));
     });
   }
 
-  // Запускаем воркеров
   for (auto& worker : workers_) {
     worker.start();
   }
 
-  // Ждем, что все `jobs` выполнены, и, соответственно, все графы сгенерированы
+  while (true) {
+    const std::lock_guard queue_lock(jobs_queue_mutex_);
+    if (jobs_.empty()) {
+      break;
+    }
+  }
 
-  // Останавливаем воркеров
+  for (auto& worker : workers_) {
+    worker.stop();
+  }
 }
 
-void GraphGenerationController::Worker::start() {
-  // Проверить что `Worker` ещё не был запущен
+GraphGenerationController::Worker::Worker(
+    const GetJobCallback& get_job_callback)
+    : get_job_callback_(get_job_callback) {}
 
-  // Создаем поток с бесконечным циклом
-  // Ждем появления работы
-  thread_ = std::thread([...]() {
-              while (true) {
-                // Проверка, должны ли мы остановить поток
-                if (state_ == State::ShouldTerminate) {
-                    return;
-                }
-                // Проверяем, есть ли для нас работа
-                const auto job_optional = get_job_callback();
-                if (job_optional.has_value()) {
-                    // Работа есть, выполняем её
-                    const auto& job = job_optional.value();
-                    job();
-                }
-              }
-            });
+void GraphGenerationController::Worker::start() {
+  assert(state_ != State::Working && "tried to start working worker");
+  state_ = State::Working;
+  thread_ = std::thread([this]() {
+    while (true) {
+      if (state_ == State::ShouldTerminate) {
+        return;
+      }
+      const auto job_optional = get_job_callback_();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  });
 }
 
 void GraphGenerationController::Worker::stop() {
-  // Проверить что `Worker` работает
-  // Остановить и завершить поток
+  assert(state_ == State::Working && "worker wasn't working");
+  state_ = State::ShouldTerminate;
   thread_.join();
 }
 
 GraphGenerationController::Worker::~Worker() {
-  // При удалении мы обязательно должны остановить поток, если он запущен
-  stop();
+  if (state_ == State::Working) {
+    stop();
+  }
 }
 }  // namespace uni_cource_cpp

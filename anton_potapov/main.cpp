@@ -76,10 +76,6 @@ int main() {
   prepare_temp_directory();
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
-  const auto generator = GraphGenerator(params);
-  auto& logger = Logger::get_logger();
-
-  const auto params = GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
 
   return 0;
