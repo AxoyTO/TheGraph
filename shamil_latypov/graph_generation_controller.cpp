@@ -1,4 +1,5 @@
 #include "graph_generation_controller.hpp"
+#include <functional>
 #include <mutex>
 #include <optional>
 
