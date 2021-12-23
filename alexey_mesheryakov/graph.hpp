@@ -53,7 +53,7 @@ class Graph {
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
   Depth get_depth() const {
     return levels_.size();
-  }  // without copy gives segfault
+  }  
   const std::vector<VertexId>& get_vertex_ids_at_depth(
       const Depth& depth) const;
 
