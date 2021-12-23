@@ -8,14 +8,14 @@
 
 namespace uni_cource_cpp {
 Logger::Logger() : output_filestream_(config::log_file_path()) {
-  std::lock_guard logger_usage_lock(logger_use_mutex_);
+  const std::lock_guard logger_usage_lock(logger_use_mutex_);
   if (!output_filestream_.is_open()) {
     throw std::runtime_error("can't open log file");
   }
 }
 
 void Logger::log(const std::string& string) {
-  std::lock_guard logger_usage_lock(logger_use_mutex_);
+  const std::lock_guard logger_usage_lock(logger_use_mutex_);
   std::cout << string;
   output_filestream_ << string;
 }
