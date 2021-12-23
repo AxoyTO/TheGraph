@@ -16,7 +16,7 @@ void GraphTraversalController::Worker::start() {
   state_ = State::Working;
 
   thread_ = std::thread(
-      [& state_ = state_, &get_job_callback_ = get_job_callback_]() {
+      [& state_ = state_, & get_job_callback_ = get_job_callback_ ]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
             state_ = State::Idle;
@@ -49,17 +49,16 @@ GraphTraversalController::GraphTraversalController(
     : graphs_(graphs) {
   const auto count = std::min(MAX_WORKERS_COUNT, (int)graphs_.size());
   for (int i = 0; i < count; ++i) {
-    workers_.emplace_back(
-        [& jobs_ = jobs_,
-         &mutex_jobs_ = mutex_jobs_]() -> std::optional<JobCallback> {
-          const std::lock_guard lock(mutex_jobs_);
-          if (jobs_.empty()) {
-            return std::nullopt;
-          }
-          const auto job = jobs_.front();
-          jobs_.pop_front();
-          return job;
-        });
+    workers_.emplace_back([& jobs_ = jobs_, & mutex_jobs_ = mutex_jobs_ ]()
+                              ->std::optional<JobCallback> {
+                                const std::lock_guard lock(mutex_jobs_);
+                                if (jobs_.empty()) {
+                                  return std::nullopt;
+                                }
+                                const auto job = jobs_.front();
+                                jobs_.pop_front();
+                                return job;
+                              });
   }
 }
 
