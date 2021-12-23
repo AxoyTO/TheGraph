@@ -8,8 +8,7 @@ void GraphGenerationController::Worker::start() {
   assert(state_ != State::Working && "Worker is already working");
   state_ = State::Working;
 
-  thread_ = std::thread(
-      [&state_ = state_, &get_job_callback_ = get_job_callback_]() {
+  thread_ =std::thread([&state_ = state_, &get_job_callback_ = get_job_callback_]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
             state_ = State::Idle;
