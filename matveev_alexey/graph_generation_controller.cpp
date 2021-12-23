@@ -13,7 +13,7 @@ GraphGenerationController::GraphGenerationController(
       graphs_num_(_graphs_num),
       graph_generator_(graph_generator_params) {
   for (int i = 0; i < threads_num_; i++) {
-    workers_.emplace_back([& jobs_ = jobs_, &mutex_jobs_ = mutex_jobs_,
+    workers_.emplace_back([&jobs_ = jobs_, &mutex_jobs_ = mutex_jobs_,
                            this]() -> std::optional<JobCallback> {
       const std::lock_guard lock(mutex_jobs_);
       if (!jobs_.empty()) {
@@ -31,7 +31,7 @@ void GraphGenerationController::Worker::start() {
 
   state_ = State::Working;
   thread_ = std::thread(
-      [& state_ = state_, &get_job_callback_ = get_job_callback_, this]() {
+      [&state_ = state_, &get_job_callback_ = get_job_callback_, this]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
             state_ = State::Idle;
