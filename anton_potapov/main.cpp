@@ -54,6 +54,19 @@ int handle_graphs_count_input() {
   }
 }
 
+int handle_threads_count_input() {
+  while (true) {
+    std::cout << "Input the amount of threads to be used: " << std::flush;
+    int threads_count;
+    std::cin >> threads_count;
+    if (threads_count >= 0) {
+      return threads_count;
+    }
+    std::cout << "threads count should be > 0, please, redo the input:"
+              << std::endl;
+  }
+}
+
 void prepare_temp_directory() {
   std::filesystem::create_directory(
       uni_cource_cpp::config::TEMP_DIRECTORY_PATH);
@@ -105,9 +118,10 @@ void write_to_file(const std::string& file_text, const std::string& file_path) {
 }
 
 int main() {
-  const int depth = handle_depth_input();
-  const int new_vertices_count = handle_new_vertices_count_input();
-  const int graphs_count = handle_graphs_count_input();
+  const auto depth = handle_depth_input();
+  const auto new_vertices_count = handle_new_vertices_count_input();
+  const auto graphs_count = handle_graphs_count_input();
+  const auto threads_count = handle_threads_count_input();
   prepare_temp_directory();
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
