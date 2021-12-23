@@ -84,7 +84,7 @@ std::string generation_started_string(int graph_number) {
 
 std::string generation_finished_string(int graph_number, const Graph& graph) {
   return get_current_date_time() + ": Graph " + std::to_string(graph_number) +
-         ", Generation Finished {  \n" +
+         ", Generation Finished {\n" +
          graph_printing::graph_description(graph) + "}\n\n";
 }
 

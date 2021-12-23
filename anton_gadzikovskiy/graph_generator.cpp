@@ -1,230 +1,24 @@
-#include <algorithm>
-#include <array>
-#include <chrono>
-#include <fstream>
-#include <iostream>
+#include "graph_generator.hpp"
+#include <atomic>
+#include <functional>
+#include <list>
+#include <mutex>
+#include <optional>
 #include <random>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <thread>
+#include "graph.hpp"
 
-using std::array;
-using std::cin;
-using std::cout;
-using std::string;
-using std::to_string;
+namespace {
+
+using std::lock_guard;
+using std::mutex;
+using std::ref;
+using std::thread;
 using std::vector;
-using VertexId = int;
-using EdgeId = int;
+using uni_cource_cpp::Graph;
 constexpr double kGreenEdgesProbability = 10.0;
 constexpr double kRedEdgesProbability = 33.0;
-
-class Graph {
- public:
-  using Depth = int;
-
-  struct Vertex {
-   public:
-    const VertexId id;
-    Depth depth = 0;
-
-    explicit Vertex(const VertexId& _id) : id(_id) {}
-
-    void add_edge_id(const EdgeId& id) { edge_ids_.push_back(id); }
-
-    const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-
-   private:
-    vector<EdgeId> edge_ids_;
-  };
-
-  struct Edge {
-    enum class Color { Gray, Green, Yellow, Red };
-
-    const VertexId from_vertex_id;
-    const VertexId to_vertex_id;
-    const EdgeId id;
-    const Color color;
-
-    Edge(const EdgeId& _id,
-         const VertexId& _from_vertex_id,
-         const VertexId& _to_vertex_id,
-         const Color& _color)
-        : id(_id),
-          from_vertex_id(_from_vertex_id),
-          to_vertex_id(_to_vertex_id),
-          color(_color) {}
-  };
-
-  VertexId add_vertex() {
-    if (vertices_on_depth_.empty()) {
-      vertices_on_depth_.push_back(vector<VertexId>());
-    }
-    const VertexId new_vertex_id = get_new_vertex_id();
-    vertices_.emplace(new_vertex_id, new_vertex_id);
-    vertices_on_depth_[0].push_back(new_vertex_id);
-    return new_vertex_id;
-  }
-
-  void add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
-    const EdgeId new_edge_id = get_new_edge_id();
-    const auto& new_edge_color =
-        define_edge_color(from_vertex_id, to_vertex_id);
-    edges_.emplace(new_edge_id, Edge(new_edge_id, from_vertex_id, to_vertex_id,
-                                     new_edge_color));
-    get_vertex(from_vertex_id).add_edge_id(new_edge_id);
-    if (new_edge_color != Edge::Color::Green) {
-      get_vertex(to_vertex_id).add_edge_id(new_edge_id);
-    }
-    if (new_edge_color == Edge::Color::Gray) {
-      const auto new_vertex_depth = get_vertex(from_vertex_id).depth + 1;
-      get_vertex(to_vertex_id).depth = new_vertex_depth;
-      if (vertices_on_depth_.size() - 1 < new_vertex_depth) {
-        vertices_on_depth_.push_back(vector<VertexId>());
-      }
-      vertices_on_depth_[new_vertex_depth].push_back(to_vertex_id);
-      for (auto vertex_id = vertices_on_depth_.at(0).begin();
-           vertex_id != vertices_on_depth_[0].end(); vertex_id++) {
-        if (to_vertex_id == *vertex_id) {
-          vertices_on_depth_[0].erase(vertex_id);
-          break;
-        }
-      }
-    }
-  };
-
-  Vertex& get_vertex(const VertexId& id) {
-    const auto& const_this = *this;
-
-    return const_cast<Vertex&>(const_this.vertices_.at(id));
-  }
-  const Edge& get_edge(const EdgeId& id) const { return edges_.at(id); }
-
-  Depth get_vertex_depth(const VertexId& vertex_id) const {
-    return vertices_.at(vertex_id).depth;
-  }
-
-  bool is_connected(const VertexId& from_vertex_id,
-                    const VertexId& to_vertex_id) const {
-    if (from_vertex_id != to_vertex_id) {
-      for (const auto& edge_id_1 : get_vertex_edge_ids(from_vertex_id)) {
-        for (const auto& edge_id_2 : get_vertex_edge_ids(to_vertex_id)) {
-          if (edge_id_1 == edge_id_2) {
-            return true;
-          }
-        }
-      }
-    } else {
-      for (const auto& edge_id : get_vertex_edge_ids(from_vertex_id)) {
-        if (get_edge(edge_id).from_vertex_id ==
-            get_edge(edge_id).to_vertex_id) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  Edge::Color define_edge_color(const VertexId& from_vertex_id,
-                                const VertexId& to_vertex_id) const {
-    const auto from_vertex_depth = get_vertex_depth(from_vertex_id);
-    const auto to_vertex_depth = get_vertex_depth(to_vertex_id);
-    if (from_vertex_id == to_vertex_id) {
-      return Edge::Color::Green;
-    }
-    if (get_vertex_edge_ids(to_vertex_id).size() == 0) {
-      return Edge::Color::Gray;
-    }
-    if (to_vertex_depth - from_vertex_depth == 1 &&
-        !is_connected(from_vertex_id, to_vertex_id)) {
-      return Edge::Color::Yellow;
-    }
-    if (to_vertex_depth - from_vertex_depth == 2) {
-      return Edge::Color::Red;
-    }
-    throw std::runtime_error("Failed to determine color");
-  }
-
-  const vector<EdgeId>& get_vertex_edge_ids(const VertexId& vertex_id) const {
-    return vertices_.at(vertex_id).get_edge_ids();
-  }
-
-  const std::unordered_map<VertexId, Vertex>& get_vertices() const {
-    return vertices_;
-  }
-
-  const vector<vector<VertexId>>& get_vertices_on_depth() const {
-    return vertices_on_depth_;
-  }
-
-  const vector<VertexId>& get_vertex_ids_on_depth(Depth depth) const {
-    return vertices_on_depth_[depth];
-  }
-
-  const std::unordered_map<EdgeId, Edge>& get_edges() const { return edges_; }
-
-  Depth depth() const { return vertices_on_depth_.size() - 1; }
-
- private:
-  std::unordered_map<VertexId, Vertex> vertices_;
-  vector<vector<VertexId>> vertices_on_depth_;
-  std::unordered_map<EdgeId, Edge> edges_;
-  VertexId vertex_id_counter_ = 0;
-  EdgeId edge_id_counter_ = 0;
-
-  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-
-  EdgeId get_new_edge_id() { return edge_id_counter_++; }
-};
-
-namespace graph_printing {
-string print_edge_color(const Graph::Edge::Color& color) {
-  switch (color) {
-    case Graph::Edge::Color::Gray:
-      return "gray";
-    case Graph::Edge::Color::Green:
-      return "green";
-    case Graph::Edge::Color::Yellow:
-      return "yellow";
-    case Graph::Edge::Color::Red:
-      return "red";
-  }
-  throw std::runtime_error("Failed to determine color");
-}
-
-string print_vertex(const Graph::Vertex& vertex) {
-  string vertex_output =
-      "\"id\": " + to_string(vertex.id) + ", " + "\"edge_ids\": [";
-  for (const auto& edge_id : vertex.get_edge_ids()) {
-    vertex_output += to_string(edge_id);
-    if (edge_id != vertex.get_edge_ids().back()) {
-      vertex_output += ", ";
-    }
-  }
-  vertex_output += "], \"depth\": " + to_string(vertex.depth);
-  return vertex_output;
-}
-string print_edge(const Graph::Edge& edge) {
-  return "\"id\": " + std::to_string(edge.id) + ", " + "\"vertex_ids\": [" +
-         to_string(edge.from_vertex_id) + ", " + to_string(edge.to_vertex_id) +
-         "]" + ", " + "\"color\": \"" + print_edge_color(edge.color) + "\"";
-}
-string print_graph(const Graph& graph) {
-  string graph_output = "{\n\t\"depth\": " + to_string(graph.depth()) +
-                        ",\n\t\"vertices\": [\n\t\t";
-  for (const auto& [key, vertex] : graph.get_vertices()) {
-    graph_output += "{" + print_vertex(vertex) + "},\n\t\t";
-  }
-  graph_output = graph_output.substr(0, graph_output.size() - 4) +
-                 "\n\t],\n\t\"edges\": [\n\t\t";
-  for (const auto& [key, edge] : graph.get_edges()) {
-    graph_output += "{" + print_edge(edge) + "},\n\t\t";
-  }
-  graph_output = graph_output.substr(0, graph_output.size() - 4) + "\n\t]\n}\n";
-  return graph_output;
-}
-
-}  // namespace graph_printing
+const int kMaxThreadsCount = std::thread::hardware_concurrency();
 
 bool is_generated(double probability) {
   std::random_device rd;
@@ -233,42 +27,25 @@ bool is_generated(double probability) {
   return is_gen(gen);
 }
 
-const VertexId& get_random_vertex_id(const vector<VertexId>& vertices) {
+const uni_cource_cpp::Graph::VertexId& get_random_vertex_id(
+    const vector<uni_cource_cpp::Graph::VertexId>& vertices) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> random_id(0, vertices.size() - 1);
   return vertices[random_id(gen)];
 }
 
-void generate_gray_edges(Graph& graph, int depth, int new_vertices_num) {
-  for (int current_depth = 0; current_depth < depth; current_depth++) {
-    double step = 100 / (double)depth;
-    double probability = 100 - step * current_depth;
-    if (current_depth < graph.depth() + 1) {
-      //Создаю копию, чтобы не менять объект по которому итерирую
-      const auto vertex_ids_on_depth =
-          graph.get_vertex_ids_on_depth(current_depth);
-      for (const auto& from_vertex_id : vertex_ids_on_depth) {
-        for (int k = 0; k < new_vertices_num; k++) {
-          if (is_generated(probability)) {
-            const auto new_vertex_id = graph.add_vertex();
-            graph.add_edge(from_vertex_id, new_vertex_id);
-          }
-        }
-      }
-    }
-  }
-}
-
-void generate_green_edges(Graph& graph) {
+void generate_green_edges(uni_cource_cpp::Graph& graph, mutex& new_edge_mutex) {
   for (const auto& [vertex_id, vertex] : graph.get_vertices()) {
     if (is_generated(kGreenEdgesProbability)) {
+      const lock_guard lock(new_edge_mutex);
       graph.add_edge(vertex_id, vertex_id);
     }
   }
 }
 
-void generate_yellow_edges(Graph& graph) {
+void generate_yellow_edges(uni_cource_cpp::Graph& graph,
+                           mutex& new_edge_mutex) {
   for (int current_depth = 0; current_depth <= graph.depth(); current_depth++) {
     if (current_depth != graph.depth()) {
       for (const auto& from_vertex_id :
@@ -277,15 +54,22 @@ void generate_yellow_edges(Graph& graph) {
             (double)graph.get_vertex(from_vertex_id).depth *
             (100 / (double)(graph.depth() - 1));
         if (is_generated(probability)) {
-          vector<VertexId> vertices_on_deeper_depth;
+          vector<uni_cource_cpp::Graph::VertexId> vertices_on_deeper_depth;
           for (const auto& to_vertex_id :
                graph.get_vertex_ids_on_depth(current_depth + 1)) {
-            if (!graph.is_connected(from_vertex_id, to_vertex_id)) {
+            const bool is_connected = [&graph, &new_edge_mutex, &from_vertex_id,
+                                       &to_vertex_id]() {
+              const lock_guard lock(new_edge_mutex);
+              return graph.is_connected(from_vertex_id, to_vertex_id);
+            }();
+
+            if (!is_connected) {
               vertices_on_deeper_depth.push_back(to_vertex_id);
             }
           }
 
           if (!vertices_on_deeper_depth.empty()) {
+            const lock_guard lock(new_edge_mutex);
             graph.add_edge(from_vertex_id,
                            get_random_vertex_id(vertices_on_deeper_depth));
           }
@@ -295,7 +79,7 @@ void generate_yellow_edges(Graph& graph) {
   }
 }
 
-void generate_red_edges(Graph& graph) {
+void generate_red_edges(uni_cource_cpp::Graph& graph, mutex& new_edge_mutex) {
   for (int current_depth = 0; current_depth <= graph.depth(); current_depth++) {
     if (current_depth >= graph.depth() - 1) {
       break;
@@ -303,6 +87,7 @@ void generate_red_edges(Graph& graph) {
       for (const auto& from_vertex_id :
            graph.get_vertex_ids_on_depth(current_depth)) {
         if (is_generated(kRedEdgesProbability)) {
+          const lock_guard lock(new_edge_mutex);
           graph.add_edge(from_vertex_id,
                          get_random_vertex_id(
                              graph.get_vertex_ids_on_depth(current_depth + 2)));
@@ -312,82 +97,110 @@ void generate_red_edges(Graph& graph) {
   }
 }
 
-class GraphGenerator {
- public:
-  struct Params {
-   public:
-    explicit Params(Graph::Depth depth = 0, int new_vertices_count = 0)
-        : depth_(depth), new_vertices_count_(new_vertices_count) {}
+}  // namespace
 
-    Graph::Depth depth() const { return depth_; }
-    int new_vertices_count() const { return new_vertices_count_; }
+namespace uni_cource_cpp {
 
-   private:
-    Graph::Depth depth_ = 0;
-    int new_vertices_count_ = 0;
+void GraphGenerator::generate_gray_branch(
+    Graph& graph,
+    const Graph::VertexId& parent_vertex_id,
+    mutex& new_edge_mutex,
+    const Graph::Depth& depth) const {
+  const auto new_vertex_id = [&graph, &new_edge_mutex, &parent_vertex_id]() {
+    const lock_guard lock(new_edge_mutex);
+    const auto new_vertex_id = graph.add_vertex();
+    graph.add_edge(parent_vertex_id, new_vertex_id);
+    return new_vertex_id;
+  }();
+
+  if (depth == params_.depth())
+    return;
+
+  const double step = 100 / (double)params_.depth();
+  const double probability = 100 - step * depth;
+
+  for (int i = 0; i < params_.new_vertices_count(); i++) {
+    if (is_generated(probability)) {
+      generate_gray_branch(graph, new_vertex_id, new_edge_mutex, depth + 1);
+    }
+  }
+}
+
+void GraphGenerator::generate_gray_edges(
+    Graph& graph,
+    const Graph::VertexId& root_vertex_id) const {
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
+  std::atomic<int> jobs_done = 0;
+  mutex new_edge_mutex;
+
+  for (int i = 0; i < params_.new_vertices_count(); i++) {
+    jobs.push_back(
+        [this, &graph, &new_edge_mutex, &jobs_done, root_vertex_id]() {
+          generate_gray_branch(graph, root_vertex_id, new_edge_mutex, 1);
+          jobs_done++;
+        });
+  }
+  std::atomic<bool> should_terminate = false;
+  mutex jobs_mutex;
+  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional = [&jobs_mutex,
+                                 &jobs]() -> std::optional<JobCallback> {
+        const lock_guard lock(jobs_mutex);
+        if (!jobs.empty()) {
+          const auto next_job = jobs.front();
+          jobs.pop_front();
+          return next_job;
+        }
+        return std::nullopt;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
   };
 
-  explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
+  const auto threads_count =
+      std::min(kMaxThreadsCount, params_.new_vertices_count());
+  auto threads = vector<thread>();
+  threads.reserve(threads_count);
 
-  Graph generate() const {
-    auto graph = Graph();
-    graph.add_vertex();
-    generate_gray_edges(graph, params_.depth(), params_.new_vertices_count());
-    generate_green_edges(graph);
-    generate_yellow_edges(graph);
-    generate_red_edges(graph);
-    return graph;
+  for (int i = 0; i < threads_count; i++) {
+    threads.push_back(thread(worker));
   }
 
- private:
-  const Params params_ = Params();
-};
-
-void write_to_file(const string& json, const string& file_name) {
-  std::ofstream file;
-  file.open(file_name);
-  file << json;
-}
-
-int handle_depth_input() {
-  int depth;
-  while (true) {
-    cout << "Enter depth of graph:\n";
-    cin >> depth;
-    if (depth < 0) {
-      std::cout << "Incorrect input. Depth must be integer and >= 0\n";
-      cin.clear();
-    } else {
-      break;
-    }
+  while (jobs_done != params_.new_vertices_count()) {
   }
-  return depth;
-}
 
-int handle_new_vertices_count_input() {
-  int new_vertices_num;
-  bool incorrect_input = true;
-  while (true) {
-    cout << "Enter max number of vertices for each vertex:\n";
-    cin >> new_vertices_num;
-    if (new_vertices_num < 0) {
-      cout << "Incorrect input. Number of vertices must be integer and >= 0\n";
-    } else {
-      break;
-    }
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
   }
-  return new_vertices_num;
 }
 
-int main() {
-  const int depth = handle_depth_input();
-  const int new_vertices_count = handle_new_vertices_count_input();
+Graph GraphGenerator::generate() const {
+  auto graph = Graph();
 
-  const auto params = GraphGenerator::Params(depth, new_vertices_count);
-  const auto generator = GraphGenerator(params);
-  const auto graph = generator.generate();
+  const auto root_vertex_id = graph.add_vertex();
 
-  const auto graph_json = graph_printing::print_graph(graph);
-  cout << graph_json << std::endl;
-  write_to_file(graph_json, "graph.json");
+  generate_gray_edges(graph, root_vertex_id);
+
+  mutex new_edge_mutex;
+
+  thread green_thread(generate_green_edges, ref(graph), ref(new_edge_mutex));
+  thread yellow_thread(generate_yellow_edges, ref(graph), ref(new_edge_mutex));
+  thread red_thread(generate_red_edges, ref(graph), ref(new_edge_mutex));
+
+  green_thread.join();
+  yellow_thread.join();
+  red_thread.join();
+
+  return graph;
 }
+
+}  // namespace uni_cource_cpp

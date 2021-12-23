@@ -20,7 +20,7 @@ std::string GraphPrinter::print_graph_description(const Graph& graph) {
 
   log_string << "  vertices: " << graph.get_vertices().size() << ", [";
   for (Depth current_depth = 0; current_depth <= depth; ++current_depth) {
-    log_string << graph.get_vertex_ids_at(depth).size();
+    log_string << graph.get_vertex_ids_at(current_depth).size();
     if (current_depth != depth)
       log_string << ", ";
   }
