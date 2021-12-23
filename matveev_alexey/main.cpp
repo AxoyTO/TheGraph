@@ -1,4 +1,4 @@
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -92,7 +92,7 @@ std::string genFinishedString(int i, const uni_course_cpp::Graph& graph) {
 }
 
 void prepareTempDirectory() {
-  std::experimental::filesystem::create_directory(
+  std::filesystem::create_directory(
       uni_course_cpp::config::TEMP_DIRECTORY_PATH);
 }
 
