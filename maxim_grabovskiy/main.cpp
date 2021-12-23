@@ -76,7 +76,7 @@ class Graph {
           vertexIdByDepth_.erase(vertexIdByDepth_.begin() + i);
       }
       const auto newDepth = getDepth(fromVertex.id) + 1;
-      if ((int)vertexIdByDepth_.size() - 1 < (newDepth))
+      if ((int)vertexIdByDepth_.size() - 1 < newDepth)
         vertexIdByDepth_.emplace_back();
 
       vertexIdByDepth_[newDepth].emplace_back(toVertexId);
@@ -96,10 +96,10 @@ class Graph {
     if (toVertexId == fromVertexId) {
       return Edge::Color::Green;
     }
-    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) > 0) {
+    if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) >= 0) {
       return Edge::Color::Gray;
     }
-    return Edge::Color::Gray;
+    throw("line 102 wrong vertex ids");
   }
   VertexId addVertex() {
     VertexId const newVertexId = getNewVertexId();
@@ -117,11 +117,17 @@ class Graph {
     return newVertexId;
   }
   bool isConnected(VertexId firstVertexId, VertexId secondVertexId) const {
-    if (firstVertexId == secondVertexId)
+    if (firstVertexId == secondVertexId) {
+      for (auto edgeId : getConnections(firstVertexId)) {
+        if (getEdge(edgeId).color == Edge::Color::Green)
+          return true;
+      }
       return false;
-    for (auto connection : getConnections(firstVertexId)) {
-      auto connectedfrom = getEdge(connection).fromVertexId;
-      auto connectedTo = getEdge(connection).toVertexId;
+    }
+    return false;
+    for (auto edgeId : getConnections(firstVertexId)) {
+      auto connectedfrom = getEdge(edgeId).fromVertexId;
+      auto connectedTo = getEdge(edgeId).toVertexId;
       if (connectedfrom != connectedTo) {
         if (connectedfrom == secondVertexId || connectedTo == secondVertexId)
           return true;
@@ -198,8 +204,9 @@ class GraphPrinter {
         return "red";
       case Graph::Edge::Color::Gray:
         return "gray";
+      default:
+        throw("line 202 wrong color");
     }
-    return "";
   }
   Graph const& graph_;
 };
@@ -227,16 +234,15 @@ class GraphGenerator {
   }
 
  private:
-  VertexId getUnconnectedVertexId(VertexId vertexId,
-                                  const std::vector<VertexId>& vertexIds,
-                                  Graph const& graph) const {
+  vector<VertexId> getUnconnectedVertexIds(
+      VertexId vertexId,
+      const std::vector<VertexId>& vertexIds,
+      Graph const& graph) const {
     vector<VertexId> notConnected;
     for (auto randomNextVertexId : vertexIds)
       if (!graph.isConnected(vertexId, randomNextVertexId))
         notConnected.emplace_back(randomNextVertexId);
-    if (!notConnected.size())
-      return vertexId;
-    return (notConnected[randomIntNumber(notConnected.size() - 1)]);
+    return notConnected;
   };
   void generateGrayEdges(Graph& graph) const {
     float const step = 100.0 / (params_.depth - 1);
@@ -268,11 +274,13 @@ class GraphGenerator {
               ((100.0 - (100.0 - (step * (graph.getDepth(vertex.id))))) /
                100)) &&
           graph.getDepth(vertex.id) < params_.depth - 1) {
-        auto const randomNextVertexId = getUnconnectedVertexId(
+        auto const NextVertexesIds = getUnconnectedVertexIds(
             vertex.id, graph.getVertexIdByDepth(graph.getDepth(vertex.id) + 1),
             graph);
-        if (randomNextVertexId > 0)
-          graph.addEdge(vertex.id, randomNextVertexId);
+        if (NextVertexesIds.size() > 0)
+          graph.addEdge(
+              vertex.id,
+              NextVertexesIds[randomIntNumber(NextVertexesIds.size() - 1)]);
       }
     }
   }
@@ -280,11 +288,13 @@ class GraphGenerator {
     for (auto vertex : graph.getVertexes()) {
       if (graph.getDepth(vertex.id) < params_.depth - 2 &&
           checkProbability(RED_GENERATION_PROBABILITY)) {
-        const auto randomNextVertexId = getUnconnectedVertexId(
+        auto const NextVertexesIds = getUnconnectedVertexIds(
             vertex.id, graph.getVertexIdByDepth(graph.getDepth(vertex.id) + 2),
             graph);
-        if (randomNextVertexId > 0)
-          graph.addEdge(vertex.id, randomNextVertexId);
+        if (NextVertexesIds.size() > 0)
+          graph.addEdge(
+              vertex.id,
+              NextVertexesIds[randomIntNumber(NextVertexesIds.size() - 1)]);
       }
     }
   }
@@ -315,13 +325,13 @@ void writeToFile(string const& output, string const& filename) {
 
 int main() {
   int const depth = intInput("depth: ");
-  int const new_vertices_num = intInput("new_vertex_num: ");
-  auto const params = GraphGenerator::Params(depth, new_vertices_num);
+  int const newVerticesNum = intInput("new_vertex_num: ");
+  auto const params = GraphGenerator::Params(depth, newVerticesNum);
   auto const generator = GraphGenerator(params);
   auto const graph = generator.generate();
-  auto const graph_printer = GraphPrinter(graph);
-  auto const graph_json = graph_printer.print();
-  std::cout << graph_json << std::endl;
-  writeToFile(graph_json, "graph.json");
+  auto const graphPrinter = GraphPrinter(graph);
+  auto const graphJson = graphPrinter.print();
+  std::cout << graphJson << std::endl;
+  writeToFile(graphJson, "graph.json");
   return 0;
 }
