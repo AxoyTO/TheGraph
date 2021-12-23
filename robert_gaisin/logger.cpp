@@ -5,7 +5,7 @@
 namespace uni_cource_cpp {
 
 void Logger::log(const std::string& log_string) {
-  std::lock_guard lock(log_mutex);
+  const std::lock_guard lock(log_mutex);
   std::cout << log_string << std::endl;
   file_stream_ << log_string << std::endl;
 }
