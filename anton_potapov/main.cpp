@@ -49,7 +49,7 @@ std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
       [&logger](int index) {
         logger.log(LogMessagesGenerator::generation_started_string(index));
       },
-      [&logger, &graphs, &params](int index, Graph graph) {
+      [&logger, &graphs, &params](int index, Graph& graph) {
         const auto graph_printer = GraphPrinter(graph);
         logger.log(LogMessagesGenerator::generation_finished_string(
             index, graph_printer.print_graph_description()));
