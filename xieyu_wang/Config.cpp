@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "Config.hpp"
 #include <string>
 
 namespace uni_course_cpp {

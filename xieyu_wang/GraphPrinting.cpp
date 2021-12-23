@@ -2,7 +2,6 @@
 #include <array>
 #include <iomanip>
 #include <sstream>
-#include "edge.hpp"
 namespace uni_course_cpp {
 std::string GraphPrinting::getTimeByString() {
   std::time_t presentTime =
