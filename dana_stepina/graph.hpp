@@ -70,8 +70,7 @@ class Graph {
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
 
-  void set_vertex_depth(const VertexId& from_vertex_id,
-                        const VertexId& to_vertex_id);
+  void set_vertex_depth(const VertexId& vertex_id, Depth depth);
   Edge::Color get_edge_color(const Vertex& from_vertex,
                              const Vertex& to_vertex);
 };
