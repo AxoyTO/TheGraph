@@ -99,6 +99,7 @@ int main() {
 
     const auto graph_printer = GraphPrinter(graph);
     write_to_file(graph_printer.print(),
-                  "temp/graph_" + std::to_string(i) + ".json");
+                  uni_course_cpp::config::kTempDirectoryPath +
+                      std::to_string(i) + ".json");
   }
 }
