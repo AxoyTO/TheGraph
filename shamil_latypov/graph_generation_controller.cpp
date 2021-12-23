@@ -33,18 +33,10 @@ void GraphGenerationController::generate(
   for (int i = 0; i < graphs_count_; i++) {
     jobs_.emplace_back([this, &gen_started_callback, &gen_finished_callback,
                         &graph_generator_ = graph_generator_,
-                        &graphs_generated_ = graphs_generated_, i,
-                        &function1_lock_ = function1_lock_,
-                        &function2_lock_ = function2_lock_]() {
-      {
-        const std::lock_guard lock(function1_lock_);
-        gen_started_callback(i);
-      }
+                        &graphs_generated_ = graphs_generated_, i]() {
+      gen_started_callback(i);
       auto graph = graph_generator_.generate_graph();
-      {
-        const std::lock_guard lock(function2_lock_);
-        gen_finished_callback(i, std::move(graph));
-      }
+      gen_finished_callback(i, std::move(graph));
       graphs_generated_++;
     });
   }

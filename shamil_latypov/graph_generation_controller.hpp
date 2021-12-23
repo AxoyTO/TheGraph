@@ -52,8 +52,6 @@ class GraphGenerationController {
   GraphGenerator graph_generator_;
   std::mutex jobs_lock_;
   std::atomic<int> graphs_generated_ = 0;
-  std::mutex function1_lock_;
-  std::mutex function2_lock_;
 };
 
 }  // namespace uni_cource_cpp
