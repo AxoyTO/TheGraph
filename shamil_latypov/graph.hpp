@@ -66,7 +66,11 @@ class Graph {
   const Vertex& get_vertex(const VertexId& id) const;
   Vertex& get_vertex(const VertexId& id);
 
+  const Edge& get_edge(const EdgeId& id) const;
+  Edge& get_edge(const EdgeId& id);
+
   bool has_vertex_id(const VertexId& id) const;
+  bool has_edge_id(const EdgeId& id) const;
   bool vertices_connected(const VertexId& v1_id, const VertexId& v2_id) const;
 
   int get_vertices_count() const;

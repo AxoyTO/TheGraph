@@ -102,9 +102,32 @@ Vertex& Graph::get_vertex(const VertexId& id) {
   return const_cast<Vertex&>(const_this.get_vertex(id));
 }
 
+const Edge& Graph::get_edge(const EdgeId& id) const {
+  assert(has_edge_id(id) && "Edge doesnt exist");
+  for (auto& edge : edges_) {
+    if (edge.get_id() == id) {
+      return edge;
+    }
+  }
+  throw std::runtime_error("Edge doesn't exist");
+}
+Edge& Graph::get_edge(const EdgeId& id) {
+  const auto& const_this = *this;
+  return const_cast<Edge&>(const_this.get_edge(id));
+}
+
 bool Graph::has_vertex_id(const VertexId& id) const {
   for (const auto& vertex : vertices_) {
     if (vertex.get_id() == id) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Graph::has_edge_id(const EdgeId& id) const {
+  for (const auto& edge : edges_) {
+    if (edge.get_id() == id) {
       return true;
     }
   }
