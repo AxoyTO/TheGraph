@@ -86,8 +86,6 @@ void GraphGenerator::generate_gray_edges(Graph& graph,
 
   std::mutex jobs_mutex;
   std::atomic<bool> should_terminate = false;
-  // Создаем воркера, который в бесконечном цикле проверяет,
-  // есть ли работа, и выполняет её
   const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       if (should_terminate)
@@ -109,7 +107,6 @@ void GraphGenerator::generate_gray_edges(Graph& graph,
     }
   };
 
-  // Создаем и запускаем потоки с воркерами
   const auto threads_counter =
       std::min(MAX_THREADS_COUNT, params_.new_vertices_num);
   auto threads = std::vector<std::thread>();
@@ -117,11 +114,10 @@ void GraphGenerator::generate_gray_edges(Graph& graph,
   for (int i = 0; i < threads_counter; ++i) {
     threads.push_back(std::thread(worker));
   }
-  // Ждем, когда все ветви будут сгенерированы
+
   while (jobs_counter < params_.new_vertices_num) {
   }
 
-  // Останавливем всех воркеров и потоки
   should_terminate = true;
   for (auto& thread : threads) {
     thread.join();
