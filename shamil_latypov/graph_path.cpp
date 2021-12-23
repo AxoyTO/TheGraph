@@ -4,8 +4,7 @@
 namespace uni_cource_cpp {
 
 GraphPath::Distance GraphPath::distance() const {
-  Distance distance = edge_ids.size();
-  return distance;
+  return edge_ids.size();
 }
 
 }  // namespace uni_cource_cpp
