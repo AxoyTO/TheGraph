@@ -9,7 +9,7 @@ class Graph {
  public:
   using Depth = int;
   explicit Graph(Depth depth) : depth_(depth) {}
-  void add_vertex(int level);
+  void add_vertex(int vertex_depth);
   void add_edge(VertexId first_vertex_id,
                 VertexId second_vertex_id,
                 Edge::Color color);

@@ -1,7 +1,7 @@
 #include "vertex.hpp"
 
-int Vertex::get_level() const {
-  return level_;
+int Vertex::get_vertex_depth() const {
+  return vertex_depth_;
 }
 
 VertexId Vertex::get_id() const {
@@ -27,7 +27,7 @@ std::string Vertex::to_string() const {
     }
   }
 
-  json << "],\n  \"depth\": " << get_level() << "\n}";
+  json << "],\n  \"depth\": " << get_vertex_depth() << "\n}";
 
   return json.str();
 }

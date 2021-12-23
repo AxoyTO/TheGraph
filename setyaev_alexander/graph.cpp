@@ -21,17 +21,17 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
   std::random_device rd;
   std::mt19937 gen(rd());
   for (int i = 0; i < params_.depth(); ++i) {
-    std::vector<Vertex> new_vertices;
+    std::vector<Vertex> parent_vertices;
     for (const auto& vertex : graph.get_vertices()) {
       std::bernoulli_distribution d(1.0 - (double)i / (double)params_.depth());
-      if (vertex.get_level() == i && d(gen)) {
-        new_vertices.push_back(vertex);
+      if (vertex.get_vertex_depth() == i && d(gen)) {
+        parent_vertices.push_back(vertex);
       }
     }
-    for (int i = 0; i < new_vertices.size(); ++i) {
+    for (int i = 0; i < parent_vertices.size(); ++i) {
       for (int j = 0; j < params_.new_vertices_count(); ++j) {
-        graph.add_vertex(new_vertices[i].get_level() + 1);
-        graph.add_edge(new_vertices[i].get_id(),
+        graph.add_vertex(parent_vertices[i].get_vertex_depth() + 1);
+        graph.add_edge(parent_vertices[i].get_id(),
                        graph.get_last_added_vertex_id(), Edge::Color::Gray);
       }
     }
@@ -52,9 +52,9 @@ void GraphGenerator::generate_yellow_edges(Graph& graph) const {
   std::random_device rd;
   std::mt19937 gen(rd());
   for (const auto& first_vertex : graph.get_vertices()) {
-    std::bernoulli_distribution d((double)first_vertex.get_level() /
+    std::bernoulli_distribution d((double)first_vertex.get_vertex_depth() /
                                   ((double)params_.depth() - 1.0));
-    if (first_vertex.get_level() < graph.get_depth() && d(gen)) {
+    if (first_vertex.get_vertex_depth() < graph.get_depth() && d(gen)) {
       std::vector<VertexId> second_vertices_ids;
       for (const auto& second_vertex : graph.get_vertices()) {
         bool flag = true;
@@ -64,7 +64,8 @@ void GraphGenerator::generate_yellow_edges(Graph& graph) const {
                   second_vertex.get_id() ||
               graph.get_edge(connected_edge).get_second_vertex_id() ==
                   second_vertex.get_id() ||
-              second_vertex.get_level() != first_vertex.get_level() + 1) {
+              second_vertex.get_vertex_depth() !=
+                  first_vertex.get_vertex_depth() + 1) {
             flag = false;
             break;
           }
@@ -89,10 +90,11 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
   std::mt19937 gen(rd());
   for (const auto& first_vertex : graph.get_vertices()) {
     std::bernoulli_distribution d(0.33);
-    if (first_vertex.get_level() < graph.get_depth() - 1 && d(gen)) {
+    if (first_vertex.get_vertex_depth() < graph.get_depth() - 1 && d(gen)) {
       std::vector<VertexId> second_vertices_ids;
       for (const auto& second_vertex : graph.get_vertices()) {
-        if (second_vertex.get_level() == first_vertex.get_level() + 2) {
+        if (second_vertex.get_vertex_depth() ==
+            first_vertex.get_vertex_depth() + 2) {
           second_vertices_ids.push_back(second_vertex.get_id());
         }
       }
@@ -106,8 +108,8 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
   }
 }
 
-void Graph::add_vertex(int level) {
-  vertices_.emplace_back(get_new_vertex_id(), level);
+void Graph::add_vertex(int vertex_depth) {
+  vertices_.emplace_back(get_new_vertex_id(), vertex_depth);
 }
 
 VertexId Graph::get_new_vertex_id() {
