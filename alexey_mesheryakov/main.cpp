@@ -32,7 +32,7 @@ int handle_new_vertices_num_input() {
 }
 
 int main() {
-  const int new_vertices_num = handle_new_vertices_num_input();
+  const auto new_vertices_num = handle_new_vertices_num_input();
   const Depth depth = handle_depth_input();
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
   const auto generator = GraphGenerator(params);
