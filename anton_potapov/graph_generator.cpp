@@ -48,10 +48,12 @@ void generate_vertices_branch(Graph& graph,
   if (current_depth > max_depth || max_depth == 0) {
     return;
   }
-  VertexId new_vertex_id;
+  VertexId new_vertex_id = [&graph_mutex, &graph]() {
+    const std::lock_guard graph_lock(graph_mutex);
+    return graph.add_vertex();
+  }();
   {
     const std::lock_guard graph_lock(graph_mutex);
-    new_vertex_id = graph.add_vertex();
     graph.add_edge(previous_vertex_id, new_vertex_id);
   }
   for (int i = 0; i < new_vertices_num; ++i) {
