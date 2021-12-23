@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
