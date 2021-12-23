@@ -79,9 +79,8 @@ GraphPath GraphTraverser::find_shortest_path(
         all_pathes_edge_ids[next_vertex_num].push_back(edge_id);
 
         if (destination_vertex_id == next_vertex_id) {
-          auto new_path = GraphPath(all_pathes[next_vertex_num],
-                                    all_pathes_edge_ids[next_vertex_num]);
-          return new_path;
+          return GraphPath(std::move(all_pathes[next_vertex_num]),
+                           std::move(all_pathes_edge_ids[next_vertex_num]));
         }
       }
     }

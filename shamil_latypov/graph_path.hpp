@@ -8,9 +8,8 @@ namespace uni_cource_cpp {
 struct GraphPath {
   using Distance = int;
 
-  GraphPath(const std::vector<VertexId>& vertices_id,
-            const std::vector<EdgeId>& edges_id)
-      : vertex_ids(vertices_id), edge_ids(edges_id) {}
+  GraphPath(std::vector<VertexId> vertices_id, std::vector<EdgeId> edges_id)
+      : vertex_ids(std::move(vertices_id)), edge_ids(std::move(edges_id)) {}
 
   Distance distance() const;
 
