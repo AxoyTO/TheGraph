@@ -69,8 +69,8 @@ class Graph {
   bool has_vertex_id(const VertexId& id) const;
   bool vertices_connected(const VertexId& v1_id, const VertexId& v2_id) const;
 
-  int get_vertices_cnt() const;
-  int get_edges_cnt() const;
+  int get_vertices_count() const;
+  int get_edges_count() const;
 
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
