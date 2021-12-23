@@ -20,6 +20,7 @@ namespace {
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::get_random_vertex_id;
 using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::Vertex;
 using uni_cource_cpp::VertexId;
 
@@ -41,11 +42,10 @@ bool is_lucky(float probability) {
 
 void generate_vertices_branch(Graph& graph,
                               std::mutex& graph_mutex,
-                              int max_depth,
-                              int new_vertices_num,
+                              const GraphGenerator::Params& params,
                               const VertexId& previous_vertex_id,
                               int current_depth) {
-  if (current_depth > max_depth || max_depth == 0) {
+  if (current_depth > params.depth || params.depth == 0) {
     return;
   }
   VertexId new_vertex_id = [&graph_mutex, &graph]() {
@@ -56,27 +56,25 @@ void generate_vertices_branch(Graph& graph,
     const std::lock_guard graph_lock(graph_mutex);
     graph.add_edge(previous_vertex_id, new_vertex_id);
   }
-  for (int i = 0; i < new_vertices_num; ++i) {
-    if (is_lucky(1.0 - (float)current_depth / max_depth)) {
-      generate_vertices_branch(graph, graph_mutex, max_depth, new_vertices_num,
-                               new_vertex_id, current_depth + 1);
+  for (int i = 0; i < params.new_vertices_num; ++i) {
+    if (is_lucky(1.0 - (float)current_depth / params.depth)) {
+      generate_vertices_branch(graph, graph_mutex, params, new_vertex_id,
+                               current_depth + 1);
     }
   }
 }
 
-void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
+void generate_vertices(Graph& graph, const GraphGenerator::Params& params) {
   const VertexId first_vertex_id = graph.add_vertex();
   std::mutex graph_mutex;
 
   using JobCallback = std::function<void()>;
   auto jobs = std::queue<JobCallback>();
 
-  for (int i = 0; i < new_vertices_num; ++i) {
-    jobs.push(
-        [&graph, &depth, &new_vertices_num, &first_vertex_id, &graph_mutex]() {
-          generate_vertices_branch(graph, graph_mutex, depth, new_vertices_num,
-                                   first_vertex_id, 1);
-        });
+  for (int i = 0; i < params.new_vertices_num; ++i) {
+    jobs.push([&graph, &params, &first_vertex_id, &graph_mutex]() {
+      generate_vertices_branch(graph, graph_mutex, params, first_vertex_id, 1);
+    });
   }
 
   std::atomic<bool> should_terminate = false;
@@ -103,7 +101,8 @@ void generate_vertices(Graph& graph, int depth, int new_vertices_num) {
     }
   };
 
-  const auto threads_count = std::min(MAX_THREADS_COUNT, new_vertices_num);
+  const auto threads_count =
+      std::min(MAX_THREADS_COUNT, params.new_vertices_num);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
@@ -230,7 +229,7 @@ GraphGenerator::GraphGenerator(const Params& params) : params_(params) {}
 
 Graph GraphGenerator::generate_graph() const {
   Graph graph;
-  generate_vertices(graph, params_.depth, params_.new_vertices_num);
+  generate_vertices(graph, params_);
   std::mutex graph_read_write_mutex;
   std::thread green_edges_generation_thread(
       &generate_green_edges, std::ref(graph), std::ref(graph_read_write_mutex));
