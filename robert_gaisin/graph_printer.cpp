@@ -6,6 +6,7 @@ using uni_cource_cpp::Edge;
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
 using uni_cource_cpp::Vertex;
+using uni_course_cpp::GraphPath;
 
 using std::cin;
 using std::cout;
@@ -135,6 +136,22 @@ std::string print_graph_description(const Graph& graph) {
   log_string << "}}\n}\n";
 
   return log_string.str();
+}
+
+std::string print_path(const GraphPath& path) {
+  std::stringstream res;
+
+  res << "{vertices: [";
+
+  const auto& vertex_ids = path.get_vertex_ids();
+
+  res << vertex_ids;
+
+  res << "], distance: ";
+  res << path.distance();
+  res << "}";
+
+  return res.str();
 }
 
 }  // namespace graph_printing

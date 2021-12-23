@@ -22,6 +22,20 @@ Vertex& Graph::get_vertex(const VertexId& id) {
   throw std::runtime_error("Vertex doesn't exist");
 }
 
+const Vertex& Graph::get_vertex_const(const VertexId& id) const {
+  for (const auto& vertex : vertices_)
+    if (vertex.id == id)
+      return vertex;
+  throw std::runtime_error("Vertex with such id doesn't exist");
+}
+
+const Edge& Graph::get_edge(const EdgeId& edge_id) const {
+  for (const auto& edge : edges_)
+    if (edge.id == edge_id)
+      return edge;
+  throw std::runtime_error("Edge with such id doesn't exist");
+}
+
 void Graph::add_id_to_depth_map(const VertexId& begin, const VertexId& end) {
   const size_t depth_for_new_vertex = get_vertex(begin).depth + 1;
   assert(!(depth_for_new_vertex > depth_map_.size()) &&
@@ -86,4 +100,21 @@ const std::vector<EdgeId>& Graph::get_colored_edges(
   }
   return edges_color_map_.at(color);
 }
+
+std::vector<VertexId> Graph::get_linked_vertex_ids(
+    const VertexId& vertex_id) const {
+  const auto& vertex = get_vertex_const(vertex_id);
+  std::vector<VertexId> linked_ids;
+
+  for (const auto& edge_id : vertex.edge_ids()) {
+    const auto& edge = get_edge(edge_id);
+    if (edge.color != EdgeColor::Green) {
+      const auto linked_id = edge.begin != vertex_id ? edge.begin : edge.end;
+      linked_ids.push_back(linked_id);
+    }
+  }
+
+  return linked_ids;
+}
+
 }  // namespace uni_cource_cpp

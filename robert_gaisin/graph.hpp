@@ -52,13 +52,15 @@ class Graph {
   bool has_vertex(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& begin, const VertexId& end) const;
   Vertex& get_vertex(const VertexId& id);
+  const Vertex& get_vertex_const(const VertexId& id) const;
+  const Edge& get_edge(const EdgeId& edge_id) const;
   const std::vector<EdgeId>& get_colored_edges(const EdgeColor& color) const;
+  std::vector<VertexId> get_linked_vertex_ids(const VertexId& vertex_id) const;
 
  private:
   void add_id_to_depth_map(const VertexId& begin, const VertexId& end);
   VertexId num_of_vrt_ = 0;
   EdgeId num_of_edg_ = 0;
-
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
 
