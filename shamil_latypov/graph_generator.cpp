@@ -114,13 +114,13 @@ void GraphGenerator::generate_grey_edge(Graph& graph,
     return new_vertex_id;
   }();
 
-  if (parent_depth + 1 >= depth_) {
+  if (parent_depth + 1 >= params.depth) {
     return;
   }
 
-  const double percent = 100.0 / (double)depth_;
+  const double percent = 100.0 / (double)params.depth;
 
-  for (int i = 0; i < new_vertices_num_; i++) {
+  for (int i = 0; i < params.new_vertices_num; i++) {
     if ((double)random_number() > (double)parent_depth * percent) {
       generate_grey_edge(graph, new_vertex_id, parent_depth + 1, lock_graph);
     }
@@ -135,7 +135,7 @@ void GraphGenerator::generate_vertices(Graph& graph,
   std::atomic<int> jobs_done = 0;
   std::mutex lock_graph;
 
-  for (int i = 0; i < new_vertices_num_; i++) {
+  for (int i = 0; i < params.new_vertices_num; i++) {
     jobs.emplace_back(
         [this, &graph, first_vertex_id, &lock_graph, &jobs_done]() {
           generate_grey_edge(graph, first_vertex_id, 0, lock_graph);
@@ -146,7 +146,7 @@ void GraphGenerator::generate_vertices(Graph& graph,
   std::atomic<bool> should_terminate = false;
   std::mutex jobs_lock;
 
-  const auto worker = [&should_terminate, &jobs_lock, &jobs]() {
+  auto worker = [&should_terminate, &jobs_lock, &jobs]() {
     while (true) {
       if (should_terminate) {
         return;
@@ -168,7 +168,8 @@ void GraphGenerator::generate_vertices(Graph& graph,
     }
   };
 
-  const auto threads_count = std::min(MAX_THREADS_COUNT, new_vertices_num_);
+  const auto threads_count =
+      std::min(MAX_THREADS_COUNT, params.new_vertices_num);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
@@ -176,7 +177,7 @@ void GraphGenerator::generate_vertices(Graph& graph,
     threads.emplace_back(worker);
   }
 
-  while (jobs_done != new_vertices_num_) {
+  while (jobs_done != params.new_vertices_num) {
   }
 
   should_terminate = true;

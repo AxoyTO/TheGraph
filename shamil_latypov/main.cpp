@@ -2,10 +2,13 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
@@ -13,6 +16,13 @@
 constexpr int DEPTH_MIN = 0;
 constexpr int NEW_VERTICES_MIN = 0;
 constexpr int GRAPHS_COUNT_MIN = 0;
+constexpr int THREADS_COUNT_MIN = 0;
+
+using uni_cource_cpp::Graph;
+using uni_cource_cpp::GraphGenerationController;
+using uni_cource_cpp::GraphGenerator;
+using uni_cource_cpp::GraphPrinter;
+using uni_cource_cpp::Logger;
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -30,15 +40,14 @@ std::string gen_started_string(int graph_number) {
   return log_first_string.str();
 }
 
-std::string gen_finished_string(int graph_number,
-                                const uni_cource_cpp::Graph& graph) {
-  const auto graph_printer = uni_cource_cpp::GraphPrinter();
+std::string gen_finished_string(int graph_number, const Graph& graph) {
+  const auto graph_printer = GraphPrinter();
   std::stringstream log_second_string;
   log_second_string << get_current_date_time() << ": Graph " << graph_number
                     << ", Generation Ended {\n";
 
   log_second_string << "  depth: " << graph.get_depth() << ",\n";
-  log_second_string << "  vertices: " << graph.get_vertices_cnt() << ", [";
+  log_second_string << "  vertices: " << graph.get_vertices_count() << ", [";
 
   log_second_string << graph.get_depth_map()[0].size();
   for (auto i = graph.get_depth_map().begin() + 1;
@@ -47,7 +56,7 @@ std::string gen_finished_string(int graph_number,
   }
 
   log_second_string << "],\n"
-                    << "  edges: " << graph.get_edges_cnt() << ", {";
+                    << "  edges: " << graph.get_edges_count() << ", {";
 
   const auto colors = std::array<uni_cource_cpp::Edge::Color, 5>{
       uni_cource_cpp::Edge::Color::Gray, uni_cource_cpp::Edge::Color::Green,
@@ -97,6 +106,17 @@ int handle_graphs_count_input() {
   return graphs_count;
 }
 
+int handle_threads_count_input() {
+  int threads_count;
+  do {
+    std::cout << "Input count of threads:\n";
+    std::cin >> threads_count;
+    if (threads_count <= GRAPHS_COUNT_MIN)
+      std::cout << "Threads count must be be > 0\n";
+  } while (threads_count <= THREADS_COUNT_MIN);
+  return threads_count;
+}
+
 void write_to_file(const std::string& graph_output,
                    const std::string& file_name) {
   std::ofstream out_json(file_name);
@@ -104,28 +124,40 @@ void write_to_file(const std::string& graph_output,
   out_json.close();
 }
 
-int main() {
-  std::filesystem::create_directory("temp/");
+std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
+                                   int graphs_count,
+                                   int threads_count) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
 
+  auto& logger = Logger::get_logger();
+  logger.set_output_file_path("temp/log.txt");
+
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  generation_controller.generate(
+      [&logger](int index) { logger.log(gen_started_string(index)); },
+      [&logger, &graphs](int index, Graph graph) {
+        logger.log(gen_finished_string(index, graph));
+        graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter();
+        write_to_file(graph_printer.print(graph),
+                      "temp/graph_" + std::to_string(index) + ".json");
+      });
+
+  return graphs;
+}
+
+int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
 
-  const auto graph_generator =
-      uni_cource_cpp::GraphGenerator(depth, new_vertices_num);
-  auto& logger = uni_cource_cpp::Logger::get_logger();
-
-  logger.set_output_file_path("temp/log.txt");
-
-  for (int i = 0; i < graphs_count; i++) {
-    logger.log(gen_started_string(i));
-    const auto graph = graph_generator.generate_graph();
-    logger.log(gen_finished_string(i, graph));
-
-    const auto graph_printer = uni_cource_cpp::GraphPrinter();
-    write_to_file(graph_printer.print(graph),
-                  "temp/graph_" + std::to_string(i) + ".json");
-  }
+  std::filesystem::create_directory("temp/");
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+  const auto graphs = generate_graphs(params, graphs_count, threads_count);
 
   return 0;
 }

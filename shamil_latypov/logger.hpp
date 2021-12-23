@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <mutex>
 #include <optional>
 #include <string>
 #include "graph.hpp"
@@ -27,6 +28,7 @@ class Logger {
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
+  std::mutex logger_lock_;
 };
 
 }  // namespace uni_cource_cpp

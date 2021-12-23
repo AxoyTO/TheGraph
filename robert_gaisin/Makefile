@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -Wall -std=c++17 -g 
+CXXFLAGS = -Wall -std=c++17 -g -pthread
 
 all: clean graph
 	./graph

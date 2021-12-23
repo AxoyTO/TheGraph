@@ -134,10 +134,10 @@ bool Graph::vertices_connected(const VertexId& v1_id,
   return false;
 }
 
-int Graph::get_vertices_cnt() const {
+int Graph::get_vertices_count() const {
   return vertices_.size();
 }
-int Graph::get_edges_cnt() const {
+int Graph::get_edges_count() const {
   return edges_.size();
 }
 
