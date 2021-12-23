@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include <iostream>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -27,5 +27,7 @@ class Logger {
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
+
+  std::mutex mutex_logger_;
 };
 }  // namespace uni_cource_cpp
