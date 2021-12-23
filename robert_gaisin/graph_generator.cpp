@@ -13,7 +13,6 @@ namespace {
 
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
-using uni_cource_cpp::Params;
 using uni_cource_cpp::VertexId;
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
@@ -53,17 +52,10 @@ void generate_blue_edges(Graph& graph, std::mutex& mutex) {
 std::vector<VertexId> get_unconnected_vertex_ids(
     const std::vector<VertexId>& layer,
     const VertexId& vert_id,
-    const Graph& graph,
-    std::mutex& mutex) {
+    const Graph& graph) {
   std::vector<VertexId> returned_vector;
-
   for (auto& vertex_id : layer) {
-    const bool is_connected = [&graph, &mutex, &vert_id, &vertex_id]() {
-      const std::lock_guard lock(mutex);
-      return graph.is_connected(vert_id, vertex_id);
-    }();
-
-    if (is_connected)
+    if (graph.is_connected(vert_id, vertex_id))
       continue;
     returned_vector.push_back(vertex_id);
   }
@@ -90,11 +82,13 @@ void generate_yellow_edges(Graph& graph, std::mutex& mutex) {
     for (auto vertex_id = (*vertex_ids_at_depth).begin();
          vertex_id != (*vertex_ids_at_depth).end(); ++vertex_id) {
       if (to_be_or_not_to_be(proba_yellow)) {
+        const std::unique_lock ul(mutex);
         std::vector<VertexId> vertices_to_connect = get_unconnected_vertex_ids(
-            *(vertex_ids_at_depth + 1), *vertex_id, graph, mutex);
+            *(vertex_ids_at_depth + 1), *vertex_id, graph);
+        mutex.unlock();
         const int vertex_to_attach = get_random_vertex_id(vertices_to_connect);
         if (vertex_to_attach) {
-          const std::lock_guard lock(mutex);
+          mutex.lock();
           graph.add_edge(*vertex_id, vertex_to_attach, EdgeColor::Yellow);
         }
       }
