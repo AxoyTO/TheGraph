@@ -44,7 +44,7 @@ void GraphGenerator::generate_vertices_branch(
   if (current_depth > params_.depth || params_.depth == 0) {
     return;
   }
-  VertexId new_vertex_id = [&graph_mutex, &graph]() {
+  const VertexId new_vertex_id = [&graph_mutex, &graph]() {
     const std::lock_guard graph_lock(graph_mutex);
     return graph.add_vertex();
   }();
