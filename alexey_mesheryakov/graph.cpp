@@ -45,7 +45,7 @@ bool Graph::edge_exist(const VertexId& first, const VertexId& second) const {
 }
 
 VertexId Graph::add_vertex() {
-  VertexId vertex_id = get_new_vertex_id();
+  const VertexId vertex_id = get_new_vertex_id();
   if (levels_.size() == 0)
     levels_.push_back({vertex_id});
   else
