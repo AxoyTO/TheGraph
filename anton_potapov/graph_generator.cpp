@@ -176,6 +176,7 @@ void generate_yellow_edges(Graph& graph, std::mutex& graph_read_write_mutex) {
       if (is_lucky((float)cur_depth / (graph_depth - 1))) {
         std::set<VertexId> not_connected_vertices;
         for (const auto& next_vertex_id : next_depth_vertices) {
+          const std::lock_guard graph_lock(graph_read_write_mutex);
           if (!graph.is_connected(cur_vertex_id, next_vertex_id)) {
             not_connected_vertices.insert(next_vertex_id);
           }
