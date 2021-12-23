@@ -8,7 +8,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <<optional>
+#include <optional>
 #include "graph.hpp"
 
 namespace {
