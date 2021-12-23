@@ -36,7 +36,7 @@ GraphPath GraphTraverser::find_shortest_path(
   vertices_queue.push(source_vertex);
 
   std::vector<std::vector<VertexId>> all_pathes(vertices_number);
-  std::vector<VertexId> source_vector(1, source_vertex_id);
+  std::vector<VertexId> source_vector = {source_vertex_id};
   all_pathes[source_vertex_id] = source_vector;
 
   while (!vertices_queue.empty()) {
