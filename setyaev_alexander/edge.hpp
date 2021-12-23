@@ -1,5 +1,4 @@
-#ifndef EDGE
-#define EDGE
+#pragma once
 #include "vertex.hpp"
 
 struct Edge {
@@ -25,4 +24,4 @@ struct Edge {
   VertexId second_vertex_id_ = 0;
   Edge::Color color_ = Edge::Color::Gray;
 };
-#endif
+

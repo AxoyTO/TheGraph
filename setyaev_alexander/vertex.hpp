@@ -1,5 +1,4 @@
-#ifndef VERTEX
-#define VERTEX
+#pragma once
 
 #include <fstream>
 #include <iostream>
@@ -25,4 +24,3 @@ class Vertex {
   std::vector<EdgeId> connected_edge_ids_;
 };
 
-#endif

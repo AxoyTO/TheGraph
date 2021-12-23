@@ -1,5 +1,4 @@
-#ifndef GRAPH
-#define GRAPH
+#pragma once
 
 #include "edge.hpp"
 #include "vertex.hpp"
@@ -69,4 +68,3 @@ class GraphGenerator {
   const Params params_ = Params();
 };
 
-#endif
