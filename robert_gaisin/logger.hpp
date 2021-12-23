@@ -1,7 +1,9 @@
 #pragma once
 
 #include <fstream>
+#include <mutex>
 #include <optional>
+
 #include "config.hpp"
 
 namespace uni_cource_cpp {
@@ -23,6 +25,7 @@ class Logger {
       throw std::runtime_error("Failed to open file stream");
     }
   }
+  std::mutex log_mutex;
 
   std::ofstream file_stream_;
 
