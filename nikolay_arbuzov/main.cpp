@@ -174,10 +174,15 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
 
   void set_vertex_depth(const VertexId& vertex_id, const Depth& depth) {
-    vertices_depth_[vertex_id] = depth;
-    if (depth_map_.size() <= depth) {
+    if (depth && vertex_id && !vertices_depth_[vertex_id]) {
+      depth_map_[vertices_depth_[vertex_id]].erase(
+          std::find(depth_map_[vertices_depth_[vertex_id]].begin(),
+                    depth_map_[vertices_depth_[vertex_id]].end(), vertex_id));
+    }
+    if (!depth_map_.size() || (depth_map_.size() - 1 < depth)) {
       depth_map_.emplace_back();
     }
+    vertices_depth_[vertex_id] = depth;
     depth_map_[depth].push_back(vertex_id);
   }
 
@@ -190,19 +195,14 @@ std::string print_edge_color(const Graph::Edge::Color& color) {
   switch (color) {
     case Graph::Edge::Color::Grey:
       return "grey";
-      break;
     case Graph::Edge::Color::Green:
       return "green";
-      break;
     case Graph::Edge::Color::Yellow:
       return "yellow";
-      break;
     case Graph::Edge::Color::Red:
       return "red";
-      break;
     default:
       throw std::runtime_error("No such color");
-      break;
   }
 }
 std::string print_vertex(const Graph& graph, const Graph::Vertex& vertex) {
@@ -324,8 +324,10 @@ class GraphGenerator {
     const auto& new_vertices_count = params_.new_vertices_count();
     for (Graph::Depth current_depth = 0; current_depth < depth;
          ++current_depth) {
-      for (const auto& vertex_id :
-           graph.get_vertex_ids_on_depth(current_depth)) {
+      // Not const reference, because I need to change depth in "for"
+      auto vertices_on_current_depth =
+          graph.get_vertex_ids_on_depth(current_depth);
+      for (const auto& vertex_id : vertices_on_current_depth) {
         for (int new_vertices_number = 0;
              new_vertices_number < new_vertices_count; ++new_vertices_number) {
           if (can_generate_vertex(float(depth - current_depth) / depth)) {
@@ -349,8 +351,10 @@ class GraphGenerator {
     const auto& depth = params_.depth();
     for (Graph::Depth current_depth = 0; current_depth < depth;
          ++current_depth) {
-      for (const auto& vertex_id :
-           graph.get_vertex_ids_on_depth(current_depth)) {
+      // Not const reference, because I need to change depth in "for"
+      auto vertices_on_current_depth =
+          graph.get_vertex_ids_on_depth(current_depth);
+      for (const auto& vertex_id : vertices_on_current_depth) {
         const auto& to_vertex_ids =
             graph.get_vertex_ids_on_depth(current_depth + 1);
         auto to_vertex_ids_no_neighbors = std::vector<VertexId>();
