@@ -86,7 +86,6 @@ class Graph {
           return true;
         }
       }
-      return false;
     } else {
       const auto& from_edge_set = adjacency_list_.at(from_vertex_id);
       const auto& to_edge_set = adjacency_list_.at(to_vertex_id);
@@ -97,8 +96,8 @@ class Graph {
       if (intersection.size()) {
         return true;
       }
-      return false;
     }
+    return false;
   }
 
   Edge::Color determine_color(const VertexId& from_vertex_id,
@@ -190,16 +189,16 @@ namespace graph_printing {
 std::string print_edge_color(const Graph::Edge::Color& color) {
   switch (color) {
     case Graph::Edge::Color::Grey:
-      return "Grey";
+      return "grey";
       break;
     case Graph::Edge::Color::Green:
-      return "Green";
+      return "green";
       break;
     case Graph::Edge::Color::Yellow:
-      return "Yellow";
+      return "yellow";
       break;
     case Graph::Edge::Color::Red:
-      return "Red";
+      return "red";
       break;
     default:
       throw std::runtime_error("No such color");
@@ -421,7 +420,7 @@ int main() {
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
   auto generator = GraphGenerator(params);
-  std::cout << "Starting genegation" << std::endl;
+  
   const auto graph = generator.generate();
 
   const auto graph_json = graph_printing::print_graph(graph);
