@@ -40,8 +40,7 @@ void LoggingHelper::logColors(Logger& logger, Graph graph) {
       Edge::Color::Yellow, Edge::Color::Red};
   for (int i = 0; i < colors.size(); i++) {
     logger.log(uni_course_cpp::GraphPrinter::printEdgeColor((colors[i])) +
-               ": " +
-               std::to_string(graph.getNumEdgeByColor(colors[i]).size()));
+               ": " + std::to_string(graph.getEdgeByColor(colors[i]).size()));
     if (i + 1 != colors.size())
       logger.log(", ");
   }

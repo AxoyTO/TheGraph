@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include "Edge.hpp"
 #include "Vertex.hpp"
 namespace uni_course_cpp {
@@ -7,10 +8,10 @@ class Graph {
   const std::vector<Vertex>& getVertices() const;
   const Vertex& addVertex();
   void addEdge(int fromVertexId, int toVertexId, const Edge::Color color);
-  bool hasVertex(int idFind);
-  bool isConnected(int fromVertexId, int toVertexId);
+  const bool hasVertex(int idFind);
+  const bool isConnected(int fromVertexId, int toVertexId);
   std::vector<int> getVertexIdsAtDepth(int depth);
-  std::vector<Edge> getNumEdgeByColor(const Edge::Color& color);
+  std::vector<Edge>& getEdgeByColor(const Edge::Color& color);
   const std::vector<Edge>& getEdges() const;
 
  private:
@@ -22,5 +23,6 @@ class Graph {
   int edgeIdCounter_ = 0;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
+  std::unordered_map<Edge::Color, std::vector<int>> coloredEdges_;
 };
 }  // namespace uni_course_cpp

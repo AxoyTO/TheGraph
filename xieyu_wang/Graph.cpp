@@ -13,6 +13,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
          "Vertices already connected");
   const auto& newEdge =
       edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId, color);
+  coloredEdges_[color].push_back(newEdge.id);
   auto& fromVertex = getVertex(fromVertexId);
   auto& toVertex = getVertex(toVertexId);
   if (color != Edge::Color::Green) {
@@ -23,7 +24,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-bool Graph::hasVertex(int idFind) {
+const bool Graph::hasVertex(int idFind) {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
       return true;
@@ -31,7 +32,7 @@ bool Graph::hasVertex(int idFind) {
   }
   return false;
 }
-bool Graph::isConnected(int fromVertexId, int toVertexId) {
+const bool Graph::isConnected(int fromVertexId, int toVertexId) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   if (fromVertexId ==
@@ -87,14 +88,12 @@ const Edge& Graph::getEdge(int id) {
   throw std::runtime_error("No such vertex");
 }
 
-std::vector<Edge> Graph::getNumEdgeByColor(const Edge::Color& color) {
-  std::vector<Edge> colorEdges;
-  for (const auto& edge : edges_) {
-    if (edge.color == color) {
-      colorEdges.push_back(edge);
-    }
+std::vector<Edge>& Graph::getEdgeByColor(const Edge::Color& color) {
+  if (coloredEdges_.find(color) == coloredEdges_.end()) {
+    static std::vector<Edge> empty_result = {};
+    return empty_result;
   }
-  return colorEdges;
+  return reinterpret_cast<std::vector<Edge>&>(coloredEdges_.at(color));
 }
 
 const std::vector<Edge>& Graph::getEdges() const {
