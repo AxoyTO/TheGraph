@@ -65,8 +65,8 @@ class Graph {
   void addEdge(VertexId fromVertexId, VertexId toVertexId) {
     EdgeId const newEdgeId = getNewEdgeId();
     Edge::Color color = calculate_color(fromVertexId, toVertexId);
-    const auto& fromVertex = vertexes_[fromVertexId];
-    const auto& toVertex = vertexes_[toVertexId];
+    auto const& fromVertex = vertexes_[fromVertexId];
+    auto const& toVertex = vertexes_[toVertexId];
     edgeConectionMap_[fromVertexId].push_back(newEdgeId);
     if (color != Edge::Color::Green)
       edgeConectionMap_[toVertexId].push_back(newEdgeId);
@@ -75,7 +75,7 @@ class Graph {
         if (vertexIdByDepth_[0][i] == toVertexId)
           vertexIdByDepth_.erase(vertexIdByDepth_.begin() + i);
       }
-      const auto newDepth = getDepth(fromVertex.id) + 1;
+      auto const newDepth = getDepth(fromVertex.id) + 1;
       if ((int)vertexIdByDepth_.size() - 1 < newDepth)
         vertexIdByDepth_.emplace_back();
 
@@ -85,8 +85,8 @@ class Graph {
     edges_.emplace_back(newEdgeId, fromVertexId, toVertexId, color);
   }
   Edge::Color calculate_color(VertexId fromVertexId, VertexId toVertexId) {
-    const auto& fromVertex = vertexes_[fromVertexId];
-    const auto& toVertex = vertexes_[toVertexId];
+    auto const& fromVertex = vertexes_[fromVertexId];
+    auto const& toVertex = vertexes_[toVertexId];
     if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -1) {
       return Edge::Color::Yellow;
     }
@@ -216,8 +216,8 @@ class GraphGenerator {
     explicit Params(int _depth = 0, int _new_vertices_num = 0)
         : depth(_depth), new_vertices_num(_new_vertices_num) {}
 
-    const int depth = 0;
-    const int new_vertices_num = 0;
+    int const depth = 0;
+    int const new_vertices_num = 0;
   };
 
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
@@ -247,7 +247,7 @@ class GraphGenerator {
     float const step = 100.0 / (params_.depth - 1);
     for (int currentDepth = 0; currentDepth < params_.depth; currentDepth++) {
       bool generated = false;
-      const float generationProb = ((100.0 - (step * (currentDepth))) / 100);
+      float const generationProb = ((100.0 - (step * (currentDepth))) / 100);
       for (auto parentId : graph.getVertexIdByDepth(currentDepth)) {
         for (int j = 0; j < params_.new_vertices_num; j++) {
           if (checkProbability(generationProb)) {
