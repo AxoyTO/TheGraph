@@ -37,4 +37,5 @@ std::string color_to_string(const Edge::Color& color) {
   if (color == Edge::Color::Red) {
     return "\"red\"";
   }
+  throw std::runtime_error("Failed to determine color");
 }
