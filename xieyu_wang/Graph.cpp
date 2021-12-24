@@ -24,7 +24,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-bool Graph::hasVertex(int idFind) {
+bool Graph::hasVertex(int idFind) const {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
       return true;
@@ -32,7 +32,7 @@ bool Graph::hasVertex(int idFind) {
   }
   return false;
 }
-bool Graph::isConnected(int fromVertexId, int toVertexId) {
+bool Graph::isConnected(int fromVertexId, int toVertexId) const {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   if (fromVertexId ==
@@ -55,7 +55,7 @@ bool Graph::isConnected(int fromVertexId, int toVertexId) {
   return false;
 }
 
-Vertex& Graph::getVertex(int id) {
+const Vertex& Graph::getVertex(int id) const {
   assert(hasVertex(id) && "Vertex doesn't exist");
   for (auto& vertex : vertices_) {
     if (vertex.id == id) {
@@ -98,6 +98,11 @@ const std::vector<int>& Graph::getEdgesByColor(const Edge::Color& color) const {
 
 const std::vector<Edge>& Graph::getEdges() const {
   return edges_;
+}
+
+Vertex& Graph::getVertex(int id) {
+  const auto& constThis = *this;
+  return const_cast<Vertex&>(constThis.getVertex(id));
 }
 
 }  // namespace uni_course_cpp
