@@ -40,8 +40,7 @@ int main() {
   const auto graph_printer = GraphPrinter(graph);
   const auto graph_json = graph_printer.print();
   std::ofstream file;
-  file.open("/home/alex/prac/graph_task/graph.json",
-            std::fstream::out | std::fstream::trunc);
+  file.open("./graph.json", std::fstream::out | std::fstream::trunc);
   file << graph_json;
   file.close();
   return 0;
