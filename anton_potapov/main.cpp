@@ -56,7 +56,7 @@ std::map<int, Graph> generate_graphs(const GraphGenerator::Params& params,
           logger.log(LogMessagesGenerator::generation_max_depth_warning(
               index, graph.depth(), params.depth));
         }
-        graphs.emplace(index, graph);
+        graphs.emplace(index, std::move(graph));
         write_to_file(graph_printer.print(),
                       std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
                           "graph_" + std::to_string(index) + ".json");
