@@ -7,6 +7,8 @@
 #include <optional>
 #include <thread>
 
+#include "graph_generator.hpp"
+
 namespace uni_cpp_practice {
 
 class Graph;
@@ -41,7 +43,7 @@ class GraphGenerationController {
   GraphGenerationController(
       int threads_count,
       int graphs_count,
-      const graph_generation::Params& graph_generator_params);
+      const GraphGenerator::Params& graph_generator_params);
 
   void generate(const GenStartedCallback& gen_started_callback,
                 const GenFinishedCallback& gen_finished_callback);
@@ -50,7 +52,7 @@ class GraphGenerationController {
   std::list<Worker> workers_;
   std::list<JobCallback> jobs_;
   int graphs_count_;
-  graph_generation::Params params_;
+  GraphGenerator graph_generator_;
   std::mutex start_callback_mutex_;
   std::mutex finish_callback_mutex_;
   std::mutex get_job_mutex_;

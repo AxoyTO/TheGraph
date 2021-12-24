@@ -4,9 +4,11 @@
 #include <string>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
 #include "graph_generation_controller.hpp"
+#include "graph_generator.hpp"
 #include "graph_printing.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 #include "logging_helping.hpp"
 
@@ -20,9 +22,11 @@ const std::string DIRECTORY_NAME = "temp";
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
 using uni_cpp_practice::Graph;
+using uni_cpp_practice::GraphGenerator;
+using uni_cpp_practice::GraphTraverser;
 using uni_cpp_practice::Logger;
-using uni_cpp_practice::graph_generation::Params;
 using uni_cpp_practice::graph_generation_controller::GraphGenerationController;
+using uni_cpp_practice::graph_traversal_controller::GraphTraversalController;
 
 int handle_graphs_number_input() {
   int graphs_quantity = GRAPHS_NUMBER;
@@ -57,13 +61,51 @@ int handle_threads_number_input() {
     std::cout << "Enter threads number from zero to max_threads: "
               << MAX_THREADS_COUNT << std::endl;
     std::cin >> threads_count;
-  } while (threads_count <= INVALID_THREADS_NUMBER &&
-           threads_count < MAX_THREADS_COUNT);
+  } while (threads_count <= INVALID_THREADS_NUMBER ||
+           threads_count > MAX_THREADS_COUNT);
   return threads_count;
 }
 
 void prepare_temp_directory() {
   std::filesystem::create_directory(DIRECTORY_NAME);
+}
+
+std::vector<Graph> generate_graphs(Logger& logger,
+                                   const int threads_count,
+                                   const int graphs_count,
+                                   const GraphGenerator::Params& params) {
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
+  generation_controller.generate(
+      [&logger](int index) {
+        logger.log(uni_cpp_practice::logging_helping::write_log_start(index));
+      },
+      [&logger, &graphs](const Graph& graph, int index) {
+        logger.log(
+            uni_cpp_practice::logging_helping::write_log_end(graph, index));
+        graphs.push_back(graph);
+        uni_cpp_practice::logging_helping::write_graph(graph, index);
+      });
+
+  return graphs;
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs,
+                     Logger& logger,
+                     const int threads_count) {
+  auto traversal_controller = GraphTraversalController(threads_count, graphs);
+  traversal_controller.traverse_graphs(
+      [&logger](int index) {
+        logger.log(
+            uni_cpp_practice::logging_helping::write_traverse_start(index));
+      },
+      [&logger](int index, const std::vector<GraphTraverser::Path>& pathes) {
+        logger.log(uni_cpp_practice::logging_helping::write_traverse_end(
+            index, pathes));
+      });
 }
 
 int main() {
@@ -75,23 +117,10 @@ int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_vertices_number_input();
   const int threads_count = handle_threads_number_input();
-  const auto params = Params(depth, new_vertices_num);
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
 
-  auto generation_controller =
-      GraphGenerationController(threads_count, graphs_count, params);
-  auto graphs = std::vector<Graph>();
+  auto graphs = generate_graphs(logger, threads_count, graphs_count, params);
+  traverse_graphs(graphs, logger, threads_count);
 
-  graphs.reserve(graphs_count);
-
-  generation_controller.generate(
-      [&logger](int index) {
-        logger.log(uni_cpp_practice::logging_helping::write_log_start(index));
-      },
-      [&logger, &graphs](uni_cpp_practice::Graph graph, int index) {
-        logger.log(
-            uni_cpp_practice::logging_helping::write_log_end(graph, index));
-        graphs.push_back(graph);
-        uni_cpp_practice::logging_helping::write_graph(graph, index);
-      });
   return 0;
 }

@@ -21,6 +21,7 @@ void Logger::set_file(const std::optional<std::string>& filename) {
 }
 
 void Logger::log(const std::string& string) {
+  const std::lock_guard lock(mutex_);
   if (file_stream_.has_value())
     file_stream_.value() << string;
   std::cout << string;

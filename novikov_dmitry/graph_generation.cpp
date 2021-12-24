@@ -1,5 +1,5 @@
 #include "graph_generation.hpp"
-#include <assert.h>
+#include <cassert>
 #include <limits>
 #include <random>
 

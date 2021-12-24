@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
 #include "graph_printing.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 namespace {
@@ -49,25 +49,19 @@ std::string write_log_start(int graph_num) {
   return res;
 }
 
-std::string write_log_end(Graph& work_graph, int graph_num) {
+std::string write_log_end(const Graph& work_graph, int graph_num) {
   std::string res = get_datetime();
   res += ": Graph " + to_string(graph_num) + ", Generation Ended {\n";
   res += "  depth: " + to_string(work_graph.get_depth()) + ",\n";
-  res += "  vertices: " + to_string(work_graph.get_vertices_num()) + ", [";
+  res += "  vertices: " + to_string(work_graph.get_vertices().size()) + ", [";
 
-  std::vector<int> depth_count;
-  for (int iter = 0; iter <= work_graph.get_depth(); iter++)
-    depth_count.emplace_back(0);
-  for (const auto& vertex : work_graph.get_vertices()) {
-    depth_count[vertex.depth]++;
-  }
-  for (const auto& depth : depth_count) {
-    res += to_string(depth) + ", ";
+  for (int depth = 0; depth <= work_graph.get_depth(); depth++) {
+    res += to_string(work_graph.get_vertex_ids_at_depth(depth).size()) + ", ";
   }
   res.pop_back();
   res.pop_back();
   res += "],\n";
-  res += "  edges: " + to_string(work_graph.get_edges_num()) + ", {";
+  res += "  edges: " + to_string(work_graph.get_edges().size()) + ", {";
 
   const auto colors = std::vector<Edge::Color>(
       {Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
@@ -78,7 +72,32 @@ std::string write_log_end(Graph& work_graph, int graph_num) {
            to_string(work_graph.get_edge_ids_with_color(color).size()) + ", ";
   }
   res.pop_back();
-  res += "\n}\n";
+  res.pop_back();
+  res += "}\n}\n";
+  return res;
+}
+
+std::string write_traverse_start(int graph_num) {
+  std::string res = get_datetime();
+  res += ": Graph " + to_string(graph_num) + ", Traversal Started";
+  return res;
+}
+
+std::string write_traverse_end(
+    int graph_num,
+    const std::vector<GraphTraverser::Path>& pathes) {
+  std::string res = get_datetime();
+  res += ": Graph " + to_string(graph_num) + ", Traversal Finished, Paths: [\n";
+  for (const auto& path : pathes) {
+    res += "  ";
+    res += graph_printing::path_to_json(path);
+    res += ",\n";
+  }
+  if (pathes.size()) {
+    res.pop_back();
+    res.pop_back();
+  }
+  res += "\n]\n";
   return res;
 }
 
