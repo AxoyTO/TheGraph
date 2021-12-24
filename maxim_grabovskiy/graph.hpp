@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 namespace uni_course_cpp {
 using VertexId = int;
 using EdgeId = int;

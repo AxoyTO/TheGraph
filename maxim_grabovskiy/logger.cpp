@@ -1,6 +1,6 @@
 #include "logger.hpp"
-#include <string>
 #include <stdexcept>
+#include <string>
 namespace uni_course_cpp {
 
 Logger::Logger() : file_(config::getLoggerFilePath()) {
