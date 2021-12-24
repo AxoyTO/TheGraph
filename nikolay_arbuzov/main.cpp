@@ -420,7 +420,7 @@ int main() {
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
   auto generator = GraphGenerator(params);
-  
+
   const auto graph = generator.generate();
 
   const auto graph_json = graph_printing::print_graph(graph);
