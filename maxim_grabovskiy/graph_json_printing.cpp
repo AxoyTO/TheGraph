@@ -54,7 +54,7 @@ string GraphPrinter::printEdgeColor(Graph::Edge::Color const& color) const {
     case Graph::Edge::Color::Gray:
       return "gray";
     default:
-      throw("cannot print color");
+      throw std::runtime_error("cannot print color");
   }
 }
 }  // namespace uni_course_cpp

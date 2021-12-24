@@ -24,7 +24,7 @@ int GraphGenerator::randomIntNumber(float maximum) const {
 
 std::vector<VertexId> GraphGenerator::getUnconnectedVertexIds(
     VertexId vertexId,
-    const std::vector<VertexId>& vertexIds,
+    std::vector<VertexId> const& vertexIds,
     Graph const& graph) const {
   vector<VertexId> notConnected;
   for (auto randomNextVertexId : vertexIds)

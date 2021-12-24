@@ -43,15 +43,15 @@ int main() {
   const int graphsCount = intInput("graphs_count: ");
   prepareTempDirectory();
   auto const params = GraphGenerator::Params(depth, newVerticesNum);
-  const auto generator = GraphGenerator(params);
+  auto const generator = GraphGenerator(params);
   auto& logger = Logger::getLogger();
   for (int i = 0; i < graphsCount; i++) {
     logger.log(generationStartedString(i));
-    const auto graph = generator.generate();
+    auto const graph = generator.generate();
     auto const graphPrinter = GraphPrinter(graph);
     auto const graphJson = graphPrinter.print();
     std::cout << graphJson << std::endl;
-    const auto graphDescription = printing::printGraph(graph);
+    auto const graphDescription = printing::printGraph(graph);
     logger.log(generationFinishedString(i, graphDescription));
     writeToFile(graphJson, "graph_" + std::to_string(i) + ".json");
   }

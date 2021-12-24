@@ -3,8 +3,8 @@ namespace uni_course_cpp {
 void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
   EdgeId const newEdgeId = getNewEdgeId();
   Edge::Color color = calculate_color(fromVertexId, toVertexId);
-  const auto& fromVertex = vertexes_[fromVertexId];
-  const auto& toVertex = vertexes_[toVertexId];
+  auto const& fromVertex = vertexes_[fromVertexId];
+  auto const& toVertex = vertexes_[toVertexId];
   edgeConectionMap_[fromVertexId].push_back(newEdgeId);
   if (color != Edge::Color::Green)
     edgeConectionMap_[toVertexId].push_back(newEdgeId);
@@ -13,7 +13,7 @@ void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
       if (vertexIdByDepth_[0][i] == toVertexId)
         vertexIdByDepth_.erase(vertexIdByDepth_.begin() + i);
     }
-    const auto newDepth = getDepth(fromVertex.id) + 1;
+    auto const newDepth = getDepth(fromVertex.id) + 1;
     if ((int)vertexIdByDepth_.size() - 1 < newDepth)
       vertexIdByDepth_.emplace_back();
 
@@ -24,8 +24,8 @@ void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
 }
 Graph::Edge::Color Graph::calculate_color(VertexId fromVertexId,
                                           VertexId toVertexId) {
-  const auto& fromVertex = vertexes_[fromVertexId];
-  const auto& toVertex = vertexes_[toVertexId];
+  auto const& fromVertex = vertexes_[fromVertexId];
+  auto const& toVertex = vertexes_[toVertexId];
   if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -1) {
     colorsDistribution.Yellow++;
     return Edge::Color::Yellow;
@@ -42,7 +42,7 @@ Graph::Edge::Color Graph::calculate_color(VertexId fromVertexId,
     colorsDistribution.Gray++;
     return Edge::Color::Gray;
   }
-  throw("cannot calculate color");
+  throw std::runtime_error("cannot calculate color");
 }
 VertexId Graph::addVertex() {
   VertexId const newVertexId = getNewVertexId();
@@ -65,15 +65,14 @@ bool Graph::isConnected(VertexId firstVertexId, VertexId secondVertexId) const {
       if (getEdge(edgeId).color == Edge::Color::Green)
         return true;
     }
-    return false;
-  }
-  return false;
-  for (auto edgeId : getConnections(firstVertexId)) {
-    auto connectedfrom = getEdge(edgeId).fromVertexId;
-    auto connectedTo = getEdge(edgeId).toVertexId;
-    if (connectedfrom != connectedTo) {
-      if (connectedfrom == secondVertexId || connectedTo == secondVertexId)
-        return true;
+  } else {
+    for (auto edgeId : getConnections(firstVertexId)) {
+      auto connectedfrom = getEdge(edgeId).fromVertexId;
+      auto connectedTo = getEdge(edgeId).toVertexId;
+      if (connectedfrom != connectedTo) {
+        if (connectedfrom == secondVertexId || connectedTo == secondVertexId)
+          return true;
+      }
     }
   }
   return false;

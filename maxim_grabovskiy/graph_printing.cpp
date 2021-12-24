@@ -11,7 +11,7 @@ std::string printGraph(const uni_course_cpp::Graph& graph) {
     out << std::to_string(graph.getVertexIdByDepth(i).size()) << ", ";
   out.seekp(-2, std::ios_base::end);
   out << "]}\n";
-  out << "edges: {amount:" << graph.getEdges().size() << " distribution [";
+  out << "edges: {amount:" << graph.getEdges().size() << " distribution: [";
   auto const& colorDistribution = graph.getColorDistribution();
   out << "Gray: " << std::to_string(colorDistribution.Gray) << ",";
   out << "Green: " << std::to_string(colorDistribution.Green) << ",";
