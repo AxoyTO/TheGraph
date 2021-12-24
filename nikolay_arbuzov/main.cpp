@@ -136,7 +136,7 @@ class Graph {
 
     if (new_edge_color == Edge::Color::Grey) {
       const auto from_vertex_depth = get_vertex_depth(from_vertex_id);
-      set_vertex_depth(to_vertex_id, from_vertex_depth + 1);
+      update_vertex_depth(to_vertex_id, from_vertex_depth + 1);
     }
 
     return new_edge;
@@ -174,12 +174,18 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
 
   void set_vertex_depth(const VertexId& vertex_id, const Depth& depth) {
-    if (depth && vertex_id && !vertices_depth_[vertex_id]) {
+    vertices_depth_[vertex_id] = depth;
+    depth_map_.emplace_back();
+    depth_map_[depth].push_back(vertex_id);
+  }
+
+  void update_vertex_depth(const VertexId& vertex_id, const Depth& depth) {
+    if (!vertices_depth_[vertex_id]) {
       depth_map_[vertices_depth_[vertex_id]].erase(
           std::find(depth_map_[vertices_depth_[vertex_id]].begin(),
                     depth_map_[vertices_depth_[vertex_id]].end(), vertex_id));
     }
-    if (!depth_map_.size() || (depth_map_.size() - 1 < depth)) {
+    if (depth_map_.size() - 1 < depth) {
       depth_map_.emplace_back();
     }
     vertices_depth_[vertex_id] = depth;
