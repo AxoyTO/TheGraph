@@ -1,6 +1,6 @@
 #include "graph_json_printing.hpp"
 namespace uni_course_cpp {
-string GraphPrinter::print_vertex(Graph::Vertex const& vertex) const {
+std::string GraphJsonPrinter::print_vertex(Graph::Vertex const& vertex) const {
   std::stringstream vertexOutput;
   vertexOutput << "\t{ \"id\": " << vertex.id << ", \"edge_ids\":[";
   auto const& connections = graph_.getConnections(vertex.id);
@@ -14,7 +14,7 @@ string GraphPrinter::print_vertex(Graph::Vertex const& vertex) const {
   return vertexOutput.str();
 }
 
-string GraphPrinter::print_edge(Graph::Edge const& edge) const {
+std::string GraphJsonPrinter::print_edge(Graph::Edge const& edge) const {
   std::stringstream edgeOutput;
   edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
              << edge.fromVertexId << ", " << edge.toVertexId << "],\"color\":\""
@@ -22,7 +22,7 @@ string GraphPrinter::print_edge(Graph::Edge const& edge) const {
   return edgeOutput.str();
 }
 
-string GraphPrinter::print() const {
+std::string GraphJsonPrinter::print() const {
   std::stringstream printOutput;
   printOutput << "{\n\"vertices\": [\n";
   for (auto const& vertex : graph_.getVertexes()) {
@@ -43,7 +43,7 @@ string GraphPrinter::print() const {
   return printOutput.str();
 }
 
-string GraphPrinter::printEdgeColor(Graph::Edge::Color const& color) const {
+std::string GraphJsonPrinter::printEdgeColor(Graph::Edge::Color const& color) {
   switch (color) {
     case Graph::Edge::Color::Green:
       return "green";

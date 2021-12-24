@@ -1,6 +1,8 @@
 #include "graph_printing.hpp"
-namespace printing {
-std::string printGraph(const uni_course_cpp::Graph& graph) {
+#include "graph_json_printing.hpp"
+namespace uni_course_cpp {
+
+std::string GraphPrinter::printGraph(const uni_course_cpp::Graph& graph) {
   std::stringstream out;
   out << "{"
       << "\n"
@@ -12,12 +14,39 @@ std::string printGraph(const uni_course_cpp::Graph& graph) {
   out.seekp(-2, std::ios_base::end);
   out << "]}\n";
   out << "edges: {amount:" << graph.getEdges().size() << " distribution: [";
-  auto const& colorDistribution = graph.getColorDistribution();
-  out << "Gray: " << std::to_string(colorDistribution.Gray) << ",";
-  out << "Green: " << std::to_string(colorDistribution.Green) << ",";
-  out << "Yellow: " << std::to_string(colorDistribution.Yellow) << ",";
-  out << "Red: " << std::to_string(colorDistribution.Red) << "]}\n";
+  out << uni_course_cpp::GraphJsonPrinter::printEdgeColor(
+             Graph::Edge::Color::Gray)
+      << ": "
+      << std::to_string(
+             graph
+                 .getColorDistribution(uni_course_cpp::Graph::Edge::Color::Gray)
+                 .size())
+      << ",";
+  out << uni_course_cpp::GraphJsonPrinter::printEdgeColor(
+             Graph::Edge::Color::Green)
+      << ": "
+      << std::to_string(graph
+                            .getColorDistribution(
+                                uni_course_cpp::Graph::Edge::Color::Green)
+                            .size())
+      << ",";
+  out << uni_course_cpp::GraphJsonPrinter::printEdgeColor(
+             Graph::Edge::Color::Yellow)
+      << ": "
+      << std::to_string(graph
+                            .getColorDistribution(
+                                uni_course_cpp::Graph::Edge::Color::Yellow)
+                            .size())
+      << ",";
+  out << uni_course_cpp::GraphJsonPrinter::printEdgeColor(
+             Graph::Edge::Color::Red)
+      << ": "
+      << std::to_string(
+             graph.getColorDistribution(uni_course_cpp::Graph::Edge::Color::Red)
+                 .size())
+      << "]}\n";
   out << "\n";
   return out.str();
 }
-}  // namespace printing
+
+}  // namespace uni_course_cpp

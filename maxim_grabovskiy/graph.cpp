@@ -3,6 +3,9 @@ namespace uni_course_cpp {
 void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
   EdgeId const newEdgeId = getNewEdgeId();
   Edge::Color color = calculate_color(fromVertexId, toVertexId);
+
+  colorsDistributionMap[color].emplace_back(newEdgeId);
+
   auto const& fromVertex = vertexes_[fromVertexId];
   auto const& toVertex = vertexes_[toVertexId];
   edgeConectionMap_[fromVertexId].push_back(newEdgeId);
@@ -27,19 +30,15 @@ Graph::Edge::Color Graph::calculate_color(VertexId fromVertexId,
   auto const& fromVertex = vertexes_[fromVertexId];
   auto const& toVertex = vertexes_[toVertexId];
   if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -1) {
-    colorsDistribution.Yellow++;
     return Edge::Color::Yellow;
   }
   if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) == -2) {
-    colorsDistribution.Red++;
     return Edge::Color::Red;
   }
   if (toVertexId == fromVertexId) {
-    colorsDistribution.Green++;
     return Edge::Color::Green;
   }
   if ((getDepth(fromVertex.id) - getDepth(toVertex.id)) >= 0) {
-    colorsDistribution.Gray++;
     return Edge::Color::Gray;
   }
   throw std::runtime_error("cannot calculate color");

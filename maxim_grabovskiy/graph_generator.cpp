@@ -1,4 +1,8 @@
 #include "graph_generator.hpp"
+namespace {
+constexpr float RED_GENERATION_PROBABILITY = 0.33;
+constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
+}  // namespace
 namespace uni_course_cpp {
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
@@ -26,7 +30,7 @@ std::vector<VertexId> GraphGenerator::getUnconnectedVertexIds(
     VertexId vertexId,
     std::vector<VertexId> const& vertexIds,
     Graph const& graph) const {
-  vector<VertexId> notConnected;
+  std::vector<VertexId> notConnected;
   for (auto randomNextVertexId : vertexIds)
     if (!graph.isConnected(vertexId, randomNextVertexId))
       notConnected.emplace_back(randomNextVertexId);
