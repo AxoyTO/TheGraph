@@ -1,4 +1,3 @@
-#include <atomic>
 #include <functional>
 #include <list>
 #include <mutex>
@@ -8,8 +7,8 @@
 #include <vector>
 
 #include "graph.hpp"
-#include "graph_generation.hpp"
 #include "graph_generation_controller.hpp"
+#include "graph_generator.hpp"
 
 namespace uni_cpp_practice {
 
@@ -18,8 +17,8 @@ namespace graph_generation_controller {
 GraphGenerationController::GraphGenerationController(
     int threads_count,
     int graphs_count,
-    const graph_generation::Params& graph_generator_params)
-    : graphs_count_(graphs_count), params_(graph_generator_params) {
+    const GraphGenerator::Params& graph_generator_params)
+    : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
   for (int iter = 0; iter < threads_count; iter++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
@@ -51,14 +50,14 @@ void GraphGenerationController::generate(
                           &gen_finished_callback = gen_finished_callback, i,
                           &finish_callback_mutex_ = finish_callback_mutex_,
                           &start_callback_mutex_ = start_callback_mutex_,
-                          &params_ = params_,
+                          &graph_generator_ = graph_generator_,
                           &completed_jobs = completed_jobs]() {
         {
           const std::lock_guard lock(start_callback_mutex_);
           gen_started_callback(i);
         }
 
-        auto graph = graph_generation::generate(params_);
+        auto graph = graph_generator_.generate();
         {
           const std::lock_guard lock(finish_callback_mutex_);
           gen_finished_callback(std::move(graph), i);
