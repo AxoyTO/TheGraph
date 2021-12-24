@@ -112,8 +112,8 @@ std::vector<uni_course_cpp::Graph> generateGraphs(
       [&logger](int index) { logger.log(genStartedString(index)); },
       [&logger, &graphs](int index, uni_course_cpp::Graph graph) {
         logger.log(genFinishedString(index, graph));
-        graphs.push_back(graph);
         const auto graph_printer = uni_course_cpp::GraphPrinter(graph);
+        graphs.push_back(std::move(graph));
         write_to_file(graph_printer.print(),
                       uni_course_cpp::config::TEMP_DIRECTORY_PATH + "graph_" +
                           std::to_string(index) + ".json");
