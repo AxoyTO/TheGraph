@@ -105,4 +105,17 @@ Vertex& Graph::getVertex(int id) {
   return const_cast<Vertex&>(constThis.getVertex(id));
 }
 
+int Graph::getMaxDepth() {
+  int depth = 0;
+  while (true) {
+    std::vector<int> vertexIds = getVertexIdsAtDepth(depth);
+    if (vertexIds.size() == 0) {
+      break;
+    } else {
+      depth++;
+    }
+  }
+  return depth - 1;
+}
+
 }  // namespace uni_course_cpp

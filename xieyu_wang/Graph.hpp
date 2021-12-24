@@ -13,6 +13,7 @@ class Graph {
   std::vector<int> getVertexIdsAtDepth(int depth);
   const std::vector<int>& getEdgesByColor(const Edge::Color& color) const;
   const std::vector<Edge>& getEdges() const;
+  int getMaxDepth();
 
  private:
   const Vertex& getVertex(int id) const;

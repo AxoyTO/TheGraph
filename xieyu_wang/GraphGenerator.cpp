@@ -1,42 +1,120 @@
 #include "GraphGenerator.hpp"
+#include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
+#include <list>
+#include <mutex>
+#include <optional>
 #include <random>
+#include <thread>
 #include <vector>
+
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+
 namespace uni_course_cpp {
 constexpr float GREEN_EDGE_PROBABILITY = 0.10;
 constexpr float BLUE_EDGE_PROBABILITY = 0.25;
 constexpr float RED_EDGE_PROBABILITY = 0.33;
+
 GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
     : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
-void GraphGenerator::generateGrey(Graph& graph) const {
-  for (int depth = 0; depth < maxDepth_; depth++) {
-    const auto& vertexIds = graph.getVertexIdsAtDepth(depth);
-    bool isNewVertexGenerated = false;
-    for (const auto& vertexId : vertexIds) {
-      for (int i = 0; i < newVerticesNum_; ++i) {
-        if (isLucky(getProbabilityGray(depth))) {
-          const auto& newVertex = graph.addVertex();
-          graph.addEdge(vertexId, newVertex.id, Edge::Color::Gray);
-          isNewVertexGenerated = true;
+
+void GraphGenerator::generateVertices(Graph& graph,
+                                      const int& firstVertexId) const {
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
+
+  std::atomic<int> jobsDone = 0;
+  std::mutex lockGraph;
+
+  for (int i = 0; i < newVerticesNum_; i++) {
+    jobs.emplace_back([this, &graph, firstVertexId, &lockGraph, &jobsDone]() {
+      generateGrey(graph, firstVertexId, 0, lockGraph);
+      jobsDone++;
+    });
+  }
+
+  std::atomic<bool> shouldTerminate = false;
+  std::mutex jobsLock;
+
+  const auto worker = [&shouldTerminate, &jobsLock, &jobs]() {
+    while (true) {
+      if (shouldTerminate) {
+        return;
+      }
+      const auto jobOptional = [&jobsLock,
+                                &jobs]() -> std::optional<JobCallback> {
+        const std::lock_guard lock(jobsLock);
+        if (!jobs.empty()) {
+          const auto job = jobs.front();
+          jobs.pop_front();
+          return job;
         }
+        return std::nullopt;
+      }();
+      if (jobOptional.has_value()) {
+        const auto& job = jobOptional.value();
+        job();
       }
     }
-    if (!isNewVertexGenerated) {
-      break;
+  };
+
+  const auto threads_count = std::min(MAX_THREADS_COUNT, newVerticesNum_);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
+
+  for (int i = 0; i < threads_count; i++) {
+    threads.emplace_back(worker);
+  }
+
+  while (jobsDone != newVerticesNum_) {
+  }
+
+  shouldTerminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+}
+
+void GraphGenerator::generateGrey(Graph& graph,
+                                  const int parentVertexId,
+                                  int parentDepth,
+                                  std::mutex& lockGraph) const {
+  const auto new_vertex_id = [&graph, &lockGraph, parentVertexId]() {
+    const std::lock_guard lock(lockGraph);
+    auto new_vertex_id = graph.addVertex();
+    graph.addEdge(parentVertexId, new_vertex_id.id, Edge::Color::Gray);
+    return new_vertex_id;
+  }();
+
+  if (parentDepth + 1 >= maxDepth_) {
+    return;
+  }
+
+  const double percent = 100.0 / (double)maxDepth_;
+
+  for (int i = 0; i < newVerticesNum_; i++) {
+    if ((double)getProbabilityGray(parentDepth) >
+        (double)parentDepth * percent) {
+      generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }
 }
-void GraphGenerator::generateGreen(Graph& graph) const {
+
+void generateGreen(Graph& graph, std::mutex& mutex) {
   for (const auto& vertex : graph.getVertices()) {
     if (isLucky(GREEN_EDGE_PROBABILITY)) {
       graph.addEdge(vertex.id, vertex.id, Edge::Color::Green);
     }
   }
 }
-void GraphGenerator::generateRed(Graph& graph) const {
-  for (int depth = 0; depth < maxDepth_ - 1; depth++) {
+
+void generateRed(Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getMaxDepth();
+  for (int depth = 0; depth < maxDepth - 1; depth++) {
     const auto presentDepth = graph.getVertexIdsAtDepth(depth);
     const auto destinationDepth = graph.getVertexIdsAtDepth(depth + 2);
     for (const auto& fromVertexId : presentDepth) {
@@ -49,8 +127,10 @@ void GraphGenerator::generateRed(Graph& graph) const {
     }
   }
 }
-void GraphGenerator::generateBlue(Graph& graph) const {
-  for (int depth = 1; depth < maxDepth_; depth++) {
+
+void generateBlue(Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getMaxDepth();
+  for (int depth = 1; depth < maxDepth; depth++) {
     const auto presentDepth = graph.getVertexIdsAtDepth(depth);
     for (auto vertexIt = presentDepth.begin();
          vertexIt < presentDepth.end() - 1; vertexIt++) {
@@ -60,12 +140,33 @@ void GraphGenerator::generateBlue(Graph& graph) const {
     }
   }
 }
-void GraphGenerator::generateYellow(Graph& graph) const {
-  for (int depth = 0; depth < maxDepth_; depth++) {
+float getProbabilityYellow(int depth, int maxDepth) {
+  assert(depth >= 0);
+  const float result = (float)depth / (float)(maxDepth - 1);
+  if (std::isnan(result)) {
+    return 0.0;
+  }
+  return result;
+}
+std::vector<int> getUnconnectedVertexIds(
+    const int fromVertexId,
+    const std::vector<int>& destinationLevel,
+    Graph& graph) {
+  std::vector<int> unconnectedVertexIds;
+  for (const auto& vertexId : destinationLevel) {
+    if (!graph.isConnected(fromVertexId, vertexId)) {
+      unconnectedVertexIds.push_back(vertexId);
+    }
+  }
+  return unconnectedVertexIds;
+}
+void generateYellow(Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getMaxDepth();
+  for (int depth = 0; depth < maxDepth; depth++) {
     const auto presentLevel = graph.getVertexIdsAtDepth(depth);
     const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
     for (const auto& fromVertexId : presentLevel) {
-      if (isLucky(getProbabilityYellow(depth))) {
+      if (isLucky(getProbabilityYellow(depth, maxDepth))) {
         const auto unconnectedVertexIds =
             getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
         if (!unconnectedVertexIds.empty()) {
@@ -77,29 +178,21 @@ void GraphGenerator::generateYellow(Graph& graph) const {
   }
 }
 
-float GraphGenerator::getProbabilityYellow(int depth) const {
-  assert(depth >= 0);
-  const float result = (float)depth / (float)(maxDepth_ - 1);
-  if (std::isnan(result)) {
-    return 0.0;
-  }
-  return result;
-}
-
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   graph.addVertex();  // add root vertex
-  std::cout << "Generator.................done" << std::endl;
-  generateGrey(graph);
-  std::cout << "GrayEdgeGenerate..........done" << std::endl;
-  generateGreen(graph);
-  std::cout << "GreenEdgeGenerate.........done" << std::endl;
-  generateBlue(graph);
-  std::cout << "BlueEdgeGenerate..........done" << std::endl;
-  generateRed(graph);
-  std::cout << "redEdgeGenerate...........done" << std::endl;
-  generateYellow(graph);
-  std::cout << "yellowEdgeGenerate........done" << std::endl;
+  generateVertices(graph, 0);
+  std::mutex mutex;
+  std::thread greenThread(generateGreen, std::ref(graph), std::ref(mutex));
+  std::thread blueThread(generateBlue, std::ref(graph), std::ref(mutex));
+  std::thread redThread(generateRed, std::ref(graph), std::ref(mutex));
+  std::thread yellowThread(generateYellow, std::ref(graph), std::ref(mutex));
+
+  greenThread.join();
+  blueThread.join();
+  redThread.join();
+  yellowThread.join();
+
   return graph;
 }
 
@@ -110,19 +203,6 @@ float GraphGenerator::getProbabilityGray(int depth) const {
     return 0.0;
   }
   return result;
-}
-
-std::vector<int> GraphGenerator::getUnconnectedVertexIds(
-    const int fromVertexId,
-    const std::vector<int>& destinationLevel,
-    Graph& graph) const {
-  std::vector<int> unconnectedVertexIds;
-  for (const auto& vertexId : destinationLevel) {
-    if (!graph.isConnected(fromVertexId, vertexId)) {
-      unconnectedVertexIds.push_back(vertexId);
-    }
-  }
-  return unconnectedVertexIds;
 }
 
 bool isLucky(float probability) {
