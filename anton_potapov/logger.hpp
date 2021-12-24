@@ -1,4 +1,5 @@
 #include <fstream>
+#include <mutex>
 #include <string>
 
 namespace uni_cource_cpp {
@@ -15,5 +16,6 @@ class Logger {
   Logger& operator=(Logger&&) = delete;
 
   std::ofstream output_filestream_;
+  std::mutex logger_use_mutex_;
 };
 }  // namespace uni_cource_cpp
