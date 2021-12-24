@@ -347,7 +347,7 @@ class GraphGenerator {
 
   void generate_yellow_edges(Graph& graph) {
     const auto& depth = params_.depth();
-    for (Graph::Depth current_depth = 0; current_depth < depth - 1;
+    for (Graph::Depth current_depth = 0; current_depth < depth;
          ++current_depth) {
       for (const auto& vertex_id :
            graph.get_vertex_ids_on_depth(current_depth)) {
