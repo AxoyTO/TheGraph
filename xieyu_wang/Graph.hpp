@@ -8,14 +8,14 @@ class Graph {
   const std::vector<Vertex>& getVertices() const;
   const Vertex& addVertex();
   void addEdge(int fromVertexId, int toVertexId, const Edge::Color color);
-  bool hasVertex(int idFind) const;
-  bool isConnected(int fromVertexId, int toVertexId) const;
+  bool hasVertex(int idFind);
+  bool isConnected(int fromVertexId, int toVertexId);
   std::vector<int> getVertexIdsAtDepth(int depth);
   const std::vector<int>& getEdgesByColor(const Edge::Color& color) const;
   const std::vector<Edge>& getEdges() const;
 
  private:
-  Vertex& getVertex(int id) const;
+  Vertex& getVertex(int id);
   const Edge& getEdge(int id) const;
   int getNextEdgeId() { return vertexIdCounter_++; }
   int getNextVertexId() { return edgeIdCounter_++; }

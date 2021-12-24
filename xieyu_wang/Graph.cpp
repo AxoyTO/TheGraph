@@ -24,7 +24,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-bool Graph::hasVertex(int idFind) const {
+bool Graph::hasVertex(int idFind) {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
       return true;
@@ -32,7 +32,7 @@ bool Graph::hasVertex(int idFind) const {
   }
   return false;
 }
-bool Graph::isConnected(int fromVertexId, int toVertexId) const {
+bool Graph::isConnected(int fromVertexId, int toVertexId) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   if (fromVertexId ==
@@ -55,11 +55,11 @@ bool Graph::isConnected(int fromVertexId, int toVertexId) const {
   return false;
 }
 
-Vertex& Graph::getVertex(int id) const {
+Vertex& Graph::getVertex(int id) {
   assert(hasVertex(id) && "Vertex doesn't exist");
   for (auto& vertex : vertices_) {
     if (vertex.id == id) {
-      return (Vertex&)vertex;
+      return vertex;
     }
   }
   throw std::runtime_error("Unreachable code");
