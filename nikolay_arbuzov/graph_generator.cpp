@@ -56,7 +56,7 @@ void GraphGenerator::generate_green_edges(Graph& graph) const {
 
 void GraphGenerator::generate_yellow_edges(Graph& graph) const {
   const auto& depth = params_.depth();
-  for (Graph::Depth current_depth = 0; current_depth < depth - 1;
+  for (Graph::Depth current_depth = 0; current_depth < depth;
        ++current_depth) {
     for (const auto& vertex_id : graph.get_vertex_ids_on_depth(current_depth)) {
       const auto& to_vertex_ids =
