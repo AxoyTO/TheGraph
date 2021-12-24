@@ -56,8 +56,9 @@ std::map<int, Graph> generate_graphs(const GraphGenerator::Params& params,
           logger.log(LogMessagesGenerator::generation_max_depth_warning(
               index, graph.depth(), params.depth));
         }
+        const auto graph_json = graph_printer.print();
         graphs.emplace(index, std::move(graph));
-        write_to_file(graph_printer.print(),
+        write_to_file(graph_json,
                       std::string(uni_cource_cpp::config::TEMP_DIRECTORY_PATH) +
                           "graph_" + std::to_string(index) + ".json");
       });
