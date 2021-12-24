@@ -130,9 +130,10 @@ Vertex& Graph::get_vertex(const VertexId& id) {
 
 Graph::Depth Graph::get_vertex_depth(VertexId vertex_id) {
   for (int i = 0; i < depth_map_.size(); ++i) {
-    if (std::find(depth_map_[i].begin(), depth_map_[i].end(), vertex_id) !=
-        depth_map_[i].end()) {
-      return i;
+    for (const auto& vertex_at_depth_id : depth_map_[i]) {
+      if (vertex_at_depth_id == vertex_id) {
+        return i;
+      }
     }
   }
   throw std::runtime_error("Vertex not found!\n");
