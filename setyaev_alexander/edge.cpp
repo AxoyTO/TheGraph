@@ -20,19 +20,21 @@ std::string Edge::to_string() const {
   std::stringstream json;
   json << "{\n  \"id\": " << get_id() << ",\n  \"vertex_ids\": ["
        << get_first_vertex_id() << ", " << get_second_vertex_id()
-       << "],\n  \"color\": ";
-  if (color_ == Edge::Color::Gray) {
-    json << "\"gray\"\n";
-  }
-  if (color_ == Edge::Color::Yellow) {
-    json << "\"yellow\"\n";
-  }
-  if (color_ == Edge::Color::Green) {
-    json << "\"green\"\n";
-  }
-  if (color_ == Edge::Color::Red) {
-    json << "\"red\"\n";
-  }
-  json << "}";
+       << "],\n  \"color\": " << color_to_string(color_) << "\n}";
   return json.str();
+}
+
+std::string color_to_string(const Edge::Color& color) {
+  if (color == Edge::Color::Grey) {
+    return "\"grey\"";
+  }
+  if (color == Edge::Color::Yellow) {
+    return "\"yellow\"";
+  }
+  if (color == Edge::Color::Green) {
+    return "\"green\"";
+  }
+  if (color == Edge::Color::Red) {
+    return "\"red\"";
+  }
 }

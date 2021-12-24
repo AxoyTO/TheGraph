@@ -1,13 +1,15 @@
+
 #pragma once
+
 #include "vertex.hpp"
 
 struct Edge {
  public:
-  enum class Color { Red = 0, Gray = 1, Green = 2, Yellow = 4 };
+  enum class Color { Red, Grey, Green, Yellow };
   Edge(EdgeId id,
        VertexId first_vertex_id,
        VertexId second_vertex_id,
-       Edge::Color color)
+       const Edge::Color& color)
       : id_(id),
         first_vertex_id_(first_vertex_id),
         second_vertex_id_(second_vertex_id),
@@ -22,5 +24,7 @@ struct Edge {
   EdgeId id_ = 0;
   VertexId first_vertex_id_ = 0;
   VertexId second_vertex_id_ = 0;
-  Edge::Color color_ = Edge::Color::Gray;
+  Edge::Color color_ = Edge::Color::Grey;
 };
+
+std::string color_to_string(const Edge::Color& color);

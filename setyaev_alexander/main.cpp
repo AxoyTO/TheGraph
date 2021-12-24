@@ -10,7 +10,7 @@ void json_to_file(const std::string& str) {
   json.close();
 }
 
-const int handle_depth_input() {
+int handle_depth_input() {
   int depth = 0;
   std::cout << "Please, enter graph's depth:\n";
   std::cin >> depth;
@@ -20,7 +20,7 @@ const int handle_depth_input() {
   return depth;
 }
 
-const int handle_new_vertices_count_input() {
+int handle_new_vertices_count_input() {
   int count = 0;
   std::cout << "Please, enter graph's new vertices count:\n";
   std::cin >> count;
