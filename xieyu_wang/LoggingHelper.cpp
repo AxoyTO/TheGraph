@@ -38,10 +38,10 @@ void LoggingHelper::logColors(Logger& logger, Graph graph) {
   const std::array<Edge::Color, 5> colors = {
       Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
       Edge::Color::Yellow, Edge::Color::Red};
-  for (int i = 0; i < colors.size(); i++) {
-    logger.log(uni_course_cpp::GraphPrinter::printEdgeColor((colors[i])) +
-               ": " + std::to_string(graph.getEdgeByColor(colors[i]).size()));
-    if (i + 1 != colors.size())
+  for (const auto& color : colors) {
+    logger.log(uni_course_cpp::GraphPrinter::printEdgeColor((color)) + ": " +
+               std::to_string(graph.getEdgesByColor(color).size()));
+    if (color != colors.back())
       logger.log(", ");
   }
 }

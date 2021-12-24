@@ -24,7 +24,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-const bool Graph::hasVertex(int idFind) {
+bool Graph::hasVertex(int idFind) const {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
       return true;
@@ -32,7 +32,7 @@ const bool Graph::hasVertex(int idFind) {
   }
   return false;
 }
-const bool Graph::isConnected(int fromVertexId, int toVertexId) {
+bool Graph::isConnected(int fromVertexId, int toVertexId) const {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   if (fromVertexId ==
@@ -55,11 +55,11 @@ const bool Graph::isConnected(int fromVertexId, int toVertexId) {
   return false;
 }
 
-Vertex& Graph::getVertex(int id) {
+Vertex& Graph::getVertex(int id) const {
   assert(hasVertex(id) && "Vertex doesn't exist");
   for (auto& vertex : vertices_) {
     if (vertex.id == id) {
-      return vertex;
+      return (Vertex&)vertex;
     }
   }
   throw std::runtime_error("Unreachable code");
@@ -79,7 +79,7 @@ const std::vector<Vertex>& Graph::getVertices() const {
   return vertices_;
 }
 
-const Edge& Graph::getEdge(int id) {
+const Edge& Graph::getEdge(int id) const {
   for (const auto& edge : edges_) {
     if (edge.id == id) {
       return edge;
@@ -88,12 +88,12 @@ const Edge& Graph::getEdge(int id) {
   throw std::runtime_error("No such vertex");
 }
 
-std::vector<Edge>& Graph::getEdgeByColor(const Edge::Color& color) {
+const std::vector<int>& Graph::getEdgesByColor(const Edge::Color& color) const {
   if (coloredEdges_.find(color) == coloredEdges_.end()) {
-    static std::vector<Edge> empty_result = {};
+    static std::vector<int> empty_result = {};
     return empty_result;
   }
-  return reinterpret_cast<std::vector<Edge>&>(coloredEdges_.at(color));
+  return coloredEdges_.at(color);
 }
 
 const std::vector<Edge>& Graph::getEdges() const {
