@@ -1,0 +1,6 @@
+2021.12.24 15:23:22 Graph 5 Generation Finished {
+{
+	depth: 6,
+	vertices: {amount: 1752, distribution: [1, 6, 30, 119, 328, 636, 632]},
+	edges: {amount: 2449, distribution: {grey: 1751, green: 184, yellow: 365, red: 149}}
+}
