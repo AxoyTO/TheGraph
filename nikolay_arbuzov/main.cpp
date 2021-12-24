@@ -357,10 +357,8 @@ class GraphGenerator {
     const auto& depth = params_.depth();
     for (Graph::Depth current_depth = 0; current_depth < depth;
          ++current_depth) {
-      // Not const reference, because I need to change depth in "for"
-      auto vertices_on_current_depth =
-          graph.get_vertex_ids_on_depth(current_depth);
-      for (const auto& vertex_id : vertices_on_current_depth) {
+      for (const auto& vertex_id :
+           graph.get_vertex_ids_on_depth(current_depth)) {
         const auto& to_vertex_ids =
             graph.get_vertex_ids_on_depth(current_depth + 1);
         auto to_vertex_ids_no_neighbors = std::vector<VertexId>();
