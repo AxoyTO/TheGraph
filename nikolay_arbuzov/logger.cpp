@@ -20,7 +20,7 @@ std::string get_current_date_time() {
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
-  log_file << get_current_date_time() << string;
+  log_file_ << get_current_date_time() << string;
   std::cout << get_current_date_time() << string;
 }
 
