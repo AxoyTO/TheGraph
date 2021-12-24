@@ -1,6 +1,5 @@
 #pragma once
 
-#include <random>
 #include "graph.hpp"
 namespace uni_course_cpp {
 class GraphGenerator {
@@ -18,18 +17,15 @@ class GraphGenerator {
     int new_vertices_count_ = 0;
   };
 
-  bool can_generate_vertex(float probability);
-  Graph::VertexId get_random_vertex_id(
-      const std::vector<Graph::VertexId>& vertex_ids);
   explicit GraphGenerator(const Params& params = Params()) : params_(params) {}
 
-  void generate_grey_edges(Graph& graph);
-  void generate_green_edges(Graph& graph);
-  void generate_yellow_edges(Graph& graph);
-  void generate_red_edges(Graph& graph);
-  const Graph generate();
+  Graph generate() const;
 
  private:
   const Params params_ = Params();
+  void generate_grey_edges(Graph& graph) const;
+  void generate_green_edges(Graph& graph) const;
+  void generate_yellow_edges(Graph& graph) const;
+  void generate_red_edges(Graph& graph) const;
 };
 }  // namespace uni_course_cpp

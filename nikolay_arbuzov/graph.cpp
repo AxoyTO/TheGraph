@@ -9,13 +9,13 @@
 #include <vector>
 
 namespace {
-constexpr int kNewVertexDepth = 0;
+constexpr int k_new_vertex_depth = 0;
 }
 
 namespace uni_course_cpp {
 Graph::Vertex& Graph::add_vertex() {
   VertexId new_vertex_id = get_new_vertex_id();
-  set_vertex_depth(new_vertex_id, kNewVertexDepth);
+  set_vertex_depth(new_vertex_id, k_new_vertex_depth);
   adjacency_list_[new_vertex_id] = std::set<EdgeId>();
   return vertices_.emplace_back(new_vertex_id);
 };

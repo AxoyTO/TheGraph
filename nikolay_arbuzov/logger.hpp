@@ -1,11 +1,6 @@
 #pragma once
 
-#include <chrono>
-#include <ctime>
 #include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
 #include <string>
 #include "config.hpp"
 
@@ -20,13 +15,13 @@ class Logger {
   void log(const std::string& string);
 
  private:
-  std::ofstream log_file;
+  std::ofstream log_file_;
 
-  Logger() : log_file(config::kLogFilePath) {
-    if (!log_file.is_open())
+  Logger() : log_file_(config::kLogFilePath) {
+    if (!log_file_.is_open())
       throw std::runtime_error("File was not open");
   }
-  ~Logger() { log_file.close(); }
+  ~Logger() { log_file_.close(); }
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
   Logger(Logger&&) = delete;
