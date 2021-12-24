@@ -8,7 +8,7 @@ namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
   log_file << string;
-  std::cout << string << std::endl;
+  std::cout << string;
 }
 
 }  // namespace uni_course_cpp

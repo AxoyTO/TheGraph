@@ -54,7 +54,7 @@ std::string get_current_date_time() {
 std::string generation_started_string(const int graph_number) {
   std::stringstream log_string;
   log_string << get_current_date_time() << " Graph " << graph_number
-             << " Generation Started";
+             << " Generation Started" << std::endl;
   return log_string.str();
 }
 
