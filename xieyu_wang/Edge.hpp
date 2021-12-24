@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+namespace uni_course_cpp {
 class Edge {
  public:
   enum class Color { Gray, Green, Blue, Yellow, Red };
@@ -11,6 +12,5 @@ class Edge {
        int fromVertexId,
        int toVertexId,
        const Color color = Color::Gray);
-  std::string toString() const;
 };
-std::string edgeColorToString(const Edge::Color& color);
+}  // namespace uni_course_cpp

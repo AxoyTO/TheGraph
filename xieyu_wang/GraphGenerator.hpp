@@ -1,5 +1,6 @@
 #pragma once
 #include "Graph.hpp"
+namespace uni_course_cpp {
 class GraphGenerator {
  public:
   GraphGenerator(int maxDepth, int newVerticesNum);
@@ -25,3 +26,5 @@ class GraphGenerator {
 };
 int getRandomVertexId(const std::vector<int> vector1);
 bool isLucky(float probability);
+
+}  // namespace uni_course_cpp
