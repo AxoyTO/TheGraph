@@ -14,6 +14,22 @@ constexpr float k_green_probability = 0.1;
 constexpr float k_red_probability = 0.33;
 constexpr int k_max_threads_count = 4;
 
+std::vector<uni_course_cpp::Graph::VertexId> get_unconnected_vertex_ids(
+    const uni_course_cpp::Graph& graph,
+    const uni_course_cpp::Graph::VertexId& vertex_id) {
+  const auto& to_vertex_ids =
+      graph.get_vertex_ids_on_depth(graph.get_vertex_depth(vertex_id) + 1);
+  auto to_vertex_ids_no_neighbors =
+      std::vector<uni_course_cpp::Graph::VertexId>();
+
+  for (const auto& not_neighbor_vertex_id : to_vertex_ids) {
+    if (!graph.is_connected(vertex_id, not_neighbor_vertex_id)) {
+      to_vertex_ids_no_neighbors.push_back(not_neighbor_vertex_id);
+    }
+  }
+  return to_vertex_ids_no_neighbors;
+}
+
 bool can_generate_vertex(float probability) {
   std::random_device random_device;
   std::mt19937 generate(random_device());
@@ -58,7 +74,7 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
   // Создаем воркера,
   // который в бесконечном цикле проверяет,
   // есть ли работа, и выполняет её
-  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
+  const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       // Проверка флага, должны ли мы остановить поток
       if (should_terminate) {
@@ -151,11 +167,11 @@ void GraphGenerator::generate_yellow_edges(Graph& graph,
   const auto& depth = params_.depth();
   for (Graph::Depth current_depth = 0; current_depth < depth; ++current_depth) {
     for (const auto& vertex_id : graph.get_vertex_ids_on_depth(current_depth)) {
-      const auto& to_vertex_ids = graph.get_unconnected_vertex_ids(vertex_id);
+      const std::lock_guard<std::mutex> lock(mutex);
+      const auto& to_vertex_ids = get_unconnected_vertex_ids(graph, vertex_id);
       if (to_vertex_ids.size() &&
           can_generate_vertex(
               float(1) - (float(depth - 1 - current_depth) / (depth - 1)))) {
-        const std::lock_guard<std::mutex> lock(mutex);
         graph.add_edge(vertex_id, get_random_vertex_id(to_vertex_ids));
       }
     }

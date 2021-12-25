@@ -70,20 +70,6 @@ bool Graph::is_connected(const VertexId& from_vertex_id,
   }
 }
 
-std::vector<Graph::VertexId> Graph::get_unconnected_vertex_ids(
-    const Graph::VertexId& vertex_id) const {
-  const auto& to_vertex_ids =
-      get_vertex_ids_on_depth(get_vertex_depth(vertex_id) + 1);
-  auto to_vertex_ids_no_neighbors = std::vector<Graph::VertexId>();
-
-  for (const auto& not_neighbor_vertex_id : to_vertex_ids) {
-    if (!is_connected(vertex_id, not_neighbor_vertex_id)) {
-      to_vertex_ids_no_neighbors.push_back(not_neighbor_vertex_id);
-    }
-  }
-  return to_vertex_ids_no_neighbors;
-}
-
 Graph::Edge::Color Graph::determine_color(const VertexId& from_vertex_id,
                                           const VertexId& to_vertex_id) const {
   const auto from_vertex_depth = get_vertex_depth(from_vertex_id);
