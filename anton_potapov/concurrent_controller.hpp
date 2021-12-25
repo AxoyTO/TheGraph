@@ -6,7 +6,6 @@
 #include <thread>
 
 namespace uni_cource_cpp {
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
 class ConcurrentController {
  public:
@@ -36,19 +35,8 @@ class ConcurrentController {
   std::mutex jobs_queue_mutex_;
   std::mutex controller_mutex_;
 
-  void init_workers(int threads_count) {
-    const auto workers_count = std::min(MAX_THREADS_COUNT, threads_count);
-    for (int i = 0; i < workers_count; ++i) {
-      workers_.emplace_back([this]() -> std::optional<JobCallback> {
-        const std::lock_guard queue_lock(jobs_queue_mutex_);
-        if (!jobs_.empty()) {
-          const auto job = jobs_.front();
-          jobs_.pop();
-          return job;
-        }
-        return std::nullopt;
-      });
-    }
-  }
+  void init_workers(int threads_count);
+  virtual void init_jobs() = 0;
+  void run_jobs();
 };
 }  // namespace uni_cource_cpp

@@ -25,5 +25,8 @@ class GraphGenerationController : public ConcurrentController {
  private:
   const int graphs_count_;
   GraphGenerator graph_generator_;
+
+  void init_jobs(const GenStartedCallback& gen_started_callback,
+                 const GenFinishedCallback& gen_finished_callback);
 };
 }  // namespace uni_cource_cpp

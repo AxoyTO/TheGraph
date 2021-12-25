@@ -14,7 +14,7 @@ GraphGenerationController::GraphGenerationController(
   init_workers(threads_count);
 }
 
-void GraphGenerationController::generate(
+void GraphGenerationController::init_jobs(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
   for (int i = 0; i < graphs_count_; ++i) {
@@ -30,20 +30,12 @@ void GraphGenerationController::generate(
       }
     });
   }
+}
 
-  for (auto& worker : workers_) {
-    worker.start();
-  }
-
-  while (true) {
-    const std::lock_guard queue_lock(jobs_queue_mutex_);
-    if (jobs_.empty()) {
-      break;
-    }
-  }
-
-  for (auto& worker : workers_) {
-    worker.stop();
-  }
+void GraphGenerationController::generate(
+    const GenStartedCallback& gen_started_callback,
+    const GenFinishedCallback& gen_finished_callback) {
+  init_jobs(gen_started_callback, gen_finished_callback);
+  run_jobs();
 }
 }  // namespace uni_cource_cpp
