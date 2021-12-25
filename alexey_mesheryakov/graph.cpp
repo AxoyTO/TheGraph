@@ -122,12 +122,8 @@ Edge::Color Graph::calculate_color(const VertexId& first_id,
     return Edge::Color::Gray;
   const Depth& first_depth = get_vertex(first_id).depth;
   const Depth& second_depth = get_vertex(second_id).depth;
-  if (first_depth == second_depth) {
-    if (first_id != second_id)
-      return Edge::Color::Blue;
-    else
-      return Edge::Color::Green;
-  }
+  if (first_depth == second_depth)
+    return Edge::Color::Green;
   if (abs(first_depth - second_depth) == 1)
     return Edge::Color::Yellow;
   if (abs(first_depth - second_depth) == 2)

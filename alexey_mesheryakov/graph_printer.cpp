@@ -13,8 +13,6 @@ std::string GraphPrinter::edge_color_to_string(const Edge::Color& color) {
       return "green";
     case Edge::Color::Red:
       return "red";
-    case Edge::Color::Blue:
-      return "blue";
     case Edge::Color::Yellow:
       return "yellow";
   }
@@ -32,9 +30,9 @@ std::string GraphPrinter::print() const {
              << "],\n"
              << "  edges: " << graph_.get_edges().size() << ", {";
 
-  const auto colors = std::array<Edge::Color, 5>{
-      Edge::Color::Gray, Edge::Color::Green, Edge::Color::Blue,
-      Edge::Color::Yellow, Edge::Color::Red};
+  const auto colors =
+      std::array<Edge::Color, 4>{Edge::Color::Gray, Edge::Color::Green,
+                                 Edge::Color::Yellow, Edge::Color::Red};
   for (const auto& color : colors) {
     log_string << edge_color_to_string(color) << ": "
                << graph_.get_colored_edges(color).size();
