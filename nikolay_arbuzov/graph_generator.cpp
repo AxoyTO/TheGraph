@@ -168,7 +168,7 @@ void GraphGenerator::generate_yellow_edges(Graph& graph,
   for (Graph::Depth current_depth = 0; current_depth < depth; ++current_depth) {
     for (const auto& vertex_id : graph.get_vertex_ids_on_depth(current_depth)) {
       const std::lock_guard<std::mutex> lock(mutex);
-      auto to_vertex_ids = get_unconnected_vertex_ids(graph, vertex_id);
+      const auto to_vertex_ids = get_unconnected_vertex_ids(graph, vertex_id);
       if (to_vertex_ids.size() &&
           can_generate_vertex(
               float(1) - (float(depth - 1 - current_depth) / (depth - 1)))) {
