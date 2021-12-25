@@ -31,7 +31,7 @@ std::string GraphPrinter::print() const {
              << "  edges: " << graph_.get_edges().size() << ", {";
 
   const auto colors =
-      std::array<Edge::Color, 5>{Edge::Color::Gray, Edge::Color::Green,
+      std::array<Edge::Color, 4>{Edge::Color::Gray, Edge::Color::Green,
                                  Edge::Color::Yellow, Edge::Color::Red};
   for (const auto& color : colors) {
     log_string << edge_color_to_string(color) << ": "

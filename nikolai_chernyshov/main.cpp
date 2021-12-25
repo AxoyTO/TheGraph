@@ -1,219 +1,208 @@
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
+#include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <iterator>
-#include <memory>
+#include <sstream>
 #include <vector>
 
-using VertexId = int;
-using EdgeId = int;
+#include "config.hpp"
+#include "graph.hpp"
+#include "graph_generation_controller.hpp"
+#include "graph_generator.hpp"
+#include "graph_path.hpp"
+#include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
+#include "logger.hpp"
 
-constexpr int VERTICES_COUNT = 14;
+using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerationController;
+using uni_course_cpp::GraphGenerator;
+using uni_course_cpp::GraphPath;
+using uni_course_cpp::GraphTraversalController;
+using uni_course_cpp::GraphTraverser;
+using uni_course_cpp::Logger;
 
-struct Edge {
-  const EdgeId id;
-  const VertexId vertex1, vertex2;
+constexpr int MIN_DEPTH = 0;
+constexpr int MIN_NEW_VERTICES_COUNT = 0;
+constexpr int MIN_GRAPHS_COUNT = 0;
+constexpr int MIN_THREADS_COUNT = 1;
 
-  Edge(const VertexId& _vertex1, const VertexId& _vertex2, const EdgeId& id_max)
-      : id(id_max), vertex1(_vertex1), vertex2(_vertex2) {}
-};
+const std::string FILENAME_PREFIX = "graph_";
+const std::string FILENAME_SUFFIX = ".json";
 
-struct Vertex {
- public:
-  const VertexId id;
-
-  explicit Vertex(const VertexId& id_max) : id(id_max) {}
-
-  bool has_edge_id(const EdgeId& id) const {
-    if (edge_ids_.empty())
-      return false;
-    if (std::find(edge_ids_.begin(), edge_ids_.end(), id) != edge_ids_.end())
-      return true;
-    return false;
-  }
-
-  void add_edge_id(const EdgeId& id) {
-    assert(!has_edge_id(id) && "Edge id already exists");
-    edge_ids_.push_back(id);
-  }
-
-  const std::vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-
- private:
-  std::vector<EdgeId> edge_ids_;
-};
-
-class Graph {
- public:
-  bool are_connected(const VertexId& vertex1_id,
-                     const VertexId& vertex2_id) const {
-    assert(has_vertex(vertex1_id));
-    assert(has_vertex(vertex2_id));
-    for (const auto& edge1_id : vertices_[vertex1_id].get_edge_ids()) {
-      for (const auto& edge2_id : vertices_[vertex2_id].get_edge_ids()) {
-        if (edge1_id == edge2_id)
-          return true;
-      }
+const int handle_depth_input() {
+  int depth;
+  std::cout << "Input depth:" << std::endl;
+  while (!(std::cin >> depth) || (depth < MIN_DEPTH)) {
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
+    if (!std::cin) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-    return false;
   }
+  return depth;
+}
 
-  bool has_vertex(const VertexId& vertex_id) const {
-    for (const auto& vertex : vertices_)
-      if (vertex.id == vertex_id)
-        return true;
-    return false;
-  }
-
-  void add_edge(const VertexId& vertex1_id, const VertexId& vertex2_id) {
-    assert(has_vertex(vertex1_id));
-    assert(has_vertex(vertex2_id));
-    assert(!are_connected(vertex1_id, vertex2_id));
-
-    const auto& new_edge =
-        edges_.emplace_back(vertex1_id, vertex2_id, get_max_edge_id());
-    vertices_[vertex1_id].add_edge_id(new_edge.id);
-    vertices_[vertex2_id].add_edge_id(new_edge.id);
-  }
-
-  void add_vertex() { vertices_.emplace_back(get_max_vertex_id()); }
-
-  const std::vector<Edge>& get_edges() const { return edges_; }
-
-  const std::vector<Vertex>& get_vertices() const { return vertices_; }
-
- private:
-  std::vector<Edge> edges_;
-  std::vector<Vertex> vertices_;
-  VertexId vertex_id_max_ = 0;
-  EdgeId edge_id_max_ = 0;
-
-  const EdgeId get_max_edge_id() {
-    const auto id = edge_id_max_;
-    edge_id_max_++;
-    return id;
-  }
-
-  const VertexId get_max_vertex_id() {
-    const auto id = vertex_id_max_;
-    vertex_id_max_++;
-    return id;
-  }
-};
-
-class GraphGenerator {
- public:
-  Graph build_required_graph() const {
-    Graph graph;
-
-    for (int i = 0; i < VERTICES_COUNT; i++) {
-      graph.add_vertex();
+const int handle_new_vertices_count_input() {
+  int new_vertices_count;
+  std::cout << "Input new vertices count:" << std::endl;
+  while (!(std::cin >> new_vertices_count) ||
+         (new_vertices_count < MIN_NEW_VERTICES_COUNT)) {
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
+    if (!std::cin) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-
-    graph.add_edge(0, 1);
-    graph.add_edge(0, 2);
-    graph.add_edge(0, 3);
-    graph.add_edge(1, 4);
-    graph.add_edge(1, 5);
-    graph.add_edge(1, 6);
-    graph.add_edge(2, 7);
-    graph.add_edge(2, 8);
-    graph.add_edge(3, 9);
-    graph.add_edge(4, 10);
-    graph.add_edge(5, 10);
-    graph.add_edge(6, 10);
-    graph.add_edge(7, 11);
-    graph.add_edge(8, 11);
-    graph.add_edge(9, 12);
-    graph.add_edge(10, 13);
-    graph.add_edge(11, 13);
-    graph.add_edge(12, 13);
-
-    return graph;
   }
-};
+  return new_vertices_count;
+}
 
-class GraphPrinter {
- public:
-  std::string vertex_to_json(const Vertex& vertex) const {
-    std::string res;
-    res += "{\n\t\t\t\"id\": ";
-    res += std::to_string(vertex.id);
-    res += ",\n\t\t\t\"edge_ids\": [";
-
-    auto edge_ids = vertex.get_edge_ids();
-
-    if (!edge_ids.empty()) {
-      for (const auto& edge_id : edge_ids) {
-        res += std::to_string(edge_id);
-        res += ", ";
-      }
-      res.pop_back();
-      res.pop_back();
+const int handle_graphs_count_input() {
+  int graphs_count;
+  std::cout << "Input graphs count:" << std::endl;
+  while (!(std::cin >> graphs_count) || (graphs_count < MIN_GRAPHS_COUNT)) {
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
+    if (!std::cin) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-    res += "]\n\t\t}";
-
-    return res;
   }
+  return graphs_count;
+}
 
-  std::string edge_to_json(const Edge& edge) const {
-    std::string res;
-
-    res += "{\n\t\t\t\"id\": ";
-    res += std::to_string(edge.id);
-    res += ",\n\t\t\t\"vertex_ids\": [";
-    res += std::to_string(edge.vertex1);
-    res += ", ";
-    res += std::to_string(edge.vertex2);
-    res += "]\n\t\t}, ";
-
-    return res;
-  }
-
-  std::string to_json(const Graph& graph) const {
-    std::string res;
-    res += "{\n\t \"vertices\": [\n\t\t";
-
-    auto vertices = graph.get_vertices();
-
-    if (!vertices.empty()) {
-      for (const auto& vertex : graph.get_vertices()) {
-        res += vertex_to_json(vertex);
-        res += ", ";
-      }
-      res.pop_back();
-      res.pop_back();
+const int handle_threads_count_input() {
+  int threads_count;
+  std::cout << "Input threads count:" << std::endl;
+  while (!(std::cin >> threads_count) || (threads_count < MIN_THREADS_COUNT)) {
+    std::cout << "Invalid value, please input natural number or zero:"
+              << std::endl;
+    if (!std::cin) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-
-    res += "\n\t],\n\t\"edges\": [\n\t\t";
-
-    auto edges = graph.get_edges();
-
-    if (!edges.empty()) {
-      for (const auto& edge : graph.get_edges()) {
-        res += edge_to_json(edge);
-      }
-      res.pop_back();
-      res.pop_back();
-    }
-
-    res += "\n\t]\n}\n";
-
-    return res;
   }
-};
+  return threads_count;
+}
+
+std::string get_current_date_time() {
+  const auto date_time = std::chrono::system_clock::now();
+  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
+  std::stringstream date_time_string;
+  date_time_string << std::put_time(std::localtime(&date_time_t),
+                                    "%Y.%m.%d %H:%M:%S");
+  return date_time_string.str();
+}
+
+std::string gen_started_string(int graph_number) {
+  std::stringstream res;
+  res << get_current_date_time() << ": Graph " << graph_number
+      << ", Generation Started\n";
+  return res.str();
+}
+
+std::string gen_finished_string(int graph_number, const Graph& graph) {
+  std::stringstream res;
+  res << get_current_date_time() << ": Graph " << graph_number
+      << ", Generation Finished ";
+
+  res << uni_course_cpp::graph_printing::print_graph_description(graph);
+
+  res << "}\n}\n";
+  return res.str();
+}
+
+void prepare_temp_directory() {
+  std::filesystem::create_directory(
+      uni_course_cpp::config::TEMP_DIRECTORY_PATH);
+}
+
+void write_to_file(const std::string& string, const std::string& filename) {
+  std::ofstream filestream;
+  filestream.open(filename);
+  filestream << string;
+  filestream.close();
+}
+
+std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
+                                   int graphs_count,
+                                   int threads_count) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
+
+  auto& logger = Logger::get_instance();
+
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
+
+  generation_controller.generate(
+      [&logger](int index) { logger.log(gen_started_string(index)); },
+      [&logger, &graphs](int index, Graph graph) {
+        logger.log(gen_finished_string(index, graph));
+        graphs.push_back(graph);
+        write_to_file(uni_course_cpp::graph_printing::print_graph(graph),
+                      uni_course_cpp::config::TEMP_DIRECTORY_PATH +
+                          FILENAME_PREFIX + std::to_string(index) +
+                          FILENAME_SUFFIX);
+      });
+
+  return graphs;
+}
+
+std::string traversal_started_string(int graph_number) {
+  std::stringstream res;
+  res << get_current_date_time() << ": Graph " << graph_number
+      << ", Traversal Started\n";
+  return res.str();
+}
+
+std::string traversal_finished_string(int graph_number,
+                                      std::vector<GraphPath> paths) {
+  std::stringstream res;
+  res << get_current_date_time() << ": Graph " << graph_number
+      << ", Traversal Finished, Paths: [";
+
+  for (const auto& path : paths) {
+    res << "\n  ";
+    res << uni_course_cpp::graph_printing::print_path(path);
+    res << ",";
+  }
+  if (paths.size()) {
+    res.seekp(-1, res.cur);
+  }
+
+  res << "\n]\n";
+  return res.str();
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs) {
+  auto traversal_controller = GraphTraversalController(graphs);
+
+  traversal_controller.traverse(
+      [](int index, const Graph& graph) {
+        auto& logger = Logger::get_instance();
+        logger.log(traversal_started_string(index));
+      },
+      [](int index, const Graph& graph, std::vector<GraphPath> paths) {
+        auto& logger = Logger::get_instance();
+        logger.log(traversal_finished_string(index, paths));
+      });
+}
 
 int main() {
-  const GraphGenerator generator;
-  Graph graph = generator.build_required_graph();
+  const int depth = handle_depth_input();
+  const int new_vertices_count = handle_new_vertices_count_input();
+  const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
+  prepare_temp_directory();
 
-  const GraphPrinter printer;
-  std::ofstream myfile;
-  myfile.open("graph.json");
-  myfile << printer.to_json(graph);
-  myfile.close();
+  const auto params = GraphGenerator::Params(depth, new_vertices_count);
+  const auto graphs = generate_graphs(params, graphs_count, threads_count);
+
+  traverse_graphs(graphs);
 
   return 0;
 }

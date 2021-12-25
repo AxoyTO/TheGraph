@@ -1,4 +1,4 @@
-//#include <filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -82,7 +82,8 @@ int main() {
   const auto params = GraphGenerator::Params(depth, new_vertices_num);
   const auto generator = GraphGenerator(params);
   auto& logger = uni_course_cpp::Logger::get_instance();
-  // std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
+
+  std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 
   for (int i = 0; i < graphs_count; i++) {
     logger.log(generation_started_string(i));
