@@ -21,8 +21,14 @@ std::string get_current_date_time() {
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
-  log_file_ << get_current_date_time() << string;
-  std::cout << get_current_date_time() << string;
+  const auto log_string = get_current_date_time() + string;
+  log_file_ << log_string;
+  std::cout << log_string;
+}
+
+Logger::Logger() : log_file_(config::kLogFilePath) {
+  if (!log_file_.is_open())
+    throw std::runtime_error("File was not open");
 }
 
 }  // namespace uni_course_cpp
