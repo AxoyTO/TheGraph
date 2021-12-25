@@ -1,8 +1,11 @@
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <map>
+#include <mutex>
 #include <queue>
 #include <set>
+#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -10,6 +13,8 @@
 #include "graph_traverser.hpp"
 
 namespace uni_cource_cpp {
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+
 GraphTraverser::GraphTraverser(const Graph& graph) : graph_(graph) {}
 
 std::map<VertexId, int> GraphTraverser::get_updated_depths(
@@ -116,10 +121,68 @@ std::vector<GraphPath> GraphTraverser::find_all_paths(
     VertexId source_vertex_id,
     std::set<VertexId> destination_vertices_ids) const {
   std::vector<GraphPath> result;
+  std::mutex result_mutex;
+
+  using JobCallback = std::function<void()>;
+  auto jobs = std::queue<JobCallback>();
+
   for (const auto& destination_vertex_id : destination_vertices_ids) {
-    result.push_back(
-        find_shortest_path(source_vertex_id, destination_vertex_id));
+    jobs.push([this, &result, &result_mutex, &source_vertex_id,
+               &destination_vertex_id]() {
+      const auto current_path =
+          find_shortest_path(source_vertex_id, destination_vertex_id);
+      {
+        const std::lock_guard result_lock(result_mutex);
+        result.push_back(current_path);
+      }
+    });
   }
+
+  std::atomic<bool> should_terminate = false;
+  std::mutex queue_mutex;
+  auto worker = [&should_terminate, &queue_mutex, &jobs]() {
+    while (true) {
+      if (should_terminate) {
+        return;
+      }
+      const auto job_optional = [&queue_mutex,
+                                 &jobs]() -> std::optional<JobCallback> {
+        const std::lock_guard queue_lock(queue_mutex);
+        if (!jobs.empty()) {
+          const auto job = jobs.front();
+          jobs.pop();
+          return job;
+        }
+        return std::nullopt;
+      }();
+      if (job_optional.has_value()) {
+        const auto& job = job_optional.value();
+        job();
+      }
+    }
+  };
+
+  const auto threads_count = std::min(
+      MAX_THREADS_COUNT, static_cast<int>(destination_vertices_ids.size()));
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threads_count);
+
+  for (int i = 0; i < threads_count; ++i) {
+    threads.emplace_back(worker);
+  }
+
+  while (true) {
+    const std::lock_guard queue_lock(queue_mutex);
+    if (jobs.empty()) {
+      break;
+    }
+  }
+
+  should_terminate = true;
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
   return result;
 }
 }  // namespace uni_cource_cpp
