@@ -1,4 +1,5 @@
 #include "graph_printing.hpp"
+#include "graph_traversal_controller.hpp"
 
 namespace {
 constexpr int COLORS_NUM = 4;
@@ -103,6 +104,21 @@ std::string vertex_to_json_string(const Vertex& vertex) {
   }
   result_string += std::to_string(vertex.depth);
   result_string += " }";
+  return result_string;
+}
+
+std::string print_path(const GraphTraverser::GraphPath& path) {
+  std::string result_string = "  {vertices: [";
+  for (auto vertex_id_ind = path.vertex_ids.begin();
+       vertex_id_ind != path.vertex_ids.end(); vertex_id_ind++) {
+    if (vertex_id_ind != path.vertex_ids.begin()) {
+      result_string += ", ";
+    }
+    result_string += std::to_string(*vertex_id_ind);
+  }
+  result_string += "], distance: ";
+  result_string += std::to_string(path.distance);
+  result_string += "}";
   return result_string;
 }
 }  // namespace graph_printing

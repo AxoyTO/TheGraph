@@ -1,7 +1,7 @@
 #include "Graph.hpp"
 #include <cassert>
 #include <stdexcept>
-
+namespace uni_course_cpp {
 const Vertex& Graph::addVertex() {
   return vertices_.emplace_back(getNextVertexId());
   ;
@@ -13,6 +13,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
          "Vertices already connected");
   const auto& newEdge =
       edges_.emplace_back(getNextEdgeId(), fromVertexId, toVertexId, color);
+  coloredEdges_[color].push_back(newEdge.id);
   auto& fromVertex = getVertex(fromVertexId);
   auto& toVertex = getVertex(toVertexId);
   if (color != Edge::Color::Green) {
@@ -23,27 +24,7 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
     toVertex.depth = fromVertex.depth + 1;
   }
 }
-std::string Graph::toString() const {
-  // vertex
-  std::string strGraph = "";
-  strGraph += "{\n\t\"vertices\": [\n";
-  for (const auto& vertex : vertices_) {
-    strGraph += vertex.toString() + ",\n";
-  }
-  strGraph.pop_back();
-  strGraph.pop_back();
-  strGraph += "\n\t],\n";
-  // edges
-  strGraph += "\t\"edges\": [\n";
-  for (const auto& edge : edges_) {
-    strGraph += edge.toString() + ",\n";
-  }
-  strGraph.pop_back();
-  strGraph.pop_back();
-  strGraph += "\n\t]\n}\n";
-  return strGraph;
-}
-bool Graph::hasVertex(int idFind) {
+bool Graph::hasVertex(int idFind) const {
   for (const auto& vertex : vertices_) {
     if (vertex.id == idFind) {
       return true;
@@ -51,7 +32,7 @@ bool Graph::hasVertex(int idFind) {
   }
   return false;
 }
-bool Graph::isConnected(int fromVertexId, int toVertexId) {
+bool Graph::isConnected(int fromVertexId, int toVertexId) const {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
   assert(hasVertex(toVertexId) && "Vertex doesn't exist");
   if (fromVertexId ==
@@ -74,7 +55,7 @@ bool Graph::isConnected(int fromVertexId, int toVertexId) {
   return false;
 }
 
-Vertex& Graph::getVertex(int id) {
+const Vertex& Graph::getVertex(int id) const {
   assert(hasVertex(id) && "Vertex doesn't exist");
   for (auto& vertex : vertices_) {
     if (vertex.id == id) {
@@ -98,7 +79,7 @@ const std::vector<Vertex>& Graph::getVertices() const {
   return vertices_;
 }
 
-const Edge& Graph::getEdge(int id) {
+const Edge& Graph::getEdge(int id) const {
   for (const auto& edge : edges_) {
     if (edge.id == id) {
       return edge;
@@ -106,3 +87,22 @@ const Edge& Graph::getEdge(int id) {
   }
   throw std::runtime_error("No such vertex");
 }
+
+const std::vector<int>& Graph::getEdgesByColor(const Edge::Color& color) const {
+  if (coloredEdges_.find(color) == coloredEdges_.end()) {
+    static std::vector<int> empty_result = {};
+    return empty_result;
+  }
+  return coloredEdges_.at(color);
+}
+
+const std::vector<Edge>& Graph::getEdges() const {
+  return edges_;
+}
+
+Vertex& Graph::getVertex(int id) {
+  const auto& constThis = *this;
+  return const_cast<Vertex&>(constThis.getVertex(id));
+}
+
+}  // namespace uni_course_cpp

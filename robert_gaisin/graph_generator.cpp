@@ -13,7 +13,6 @@ namespace {
 
 using uni_cource_cpp::EdgeColor;
 using uni_cource_cpp::Graph;
-using uni_cource_cpp::Params;
 using uni_cource_cpp::VertexId;
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
@@ -56,13 +55,11 @@ std::vector<VertexId> get_unconnected_vertex_ids(
     const Graph& graph,
     std::mutex& mutex) {
   std::vector<VertexId> returned_vector;
-
   for (auto& vertex_id : layer) {
-    const bool is_connected = [&graph, &mutex, &vert_id, &vertex_id]() {
+    const bool is_connected = [&graph, &vert_id, &vertex_id, &mutex]() {
       const std::lock_guard lock(mutex);
       return graph.is_connected(vert_id, vertex_id);
     }();
-
     if (is_connected)
       continue;
     returned_vector.push_back(vertex_id);
