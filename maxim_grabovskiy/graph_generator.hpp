@@ -1,7 +1,7 @@
 #pragma once
-#include <random>
 #include "config.hpp"
 #include "graph.hpp"
+
 namespace uni_course_cpp {
 class GraphGenerator {
  public:
@@ -18,14 +18,6 @@ class GraphGenerator {
   Graph generate() const;
 
  private:
-  bool checkProbability(float probability) const;
-  int randomIntNumber(float maximum) const;
-
-  std::vector<VertexId> getUnconnectedVertexIds(
-      VertexId vertexId,
-      const std::vector<VertexId>& vertexIds,
-      Graph const& graph) const;
-
   void generateGrayEdges(Graph& graph) const;
   void generateGreenEdges(Graph& graph) const;
   void generateYellowEdges(Graph& graph) const;

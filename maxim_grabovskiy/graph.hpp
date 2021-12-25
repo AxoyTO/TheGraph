@@ -1,6 +1,5 @@
 #pragma once
 #include <map>
-#include <stdexcept>
 #include <vector>
 namespace uni_course_cpp {
 using VertexId = int;
@@ -15,7 +14,10 @@ class Graph {
     VertexId const fromVertexId;
     VertexId const toVertexId;
     Color const color;
-    Edge(EdgeId _id, VertexId _fromVertexId, VertexId _toVertexId, Color _color)
+    Edge(EdgeId _id,
+         VertexId _fromVertexId,
+         VertexId _toVertexId,
+         Color const& _color)
         : id(_id),
           fromVertexId(_fromVertexId),
           toVertexId(_toVertexId),
@@ -39,10 +41,8 @@ class Graph {
   }
   int getCurrentDepth() const { return vertexIdByDepth_.size(); }
 
-  std::vector<EdgeId> const& getColorDistribution(Edge::Color color) const {
-    return colorsDistributionMap.at(color);
-  }
-  std::map<Edge::Color, std::vector<EdgeId>> colorsDistributionMap;
+  std::vector<EdgeId> const& getColorDistribution(
+      Edge::Color const& color) const;
   std::vector<Vertex> const& getVertexes() const { return vertexes_; }
   std::vector<Edge> const& getEdges() const { return edges_; }
   Graph::Edge const& getEdge(EdgeId id) const { return edges_[id]; }
@@ -53,6 +53,7 @@ class Graph {
   bool isConnected(VertexId firstVertexId, VertexId secondVertexId) const;
 
  private:
+  std::map<Edge::Color, std::vector<EdgeId>> colorsDistributionMap_;
   std::vector<Vertex> vertexes_;
   std::vector<Edge> edges_;
   std::map<VertexId, Depth> vertexDepthMap_;

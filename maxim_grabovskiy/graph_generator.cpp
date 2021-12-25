@@ -1,7 +1,32 @@
 #include "graph_generator.hpp"
+#include <random>
 namespace {
 constexpr float RED_GENERATION_PROBABILITY = 0.33;
 constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
+
+bool checkProbability(float probability) {
+  std::random_device seed{};
+  std::default_random_engine generator(seed());
+  std::bernoulli_distribution generationDistribution(probability);
+  return generationDistribution(generator);
+}
+int randomIntNumber(float maximum) {
+  std::random_device seed{};
+  std::default_random_engine generator(seed());
+  std::uniform_int_distribution<> generationDistribution(0, maximum);
+  return generationDistribution(generator);
+}
+
+std::vector<uni_course_cpp::VertexId> getUnconnectedVertexIds(
+    uni_course_cpp::VertexId vertexId,
+    std::vector<uni_course_cpp::VertexId> const& vertexIds,
+    uni_course_cpp::Graph const& graph) {
+  std::vector<uni_course_cpp::VertexId> notConnected;
+  for (auto randomNextVertexId : vertexIds)
+    if (!graph.isConnected(vertexId, randomNextVertexId))
+      notConnected.emplace_back(randomNextVertexId);
+  return notConnected;
+};
 }  // namespace
 namespace uni_course_cpp {
 Graph GraphGenerator::generate() const {
@@ -13,29 +38,6 @@ Graph GraphGenerator::generate() const {
   generateRedEdges(graph);
   return graph;
 }
-bool GraphGenerator::checkProbability(float probability) const {
-  std::random_device seed{};
-  std::default_random_engine generator(seed());
-  std::bernoulli_distribution generationDistribution(probability);
-  return generationDistribution(generator);
-}
-int GraphGenerator::randomIntNumber(float maximum) const {
-  std::random_device seed{};
-  std::default_random_engine generator(seed());
-  std::uniform_int_distribution<> generationDistribution(0, maximum);
-  return generationDistribution(generator);
-}
-
-std::vector<VertexId> GraphGenerator::getUnconnectedVertexIds(
-    VertexId vertexId,
-    std::vector<VertexId> const& vertexIds,
-    Graph const& graph) const {
-  std::vector<VertexId> notConnected;
-  for (auto randomNextVertexId : vertexIds)
-    if (!graph.isConnected(vertexId, randomNextVertexId))
-      notConnected.emplace_back(randomNextVertexId);
-  return notConnected;
-};
 
 void GraphGenerator::generateGrayEdges(Graph& graph) const {
   float const step = 100.0 / (params_.depth - 1);

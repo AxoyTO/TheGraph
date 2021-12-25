@@ -1,4 +1,6 @@
 #include "graph_json_printing.hpp"
+#include <sstream>
+#include "graph_printing.hpp"
 namespace uni_course_cpp {
 std::string GraphJsonPrinter::print_vertex(Graph::Vertex const& vertex) const {
   std::stringstream vertexOutput;
@@ -18,7 +20,8 @@ std::string GraphJsonPrinter::print_edge(Graph::Edge const& edge) const {
   std::stringstream edgeOutput;
   edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
              << edge.fromVertexId << ", " << edge.toVertexId << "],\"color\":\""
-             << printEdgeColor(edge.color) << "\"}";
+             << uni_course_cpp::GraphPrinter::printEdgeColor(edge.color)
+             << "\"}";
   return edgeOutput.str();
 }
 
@@ -43,18 +46,4 @@ std::string GraphJsonPrinter::print() const {
   return printOutput.str();
 }
 
-std::string GraphJsonPrinter::printEdgeColor(Graph::Edge::Color const& color) {
-  switch (color) {
-    case Graph::Edge::Color::Green:
-      return "green";
-    case Graph::Edge::Color::Yellow:
-      return "yellow";
-    case Graph::Edge::Color::Red:
-      return "red";
-    case Graph::Edge::Color::Gray:
-      return "gray";
-    default:
-      throw std::runtime_error("cannot print color");
-  }
-}
 }  // namespace uni_course_cpp

@@ -40,7 +40,7 @@ string generationFinishedString(int i, std::string string) {
 int main() {
   int const depth = intInput("depth: ");
   int const newVerticesNum = intInput("new_vertex_num: ");
-  const int graphsCount = intInput("graphs_count: ");
+  int const graphsCount = intInput("graphs_count: ");
   prepareTempDirectory();
   auto const params =
       uni_course_cpp::GraphGenerator::Params(depth, newVerticesNum);

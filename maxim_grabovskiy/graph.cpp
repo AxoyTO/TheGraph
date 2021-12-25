@@ -1,10 +1,12 @@
 #include "graph.hpp"
+#include <stdexcept>
+
 namespace uni_course_cpp {
 void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
   EdgeId const newEdgeId = getNewEdgeId();
   Edge::Color color = calculate_color(fromVertexId, toVertexId);
 
-  colorsDistributionMap[color].emplace_back(newEdgeId);
+  colorsDistributionMap_[color].emplace_back(newEdgeId);
 
   auto const& fromVertex = vertexes_[fromVertexId];
   auto const& toVertex = vertexes_[toVertexId];
@@ -25,6 +27,15 @@ void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
   }
   edges_.emplace_back(newEdgeId, fromVertexId, toVertexId, color);
 }
+std::vector<EdgeId> const& Graph::getColorDistribution(
+    Edge::Color const& color) const {
+  if (colorsDistributionMap_.find(color) == colorsDistributionMap_.end()) {
+    static std::vector<EdgeId> const empty_result = {};
+    return empty_result;
+  }
+  return colorsDistributionMap_.at(color);
+}
+
 Graph::Edge::Color Graph::calculate_color(VertexId fromVertexId,
                                           VertexId toVertexId) {
   auto const& fromVertex = vertexes_[fromVertexId];
