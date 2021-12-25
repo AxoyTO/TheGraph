@@ -13,6 +13,7 @@ class Graph {
   std::vector<int> getVertexIdsAtDepth(int depth);
   const std::vector<int>& getEdgesByColor(const Edge::Color& color) const;
   const std::vector<Edge>& getEdges() const;
+  int getDepth();
 
  private:
   const Vertex& getVertex(int id) const;
@@ -24,6 +25,7 @@ class Graph {
   int edgeIdCounter_ = 0;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
+  std::vector<std::vector<int>> depthMap_ = {{}};
   std::unordered_map<Edge::Color, std::vector<int>> coloredEdges_;
 };
 }  // namespace uni_course_cpp
