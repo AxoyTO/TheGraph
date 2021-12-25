@@ -1,8 +1,6 @@
 #pragma once
 
 #include <fstream>
-//#include "config.hpp"
-
 namespace uni_course_cpp {
 class Logger {
  public:
