@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
+#include <unordered_map>
 #include <vector>
-
 namespace uni_course_cpp {
 using EdgeId = int;
 using VertexId = int;
@@ -51,12 +51,10 @@ class Graph {
 
   const std::vector<Edge>& get_edges() const { return edges_; }
   const std::vector<Vertex>& get_vertices() const { return vertices_; }
-  Depth get_depth() const {
-    return levels_.size();
-  }  // without copy gives segfault
+  Depth get_depth() const { return levels_.size(); }
   const std::vector<VertexId>& get_vertex_ids_at_depth(
       const Depth& depth) const;
-  int get_count_of_colored_edges(const Edge::Color& color) const;
+  const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
 
  private:
   std::vector<Edge> edges_;
@@ -64,7 +62,7 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
-  std::vector<std::vector<VertexId> > levels_;
+  std::vector<std::vector<VertexId>> levels_;
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
   const Vertex& get_vertex(const VertexId& vertex_id) const;
   const Edge& get_edge(const EdgeId& edge_id) const;
@@ -74,5 +72,6 @@ class Graph {
                            const VertexId& to_vertex_id);
   Edge::Color calculate_color(const VertexId& first_id,
                               const VertexId& second_id);
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> colored_edges_;
 };
 }  // namespace uni_course_cpp
