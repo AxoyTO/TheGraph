@@ -32,26 +32,7 @@ uni_course_cpp::Graph::VertexId get_random_vertex_id(
 }  // namespace
 
 namespace uni_course_cpp {
-/*
-void GraphGenerator::generate_grey_edges(Graph& graph) const {
-  const auto& depth = params_.depth();
-  const auto& new_vertices_count = params_.new_vertices_count();
-  for (Graph::Depth current_depth = 0; current_depth < depth; ++current_depth) {
-    // Not const reference, because I need to change depth in "for"
-    auto vertices_on_current_depth =
-        graph.get_vertex_ids_on_depth(current_depth);
-    for (const auto& vertex_id : vertices_on_current_depth) {
-      for (int new_vertices_number = 0;
-           new_vertices_number < new_vertices_count; ++new_vertices_number) {
-        if (can_generate_vertex(float(depth - current_depth) / depth)) {
-          const auto& new_vertex = graph.add_vertex();
-          graph.add_edge(vertex_id, new_vertex.id);
-        }
-      }
-    }
-  }
-}
-*/
+
 void GraphGenerator::generate_grey_edges(Graph& graph) const {
   // Job - это lambda функция,
   // которая энкапсулирует в себе генерацию однйо ветви
@@ -65,8 +46,6 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
   std::atomic<bool> should_terminate = false;
   std::atomic<int> attempts_count = 0;
 
-  // JobCallback get_job() {}
-
   // Заполняем список работ для воркеров
   for (int attempt_number = 0; attempt_number < params_.new_vertices_count();
        attempt_number++) {
@@ -79,16 +58,15 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
   // Создаем воркера,
   // который в бесконечном цикле проверяет,
   // есть ли работа, и выполняет её
-  auto worker = [&should_terminate, &jobs_mutex,
-                 &jobs /*, &has_job, &get_job*/]() {
+  auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
       // Проверка флага, должны ли мы остановить поток
       if (should_terminate) {
         return;
       }
       // Проверяем, есть ли для нас работа
-      const auto job_optional = [&jobs, &jobs_mutex/*, &has_job,
-                                 &get_job*/]() -> std::optional<JobCallback> {
+      const auto job_optional = [&jobs,
+                                 &jobs_mutex]() -> std::optional<JobCallback> {
         const std::lock_guard<std::mutex> lock(jobs_mutex);
         if ([&jobs]() { return jobs.size(); }()) {
           return [&jobs]() {
