@@ -21,8 +21,10 @@ std::string get_current_date_time() {
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
-  std::cout << get_current_date_time() << ": " << string;
-  file_stream_ << get_current_date_time() << ": " << string;
+  const std::string log_string =
+      get_current_date_time() + std::string(": ") + string;
+  std::cout << log_string;
+  file_stream_ << log_string;
 }
 
 Logger::~Logger() {
