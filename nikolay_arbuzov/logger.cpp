@@ -21,7 +21,7 @@ std::string get_current_date_time() {
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
-  const auto log_string = get_current_date_time() + string;
+  const auto log_string = get_current_date_time() + " " + string;
   log_file_ << log_string;
   std::cout << log_string;
 }
