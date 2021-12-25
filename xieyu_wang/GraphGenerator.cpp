@@ -127,8 +127,7 @@ namespace uni_course_cpp {
 GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
     : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
 
-void GraphGenerator::generateVertices(Graph& graph,
-                                      const int& firstVertexId) const {
+void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
 

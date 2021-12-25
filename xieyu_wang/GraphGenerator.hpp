@@ -19,7 +19,7 @@ class GraphGenerator {
                     int parent_depth,
                     std::mutex& lock_graph) const;
 
-  void generateVertices(Graph& graph, const int& first_vertex_id) const;
+  void generateVertices(Graph& graph, int firstVertexId) const;
 };
 
 }  // namespace uni_course_cpp
