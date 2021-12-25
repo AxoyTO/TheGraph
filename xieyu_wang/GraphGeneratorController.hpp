@@ -5,8 +5,8 @@
 #include <queue>
 #include <thread>
 
-#include "graph.hpp"
-#include "graphGenerator.hpp"
+#include "Graph.hpp"
+#include "GraphGenerator.hpp"
 
 namespace uni_course_cpp {
 class GraphGenerationController {
