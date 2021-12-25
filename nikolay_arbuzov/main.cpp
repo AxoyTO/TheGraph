@@ -42,14 +42,14 @@ void write_to_file(const std::string& graph_json,
 
 std::string generation_started_string(const int graph_number) {
   std::stringstream log_string;
-  log_string << " Graph " << graph_number << " Generation Started" << std::endl;
+  log_string << "Graph " << graph_number << " Generation Started" << std::endl;
   return log_string.str();
 }
 
 std::string generation_finished_string(const int graph_number,
                                        const std::string& graph_description) {
   std::stringstream log_string;
-  log_string << " Graph " << graph_number << " Generation Finished {"
+  log_string << "Graph " << graph_number << " Generation Finished {"
              << std::endl;
   log_string << graph_description << std::endl << "}" << std::endl;
   return log_string.str();
