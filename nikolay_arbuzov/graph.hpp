@@ -43,7 +43,6 @@ class Graph {
 
   bool is_connected(const VertexId& from_vertex_id,
                     const VertexId& to_vertex_id) const;
-
   Edge::Color determine_color(const VertexId& from_vertex_id,
                               const VertexId& to_vertex_id) const;
 
