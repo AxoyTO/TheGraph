@@ -1,3 +1,4 @@
+#include <cassert>
 #include <map>
 #include <queue>
 #include <set>
@@ -61,12 +62,63 @@ std::map<VertexId, int> GraphTraverser::get_updated_depths(
 GraphPath GraphTraverser::find_shortest_path(
     VertexId source_vertex_id,
     VertexId destination_vertex_id) const {
-  return GraphPath({}, {});
+  std::map<VertexId, GraphPath::Distance> distance;
+  distance[source_vertex_id] = 0;
+  std::map<VertexId, std::pair<VertexId, EdgeId>> previous_vertex_id;
+  std::set<std::pair<GraphPath::Distance, VertexId>> lowest_distance_set;
+  lowest_distance_set.insert(std::make_pair(source_vertex_id, 0));
+  while (!lowest_distance_set.empty()) {
+    const auto current_vertex_id = lowest_distance_set.begin()->second;
+    if (current_vertex_id == destination_vertex_id) {
+      break;
+    }
+    const auto current_distance = lowest_distance_set.begin()->first;
+    lowest_distance_set.erase(lowest_distance_set.begin());
+    for (const auto& edge_id : graph_.connected_edges(current_vertex_id)) {
+      const auto& current_edge = graph_.get_edge(edge_id);
+      const auto& next_vertex_id = (current_edge.vertex1_id == current_vertex_id
+                                        ? current_edge.vertex2_id
+                                        : current_edge.vertex1_id);
+      if (distance.find(next_vertex_id) == distance.end() ||
+          current_distance + current_edge.weight < distance[next_vertex_id]) {
+        lowest_distance_set.erase(
+            std::make_pair(distance[next_vertex_id], next_vertex_id));
+        distance[next_vertex_id] = current_distance + current_edge.weight;
+        lowest_distance_set.insert(
+            std::make_pair(distance[next_vertex_id], next_vertex_id));
+        previous_vertex_id[next_vertex_id] =
+            std::make_pair(current_vertex_id, edge_id);
+      }
+    }
+  }
+  std::vector<VertexId> vertices_id_path;
+  std::vector<EdgeId> edges_id_path;
+  auto current_vertex_id = destination_vertex_id;
+  while (current_vertex_id != source_vertex_id) {
+    assert(previous_vertex_id.find(current_vertex_id) !=
+               previous_vertex_id.end() &&
+           "dijkstra failed to find the path");
+    const auto current_previous_vertex_id =
+        previous_vertex_id[current_vertex_id].first;
+    const auto current_path_edge = previous_vertex_id[current_vertex_id].second;
+    vertices_id_path.push_back(current_vertex_id);
+    edges_id_path.push_back(current_path_edge);
+    current_vertex_id = current_previous_vertex_id;
+  }
+  vertices_id_path.push_back(source_vertex_id);
+  std::reverse(vertices_id_path.begin(), vertices_id_path.end());
+  std::reverse(edges_id_path.begin(), edges_id_path.end());
+  return GraphPath(vertices_id_path, edges_id_path);
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths(
     VertexId source_vertex_id,
     std::set<VertexId> destination_vertices_ids) const {
-  return {};
+  std::vector<GraphPath> result;
+  for (const auto& destination_vertex_id : destination_vertices_ids) {
+    result.push_back(
+        find_shortest_path(source_vertex_id, destination_vertex_id));
+  }
+  return result;
 }
 }  // namespace uni_cource_cpp

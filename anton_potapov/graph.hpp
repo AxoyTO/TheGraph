@@ -8,6 +8,7 @@
 namespace uni_cource_cpp {
 using VertexId = int;
 using EdgeId = int;
+using EdgeWeight = int;
 
 enum class EdgeColor { Gray, Green, Blue, Yellow, Red };
 constexpr size_t EDGE_COLORS_COUNT = 5;
@@ -36,10 +37,12 @@ class Edge {
   const VertexId vertex1_id, vertex2_id;
   const EdgeColor color;
   const EdgeId id;
+  const EdgeWeight weight;
   Edge(const EdgeId& edge_id,
        const VertexId& vertex1,
        const VertexId& vertex2,
-       const EdgeColor& edge_color);
+       const EdgeColor& edge_color,
+       const EdgeWeight& edge_weight = 1);
 };
 
 class Graph {
