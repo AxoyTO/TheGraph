@@ -17,10 +17,7 @@ class Logger {
  private:
   std::ofstream log_file_;
 
-  Logger() : log_file_(config::kLogFilePath) {
-    if (!log_file_.is_open())
-      throw std::runtime_error("File was not open");
-  }
+  Logger();
   ~Logger() { log_file_.close(); }
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
