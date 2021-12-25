@@ -1,9 +1,4 @@
-#include <atomic>
 #include <functional>
-#include <list>
-#include <optional>
-#include <queue>
-#include <thread>
 
 namespace uni_cource_cpp {
 
@@ -36,7 +31,6 @@ class ConcurrentController {
   std::mutex controller_mutex_;
 
   void init_workers(int threads_count);
-  virtual void init_jobs() = 0;
   void run_jobs();
 };
 }  // namespace uni_cource_cpp

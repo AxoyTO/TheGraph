@@ -2,6 +2,7 @@
 
 #include <string>
 #include "graph.hpp"
+#include "graph_traverser.hpp"
 
 namespace uni_cource_cpp {
 class GraphPrinter {
@@ -11,6 +12,7 @@ class GraphPrinter {
   std::string print_graph_description() const;
   std::string print_vertex(const Vertex& vertex) const;
   std::string print_edge(const Edge& Edge) const;
+  static std::string print_paths(std::vector<GraphPath> paths);
 
  private:
   Graph& graph_;

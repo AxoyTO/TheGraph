@@ -104,4 +104,11 @@ std::string GraphPrinter::print_edge(const Edge& Edge) const {
                     << print_edge_color(Edge.color) << "\"}";
   return json_stringstream.str();
 }
+
+std::string GraphPrinter::print_paths(std::vector<GraphPath> paths) {
+  // TODO: this print
+  std::stringstream graph_paths_stringstream;
+  graph_paths_stringstream << std::endl;
+  return graph_paths_stringstream.str();
+}
 }  // namespace uni_cource_cpp
