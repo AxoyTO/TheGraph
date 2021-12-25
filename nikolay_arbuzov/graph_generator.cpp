@@ -51,7 +51,7 @@ uni_course_cpp::Graph::VertexId get_random_vertex_id(
 namespace uni_course_cpp {
 
 void GraphGenerator::generate_grey_edges(Graph& graph) const {
-    graph.add_vertex();
+  graph.add_vertex();
 
   using JobCallback = std::function<void()>;
   auto jobs = std::list<JobCallback>();
