@@ -1,6 +1,30 @@
 #include "graph.hpp"
 #include <cassert>
 #include <iostream>
+#include <random>
+
+namespace {
+using uni_cource_cpp::Edge;
+using uni_cource_cpp::EdgeColor;
+
+Edge::Duration determine_duration(const EdgeColor& color) {
+  std::random_device rd;
+  std::mt19937 mersenne(rd());
+  switch (color) {
+    case EdgeColor::Gray:
+      return mersenne() % 2 + 1;
+    case EdgeColor::Green:
+      return mersenne() % 2 + 1;
+    case EdgeColor::Blue:
+      return 1000;
+    case EdgeColor::Yellow:
+      return mersenne() % 3 + 1;
+    case EdgeColor::Red:
+      return mersenne() % 3 + 2;
+  }
+  throw std::runtime_error("Color error");
+}
+}  // namespace
 namespace uni_cource_cpp {
 bool Vertex::has_edge_id(const EdgeId& id) const {
   for (const auto& edge_id : edge_ids_)
@@ -14,7 +38,14 @@ void Vertex::add_edge_id(const EdgeId& id) {
   edge_ids_.push_back(id);
 }
 
-Vertex& Graph::get_vertex(const VertexId& id) {
+Edge::Edge(const EdgeId& new_id,
+           const VertexId& begin_vertex,
+           const VertexId& end_vertex,
+           const EdgeColor _color)
+    : id(new_id), begin(begin_vertex), end(end_vertex), color(_color) {
+  duration_ = determine_duration(color);
+}
+Vertex& Graph::vertex(const VertexId& id) {
   for (auto& vertex : vertices_) {
     if (vertex.id == id)
       return vertex;
@@ -22,7 +53,7 @@ Vertex& Graph::get_vertex(const VertexId& id) {
   throw std::runtime_error("Vertex doesn't exist");
 }
 
-const Vertex& Graph::get_vertex_const(const VertexId& id) const {
+const Vertex& Graph::get_vertex(const VertexId& id) const {
   for (const auto& vertex : vertices_)
     if (vertex.id == id)
       return vertex;
@@ -45,7 +76,7 @@ void Graph::add_id_to_depth_map(const VertexId& begin, const VertexId& end) {
   } else {
     depth_map_[depth_for_new_vertex].push_back(end);
   }
-  get_vertex(end).depth = depth_for_new_vertex;
+  vertex(end).depth = depth_for_new_vertex;
 }
 
 bool Graph::has_vertex(const VertexId& vertex_id) const {
@@ -59,8 +90,8 @@ bool Graph::has_vertex(const VertexId& vertex_id) const {
 bool Graph::is_connected(const VertexId& begin, const VertexId& end) const {
   assert(has_vertex(begin) && "Vertex doesn't exist");
   assert(has_vertex(end) && "Vertex doesn't exist");
-  for (const EdgeId& edge_num : vertices_[begin].edge_ids()) {
-    if (edges_[edge_num].begin == end || edges_[edge_num].end == end) {
+  for (const EdgeId& edge_num : get_vertex(begin).edge_ids()) {
+    if (get_edge(edge_num).begin == end || get_edge(edge_num).end == end) {
       if (begin != end || edges_[edge_num].color == EdgeColor::Green)
         return true;
     }
@@ -84,9 +115,9 @@ void Graph::add_edge(const VertexId& begin,
   assert(has_vertex(end) && "Vertex doesn't exist");
   assert(!(is_connected(begin, end)) && "Vertices already connected");
   const auto& edge = edges_.emplace_back(next_edge_id(), begin, end, color);
-  get_vertex(begin).add_edge_id(edge.id);
+  vertex(begin).add_edge_id(edge.id);
   if (begin != end)
-    get_vertex(end).add_edge_id(edge.id);
+    vertex(end).add_edge_id(edge.id);
   if (color == EdgeColor::Gray)
     add_id_to_depth_map(begin, end);
   edges_color_map_[color].push_back(edge.id);
@@ -103,7 +134,7 @@ const std::vector<EdgeId>& Graph::get_colored_edges(
 
 std::vector<VertexId> Graph::get_linked_vertex_ids(
     const VertexId& vertex_id) const {
-  const auto& vertex = get_vertex_const(vertex_id);
+  const auto& vertex = get_vertex(vertex_id);
   std::vector<VertexId> linked_ids;
 
   for (const auto& edge_id : vertex.edge_ids()) {
@@ -113,7 +144,6 @@ std::vector<VertexId> Graph::get_linked_vertex_ids(
       linked_ids.push_back(linked_id);
     }
   }
-
   return linked_ids;
 }
 

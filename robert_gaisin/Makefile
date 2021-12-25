@@ -8,7 +8,7 @@ graph:
 
 format:
 	clang-format -i -style=Chromium *.hpp
-	clang-format -i -style=Chromium *.cpp
+	clang-format -i -style=Chromium main.cpp graph.cpp graph_generator.cpp graph_printer.cpp logger.cpp graph_traverser.cpp config.cpp
 
 clean:
 	rm -f graph

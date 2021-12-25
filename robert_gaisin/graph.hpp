@@ -23,15 +23,19 @@ struct Vertex {
 };
 
 struct Edge {
+  using Duration = int;
   Edge(const EdgeId& new_id,
        const VertexId& begin_vertex,
        const VertexId& end_vertex,
-       const EdgeColor color)
-      : id(new_id), begin(begin_vertex), end(end_vertex), color(color) {}
+       const EdgeColor _color);
   const EdgeId id = 0;
   const VertexId begin = 0;
   const VertexId end = 0;
   const EdgeColor color = EdgeColor::Gray;
+  const Duration& duration() const { return duration_; }
+
+ private:
+  Duration duration_;
 };
 
 class Graph {
@@ -51,8 +55,8 @@ class Graph {
   }
   bool has_vertex(const VertexId& vertex_id) const;
   bool is_connected(const VertexId& begin, const VertexId& end) const;
-  Vertex& get_vertex(const VertexId& id);
-  const Vertex& get_vertex_const(const VertexId& id) const;
+
+  const Vertex& get_vertex(const VertexId& id) const;
   const Edge& get_edge(const EdgeId& edge_id) const;
   const std::vector<EdgeId>& get_colored_edges(const EdgeColor& color) const;
   std::vector<VertexId> get_linked_vertex_ids(const VertexId& vertex_id) const;
@@ -63,6 +67,7 @@ class Graph {
   EdgeId num_of_edg_ = 0;
   VertexId next_vertex_id() { return num_of_vrt_++; }
   EdgeId next_edge_id() { return num_of_edg_++; }
+  Vertex& vertex(const VertexId& id);
 
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
