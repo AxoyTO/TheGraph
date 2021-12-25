@@ -12,13 +12,118 @@
 #include <thread>
 #include <vector>
 
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
-
-namespace uni_course_cpp {
+namespace {
 constexpr float GREEN_EDGE_PROBABILITY = 0.10;
 constexpr float BLUE_EDGE_PROBABILITY = 0.25;
 constexpr float RED_EDGE_PROBABILITY = 0.33;
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+float getProbabilityGray(int depth, int maxDepth) {
+  assert(depth >= 0);
+  const float result = 1.0 - (float)depth / (float)maxDepth;
+  if (std::isnan(result)) {
+    return 0.0;
+  }
+  return result;
+}
+int getRandomVertexId(const std::vector<int> destinationLevelIds) {
+  assert(!destinationLevelIds.empty() && "destinationLevelIds is empty!!!");
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<std::mt19937::result_type> vertexIndex(
+      0, destinationLevelIds.size() - 1);
+  return destinationLevelIds[vertexIndex(gen)];
+}
+bool isLucky(float probability) {
+  assert(probability >= 0);
+  assert(probability <= 1.0);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::bernoulli_distribution distribution(probability);
+  return distribution(gen);
+}
+void generateGreen(uni_course_cpp::Graph& graph, std::mutex& mutex) {
+  for (const auto& vertex : graph.getVertices()) {
+    if (isLucky(GREEN_EDGE_PROBABILITY)) {
+      const std::lock_guard lock(mutex);
+      graph.addEdge(vertex.id, vertex.id, uni_course_cpp::Edge::Color::Green);
+    }
+  }
+}
 
+void generateRed(uni_course_cpp::Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getDepth();
+  for (int depth = 0; depth < maxDepth - 1; depth++) {
+    const auto presentDepth = graph.getVertexIdsAtDepth(depth);
+    const auto destinationDepth = graph.getVertexIdsAtDepth(depth + 2);
+    for (const auto& fromVertexId : presentDepth) {
+      if (isLucky(RED_EDGE_PROBABILITY)) {
+        if (!destinationDepth.empty()) {
+          const auto randomVertexId = getRandomVertexId(destinationDepth);
+          const std::lock_guard lock(mutex);
+          graph.addEdge(fromVertexId, randomVertexId,
+                        uni_course_cpp::Edge::Color::Red);
+        }
+      }
+    }
+  }
+}
+
+void generateBlue(uni_course_cpp::Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getDepth();
+  for (int depth = 1; depth < maxDepth; depth++) {
+    const auto presentDepth = graph.getVertexIdsAtDepth(depth);
+    for (auto vertexIt = presentDepth.begin();
+         vertexIt < presentDepth.end() - 1; vertexIt++) {
+      if (isLucky(BLUE_EDGE_PROBABILITY)) {
+        const std::lock_guard lock(mutex);
+        graph.addEdge(*vertexIt, *(vertexIt + 1),
+                      uni_course_cpp::Edge::Color::Blue);
+      }
+    }
+  }
+}
+float getProbabilityYellow(int depth, int maxDepth) {
+  assert(depth >= 0);
+  const float result = (float)depth / (float)(maxDepth - 1);
+  if (std::isnan(result)) {
+    return 0.0;
+  }
+  return result;
+}
+std::vector<int> getUnconnectedVertexIds(
+    const int fromVertexId,
+    const std::vector<int>& destinationLevel,
+    uni_course_cpp::Graph& graph) {
+  std::vector<int> unconnectedVertexIds;
+  for (const auto& vertexId : destinationLevel) {
+    if (!graph.isConnected(fromVertexId, vertexId)) {
+      unconnectedVertexIds.push_back(vertexId);
+    }
+  }
+  return unconnectedVertexIds;
+}
+void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
+  int maxDepth = graph.getDepth();
+  for (int depth = 0; depth < maxDepth; depth++) {
+    const auto presentLevel = graph.getVertexIdsAtDepth(depth);
+    const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
+    for (const auto& fromVertexId : presentLevel) {
+      if (isLucky(getProbabilityYellow(depth, maxDepth))) {
+        const auto unconnectedVertexIds =
+            getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
+        if (!unconnectedVertexIds.empty()) {
+          const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
+          const std::lock_guard lock(mutex);
+          graph.addEdge(fromVertexId, randomVertexId,
+                        uni_course_cpp::Edge::Color::Yellow);
+        }
+      }
+    }
+  }
+}
+
+}  // namespace
+namespace uni_course_cpp {
 GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
     : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
 
@@ -80,7 +185,7 @@ void GraphGenerator::generateVertices(Graph& graph,
 }
 
 void GraphGenerator::generateGrey(Graph& graph,
-                                  const int parentVertexId,
+                                  int parentVertexId,
                                   int parentDepth,
                                   std::mutex& lockGraph) const {
   const auto new_vertex_id = [&graph, &lockGraph, parentVertexId]() {
@@ -97,87 +202,12 @@ void GraphGenerator::generateGrey(Graph& graph,
   const double percent = 100.0 / (double)maxDepth_;
 
   for (int i = 0; i < newVerticesNum_; i++) {
-    if ((double)getProbabilityGray(parentDepth) >
+    if ((double)getProbabilityGray(parentDepth, maxDepth_) >
         (double)parentDepth * percent) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }
 }
-
-void generateGreen(Graph& graph, std::mutex& mutex) {
-  for (const auto& vertex : graph.getVertices()) {
-    if (isLucky(GREEN_EDGE_PROBABILITY)) {
-      graph.addEdge(vertex.id, vertex.id, Edge::Color::Green);
-    }
-  }
-}
-
-void generateRed(Graph& graph, std::mutex& mutex) {
-  int maxDepth = graph.getMaxDepth();
-  for (int depth = 0; depth < maxDepth - 1; depth++) {
-    const auto presentDepth = graph.getVertexIdsAtDepth(depth);
-    const auto destinationDepth = graph.getVertexIdsAtDepth(depth + 2);
-    for (const auto& fromVertexId : presentDepth) {
-      if (isLucky(RED_EDGE_PROBABILITY)) {
-        if (!destinationDepth.empty()) {
-          const auto randomVertexId = getRandomVertexId(destinationDepth);
-          graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Red);
-        }
-      }
-    }
-  }
-}
-
-void generateBlue(Graph& graph, std::mutex& mutex) {
-  int maxDepth = graph.getMaxDepth();
-  for (int depth = 1; depth < maxDepth; depth++) {
-    const auto presentDepth = graph.getVertexIdsAtDepth(depth);
-    for (auto vertexIt = presentDepth.begin();
-         vertexIt < presentDepth.end() - 1; vertexIt++) {
-      if (isLucky(BLUE_EDGE_PROBABILITY)) {
-        graph.addEdge(*vertexIt, *(vertexIt + 1), Edge::Color::Blue);
-      }
-    }
-  }
-}
-float getProbabilityYellow(int depth, int maxDepth) {
-  assert(depth >= 0);
-  const float result = (float)depth / (float)(maxDepth - 1);
-  if (std::isnan(result)) {
-    return 0.0;
-  }
-  return result;
-}
-std::vector<int> getUnconnectedVertexIds(
-    const int fromVertexId,
-    const std::vector<int>& destinationLevel,
-    Graph& graph) {
-  std::vector<int> unconnectedVertexIds;
-  for (const auto& vertexId : destinationLevel) {
-    if (!graph.isConnected(fromVertexId, vertexId)) {
-      unconnectedVertexIds.push_back(vertexId);
-    }
-  }
-  return unconnectedVertexIds;
-}
-void generateYellow(Graph& graph, std::mutex& mutex) {
-  int maxDepth = graph.getMaxDepth();
-  for (int depth = 0; depth < maxDepth; depth++) {
-    const auto presentLevel = graph.getVertexIdsAtDepth(depth);
-    const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
-    for (const auto& fromVertexId : presentLevel) {
-      if (isLucky(getProbabilityYellow(depth, maxDepth))) {
-        const auto unconnectedVertexIds =
-            getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
-        if (!unconnectedVertexIds.empty()) {
-          const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
-          graph.addEdge(fromVertexId, randomVertexId, Edge::Color::Yellow);
-        }
-      }
-    }
-  }
-}
-
 Graph GraphGenerator::generate() const {
   auto graph = Graph();
   graph.addVertex();  // add root vertex
@@ -195,32 +225,4 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
-
-float GraphGenerator::getProbabilityGray(int depth) const {
-  assert(depth >= 0);
-  const float result = 1.0 - (float)depth / (float)maxDepth_;
-  if (std::isnan(result)) {
-    return 0.0;
-  }
-  return result;
-}
-
-bool isLucky(float probability) {
-  assert(probability >= 0);
-  assert(probability <= 1.0);
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution distribution(probability);
-  return distribution(gen);
-}
-
-int getRandomVertexId(const std::vector<int> destinationLevelIds) {
-  assert(!destinationLevelIds.empty() && "destinationLevelIds is empty!!!");
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<std::mt19937::result_type> vertexIndex(
-      0, destinationLevelIds.size() - 1);
-  return destinationLevelIds[vertexIndex(gen)];
-}
-
 }  // namespace uni_course_cpp
