@@ -1,4 +1,5 @@
 #include "Graph.hpp"
+#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 namespace uni_course_cpp {
