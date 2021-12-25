@@ -12,7 +12,7 @@ class Graph {
   VertexId get_new_vertex_id();
   EdgeId get_new_edge_id();
 
-  Vertex add_vertex(int vertex_depth);
+  Vertex add_vertex();
   void add_edge(VertexId first_vertex_id, VertexId second_vertex_id);
   std::string to_string() const;
   const std::vector<Vertex>& get_vertices() const;
@@ -62,10 +62,14 @@ class GraphGenerator {
 
   Graph generate() const {
     auto graph = Graph();
-    graph.add_vertex(0);
+    graph.add_vertex();
+
     generate_gray_edges(graph);
+
     generate_green_edges(graph);
+
     generate_yellow_edges(graph);
+
     generate_red_edges(graph);
     return graph;
   }

@@ -25,8 +25,10 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
     const std::vector<VertexId> vertices = graph.get_vertex_ids_at_depth(depth);
     for (const auto& vertex : vertices) {
       if (check_probability(1.0 - (double)depth / (double)params_.depth())) {
-        const auto& new_vertex = graph.add_vertex(depth + 1);
-        graph.add_edge(vertex, new_vertex.get_id());
+        for (int i = 0; i < params_.new_vertices_count(); ++i) {
+          auto new_vertex = graph.add_vertex();
+          graph.add_edge(vertex, new_vertex.get_id());
+        }
       }
     }
   }
@@ -69,16 +71,17 @@ void GraphGenerator::generate_yellow_edges(Graph& graph) const {
     if (check_probability((double)first_vertex.get_depth() /
                           ((double)params_.depth() - 1.0))) {
       std::vector<VertexId> second_vertices_ids = graph.get_vertex_ids_at_depth(
-          graph.get_vertex_depth(first_vertex.get_id() + 1));
+          graph.get_vertex_depth(first_vertex.get_id()) + 1);
       const std::vector<VertexId> unconnected_vertex_ids =
           graph.get_unconected_vertex_ids(first_vertex, second_vertices_ids);
 
       if (unconnected_vertex_ids.size() > 0) {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(0,
-                                                unconnected_vertex_ids.size());
+        std::uniform_int_distribution<> distrib(
+            0, unconnected_vertex_ids.size() - 1);
         VertexId second_vertex_id = unconnected_vertex_ids[distrib(gen)];
+
         graph.add_edge(first_vertex.get_id(), second_vertex_id);
       }
     }
@@ -106,9 +109,11 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
   }
 }
 
-Vertex Graph::add_vertex(int vertex_depth) {
+Vertex Graph::add_vertex() {
   Vertex vertex = vertices_.emplace_back(get_new_vertex_id());
-  depth_map_[vertex_depth].push_back(vertex.get_id());
+  if (vertex.get_id() == 0) {
+    depth_map_.push_back({0});
+  }
   return vertex;
 }
 
@@ -136,16 +141,25 @@ Graph::Depth Graph::get_vertex_depth(VertexId vertex_id) {
       }
     }
   }
-  throw std::runtime_error("Vertex not found!\n");
+  return 0;
 }
 
 void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
-  const auto& new_edge =
-      edges_.emplace_back(get_new_edge_id(), first_vertex_id, second_vertex_id,
-                          get_edge_color(first_vertex_id, second_vertex_id));
+  Edge::Color color = get_edge_color(first_vertex_id, second_vertex_id);
+  const auto& new_edge = edges_.emplace_back(get_new_edge_id(), first_vertex_id,
+                                             second_vertex_id, color);
+
   auto& first_vertex = get_vertex(first_vertex_id);
   first_vertex.add_connected_edge_id(new_edge.get_id());
   auto& second_vertex = get_vertex(second_vertex_id);
+  if (color == Edge::Color::Grey) {
+    second_vertex.change_depth(first_vertex.get_depth() + 1);
+    if (depth_map_.size() < first_vertex.get_depth() + 2) {
+      depth_map_.push_back({second_vertex_id});
+    } else {
+      depth_map_[first_vertex.get_depth() + 1].push_back(second_vertex_id);
+    }
+  }
   if (second_vertex.get_id() != first_vertex.get_id()) {
     second_vertex.add_connected_edge_id(new_edge.get_id());
   }
@@ -160,8 +174,9 @@ Edge::Color Graph::get_edge_color(VertexId from_vertex_id,
   if (get_edges(to_vertex_id).size() == 0) {
     return Edge::Color::Grey;
   }
+
   if (to_vertex_depth - from_vertex_depth == 1 &&
-      !is_connected(from_vertex_id, to_vertex_id)) {
+      !(is_connected(from_vertex_id, to_vertex_id))) {
     return Edge::Color::Yellow;
   }
   if (to_vertex_depth - from_vertex_depth == 2) {
