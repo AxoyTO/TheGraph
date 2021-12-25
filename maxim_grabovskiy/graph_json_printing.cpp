@@ -20,8 +20,7 @@ std::string GraphJsonPrinter::print_edge(Graph::Edge const& edge) const {
   std::stringstream edgeOutput;
   edgeOutput << "\t{ \"id\": " << edge.id << ", \"vertex_ids\":["
              << edge.fromVertexId << ", " << edge.toVertexId << "],\"color\":\""
-             << uni_course_cpp::GraphPrinter::printEdgeColor(edge.color)
-             << "\"}";
+             << GraphPrinter::printEdgeColor(edge.color) << "\"}";
   return edgeOutput.str();
 }
 

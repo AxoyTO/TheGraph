@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include "config.hpp"
 namespace {
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
