@@ -1,6 +1,11 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
+#include <thread>
+#include <list>
+#include <mutex>
+#include <queue>
 
 namespace uni_cource_cpp {
 

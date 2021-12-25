@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <functional>
+#include <optional>
 #include <thread>
 
 #include "concurrent_controller.hpp"

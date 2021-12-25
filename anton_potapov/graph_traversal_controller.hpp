@@ -9,9 +9,9 @@
 namespace uni_cource_cpp {
 class GraphTraversalController : public ConcurrentController {
  public:
-  using TraversalStartedCallback = std::function<void(int index, Graph& graph)>;
-  using TraversalFinishedCallback = std::function<
-      void(int index, Graph& graph, std::vector<GraphPath> paths)>;
+  using TraversalStartedCallback = std::function<void(int index)>;
+  using TraversalFinishedCallback =
+      std::function<void(int index, std::vector<GraphPath> paths)>;
 
   GraphTraversalController(int threads_count, std::map<int, Graph>& graphs);
 
@@ -19,6 +19,8 @@ class GraphTraversalController : public ConcurrentController {
                 const TraversalFinishedCallback& traversalFinishedCallback);
 
  private:
+  std::map<int, Graph>& graphs_;
+
   void init_jobs(const TraversalStartedCallback& gen_started_callback,
                  const TraversalFinishedCallback& gen_finished_callback);
 };

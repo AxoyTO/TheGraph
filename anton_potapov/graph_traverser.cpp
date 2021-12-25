@@ -2,11 +2,14 @@
 #include <queue>
 #include <set>
 #include <tuple>
+#include <vector>
 
 #include "graph.hpp"
 #include "graph_traverser.hpp"
 
 namespace uni_cource_cpp {
+GraphTraverser::GraphTraverser(const Graph& graph) : graph_(graph) {}
+
 std::map<VertexId, int> GraphTraverser::get_updated_depths(
     const Graph& graph,
     const std::map<int, std::set<VertexId>>& known_depths,
@@ -53,5 +56,17 @@ std::map<VertexId, int> GraphTraverser::get_updated_depths(
     }
   }
   return depths;
+}
+
+GraphPath GraphTraverser::find_shortest_path(
+    VertexId source_vertex_id,
+    VertexId destination_vertex_id) const {
+  return GraphPath({}, {});
+}
+
+std::vector<GraphPath> GraphTraverser::find_all_paths(
+    VertexId source_vertex_id,
+    std::set<VertexId> destination_vertices_ids) const {
+  return {};
 }
 }  // namespace uni_cource_cpp

@@ -45,13 +45,17 @@ std::string LogMessagesGenerator::generation_max_depth_warning(
       << " is less than specified one =" << given_depth << std::endl;
   return generation_max_depth_warning_stringstream.str();
 }
-std::string traversal_started_string(int id) {
+
+std::string LogMessagesGenerator::traversal_started_string(int id) {
   std::stringstream traversal_started_stringstream;
   traversal_started_stringstream << get_current_date_time() << ": Graph " << id
                                  << ", Traversal Started" << std::endl;
   return traversal_started_stringstream.str();
 }
-std::string traversal_finished_string(int id, const std::string& graph_paths) {
+
+std::string LogMessagesGenerator::traversal_finished_string(
+    int id,
+    const std::string& graph_paths) {
   std::stringstream traversal_finished_stringstream;
   traversal_finished_stringstream
       << get_current_date_time() << ": Graph " << id

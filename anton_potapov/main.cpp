@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
 
 #include "config.hpp"
 #include "graph.hpp"
@@ -75,12 +76,12 @@ void traverse_graphs(Logger& logger,
   auto traversal_controller = GraphTraversalController(threads_count, graphs);
 
   traversal_controller.traverse(
-      [&logger](int index, const Graph& graph) {
+      [&logger](int index) {
         logger.log(LogMessagesGenerator::traversal_started_string(index));
       },
-      [&logger](int index, const Graph& graph, std::vector<GraphPath> paths) {
+      [&logger](int index, std::vector<GraphPath> paths) {
         logger.log(LogMessagesGenerator::traversal_finished_string(
-            index, GraphPrinter::print_paths(paths)));
+            index, GraphPrinter::print_paths(std::move(paths))));
       });
 }
 

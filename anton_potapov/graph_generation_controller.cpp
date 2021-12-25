@@ -14,6 +14,13 @@ GraphGenerationController::GraphGenerationController(
   init_workers(threads_count);
 }
 
+void GraphGenerationController::generate(
+    const GenStartedCallback& gen_started_callback,
+    const GenFinishedCallback& gen_finished_callback) {
+  init_jobs(gen_started_callback, gen_finished_callback);
+  run_jobs();
+}
+
 void GraphGenerationController::init_jobs(
     const GenStartedCallback& gen_started_callback,
     const GenFinishedCallback& gen_finished_callback) {
@@ -30,12 +37,5 @@ void GraphGenerationController::init_jobs(
       }
     });
   }
-}
-
-void GraphGenerationController::generate(
-    const GenStartedCallback& gen_started_callback,
-    const GenFinishedCallback& gen_finished_callback) {
-  init_jobs(gen_started_callback, gen_finished_callback);
-  run_jobs();
 }
 }  // namespace uni_cource_cpp
