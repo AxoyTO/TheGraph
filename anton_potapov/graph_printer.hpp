@@ -2,7 +2,7 @@
 
 #include <string>
 #include "graph.hpp"
-#include "graph_traverser.hpp"
+#include "graph_path.hpp"
 
 namespace uni_cource_cpp {
 class GraphPrinter {

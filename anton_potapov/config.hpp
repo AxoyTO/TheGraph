@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 namespace uni_cource_cpp {

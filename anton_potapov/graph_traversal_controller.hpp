@@ -1,7 +1,10 @@
+#pragma once
+
 #include <functional>
 
 #include "concurrent_controller.hpp"
 #include "graph.hpp"
+#include "graph_path.hpp"
 
 namespace uni_cource_cpp {
 class GraphTraversalController : public ConcurrentController {

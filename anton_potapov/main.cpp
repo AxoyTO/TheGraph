@@ -7,9 +7,9 @@
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_input_handler.hpp"
+#include "graph_path.hpp"
 #include "graph_printer.hpp"
 #include "graph_traversal_controller.hpp"
-#include "graph_traverser.hpp"
 #include "log_messages_generator.hpp"
 #include "logger.hpp"
 

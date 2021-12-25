@@ -7,8 +7,6 @@
 #include "graph.hpp"
 
 namespace uni_cource_cpp {
-using GraphPath = std::vector<VertexId>;
-
 class GraphTraverser {
  public:
   static std::map<VertexId, int> get_updated_depths(

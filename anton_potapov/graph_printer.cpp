@@ -106,9 +106,24 @@ std::string GraphPrinter::print_edge(const Edge& Edge) const {
 }
 
 std::string GraphPrinter::print_paths(std::vector<GraphPath> paths) {
-  // TODO: this print
   std::stringstream graph_paths_stringstream;
-  graph_paths_stringstream << std::endl;
+  graph_paths_stringstream << "[" << std::endl;
+  for (auto it = paths.begin(); it != paths.end(); ++it) {
+    graph_paths_stringstream << "\t{vertices: [";
+    for (auto vertex_id_it = it->vertex_ids.begin();
+         vertex_id_it != it->vertex_ids.end(); ++vertex_id_it) {
+      graph_paths_stringstream << *vertex_id_it;
+      if (std::next(vertex_id_it) != it->vertex_ids.end()) {
+        graph_paths_stringstream << ", ";
+      }
+    }
+    graph_paths_stringstream << "], distance: " << it->distance() << "}";
+    if (std::next(it) != paths.end()) {
+      graph_paths_stringstream << ",";
+    }
+    graph_paths_stringstream << std::endl;
+  }
+  graph_paths_stringstream << "]" << std::endl;
   return graph_paths_stringstream.str();
 }
 }  // namespace uni_cource_cpp
