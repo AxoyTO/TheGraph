@@ -18,7 +18,7 @@ using uni_course_cpp::Logger;
 
 std::string generation_started_string(int graph_number) {
   std::stringstream log_first_string;
-  log_first_string << ": Graph " << graph_number << ", Generation Started"
+  log_first_string << "Graph " << graph_number << ", Generation Started"
                    << std::endl;
   return log_first_string.str();
 }
@@ -26,7 +26,7 @@ std::string generation_started_string(int graph_number) {
 std::string generation_finished_string(int graph_number,
                                        std::string graph_string) {
   std::stringstream log_second_string;
-  log_second_string << ": Graph " << graph_number << ", Generation Ended {"
+  log_second_string << "Graph " << graph_number << ", Generation Ended {"
                     << std::endl
                     << graph_string;
 
