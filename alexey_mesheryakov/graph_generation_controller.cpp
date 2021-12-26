@@ -63,7 +63,7 @@ void GraphGenerationController::generate(
 void GraphGenerationController::Worker::start() {
   assert(state_ == State::Idle && "Worker is already running");
   state_ = State::Working;
-  thread_ = 
+  thread_ =
       std::thread([&state_ = state_, &get_job_callback_ = get_job_callback_]() {
         while (true) {
           if (state_ == State::ShouldTerminate) {
@@ -78,6 +78,7 @@ void GraphGenerationController::Worker::start() {
         }
       });
 }
+
 
 void GraphGenerationController::Worker::stop() {
   assert(state_ == State::Working && "Worker is not running");
