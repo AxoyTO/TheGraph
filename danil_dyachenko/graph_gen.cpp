@@ -16,11 +16,15 @@ class Graph {
     explicit Vertex(const VertexId& _id) : id_(_id) {}
 
     VertexId id() const { return id_; }
-    std::set<EdgeId> edges_ids() const { return edges_ids_; }
+    const std::set<EdgeId>& edges_ids() const { return edges_ids_; }
+
+    void set_add(const EdgeId edge_id){
+      edges_ids_.insert(edge_id);
+    }
 
    private:
     const VertexId id_ = INVALID_ID;
-    const std::set<EdgeId> edges_ids_ = {};
+    std::set<EdgeId> edges_ids_ = std::set<EdgeId>();
   };
 
   struct Edge {
@@ -41,6 +45,8 @@ class Graph {
   };
 
   // Graph functions
+  const EdgeId & current_id() const { return current_edge_id; }
+
   Vertex& add_vertex() {
     Vertex new_vertex(current_vertex_id);
     vertices_.push_back(new_vertex);
@@ -52,8 +58,8 @@ class Graph {
     assert(from_vertex_id < current_vertex_id && from_vertex_id >= 0);
     assert(to_vertex_id < current_vertex_id && to_vertex_id >= 0);
     Edge new_edge(current_edge_id, from_vertex_id, to_vertex_id);
-    vertices_[to_vertex_id].edges_ids().insert(from_vertex_id);
-    vertices_[from_vertex_id].edges_ids().insert(to_vertex_id);
+    vertices_[to_vertex_id].set_add(current_id());
+    vertices_[from_vertex_id].set_add(current_id());
     current_edge_id++;
     edges_.push_back(new_edge);
     return edges_[current_edge_id - 1];
