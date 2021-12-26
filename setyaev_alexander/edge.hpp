@@ -1,3 +1,4 @@
+using EdgeId = int;
 
 #pragma once
 

@@ -1,3 +1,4 @@
+using VertexId = int;
 
 #pragma once
 
@@ -6,9 +7,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-using VertexId = int;
-using EdgeId = int;
+#include "edge.hpp"
 
 class Vertex {
  public:
