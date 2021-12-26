@@ -103,7 +103,7 @@ std::vector<int> getUnconnectedVertexIds(
   return unconnectedVertexIds;
 }
 void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
-  int maxDepth = graph.getDepth();
+  const int maxDepth = graph.getDepth();
   for (int depth = 0; depth < maxDepth; depth++) {
     const auto presentLevel = graph.getVertexIdsAtDepth(depth);
     const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
@@ -135,7 +135,7 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   std::mutex lockGraph;
 
   for (int i = 0; i < newVerticesNum_; i++) {
-    jobs.emplace_back([this, &graph, firstVertexId, &lockGraph, &jobsDone]() {
+    jobs.emplace_back([this, &graph, &firstVertexId, &lockGraph, &jobsDone]() {
       generateGrey(graph, firstVertexId, 0, lockGraph);
       jobsDone++;
     });

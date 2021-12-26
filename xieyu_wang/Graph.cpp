@@ -5,6 +5,9 @@
 namespace uni_course_cpp {
 const Vertex& Graph::addVertex() {
   int newVertexId = getNextVertexId();
+  if (depthMap_.empty()) {
+    depthMap_.push_back({});
+  }
   depthMap_[0].push_back(newVertexId);
   return vertices_.emplace_back(newVertexId);
 }
