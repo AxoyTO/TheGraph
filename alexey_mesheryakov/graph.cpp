@@ -61,6 +61,7 @@ void Graph::add_edge(const VertexId& first_id, const VertexId& second_id) {
   const Edge::Color color = calculate_color(first_id, second_id);
   const auto& new_edge = edges_.emplace_back(
       pair<VertexId, VertexId>{first_id, second_id}, get_new_edge_id(), color);
+  colored_edges_[color].emplace_back(new_edge.id);
   get_vertex(first_id).add_edge_id(new_edge.id);
   if (first_id != second_id)
     get_vertex(second_id).add_edge_id(new_edge.id);
@@ -121,21 +122,22 @@ Edge::Color Graph::calculate_color(const VertexId& first_id,
     return Edge::Color::Gray;
   const Depth& first_depth = get_vertex(first_id).depth;
   const Depth& second_depth = get_vertex(second_id).depth;
-  if (first_depth == second_depth) {
+  if (first_depth == second_depth)
     return Edge::Color::Green;
-  }
   if (abs(first_depth - second_depth) == 1)
     return Edge::Color::Yellow;
   if (abs(first_depth - second_depth) == 2)
     return Edge::Color::Red;
   throw std::runtime_error("Can't calculate color");
 }
-int Graph::get_count_of_colored_edges(const Edge::Color& color) const {
-  int count = 0;
-  for (const auto& edge : edges_)
-    if (edge.color == color)
-      count++;
-  return count;
+
+const std::vector<EdgeId>& Graph::get_colored_edges(
+    const Edge::Color& color) const {
+  if (colored_edges_.find(color) == colored_edges_.end()) {
+    static std::vector<EdgeId> empty_result = {};
+    return empty_result;
+  }
+  return colored_edges_.at(color);
 }
 
 }  // namespace uni_course_cpp

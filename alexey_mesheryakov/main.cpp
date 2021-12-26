@@ -1,45 +1,33 @@
-#include <chrono>
-#include <ctime>
+#include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <thread>
 #include "config.hpp"
 #include "graph.hpp"
-#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
+#include "graph_json_printer.hpp"
 #include "graph_printer.hpp"
 #include "logger.hpp"
 
 using uni_course_cpp::Depth;
 using uni_course_cpp::Graph;
-using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
+using uni_course_cpp::GraphJsonPrinter;
 using uni_course_cpp::GraphPrinter;
 using uni_course_cpp::Logger;
 
-std::string get_current_date_time() {
-  const auto date_time = std::chrono::system_clock::now();
-  const auto date_time_t = std::chrono::system_clock::to_time_t(date_time);
-  std::stringstream date_time_string;
-  date_time_string << std::put_time(std::localtime(&date_time_t),
-                                    "%Y.%m.%d %H:%M:%S");
-  return date_time_string.str();
-}
-
 std::string generation_started_string(int graph_number) {
   std::stringstream log_first_string;
-  log_first_string << get_current_date_time() << ": Graph " << graph_number
-                   << ", Generation Started\n";
+  log_first_string << "Graph " << graph_number << ", Generation Started"
+                   << std::endl;
   return log_first_string.str();
 }
 
 std::string generation_finished_string(int graph_number,
                                        std::string graph_string) {
   std::stringstream log_second_string;
-  log_second_string << get_current_date_time() << ": Graph " << graph_number
-                    << ", Generation Ended {\n"
+  log_second_string << "Graph " << graph_number << ", Generation Ended {"
+                    << std::endl
                     << graph_string;
 
   return log_second_string.str();
@@ -99,6 +87,7 @@ void write_to_file(const std::string& graph_output,
   out_json.close();
 }
 
+<<<<<<< HEAD
 std::vector<Graph> generate_graphs(int graphs_count,
                                    int threads_count,
                                    const GraphGenerator::Params& params) {
@@ -112,17 +101,14 @@ std::vector<Graph> generate_graphs(int graphs_count,
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
       [&logger, &graphs](int i, Graph graph) {
-        const auto graph_description =
-            uni_course_cpp::printing::print_graph(graph);
-        logger.log(generation_finished_string(i, graph_description));
+        const auto graph_printer = GraphPrinter(graph);
+        logger.log(generation_finished_string(i, graph_printer.print()));
         graphs.push_back(graph);
         const std::string file_name =
             std::string(uni_course_cpp::config::kTempDirectoryPath) +
             std::to_string(i) + ".json";
-        const auto graph_printer = GraphPrinter(graph);
-        write_to_file(graph_printer.print(),
-                      std::string(uni_course_cpp::config::kTempDirectoryPath) +
-                          "graph_" + std::to_string(i) + ".json");
+        const auto graph_json_printer = GraphJsonPrinter(graph);
+        write_to_file(graph_json_printer.print(), file_name);
       });
   return graphs;
 }

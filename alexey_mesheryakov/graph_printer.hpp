@@ -6,14 +6,10 @@ class GraphPrinter {
  public:
   explicit GraphPrinter(const Graph& graph) : graph_(graph){};
   std::string print() const;
+  static std::string edge_color_to_string(const Edge::Color& color);
 
  private:
   const Graph& graph_;
 };
-
-namespace printing {
-std::string print_graph(const uni_course_cpp::Graph& graph);
-
-}  // namespace printing
 
 }  // namespace uni_course_cpp
