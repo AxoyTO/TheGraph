@@ -1,4 +1,4 @@
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -99,19 +99,19 @@ std::vector<Graph> generate_graphs(int graphs_count,
   auto& logger = Logger::get_instance();
 
   auto graphs = std::vector<Graph>(graphs_count);
-  std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
+  // std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
-      [&logger, &graphs](int i, const Graph&& graph) {
-        graphs.push_back(graph);
-        const auto graph_printer = GraphPrinter(graphs.back());
-        const auto graph_json_printer = GraphJsonPrinter(graphs.back());
+      [&logger, &graphs](int i, Graph&& graph) {
+        const auto graph_printer = GraphPrinter(graph);
+        const auto graph_json_printer = GraphJsonPrinter(graph);
         logger.log(generation_finished_string(i, graph_printer.print()));
         const std::string file_name =
             std::string(uni_course_cpp::config::kTempDirectoryPath) +
             std::to_string(i) + ".json";
         write_to_file(graph_json_printer.print(), file_name);
+        graphs.push_back(graph);
       });
   return graphs;
 }
