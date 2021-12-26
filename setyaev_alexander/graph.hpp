@@ -2,6 +2,7 @@
 
 #include <random>
 #include <unordered_map>
+#include <algorithm>
 #include "edge.hpp"
 #include "vertex.hpp"
 
