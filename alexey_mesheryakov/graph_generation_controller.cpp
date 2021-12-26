@@ -1,6 +1,7 @@
-#include "graph_generation_controller.hpp"
 #include <cassert>
 #include <algorithm>
+#include "graph_generation_controller.hpp"
+
 namespace uni_course_cpp {
 
 GraphGenerationController::GraphGenerationController(
