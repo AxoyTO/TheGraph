@@ -1,9 +1,11 @@
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_json_printer.hpp"
 #include "graph_printer.hpp"
@@ -11,6 +13,7 @@
 
 using uni_course_cpp::Depth;
 using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
 using uni_course_cpp::GraphJsonPrinter;
 using uni_course_cpp::GraphPrinter;
@@ -87,7 +90,6 @@ void write_to_file(const std::string& graph_output,
   out_json.close();
 }
 
-<<<<<<< HEAD
 std::vector<Graph> generate_graphs(int graphs_count,
                                    int threads_count,
                                    const GraphGenerator::Params& params) {
@@ -97,6 +99,7 @@ std::vector<Graph> generate_graphs(int graphs_count,
   auto& logger = Logger::get_instance();
 
   auto graphs = std::vector<Graph>(graphs_count);
+  // std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
