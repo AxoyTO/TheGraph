@@ -1,8 +1,7 @@
 #include "graph_json_printing.hpp"
-#include <fstream>
+
 #include <iostream>
 #include <sstream>
-#include <string>
 
 namespace printing {
 namespace json {
