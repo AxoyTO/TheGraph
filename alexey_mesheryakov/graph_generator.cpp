@@ -67,7 +67,6 @@ void generate_red_edges(Graph& graph, std::mutex& graph_edges_mutex) {
   for (Depth depth = 1; depth < graph.get_depth() - 2; depth++) {
     for (const auto& vertex_id : graph.get_vertex_ids_at_depth(depth)) {
       if (is_lucky(get_color_probability(Edge::Color::Red))) {
-        const std::lock_guard lock(graph_edges_mutex);
         const auto& level_for_red_edge =
             graph.get_vertex_ids_at_depth(depth + 2);
         if (level_for_red_edge.size() > 0) {
