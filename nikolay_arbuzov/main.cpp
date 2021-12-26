@@ -1,3 +1,4 @@
+#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -104,29 +105,13 @@ int main() {
   const int new_vertices_count = handle_new_vertices_count_input();
   const int graphs_count = handle_graphs_count_input();
   const int threads_count = handle_threads_count_input();
+  if (threads_count > std::thread::hardware_concurrency())
+    throw std::runtime_error("Too much threads");
 
   prepare_temp_directory();
 
   const auto params =
       uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
-  /*
-    const auto params =
-        uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
-    const auto generator = uni_course_cpp::GraphGenerator(params);
-    auto& logger = uni_course_cpp::Logger::get_logger();
-
-    for (int i = 0; i < graphs_count; i++) {
-      logger.log(generation_started_string(i));
-      const auto graph = generator.generate();
-
-      const auto graph_description =
-    uni_course_cpp::printing::print_graph(graph);
-      logger.log(generation_finished_string(i, graph_description));
-      const auto graph_json =
-    uni_course_cpp::printing::json::print_graph(graph);
-      write_to_file(graph_json, "graph_" + std::to_string(i) + ".json");
-    }
-  */
   return 0;
 }
