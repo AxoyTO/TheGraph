@@ -1,4 +1,4 @@
-//#include <filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -99,7 +99,7 @@ std::vector<Graph> generate_graphs(int graphs_count,
   auto& logger = Logger::get_instance();
 
   auto graphs = std::vector<Graph>(graphs_count);
-  // std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
+  std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
