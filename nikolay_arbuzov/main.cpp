@@ -12,32 +12,49 @@
 #include "logger.hpp"
 
 namespace {
-const int handle_graphs_count_input() {
+int handle_graphs_count_input() {
   int graph_count;
   std::cout << "Please, enter: how many graphs do you want: ";
   std::cin >> graph_count;
+  while (graph_count < 0) {
+    std::cout << "Please, try again: ";
+    std::cin >> graph_count;
+  }
   return graph_count;
 }
 
-const int handle_depth_input() {
+int handle_depth_input() {
   int depth;
   std::cout << "Please, enter the depth of your graph: ";
   std::cin >> depth;
+  while (depth < 0) {
+    std::cout << "Please, try again: ";
+    std::cin >> depth;
+  }
   return depth;
 }
 
-const int handle_new_vertices_count_input() {
+int handle_new_vertices_count_input() {
   int new_vertices_count;
   std::cout
       << "Please, enter count of new neighbors for each vertex of your graph: ";
   std::cin >> new_vertices_count;
+  while (new_vertices_count < 0) {
+    std::cout << "Please, try again: ";
+    std::cin >> new_vertices_count;
+  }
   return new_vertices_count;
 }
 
-const int handle_threads_count_input() {
+int handle_threads_count_input() {
   int threads_count;
   std::cout << "Please, enter count of threads: ";
   std::cin >> threads_count;
+  while (threads_count < 1 ||
+         threads_count > std::thread::hardware_concurrency()) {
+    std::cout << "Please, try again: ";
+    std::cin >> threads_count;
+  }
   return threads_count;
 }
 

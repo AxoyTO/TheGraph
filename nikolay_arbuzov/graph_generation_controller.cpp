@@ -68,31 +68,30 @@ void GraphGenerationController::generate(
   for (auto& worker : workers_) {
     worker.start();
   }
-  {
-    std::lock_guard<std::mutex> lock(jobs_mutex_);
-    for (int graph_number = 0; graph_number < graphs_count_; graph_number++) {
-      jobs_.emplace_back([&gen_started_callback = gen_started_callback,
-                          &gen_finished_callback = gen_finished_callback,
-                          graph_number,
-                          &finish_callback_mutex_ = finish_callback_mutex_,
-                          &start_callback_mutex_ = start_callback_mutex_,
-                          &graph_generator_ = graph_generator_, &jobs_done]() {
-        {
-          const std::lock_guard lock(start_callback_mutex_);
-          gen_started_callback(graph_number);
-        }
 
-        auto graph = graph_generator_.generate();
+  for (int graph_number = 0; graph_number < graphs_count_; graph_number++) {
+    jobs_.emplace_back([&gen_started_callback = gen_started_callback,
+                        &gen_finished_callback = gen_finished_callback,
+                        graph_number,
+                        &finish_callback_mutex_ = finish_callback_mutex_,
+                        &start_callback_mutex_ = start_callback_mutex_,
+                        &graph_generator_ = graph_generator_, &jobs_done]() {
+      {
+        const std::lock_guard lock(start_callback_mutex_);
+        gen_started_callback(graph_number);
+      }
 
-        {
-          const std::lock_guard lock(finish_callback_mutex_);
-          gen_finished_callback(graph_number, std::move(graph));
-        }
+      auto graph = graph_generator_.generate();
 
-        jobs_done++;
-      });
-    }
+      {
+        const std::lock_guard lock(finish_callback_mutex_);
+        gen_finished_callback(graph_number, std::move(graph));
+      }
+
+      jobs_done++;
+    });
   }
+
   while (jobs_done < graphs_count_) {
   }
 
