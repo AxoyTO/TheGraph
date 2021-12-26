@@ -73,10 +73,7 @@ void GraphGenerationController::generate(
                         &finish_callback_mutex_ = finish_callback_mutex_,
                         &start_callback_mutex_ = start_callback_mutex_,
                         &graph_generator_ = graph_generator_, &jobs_done]() {
-      {
-        const std::lock_guard lock(start_callback_mutex_);
-        gen_started_callback(graph_number);
-      }
+      gen_started_callback(graph_number);
 
       auto graph = graph_generator_.generate();
 
