@@ -1,9 +1,9 @@
-using EdgeId = int;
+
 
 #pragma once
 
 #include "vertex.hpp"
-
+using EdgeId = int;
 struct Edge {
  public:
   enum class Color { Red, Grey, Green, Yellow };
@@ -18,7 +18,6 @@ struct Edge {
   EdgeId get_id() const;
   VertexId get_first_vertex_id() const;
   VertexId get_second_vertex_id() const;
-  std::string to_string() const;
   Edge::Color get_color() const;
 
  private:

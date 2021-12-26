@@ -1,4 +1,5 @@
 #include "graph.hpp"
+#include "graph_json_printing.hpp"
 
 void json_to_file(const std::string& str) {
   std::ofstream json;
@@ -44,7 +45,7 @@ int main() {
   const auto generator = GraphGenerator(params);
   const auto graph = generator.generate();
 
-  const auto graph_json = graph.to_string();
+  const auto graph_json = printing::json::graph_to_string(graph);
   std::cout << graph_json << std::endl;
   json_to_file(graph_json);
 
