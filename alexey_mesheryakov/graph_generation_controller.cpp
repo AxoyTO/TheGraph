@@ -1,6 +1,6 @@
 #include "graph_generation_controller.hpp"
 #include <cassert>
-
+#include <algorithm>
 namespace uni_course_cpp {
 
 GraphGenerationController::GraphGenerationController(
@@ -8,7 +8,7 @@ GraphGenerationController::GraphGenerationController(
     int graphs_count,
     const GraphGenerator::Params& graph_generator_params)
     : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
-  for (int i = 0; i < threads_count; ++i) {
+  for (int i = 0; i < std::min(threads_count, graphs_count); ++i) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
          &job_mutex_ = job_mutex_]() -> std::optional<JobCallback> {

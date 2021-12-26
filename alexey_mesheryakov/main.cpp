@@ -103,14 +103,14 @@ std::vector<Graph> generate_graphs(int graphs_count,
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
-      [&logger, &graphs](int i, Graph graph) {
-        const auto graph_printer = GraphPrinter(graph);
-        logger.log(generation_finished_string(i, graph_printer.print()));
+      [&logger, &graphs](int i, Graph&& graph) {
         graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter(graphs.back());
+        const auto graph_json_printer = GraphJsonPrinter(graphs.back());
+        logger.log(generation_finished_string(i, graph_printer.print()));
         const std::string file_name =
             std::string(uni_course_cpp::config::kTempDirectoryPath) +
             std::to_string(i) + ".json";
-        const auto graph_json_printer = GraphJsonPrinter(graph);
         write_to_file(graph_json_printer.print(), file_name);
       });
   return graphs;
