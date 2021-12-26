@@ -1,4 +1,8 @@
 #include "graph_json_printing.hpp"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace printing {
 namespace json {
@@ -28,7 +32,7 @@ std::string graph_to_string(const Graph& graph) {
 
   for (const auto& vertex : graph.get_vertices()) {
     json << vertex_to_string(vertex, graph.get_vertex_depth(vertex.get_id()),
-                             graph.get_edges(vertex.get_id()));
+                             graph.get_connected_edges_ids(vertex.get_id()));
     if (vertex.get_id() != graph.get_vertices().back().get_id()) {
       json << ",\n";
     }
@@ -36,9 +40,9 @@ std::string graph_to_string(const Graph& graph) {
 
   json << "\n],\n\"edges\": [\n";
 
-  for (const auto& edge : graph.get_edges()) {
+  for (const auto& edge : graph.get_edges_ids()) {
     json << edge_to_string(edge);
-    if (edge.get_id() != graph.get_edges().back().get_id()) {
+    if (edge.get_id() != graph.get_edges_ids().back().get_id()) {
       json << ",\n";
     }
   }

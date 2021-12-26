@@ -1,8 +1,7 @@
 #pragma once
 
-#include <random>
 #include <unordered_map>
-#include <algorithm>
+
 #include "edge.hpp"
 #include "vertex.hpp"
 
@@ -23,8 +22,8 @@ class Graph {
   }
   Depth get_depth() { return depth_map_.size(); }
   Depth get_vertex_depth(VertexId vertex_id) const;
-  const std::vector<Edge>& get_edges() const { return edges_; }
-  const std::vector<EdgeId>& get_edges(VertexId vertex_id) const {
+  const std::vector<Edge>& get_edges_ids() const { return edges_; }
+  const std::vector<EdgeId>& get_connected_edges_ids(VertexId vertex_id) const {
     return adjacency_list_.at(vertex_id);
   }
 

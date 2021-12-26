@@ -1,4 +1,9 @@
 #include "graph.hpp"
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <unordered_map>
 
 constexpr double kGreenProbability = 0.1;
 constexpr double kRedProbability = 0.33;
@@ -123,7 +128,7 @@ Vertex Graph::add_vertex() {
     depth_map_[0].push_back(vertex.get_id());
   }
   vertices_depth_[vertex.get_id()] = 0;
-  adjacency_list_[vertex.get_id()];
+  adjacency_list_[vertex.get_id()] = {};
   return vertex;
 }
 
@@ -180,7 +185,7 @@ Edge::Color Graph::get_edge_color(VertexId from_vertex_id,
   if (from_vertex_id == to_vertex_id) {
     return Edge::Color::Green;
   }
-  if (get_edges(to_vertex_id).size() == 0) {
+  if (get_connected_edges_ids(to_vertex_id).size() == 0) {
     return Edge::Color::Grey;
   }
 

@@ -1,3 +1,5 @@
+#include <fstream>
+#include <iostream>
 #include "graph.hpp"
 #include "graph_json_printing.hpp"
 
