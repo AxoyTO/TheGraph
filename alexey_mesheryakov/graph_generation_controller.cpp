@@ -79,7 +79,6 @@ void GraphGenerationController::Worker::start() {
       });
 }
 
-
 void GraphGenerationController::Worker::stop() {
   assert(state_ == State::Working && "Worker is not running");
   state_ = State::ShouldTerminate;
