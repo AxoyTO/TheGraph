@@ -109,11 +109,11 @@ void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
     const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
     for (const auto& fromVertexId : presentLevel) {
       if (isLucky(getProbabilityYellow(depth, maxDepth))) {
+        const std::lock_guard lock(mutex);
         const auto unconnectedVertexIds =
             getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
         if (!unconnectedVertexIds.empty()) {
           const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
-          const std::lock_guard lock(mutex);
           graph.addEdge(fromVertexId, randomVertexId,
                         uni_course_cpp::Edge::Color::Yellow);
         }
