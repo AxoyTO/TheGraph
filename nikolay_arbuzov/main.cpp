@@ -89,9 +89,9 @@ std::vector<uni_course_cpp::Graph> generate_graphs(
         const auto graph_description =
             uni_course_cpp::printing::print_graph(graph);
         logger.log(generation_finished_string(index, graph_description));
-        graphs.push_back(graph);
         const auto graph_json =
             uni_course_cpp::printing::json::print_graph(graph);
+        graphs.push_back(std::move(graph));
         write_to_file(graph_json, "graph_" + std::to_string(index) + ".json");
       });
 
