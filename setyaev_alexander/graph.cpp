@@ -1,7 +1,7 @@
 #include "graph.hpp"
 
-constexpr double GreenProbability = 0.1;
-constexpr double RedProbability = 0.33;
+constexpr double kGreenProbability = 0.1;
+constexpr double kRedProbability = 0.33;
 
 const Edge& Graph::get_edge(EdgeId id) const {
   for (const auto& edge : edges_) {
@@ -37,8 +37,7 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
     for (const auto& vertex : vertices) {
       if (check_probability(1.0 - (double)depth / (double)params_.depth())) {
         for (int i = 0; i < params_.new_vertices_count(); ++i) {
-          // copy for a temporary object
-          const auto new_vertex = graph.add_vertex();
+          const auto& new_vertex = graph.add_vertex();
           graph.add_edge(vertex, new_vertex.get_id());
         }
       }
@@ -48,7 +47,7 @@ void GraphGenerator::generate_gray_edges(Graph& graph) const {
 
 void GraphGenerator::generate_green_edges(Graph& graph) const {
   for (const auto& vertex : graph.get_vertices()) {
-    if (check_probability(GreenProbability)) {
+    if (check_probability(kGreenProbability)) {
       graph.add_edge(vertex.get_id(), vertex.get_id());
     }
   }
@@ -99,7 +98,7 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
       continue;
     }
 
-    if (check_probability(RedProbability)) {
+    if (check_probability(kRedProbability)) {
       std::vector<VertexId> second_vertices_ids;
       for (const auto& second_vertex : graph.get_vertices()) {
         if (graph.get_vertex_depth(second_vertex.get_id()) ==
@@ -117,13 +116,14 @@ void GraphGenerator::generate_red_edges(Graph& graph) const {
 }
 
 Vertex Graph::add_vertex() {
-  Vertex vertex = vertices_.emplace_back(get_new_vertex_id());
+  const Vertex& vertex = vertices_.emplace_back(get_new_vertex_id());
   if (vertex.get_id() == 0) {
     depth_map_.push_back({0});
   } else {
     depth_map_[0].push_back(vertex.get_id());
   }
   vertices_depth_[vertex.get_id()] = 0;
+  adjacency_list_[vertex.get_id()];
   return vertex;
 }
 
@@ -145,7 +145,6 @@ Vertex& Graph::get_vertex(const VertexId& id) {
 
 Graph::Depth Graph::get_vertex_depth(VertexId vertex_id) const {
   return vertices_depth_.at(vertex_id);
-  ;
 }
 
 void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
@@ -170,9 +169,7 @@ void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
     auto depth_iterator =
         std::find(depth_map_[0].begin(), depth_map_[0].end(), second_vertex_id);
     if (depth_iterator != depth_map_[0].end()) {
-      std::swap(*depth_iterator, depth_map_[0].back());
-
-      depth_map_[0].pop_back();
+      depth_map_[0].erase(depth_iterator);
     }
   }
 }
@@ -199,7 +196,8 @@ Edge::Color Graph::get_edge_color(VertexId from_vertex_id,
 
 bool Graph::is_connected(VertexId from_vertex_id, VertexId to_vertex_id) const {
   for (const auto& connected_edge : adjacency_list_.at(from_vertex_id)) {
-    if (get_edge(connected_edge).get_color() == Edge::Color::Green) {
+    if (get_edge(connected_edge).get_color() == Edge::Color::Green &&
+        from_vertex_id == to_vertex_id) {
       return true;
     }
     const Edge& edge = get_edge(connected_edge);

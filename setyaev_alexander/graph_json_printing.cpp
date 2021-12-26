@@ -3,6 +3,24 @@
 namespace printing {
 namespace json {
 
+std::string color_to_string(const Edge::Color& color) {
+  switch (color) {
+    case Edge::Color::Grey:
+      return "\"grey\"";
+
+    case Edge::Color::Yellow:
+      return "\"yellow\"";
+
+    case Edge::Color::Green:
+      return "\"green\"";
+
+    case Edge::Color::Red:
+      return "\"red\"";
+  }
+
+  throw std::runtime_error("Failed to determine color");
+}
+
 std::string graph_to_string(const Graph& graph) {
   std::stringstream json;
 
