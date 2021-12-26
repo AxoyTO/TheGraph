@@ -45,8 +45,6 @@ class Graph {
   };
 
   // Graph functions
-  const EdgeId & current_id() const { return current_edge_id; }
-
   Vertex& add_vertex() {
     Vertex new_vertex(current_vertex_id);
     vertices_.push_back(new_vertex);
@@ -58,8 +56,8 @@ class Graph {
     assert(from_vertex_id < current_vertex_id && from_vertex_id >= 0);
     assert(to_vertex_id < current_vertex_id && to_vertex_id >= 0);
     Edge new_edge(current_edge_id, from_vertex_id, to_vertex_id);
-    vertices_[to_vertex_id].set_add(current_id());
-    vertices_[from_vertex_id].set_add(current_id());
+    vertices_[to_vertex_id].set_add(current_edge_id);
+    vertices_[from_vertex_id].set_add(current_edge_id);
     current_edge_id++;
     edges_.push_back(new_edge);
     return edges_[current_edge_id - 1];
