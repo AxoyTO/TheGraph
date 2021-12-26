@@ -25,7 +25,7 @@ class Graph {
   int edgeIdCounter_ = 0;
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
-  std::vector<std::vector<int>> depthMap_ = {{}};
+  std::vector<std::vector<int>> depthMap_;
   std::unordered_map<Edge::Color, std::vector<int>> coloredEdges_;
 };
 }  // namespace uni_course_cpp

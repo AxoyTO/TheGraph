@@ -103,17 +103,17 @@ std::vector<int> getUnconnectedVertexIds(
   return unconnectedVertexIds;
 }
 void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
-  int maxDepth = graph.getDepth();
+  const int maxDepth = graph.getDepth();
   for (int depth = 0; depth < maxDepth; depth++) {
     const auto presentLevel = graph.getVertexIdsAtDepth(depth);
     const auto destinationLevel = graph.getVertexIdsAtDepth(depth + 1);
     for (const auto& fromVertexId : presentLevel) {
       if (isLucky(getProbabilityYellow(depth, maxDepth))) {
+        const std::lock_guard lock(mutex);
         const auto unconnectedVertexIds =
             getUnconnectedVertexIds(fromVertexId, destinationLevel, graph);
         if (!unconnectedVertexIds.empty()) {
           const auto randomVertexId = getRandomVertexId(unconnectedVertexIds);
-          const std::lock_guard lock(mutex);
           graph.addEdge(fromVertexId, randomVertexId,
                         uni_course_cpp::Edge::Color::Yellow);
         }
@@ -134,7 +134,7 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   std::mutex lockGraph;
 
   for (int i = 0; i < params_.newVerticesNum; i++) {
-    jobs.emplace_back([this, &graph, firstVertexId, &lockGraph, &jobsDone]() {
+    jobs.emplace_back([this, &graph, &firstVertexId, &lockGraph, &jobsDone]() {
       generateGrey(graph, firstVertexId, 0, lockGraph);
       jobsDone++;
     });
@@ -189,7 +189,7 @@ void GraphGenerator::generateGrey(Graph& graph,
                                   std::mutex& lockGraph) const {
   const auto new_vertex_id = [&graph, &lockGraph, parentVertexId]() {
     const std::lock_guard lock(lockGraph);
-    auto new_vertex_id = graph.addVertex();
+    const auto new_vertex_id = graph.addVertex();
     graph.addEdge(parentVertexId, new_vertex_id.id, Edge::Color::Gray);
     return new_vertex_id;
   }();
@@ -198,11 +198,10 @@ void GraphGenerator::generateGrey(Graph& graph,
     return;
   }
 
-  const double percent = 100.0 / (double)params_.maxDepth;
+  // const double percent = 100.0 / (double) maxDepth_;
 
   for (int i = 0; i < params_.newVerticesNum; i++) {
-    if ((double)getProbabilityGray(parentDepth, params_.maxDepth) >
-        (double)parentDepth * percent) {
+    if (isLucky(getProbabilityGray(parentDepth, params_.maxDepth))) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }

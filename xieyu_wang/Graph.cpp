@@ -5,6 +5,9 @@
 namespace uni_course_cpp {
 const Vertex& Graph::addVertex() {
   int newVertexId = getNextVertexId();
+  if (depthMap_.empty()) {
+    depthMap_.push_back({});
+  }
   depthMap_[0].push_back(newVertexId);
   return vertices_.emplace_back(newVertexId);
 }
@@ -75,10 +78,10 @@ const Vertex& Graph::getVertex(int id) const {
 }
 
 std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
-  if (depth <= depthMap_.size() - 1) {
-    return depthMap_.at(depth);
+  if (depth > getDepth()) {
+    throw std::runtime_error("depth get error");
   }
-  return {};
+  return depthMap_.at(depth);
 }
 
 const std::vector<Vertex>& Graph::getVertices() const {
