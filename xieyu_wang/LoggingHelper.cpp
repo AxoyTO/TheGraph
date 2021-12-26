@@ -15,18 +15,6 @@ void LoggingHelper::logStart(Logger& logger, int graphIndex) {
   logger.log(getTimeByString() + ": Graph " + std::to_string(graphIndex) +
              ", Generation Started\n");
 }
-int getMaxDepth(Logger& logger, Graph graph) {
-  int depth = 0;
-  while (true) {
-    std::vector<int> vertexIds = graph.getVertexIdsAtDepth(depth);
-    if (vertexIds.size() == 0) {
-      break;
-    } else {
-      depth++;
-    }
-  }
-  return depth - 1;
-}
 void logDepth(Logger& logger, Graph graph, int maxDepth) {
   for (int i = 0; i <= maxDepth; i++) {
     logger.log(std::to_string(graph.getVertexIdsAtDepth(i).size()));
@@ -48,10 +36,10 @@ void LoggingHelper::logColors(Logger& logger, Graph graph) {
 void LoggingHelper::logEnd(Logger& logger, Graph graph, int graphIndex) {
   logger.log(getTimeByString() + ": Graph " + std::to_string(graphIndex) +
              ", Generation Finished {  \n");
-  logger.log("  depth: " + std::to_string(getMaxDepth(logger, graph)) + ",\n");
+  logger.log("  depth: " + std::to_string(graph.getDepth()) + ",\n");
   logger.log("  vertices: " + std::to_string(graph.getVertices().size()) +
              ", [");
-  logDepth(logger, graph, getMaxDepth(logger, graph));
+  logDepth(logger, graph, graph.getDepth());
   logger.log("],\n  edges: " + std::to_string(graph.getEdges().size()) + ", {");
   logColors(logger, graph);
   logger.log("}\n}\n");
