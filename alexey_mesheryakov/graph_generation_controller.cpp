@@ -1,9 +1,8 @@
-#include <cassert>
-#include <algorithm>
 #include "graph_generation_controller.hpp"
+#include <algorithm>
+#include <cassert>
 
 namespace uni_course_cpp {
-
 GraphGenerationController::GraphGenerationController(
     int threads_count,
     int graphs_count,
