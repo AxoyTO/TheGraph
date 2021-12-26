@@ -189,7 +189,7 @@ void GraphGenerator::generateGrey(Graph& graph,
                                   std::mutex& lockGraph) const {
   const auto new_vertex_id = [&graph, &lockGraph, parentVertexId]() {
     const std::lock_guard lock(lockGraph);
-    auto new_vertex_id = graph.addVertex();
+    const auto new_vertex_id = graph.addVertex();
     graph.addEdge(parentVertexId, new_vertex_id.id, Edge::Color::Gray);
     return new_vertex_id;
   }();
@@ -198,11 +198,10 @@ void GraphGenerator::generateGrey(Graph& graph,
     return;
   }
 
-  const double percent = 100.0 / (double)maxDepth_;
+  // const double percent = 100.0 / (double) maxDepth_;
 
   for (int i = 0; i < newVerticesNum_; i++) {
-    if ((double)getProbabilityGray(parentDepth, maxDepth_) >
-        (double)parentDepth * percent) {
+    if (isLucky(getProbabilityGray(parentDepth, maxDepth_))) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }
