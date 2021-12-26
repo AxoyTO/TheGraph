@@ -45,7 +45,7 @@ GraphGenerationController::GraphGenerationController(
     int graphs_count,
     GraphGenerator::Params graph_generator_params)
     : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
-  int workers_count = std::min(threads_count, graphs_count);
+  const int workers_count = std::min(threads_count, graphs_count);
   for (int worker_number = 0; worker_number < workers_count; worker_number++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,

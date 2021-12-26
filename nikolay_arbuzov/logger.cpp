@@ -22,7 +22,7 @@ std::string get_current_date_time() {
 namespace uni_course_cpp {
 
 void Logger::log(const std::string& string) {
-  std::lock_guard<std::mutex> lock(log_mutex_);
+  const std::lock_guard<std::mutex> lock(log_mutex_);
   const auto log_string = get_current_date_time() + " " + string;
   log_file_ << log_string;
   std::cout << log_string;
