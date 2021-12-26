@@ -18,9 +18,7 @@ class Graph {
     VertexId id() const { return id_; }
     const std::set<EdgeId>& edges_ids() const { return edges_ids_; }
 
-    void set_add(const EdgeId edge_id){
-      edges_ids_.insert(edge_id);
-    }
+    void set_add(const EdgeId edge_id) { edges_ids_.insert(edge_id); }
 
    private:
     const VertexId id_ = INVALID_ID;
