@@ -29,7 +29,7 @@ int handle_depth_input() {
   std::cout << "Please, enter the depth of your graph: ";
   std::cin >> depth;
   while (depth < 0) {
-    std::cout << "Please, try again: ";
+    std::cout << "Negative depth, please, try again: ";
     std::cin >> depth;
   }
   return depth;
@@ -41,7 +41,7 @@ int handle_new_vertices_count_input() {
       << "Please, enter count of new neighbors for each vertex of your graph: ";
   std::cin >> new_vertices_count;
   while (new_vertices_count < 0) {
-    std::cout << "Please, try again: ";
+    std::cout << "Negative new_vertices_count, please, try again: ";
     std::cin >> new_vertices_count;
   }
   return new_vertices_count;
@@ -50,12 +50,12 @@ int handle_new_vertices_count_input() {
 int handle_threads_count_input() {
   int threads_count;
   std::cout << "Please, enter count of threads: ";
+  std::cin >> threads_count;
   while (threads_count < 1 ||
          threads_count > std::thread::hardware_concurrency()) {
-    std::cout << "Please, try again: ";
+    std::cout << "Cant do this count of threads, please, try again: ";
     std::cin >> threads_count;
   }
-  std::cin >> threads_count;
   return threads_count;
 }
 
