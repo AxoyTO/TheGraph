@@ -103,7 +103,7 @@ std::vector<Graph> generate_graphs(int graphs_count,
 
   generation_controller.generate(
       [&logger](int i) { logger.log(generation_started_string(i)); },
-      [&logger, &graphs](int i, Graph&& graph) {
+      [&logger, &graphs](int i, const Graph&& graph) {
         graphs.push_back(graph);
         const auto graph_printer = GraphPrinter(graphs.back());
         const auto graph_json_printer = GraphJsonPrinter(graphs.back());
