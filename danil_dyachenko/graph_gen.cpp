@@ -45,10 +45,9 @@ class Graph {
   const EdgeId get_edge_id() { return current_edge_id++; }
 
   Vertex& add_vertex() {
-    VertexId new_vertex_id = get_vertex_id();
+    const VertexId new_vertex_id = get_vertex_id();
     adjacency_list_[new_vertex_id] = {};
-    vertices_.emplace_back(new_vertex_id);
-    return vertices_[new_vertex_id];
+    return vertices_.emplace_back(new_vertex_id);
   }
 
   Edge& add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
@@ -56,11 +55,10 @@ class Graph {
     assert(from_vertex_id >= 0);
     assert(to_vertex_id < current_vertex_id);
     assert(to_vertex_id >= 0);
-    EdgeId new_edge_id = get_edge_id();
+    const EdgeId new_edge_id = get_edge_id();
     adjacency_list_[to_vertex_id].emplace(new_edge_id);
     adjacency_list_[from_vertex_id].emplace(new_edge_id);
-    edges_.emplace_back(current_edge_id, from_vertex_id, to_vertex_id);
-    return edges_[new_edge_id];
+    return edges_.emplace_back(current_edge_id, from_vertex_id, to_vertex_id);
   }
 
   const std::set<EdgeId>& get_edges_ids(const VertexId vertex_id) const {
@@ -118,14 +116,18 @@ std::string print_graph(const Graph& graph) {
   for (const auto& vertex : vertices) {
     string += "    " + print_vertex(vertex, graph) + ",\n";
   }
-  string.pop_back();
-  string.pop_back();
+  if (!vertices.empty()) {
+    string.pop_back();
+    string.pop_back();
+  }
   string += "\n  ],\n  \"edges\": [\n";
   for (const auto& edge : edges) {
     string += "    " + print_edge(edge) + ",\n";
   }
-  string.pop_back();
-  string.pop_back();
+  if (!edges.empty()) {
+    string.pop_back();
+    string.pop_back();
+  }
   string += "\n  ]\n}\n";
   return string;
 }
