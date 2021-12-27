@@ -1,9 +1,9 @@
-#include <algorithm>
-#include <cassert>
-
 #include "graph_traversal_controller.hpp"
 #include "graph_traverser.hpp"
 #include "graph_path.hpp"
+
+#include <algorithm>
+#include <cassert>
 
 namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
