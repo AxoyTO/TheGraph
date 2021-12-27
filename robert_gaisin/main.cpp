@@ -125,7 +125,7 @@ std::string traversal_started_string(int graph_num) {
 }
 
 std::string traversal_finished_string(int graph_number,
-                                      std::vector<GraphPath>& paths) {
+                                      const std::vector<GraphPath>& paths) {
   std::stringstream res;
   res << get_current_date_time() << ": Graph " << graph_number + 1
       << ", Traversal Finished, Paths: [";
