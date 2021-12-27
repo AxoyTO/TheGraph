@@ -18,10 +18,6 @@ class Logger {
  private:
   std::ofstream log_file_;
   std::mutex log_mutex_;
-<<<<<<< HEAD
-
-=======
->>>>>>> 43232f705f9510e1ebeece44e2919cdff84fcf3b
   Logger();
   ~Logger() { log_file_.close(); }
   Logger(const Logger&) = delete;
