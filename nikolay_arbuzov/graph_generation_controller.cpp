@@ -45,7 +45,8 @@ GraphGenerationController::GraphGenerationController(
     int graphs_count,
     GraphGenerator::Params graph_generator_params)
     : graphs_count_(graphs_count), graph_generator_(graph_generator_params) {
-  for (int thread_number = 0; thread_number < threads_count; thread_number++) {
+  const int workers_count = std::min(threads_count, graphs_count);
+  for (int worker_number = 0; worker_number < workers_count; worker_number++) {
     workers_.emplace_back(
         [&jobs_ = jobs_,
          &jobs_mutex_ = jobs_mutex_]() -> std::optional<JobCallback> {
@@ -72,10 +73,7 @@ void GraphGenerationController::generate(
                         &finish_callback_mutex_ = finish_callback_mutex_,
                         &start_callback_mutex_ = start_callback_mutex_,
                         &graph_generator_ = graph_generator_, &jobs_done]() {
-      {
-        const std::lock_guard lock(start_callback_mutex_);
-        gen_started_callback(graph_number);
-      }
+      gen_started_callback(graph_number);
 
       auto graph = graph_generator_.generate();
 

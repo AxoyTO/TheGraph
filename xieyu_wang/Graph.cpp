@@ -1,10 +1,15 @@
 #include "Graph.hpp"
+#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 namespace uni_course_cpp {
 const Vertex& Graph::addVertex() {
-  return vertices_.emplace_back(getNextVertexId());
-  ;
+  int newVertexId = getNextVertexId();
+  if (depthMap_.empty()) {
+    depthMap_.push_back({});
+  }
+  depthMap_[0].push_back(newVertexId);
+  return vertices_.emplace_back(newVertexId);
 }
 void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
   assert(hasVertex(fromVertexId) && "Vertex doesn't exist");
@@ -21,7 +26,14 @@ void Graph::addEdge(int fromVertexId, int toVertexId, const Edge::Color color) {
   }
   toVertex.addEdgeId(newEdge.id);
   if (color == Edge::Color::Gray) {
+    depthMap_[0].erase(
+        std::find(depthMap_[0].begin(), depthMap_[0].end(), toVertexId));
     toVertex.depth = fromVertex.depth + 1;
+    if (depthMap_.size() - 1 < toVertex.depth) {
+      depthMap_.push_back({toVertexId});
+    } else {
+      depthMap_[toVertex.depth].push_back(toVertexId);
+    }
   }
 }
 bool Graph::hasVertex(int idFind) const {
@@ -66,13 +78,10 @@ const Vertex& Graph::getVertex(int id) const {
 }
 
 std::vector<int> Graph::getVertexIdsAtDepth(int depth) {
-  std::vector<int> vertices;
-  for (const auto& vertex : vertices_) {
-    if (vertex.depth == depth) {
-      vertices.push_back(vertex.id);
-    }
+  if (depth <= depthMap_.size() - 1) {
+    return depthMap_.at(depth);
   }
-  return vertices;
+  return {};
 }
 
 const std::vector<Vertex>& Graph::getVertices() const {
@@ -103,6 +112,10 @@ const std::vector<Edge>& Graph::getEdges() const {
 Vertex& Graph::getVertex(int id) {
   const auto& constThis = *this;
   return const_cast<Vertex&>(constThis.getVertex(id));
+}
+
+int Graph::getDepth() {
+  return depthMap_.size() - 1;
 }
 
 }  // namespace uni_course_cpp
