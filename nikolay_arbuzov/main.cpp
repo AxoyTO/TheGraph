@@ -161,9 +161,6 @@ int main() {
   const auto params =
       uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
-<<<<<<< HEAD
   traverse_graphs(threads_count, graphs);
-=======
->>>>>>> 43232f705f9510e1ebeece44e2919cdff84fcf3b
   return 0;
 }
