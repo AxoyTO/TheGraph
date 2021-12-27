@@ -2,7 +2,10 @@
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
+#include "graph_path.hpp"
 #include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 #include <chrono>
@@ -11,13 +14,17 @@
 #include <iomanip>
 #include <iostream>
 
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::GraphGenerator;
-using uni_cource_cpp::Logger;
-using uni_cource_cpp::config::log_file_path;
-using uni_cource_cpp::graph_printing::print_graph;
-using uni_cource_cpp::graph_printing::print_graph_description;
+using uni_course_cpp::Graph;
 using uni_course_cpp::GraphGenerationController;
+using uni_course_cpp::GraphGenerator;
+using uni_course_cpp::GraphPath;
+using uni_course_cpp::GraphTraversalController;
+using uni_course_cpp::GraphTraverser;
+using uni_course_cpp::Logger;
+using uni_course_cpp::config::log_file_path;
+using uni_course_cpp::graph_printing::print_graph;
+using uni_course_cpp::graph_printing::print_graph_description;
+using uni_course_cpp::graph_printing::print_path;
 
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
@@ -80,11 +87,11 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
+  std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 }
 
 void write_to_file(const std::string& graph_json, const std::string& filename) {
-  std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
+  std::ofstream out(uni_course_cpp::config::kTempDirectoryPath + filename);
   out << graph_json;
   out.close();
 }
@@ -112,6 +119,39 @@ std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
   return graphs;
 }
 
+std::string traversal_started_string(int graph_num) {
+  return get_current_date_time() + ": Graph " + std::to_string(graph_num + 1) +
+         ", Traversal Started\n";
+}
+
+std::string traversal_finished_string(int graph_number,
+                                      const std::vector<GraphPath>& paths) {
+  std::stringstream res;
+  res << get_current_date_time() << ": Graph " << graph_number + 1
+      << ", Traversal Finished, Paths: [";
+
+  for (const auto& path : paths) {
+    res << "\n  ";
+    res << print_path(path);
+    res << ",";
+  }
+  res << "\n]\n";
+  return res.str();
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs) {
+  auto traversal_controller = GraphTraversalController(graphs);
+  auto& logger = Logger::get_logger();
+
+  traversal_controller.traverse(
+      [&logger](int index, const Graph& graph) {
+        logger.log(traversal_started_string(index));
+      },
+      [&logger](int index, const Graph& graph, std::vector<GraphPath> paths) {
+        logger.log(traversal_finished_string(index, paths));
+      });
+}
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_count = handle_new_vertices_count_input();
@@ -121,5 +161,8 @@ int main() {
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
+
+  traverse_graphs(graphs);
+
   return 0;
 }

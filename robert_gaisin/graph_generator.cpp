@@ -11,9 +11,9 @@
 
 namespace {
 
-using uni_cource_cpp::EdgeColor;
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::VertexId;
+using uni_course_cpp::EdgeColor;
+using uni_course_cpp::Graph;
+using uni_course_cpp::VertexId;
 
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
 
@@ -119,7 +119,7 @@ void generate_red_edges(Graph& graph, std::mutex& mutex) {
 }
 
 }  // namespace
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 void GraphGenerator::generate_gray_branch(Graph& graph,
                                           int depth,
                                           const VertexId& vertex_id,
@@ -226,4 +226,4 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

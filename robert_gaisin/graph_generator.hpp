@@ -4,7 +4,7 @@
 
 #include "graph.hpp"
 
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 
 class GraphGenerator {
  public:
@@ -26,4 +26,4 @@ class GraphGenerator {
                             const VertexId& vertex_id,
                             std::mutex& mutex) const;
 };
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

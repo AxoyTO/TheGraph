@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 
 void Logger::log(const std::string& log_string) {
   const std::lock_guard lock(log_mutex);
@@ -13,4 +13,4 @@ void Logger::log(const std::string& log_string) {
 Logger::~Logger() {
   file_stream_.close();
 }
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

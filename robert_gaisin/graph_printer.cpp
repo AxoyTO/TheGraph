@@ -1,11 +1,13 @@
 #include "graph_printer.hpp"
 #include <iostream>
+#include "graph_path.hpp"
 
 namespace {
-using uni_cource_cpp::Edge;
-using uni_cource_cpp::EdgeColor;
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::Vertex;
+using uni_course_cpp::Edge;
+using uni_course_cpp::EdgeColor;
+using uni_course_cpp::Graph;
+using uni_course_cpp::GraphPath;
+using uni_course_cpp::Vertex;
 
 using std::cin;
 using std::cout;
@@ -92,7 +94,7 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
   return out;
 }
 }  // namespace
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 namespace graph_printing {
 std::string print_graph(const Graph& graph) {
   using std::ostringstream;
@@ -137,6 +139,22 @@ std::string print_graph_description(const Graph& graph) {
   return log_string.str();
 }
 
+std::string print_path(const GraphPath& path) {
+  std::stringstream res;
+
+  res << "{vertices: [";
+
+  const auto& vertex_ids = path.get_vertex_ids();
+
+  res << vertex_ids;
+
+  res << "], distance: ";
+  res << path.distance();
+  res << "}";
+
+  return res.str();
+}
+
 }  // namespace graph_printing
 
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp
