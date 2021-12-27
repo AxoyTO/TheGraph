@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 constexpr int kVerticesCount = 14;
 
@@ -51,7 +51,7 @@ class Graph {
     return vertices_[new_vertex_id];
   }
 
-  Edge& add_edge (const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
+  Edge& add_edge(const VertexId& from_vertex_id, const VertexId& to_vertex_id) {
     assert(from_vertex_id < current_vertex_id);
     assert(from_vertex_id >= 0);
     assert(to_vertex_id < current_vertex_id);
@@ -63,8 +63,8 @@ class Graph {
     return edges_[new_edge_id];
   }
 
-  const std::set<EdgeId>& get_edges_ids (const VertexId vertex_id) const { 
-    return adjacency_list_.at(vertex_id); 
+  const std::set<EdgeId>& get_edges_ids(const VertexId vertex_id) const {
+    return adjacency_list_.at(vertex_id);
   }
 
   const std::vector<Vertex>& vertices() const { return vertices_; }
@@ -80,13 +80,14 @@ class Graph {
 
 namespace printing {
 namespace json {
-  std::string print_vertex(const Graph::Vertex& vertex, const Graph& graph) {
+std::string print_vertex(const Graph::Vertex& vertex, const Graph& graph) {
   std::string string;
   string += "{ \"id\": ";
   string += std::to_string(vertex.id());
   string += ", \"edge_ids\": [";
   auto edges_ids = graph.get_edges_ids(vertex.id());
-  for (auto edge_id_it = edges_ids.begin(); edge_id_it != edges_ids.end(); edge_id_it++) {
+  for (auto edge_id_it = edges_ids.begin(); edge_id_it != edges_ids.end();
+       edge_id_it++) {
     if (edge_id_it != edges_ids.begin())
       string += ", ";
     string += std::to_string(*edge_id_it);
@@ -114,12 +115,12 @@ std::string print_graph(const Graph& graph) {
   assert(edges.size() != 0);
   std::string string;
   string += "{\n  \"vertices\": [\n";
-  for (const auto & vertex : vertices){
+  for (const auto& vertex : vertices) {
     string += "    " + print_vertex(vertex, graph) + ",\n";
   }
   string += "    " + print_vertex(*(vertices.end() - 1), graph) + "\n" +
             "  ],\n  \"edges\": [\n";
-  for (const auto & edge : edges){
+  for (const auto& edge : edges) {
     string += "    " + print_edge(edge) + ",\n";
   }
   string += "    " + print_edge(*(edges.end() - 1)) + "\n" + "  ]\n}\n";
