@@ -42,9 +42,12 @@ Edge::Edge(const EdgeId& new_id,
            const VertexId& begin_vertex,
            const VertexId& end_vertex,
            const EdgeColor _color)
-    : id(new_id), begin(begin_vertex), end(end_vertex), color(_color) {
-  duration_ = determine_duration(color);
-}
+    : id(new_id),
+      begin(begin_vertex),
+      end(end_vertex),
+      color(_color),
+      duration_(determine_duration(_color)) {}
+
 Vertex& Graph::vertex(const VertexId& id) {
   for (auto& vertex : vertices_) {
     if (vertex.id == id)
@@ -132,17 +135,19 @@ const std::vector<EdgeId>& Graph::get_colored_edges(
   return edges_color_map_.at(color);
 }
 
-std::vector<VertexId> Graph::get_linked_vertex_ids(
+std::map<VertexId, Edge::Duration> Graph::get_linked_vertex_ids(
     const VertexId& vertex_id) const {
   const auto& vertex = get_vertex(vertex_id);
-  std::vector<VertexId> linked_ids;
+  std::map<VertexId, Edge::Duration> linked_ids;
 
   for (const auto& edge_id : vertex.edge_ids()) {
     const auto& edge = get_edge(edge_id);
-    if (edge.color != EdgeColor::Green) {
-      const auto linked_id = edge.begin != vertex_id ? edge.begin : edge.end;
-      linked_ids.push_back(linked_id);
-    }
+    const auto linked_id = [&edge, &vertex_id]() {
+      if (edge.color == EdgeColor::Green)
+        return edge.begin;
+      return edge.begin != vertex_id ? edge.begin : edge.end;
+    }();
+    linked_ids[linked_id] = edge.duration();
   }
   return linked_ids;
 }

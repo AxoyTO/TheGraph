@@ -1,4 +1,6 @@
 #include "config.hpp"
+#include "game.hpp"
+#include "game_generator.hpp"
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
@@ -9,11 +11,13 @@
 #include "logger.hpp"
 
 #include <chrono>
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 
+using uni_course_cpp::Game;
+using uni_course_cpp::GameGenerator;
 using uni_course_cpp::Graph;
 using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
@@ -22,6 +26,7 @@ using uni_course_cpp::GraphTraversalController;
 using uni_course_cpp::GraphTraverser;
 using uni_course_cpp::Logger;
 using uni_course_cpp::config::log_file_path;
+using uni_course_cpp::graph_printing::print_game;
 using uni_course_cpp::graph_printing::print_graph;
 using uni_course_cpp::graph_printing::print_graph_description;
 using uni_course_cpp::graph_printing::print_path;
@@ -85,13 +90,13 @@ int handle_graphs_count_input() {
   } while (graphs_quantity < INVALID_GRAPHS_NUMBER);
   return graphs_quantity;
 }
-
+/*
 void prepare_temp_directory() {
   std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
-}
+}*/
 
 void write_to_file(const std::string& graph_json, const std::string& filename) {
-  std::ofstream out(uni_course_cpp::config::kTempDirectoryPath + filename);
+  std::ofstream out(filename);
   out << graph_json;
   out.close();
 }
@@ -152,17 +157,56 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
       });
 }
 
+std::string game_preparing_string() {
+  return get_current_date_time() + " Game is preparing...\n";
+}
+
+std::string game_ready_string(const Game& game) {
+  return get_current_date_time() + " Game is Ready " + print_game(game);
+}
+
+std::string shortest_path_searching_string() {
+  return get_current_date_time() + " Searching for Shortest Path...\n";
+}
+
+std::string shortest_path_ready_string(const GraphPath& path) {
+  return get_current_date_time() + " Shortest Path: " + print_path(path) + "\n";
+}
+
+std::string fastest_path_searching_string() {
+  return get_current_date_time() + " Searching for Fastest Path...\n";
+}
+
+std::string fastest_path_ready_string(const GraphPath& path) {
+  return get_current_date_time() + " Fastest Path: " + print_path(path) + "\n";
+}
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_count = handle_new_vertices_count_input();
-  const int graphs_count = handle_graphs_count_input();
-  const int threads_count = handle_threads_count_input();
-  prepare_temp_directory();
+//  prepare_temp_directory();
+
+  auto& logger = Logger::get_logger();
+  logger.log(game_preparing_string());
 
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
-  const auto graphs = generate_graphs(params, graphs_count, threads_count);
+  const auto game_generator = GameGenerator(params);
+  const auto game = game_generator.generate();
 
-  traverse_graphs(graphs);
+  logger.log(game_ready_string(game));
+  logger.log(shortest_path_searching_string());
+
+  const auto shortest_path = game.find_shortest_path();
+
+  logger.log(shortest_path_ready_string(shortest_path));
+  logger.log(fastest_path_searching_string());
+
+  const auto fastest_path = game.find_fastest_path();
+
+  logger.log(fastest_path_ready_string(fastest_path));
+
+  const auto map_json = print_graph(game.map());
+  write_to_file(map_json, "map.json");
 
   return 0;
 }

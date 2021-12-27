@@ -1,10 +1,13 @@
 #include "graph_printer.hpp"
-#include <iostream>
+#include "game.hpp"
 #include "graph_path.hpp"
+
+#include <iostream>
 
 namespace {
 using uni_course_cpp::Edge;
 using uni_course_cpp::EdgeColor;
+using uni_course_cpp::Game;
 using uni_course_cpp::Graph;
 using uni_course_cpp::GraphPath;
 using uni_course_cpp::Vertex;
@@ -55,8 +58,8 @@ std::ostream& operator<<(std::ostream& out, const Edge& edge) {
   out << "      \"vertex_ids\": [" << edge.begin << ", " << edge.end << "],"
       << endl;
   out << "      \"color\": ";
-  out << color_to_string(edge.color);
-  out << endl;
+  out << color_to_string(edge.color) << ",";
+  out << endl << "      \"duration\": " << edge.duration() << endl;
   out << "}";
   return out;
 }
@@ -93,12 +96,18 @@ std::ostream& operator<<(std::ostream& out, const Graph& graph) {
       << "}" << endl;
   return out;
 }
+
+std::string print_position(const Vertex& vertex) {
+  std::ostringstream out;
+  out << "{vertex_id: " << vertex.id << ", depth: " << vertex.depth << "}";
+  return out.str();
+}
+
 }  // namespace
 namespace uni_course_cpp {
 namespace graph_printing {
 std::string print_graph(const Graph& graph) {
-  using std::ostringstream;
-  ostringstream out_message;
+  std::ostringstream out_message;
   out_message << graph;
   return out_message.str();
 }
@@ -134,7 +143,7 @@ std::string print_graph_description(const Graph& graph) {
       log_string << ", ";
   }
 
-  log_string << "}}\n}\n";
+  log_string << "}}\n}";
 
   return log_string.str();
 }
@@ -149,12 +158,23 @@ std::string print_path(const GraphPath& path) {
   res << vertex_ids;
 
   res << "], distance: ";
-  res << path.distance();
+  res << path.distance() << ", duration: " << path.duration();
   res << "}";
 
   return res.str();
 }
-
+std::string print_game(const Game& game) {
+  std::ostringstream out;
+  const auto& graph = game.map();
+  const auto& knight_vertex = graph.get_vertex(game.knight_position());
+  const auto& princess_vertex = graph.get_vertex(game.princess_position());
+  out << "{\n"
+      << "  map: " << print_graph_description(graph) << ",\n"
+      << "  knight_position: " << print_position(knight_vertex) << ",\n"
+      << "  princess position: " << print_position(princess_vertex) << "\n"
+      << "}";
+  return out.str();
+}
 }  // namespace graph_printing
 
 }  // namespace uni_course_cpp

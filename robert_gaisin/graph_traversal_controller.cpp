@@ -1,15 +1,15 @@
+#include "graph_traversal_controller.hpp"
+#include "graph_path.hpp"
+#include "graph_traverser.hpp"
+
 #include <algorithm>
 #include <cassert>
-
-#include "graph_traversal_controller.hpp"
 
 namespace {
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }  // namespace
 
 namespace uni_course_cpp {
-
-using uni_course_cpp::Graph;
 
 void GraphTraversalController::Worker::start() {
   assert(state_ != State::Working && "Worker is already working");

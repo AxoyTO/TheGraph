@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -35,7 +36,7 @@ struct Edge {
   const Duration& duration() const { return duration_; }
 
  private:
-  Duration duration_;
+  const Duration duration_;
 };
 
 class Graph {
@@ -59,7 +60,8 @@ class Graph {
   const Vertex& get_vertex(const VertexId& id) const;
   const Edge& get_edge(const EdgeId& edge_id) const;
   const std::vector<EdgeId>& get_colored_edges(const EdgeColor& color) const;
-  std::vector<VertexId> get_linked_vertex_ids(const VertexId& vertex_id) const;
+  std::map<VertexId, Edge::Duration> get_linked_vertex_ids(
+      const VertexId& vertex_id) const;
 
  private:
   void add_id_to_depth_map(const VertexId& begin, const VertexId& end);

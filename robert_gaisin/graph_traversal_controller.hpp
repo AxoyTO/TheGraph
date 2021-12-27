@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graph_traverser.hpp"
-
 #include <atomic>
 #include <functional>
 #include <list>
@@ -11,7 +9,8 @@
 
 namespace uni_course_cpp {
 
-using uni_course_cpp::Graph;
+class Graph;
+class GraphPath;
 
 class GraphTraversalController {
  public:
