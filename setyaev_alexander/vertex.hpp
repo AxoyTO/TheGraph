@@ -3,7 +3,7 @@
 #pragma once
 
 #include <vector>
-
+namespace uni_course_cpp {
 using VertexId = int;
 
 class Vertex {
@@ -14,3 +14,4 @@ class Vertex {
  private:
   VertexId id_ = 0;
 };
+}  // namespace uni_course_cpp

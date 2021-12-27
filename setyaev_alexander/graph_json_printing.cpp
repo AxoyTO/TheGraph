@@ -1,30 +1,15 @@
 #include "graph_json_printing.hpp"
+#include "graph_printing.hpp"
 
 #include <iostream>
 #include <sstream>
 
+namespace uni_course_cpp {
 namespace printing {
+
 namespace json {
 
-std::string color_to_string(const Edge::Color& color) {
-  switch (color) {
-    case Edge::Color::Grey:
-      return "\"grey\"";
-
-    case Edge::Color::Yellow:
-      return "\"yellow\"";
-
-    case Edge::Color::Green:
-      return "\"green\"";
-
-    case Edge::Color::Red:
-      return "\"red\"";
-  }
-
-  throw std::runtime_error("Failed to determine color");
-}
-
-std::string graph_to_string(const Graph& graph) {
+std::string graph_to_string(const uni_course_cpp::Graph& graph) {
   std::stringstream json;
 
   json << "{\n\"vertices\": [\n";
@@ -51,9 +36,10 @@ std::string graph_to_string(const Graph& graph) {
   return json.str();
 }
 
-std::string vertex_to_string(const Vertex& vertex,
-                             Graph::Depth depth,
-                             const std::vector<EdgeId>& connected_edge_ids) {
+std::string vertex_to_string(
+    const uni_course_cpp::Vertex& vertex,
+    uni_course_cpp::Graph::Depth depth,
+    const std::vector<uni_course_cpp::EdgeId>& connected_edge_ids) {
   std::stringstream json;
   json << "{\n  \"id\": " << vertex.get_id() << ",\n  \"edge_ids\": [";
 
@@ -69,13 +55,16 @@ std::string vertex_to_string(const Vertex& vertex,
   return json.str();
 }
 
-std::string edge_to_string(const Edge& edge) {
+std::string edge_to_string(const uni_course_cpp::Edge& edge) {
   std::stringstream json;
   json << "{\n  \"id\": " << edge.get_id() << ",\n  \"vertex_ids\": ["
        << edge.get_first_vertex_id() << ", " << edge.get_second_vertex_id()
-       << "],\n  \"color\": " << color_to_string(edge.get_color()) << "\n}";
+       << "],\n  \"color\": \""
+       << uni_course_cpp::printing::color_to_string(edge.get_color())
+       << "\"\n}";
   return json.str();
 }
 
 }  // namespace json
 }  // namespace printing
+}  // namespace uni_course_cpp

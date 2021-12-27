@@ -2,12 +2,10 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <random>
+
 #include <unordered_map>
 
-constexpr double kGreenProbability = 0.1;
-constexpr double kRedProbability = 0.33;
-
+namespace uni_course_cpp {
 const Edge& Graph::get_edge(EdgeId id) const {
   for (const auto& edge : edges_) {
     if (edge.get_id() == id) {
@@ -21,103 +19,8 @@ const std::vector<Vertex>& Graph::get_vertices() const {
   return vertices_;
 }
 
-bool check_probability(double probability) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::bernoulli_distribution d(probability);
-  return d(gen);
-}
-
-int get_random_index(int size) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distrib(0, size);
-  return distrib(gen);
-}
-
-void GraphGenerator::generate_gray_edges(Graph& graph) const {
-  for (int depth = 0; depth < params_.depth(); ++depth) {
-    // const for not to iterate changing objects
-    const std::vector<VertexId> vertices = graph.get_vertex_ids_at_depth(depth);
-    for (const auto& vertex : vertices) {
-      if (check_probability(1.0 - (double)depth / (double)params_.depth())) {
-        for (int i = 0; i < params_.new_vertices_count(); ++i) {
-          const auto& new_vertex = graph.add_vertex();
-          graph.add_edge(vertex, new_vertex.get_id());
-        }
-      }
-    }
-  }
-}
-
-void GraphGenerator::generate_green_edges(Graph& graph) const {
-  for (const auto& vertex : graph.get_vertices()) {
-    if (check_probability(kGreenProbability)) {
-      graph.add_edge(vertex.get_id(), vertex.get_id());
-    }
-  }
-}
-
-std::vector<VertexId> get_unconected_vertex_ids(
-    const Graph& graph,
-    const Vertex& vertex,
-    const std::vector<VertexId>& vertices_at_depth) {
-  std::vector<VertexId> vertices_ids;
-  for (const auto& another_vertex : vertices_at_depth) {
-    if (!(graph.is_connected(vertex.get_id(), another_vertex))) {
-      vertices_ids.push_back(another_vertex);
-    }
-  }
-  return vertices_ids;
-}
-
-void GraphGenerator::generate_yellow_edges(Graph& graph) const {
-  for (const auto& first_vertex : graph.get_vertices()) {
-    if (graph.get_vertex_depth(first_vertex.get_id()) == graph.get_depth()) {
-      continue;
-    }
-
-    if (check_probability(
-            (double)graph.get_vertex_depth(first_vertex.get_id()) /
-            ((double)params_.depth() - 1.0))) {
-      const std::vector<VertexId>& second_vertices_ids =
-          graph.get_vertex_ids_at_depth(
-              graph.get_vertex_depth(first_vertex.get_id()) + 1);
-      const std::vector<VertexId> unconnected_vertex_ids =
-          get_unconected_vertex_ids(graph, first_vertex, second_vertices_ids);
-
-      if (unconnected_vertex_ids.size() > 0) {
-        const VertexId second_vertex_id =
-            unconnected_vertex_ids[get_random_index(
-                unconnected_vertex_ids.size() - 1)];
-
-        graph.add_edge(first_vertex.get_id(), second_vertex_id);
-      }
-    }
-  }
-}
-void GraphGenerator::generate_red_edges(Graph& graph) const {
-  for (const auto& first_vertex : graph.get_vertices()) {
-    if (graph.get_vertex_depth(first_vertex.get_id()) ==
-        graph.get_depth() - 1) {
-      continue;
-    }
-
-    if (check_probability(kRedProbability)) {
-      std::vector<VertexId> second_vertices_ids;
-      for (const auto& second_vertex : graph.get_vertices()) {
-        if (graph.get_vertex_depth(second_vertex.get_id()) ==
-            graph.get_vertex_depth(first_vertex.get_id()) + 2) {
-          second_vertices_ids.push_back(second_vertex.get_id());
-        }
-      }
-      if (second_vertices_ids.size() > 0) {
-        const VertexId second_vertex_id = second_vertices_ids[get_random_index(
-            second_vertices_ids.size() - 1)];
-        graph.add_edge(first_vertex.get_id(), second_vertex_id);
-      }
-    }
-  }
+const std::vector<Edge>& Graph::get_edges() const {
+  return edges_;
 }
 
 Vertex Graph::add_vertex() {
@@ -177,6 +80,7 @@ void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
       depth_map_[0].erase(depth_iterator);
     }
   }
+  colored_edges_[color].push_back(new_edge.get_id());
 }
 Edge::Color Graph::get_edge_color(VertexId from_vertex_id,
                                   VertexId to_vertex_id) {
@@ -215,16 +119,13 @@ bool Graph::is_connected(VertexId from_vertex_id, VertexId to_vertex_id) const {
   return false;
 }
 
-Graph GraphGenerator::generate() const {
-  auto graph = Graph();
-  graph.add_vertex();
-
-  generate_gray_edges(graph);
-
-  generate_green_edges(graph);
-
-  generate_yellow_edges(graph);
-
-  generate_red_edges(graph);
-  return graph;
+const std::vector<EdgeId>& Graph::get_colored_edge_ids(
+    const Edge::Color& color) const {
+  if (colored_edges_.find(color) == colored_edges_.end()) {
+    static const std::vector<EdgeId> empty_result = {};
+    return empty_result;
+  }
+  return colored_edges_.at(color);
 }
+
+}  // namespace uni_course_cpp
