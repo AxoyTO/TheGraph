@@ -43,4 +43,15 @@ std::string GraphPrinter::print() const {
   log_string << "}\n}\n";
   return log_string.str();
 }
+
+std::string GraphPrinter::print_path(const GraphPath& path) {
+  std::string result_string = "  {vertices: [";
+  result_string += std::to_string(path.vertex_ids[0]);
+  for (int i = 1; i < path.vertex_ids.size(); i++)
+    result_string += std::string(", ") + std::to_string(path.vertex_ids[i]);
+  result_string += std::string("], distance: ") +
+                   std::to_string(path.distance) + std::string("}");
+  return result_string;
+}
+
 }  // namespace uni_course_cpp
