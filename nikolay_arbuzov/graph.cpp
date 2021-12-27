@@ -133,6 +133,21 @@ const std::vector<Graph::EdgeId>& Graph::get_color_edge_ids(
   }
 }
 
+std::vector<Graph::VertexId> Graph::get_neighbors(
+    const Graph::VertexId& vertex_id) const {
+  const auto& neighbor_edges = connected_edge_ids(vertex_id);
+  std::vector<VertexId> result_vector;
+  for (const auto& edge_id : neighbor_edges) {
+    const auto& edge = get_edge(edge_id);
+    if (edge.from_vertex_id != vertex_id) {
+      result_vector.push_back(edge.from_vertex_id);
+    } else if (edge.to_vertex_id != vertex_id) {
+      result_vector.push_back(edge.to_vertex_id);
+    }
+  }
+  return result_vector;
+}
+
 std::string Graph::get_edges_distribution() const {
   std::stringstream result_string;
   result_string << "grey: " << get_color_edge_ids(Edge::Color::Grey).size()

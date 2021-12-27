@@ -10,6 +10,8 @@
 #include "graph_generator.hpp"
 #include "graph_json_printing.hpp"
 #include "graph_printing.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 namespace {
@@ -82,12 +84,30 @@ std::string generation_finished_string(const int graph_number,
   return log_string.str();
 }
 
-void prepare_temp_directory() {
-  if (!std::filesystem::exists(config::kTempDirectoryPath) ||
-      (std::filesystem::exists(config::kTempDirectoryPath) &&
-       !std::filesystem::is_directory(config::kTempDirectoryPath))) {
-    std::filesystem::create_directory(config::kTempDirectoryPath);
+std::string traversing_started_string(const int graph_number) {
+  std::stringstream log_string;
+  log_string << "Graph " << graph_number << " Traversing Started" << std::endl;
+  return log_string.str();
+}
+
+std::string traversing_finished_string(
+    const int graph_number,
+    const std::vector<uni_course_cpp::GraphPath>& paths) {
+  std::stringstream result_stream;
+  result_stream << "Graph " << graph_number << ", Traversal Finished, Paths: ["
+                << std::endl;
+  for (const auto& path : paths) {
+    result_stream << "  " << uni_course_cpp::printing::path_to_json(path);
+    if (path.vertex_ids.back() != paths.back().vertex_ids.back())
+      result_stream << ",";
+    result_stream << std::endl;
   }
+
+  result_stream << "]" << std::endl;
+  return result_stream.str();
+}
+void prepare_temp_directory() {
+  std::filesystem::create_directory(config::kTempDirectoryPath);
 }
 
 std::vector<uni_course_cpp::Graph> generate_graphs(
@@ -115,6 +135,19 @@ std::vector<uni_course_cpp::Graph> generate_graphs(
   return graphs;
 }
 
+void traverse_graphs(int threads_count,
+                     const std::vector<uni_course_cpp::Graph>& graphs) {
+  auto traversal_controller =
+      uni_course_cpp::GraphTraversalController(threads_count, graphs);
+  auto& logger = uni_course_cpp::Logger::get_logger();
+  traversal_controller.traverse_graphs(
+      [&logger](int index) { logger.log(traversing_started_string(index)); },
+      [&logger](int index,
+                const std::vector<uni_course_cpp::GraphPath>& paths) {
+        logger.log(traversing_finished_string(index, paths));
+      });
+}
+
 }  // namespace
 
 int main() {
@@ -128,5 +161,6 @@ int main() {
   const auto params =
       uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
+  traverse_graphs(threads_count, graphs);
   return 0;
 }

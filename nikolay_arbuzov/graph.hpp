@@ -65,6 +65,7 @@ class Graph {
   const std::set<EdgeId>& connected_edge_ids(const VertexId& id) const {
     return adjacency_list_.at(id);
   }
+  std::vector<VertexId> get_neighbors(const VertexId& vertex_id) const;
 
  private:
   std::vector<Edge> edges_;
