@@ -5,25 +5,8 @@
 
 namespace uni_course_cpp {
 namespace printing {
+
 namespace json {
-
-std::string color_to_string(const uni_course_cpp::Edge::Color& color) {
-  switch (color) {
-    case uni_course_cpp::Edge::Color::Grey:
-      return "\"grey\"";
-
-    case uni_course_cpp::Edge::Color::Yellow:
-      return "\"yellow\"";
-
-    case uni_course_cpp::Edge::Color::Green:
-      return "\"green\"";
-
-    case uni_course_cpp::Edge::Color::Red:
-      return "\"red\"";
-  }
-
-  throw std::runtime_error("Failed to determine color");
-}
 
 std::string graph_to_string(const uni_course_cpp::Graph& graph) {
   std::stringstream json;
@@ -75,7 +58,9 @@ std::string edge_to_string(const uni_course_cpp::Edge& edge) {
   std::stringstream json;
   json << "{\n  \"id\": " << edge.get_id() << ",\n  \"vertex_ids\": ["
        << edge.get_first_vertex_id() << ", " << edge.get_second_vertex_id()
-       << "],\n  \"color\": " << color_to_string(edge.get_color()) << "\n}";
+       << "],\n  \"color\": \""
+       << uni_course_cpp::printing::color_to_string(edge.get_color())
+       << "\"\n}";
   return json.str();
 }
 

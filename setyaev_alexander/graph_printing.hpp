@@ -4,9 +4,8 @@
 
 namespace uni_course_cpp {
 namespace printing {
+std::string color_to_string(const uni_course_cpp::Edge::Color& color);
 std::string print_graph(const uni_course_cpp::Graph& graph);
-std::string generation_started_string(int graph_number);
-std::string generation_finished_string(int graph_number,
-                                       const std::string& graph_description);
+
 }  // namespace printing
 }  // namespace uni_course_cpp

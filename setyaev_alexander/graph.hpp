@@ -31,6 +31,9 @@ class Graph {
 
   bool is_connected(VertexId from_vertex_id, VertexId to_vertex_id) const;
 
+  const std::vector<EdgeId>& get_colored_edge_ids(
+      const Edge::Color& color) const;
+
  private:
   std::vector<Vertex> vertices_;
   std::vector<Edge> edges_;
@@ -45,6 +48,7 @@ class Graph {
   VertexId vertex_id_counter_ = 0;
   EdgeId edge_id_counter_ = 0;
   std::vector<std::vector<VertexId>> depth_map_;
+  std::unordered_map<Edge::Color, std::vector<EdgeId>> colored_edges_;
 };
 
 }  // namespace uni_course_cpp

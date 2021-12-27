@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "graph.hpp"
+#include "graph_printing.hpp"
 
 namespace uni_course_cpp {
 namespace printing {

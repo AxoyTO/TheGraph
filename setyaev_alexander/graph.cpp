@@ -80,6 +80,7 @@ void Graph::add_edge(VertexId first_vertex_id, VertexId second_vertex_id) {
       depth_map_[0].erase(depth_iterator);
     }
   }
+  colored_edges_[color].push_back(new_edge.get_id());
 }
 Edge::Color Graph::get_edge_color(VertexId from_vertex_id,
                                   VertexId to_vertex_id) {
@@ -117,4 +118,14 @@ bool Graph::is_connected(VertexId from_vertex_id, VertexId to_vertex_id) const {
   }
   return false;
 }
+
+const std::vector<EdgeId>& Graph::get_colored_edge_ids(
+    const Edge::Color& color) const {
+  if (colored_edges_.find(color) == colored_edges_.end()) {
+    static const std::vector<EdgeId> empty_result = {};
+    return empty_result;
+  }
+  return colored_edges_.at(color);
+}
+
 }  // namespace uni_course_cpp

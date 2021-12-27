@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
@@ -59,6 +60,19 @@ void prepare_temp_directory() {
       std::string(uni_course_cpp::config::kTempDirectoryPath));
 }
 
+std::string generation_started_string(int graph_number) {
+  std::stringstream output;
+  output << "Graph " << graph_number << ", GenerationStarted";
+  return output.str();
+}
+std::string generation_finished_string(int graph_number,
+                                       const std::string& graph_description) {
+  std::stringstream output;
+  output << "Graph " << graph_number << ", GenerationFinished "
+         << graph_description;
+  return output.str();
+}
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_count = handle_new_vertices_count_input();
@@ -70,12 +84,11 @@ int main() {
   const auto generator = uni_course_cpp::GraphGenerator(params);
 
   for (int i = 0; i < graphs_count; i++) {
-    logger.log(uni_course_cpp::printing::generation_started_string(i));
+    logger.log(generation_started_string(i));
     const auto graph = generator.generate();
 
     const auto graph_description = uni_course_cpp::printing::print_graph(graph);
-    logger.log(uni_course_cpp::printing::generation_finished_string(
-        i, graph_description));
+    logger.log(generation_finished_string(i, graph_description));
 
     const auto graph_json =
         uni_course_cpp::printing::json::graph_to_string(graph);
