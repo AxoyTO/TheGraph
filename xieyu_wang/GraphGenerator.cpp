@@ -197,9 +197,6 @@ void GraphGenerator::generateGrey(Graph& graph,
   if (parentDepth + 1 >= params_.maxDepth) {
     return;
   }
-
-  // const double percent = 100.0 / (double) maxDepth_;
-
   for (int i = 0; i < params_.newVerticesNum; i++) {
     if (isLucky(getProbabilityGray(parentDepth, params_.maxDepth))) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);

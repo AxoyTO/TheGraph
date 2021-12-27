@@ -75,7 +75,7 @@ std::map<int, Graph> generateGraphs(const GraphGenerator::Params& params,
                                     int graphsCount,
                                     int threadsNum) {
   auto generationController =
-      GraphGenerationController(graphsCount, threadsNum, params);
+      GraphGenerationController(threadsNum, graphsCount, params);
 
   auto& logger = Logger::getLogger();
 
@@ -94,11 +94,11 @@ std::map<int, Graph> generateGraphs(const GraphGenerator::Params& params,
 int main() {
   std::filesystem::create_directory("./temp");
   Logger& logger = Logger::getLogger();
-  int maxDepth = ctrlMaxDepthEntry();
-  int newVerticesNum = ctrlNewVertexNum();
-  int newGraphNum = ctrlNewGraphNum();
-  int threadNum = ctrlThreadNum();
-  GraphGenerator::Params params(maxDepth, newVerticesNum);
+  const int maxDepth = ctrlMaxDepthEntry();
+  const int newVerticesNum = ctrlNewVertexNum();
+  const int newGraphNum = ctrlNewGraphNum();
+  const int threadNum = ctrlThreadNum();
+  const GraphGenerator::Params params(maxDepth, newVerticesNum);
   const auto graph = generateGraphs(params, newGraphNum, threadNum);
   return 0;
 }

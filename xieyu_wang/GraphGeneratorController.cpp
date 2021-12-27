@@ -2,19 +2,20 @@
 #include <cassert>
 #include <list>
 #include <thread>
-
-namespace uni_course_cpp {
+namespace {
 const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+}
+namespace uni_course_cpp {
 
 GraphGenerationController::GraphGenerationController(
     int threads_count,
     int graphs_count,
-    GraphGenerator::Params graphGeneratorParams)
+    const GraphGenerator::Params& graphGeneratorParams)
     : graphsCount_(graphs_count), graphGenerator_(graphGeneratorParams) {
   const auto workers_count = std::min(MAX_THREADS_COUNT, threads_count);
   for (int i = 0; i < workers_count; ++i) {
     workers_.emplace_back([this]() -> std::optional<JobCallback> {
-      const std::lock_guard queue_lock(jobsQueueMutex_);
+      const std::lock_guard queueLock(jobsQueueMutex_);
       if (!jobs_.empty()) {
         const auto job = jobs_.front();
         jobs_.pop();
@@ -47,7 +48,7 @@ void GraphGenerationController::generate(
   }
 
   while (true) {
-    const std::lock_guard queue_lock(jobsQueueMutex_);
+    const std::lock_guard queueLock(jobsQueueMutex_);
     if (jobs_.empty()) {
       break;
     }
