@@ -51,7 +51,6 @@ int main() {
     auto const graph = generator.generate();
     auto const graphPrinter = uni_course_cpp::GraphJsonPrinter(graph);
     auto const graphJson = graphPrinter.print();
-    std::cout << graphJson << std::endl;
     auto const graphDescription =
         uni_course_cpp::GraphPrinter::printGraph(graph);
     logger.log(generationFinishedString(i, graphDescription));

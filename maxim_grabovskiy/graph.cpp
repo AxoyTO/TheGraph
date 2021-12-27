@@ -14,14 +14,9 @@ void Graph::addEdge(VertexId fromVertexId, VertexId toVertexId) {
   if (color != Edge::Color::Green)
     edgeConectionMap_[toVertexId].push_back(newEdgeId);
   if (color == Edge::Color::Gray) {
-    for (int i = 0; i < (int)vertexIdByDepth_[0].size() - 1; i++) {
-      if (vertexIdByDepth_[0][i] == toVertexId)
-        vertexIdByDepth_.erase(vertexIdByDepth_.begin() + i);
-    }
     auto const newDepth = getDepth(fromVertex.id) + 1;
     if ((int)vertexIdByDepth_.size() - 1 < newDepth)
       vertexIdByDepth_.emplace_back();
-
     vertexIdByDepth_[newDepth].emplace_back(toVertexId);
     setDepth(toVertex.id, newDepth);
   }
