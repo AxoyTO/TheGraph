@@ -70,6 +70,9 @@ void Graph::add_edge(const VertexId& first_id, const VertexId& second_id) {
 }
 const vector<VertexId>& Graph::get_vertex_ids_at_depth(
     const Depth& depth) const {
+  if (depth >= levels_.size()) {
+    std::cout << depth << " " << levels_.size() << "endl";
+  }
   assert(depth < levels_.size() && "Depth out of range");
   assert(depth >= 0 && "Depth out of range");
   return levels_[depth];

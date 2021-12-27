@@ -55,6 +55,10 @@ class Graph {
   const std::vector<VertexId>& get_vertex_ids_at_depth(
       const Depth& depth) const;
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
+  const Vertex& get_vertex(const VertexId& vertex_id) const;
+  const Edge& get_edge(const EdgeId& edge_id) const;
+  Vertex& get_vertex(const VertexId& vertex_id);
+  Edge& get_edge(const EdgeId& edge_id);
 
  private:
   std::vector<Edge> edges_;
@@ -64,10 +68,6 @@ class Graph {
   EdgeId get_new_edge_id() { return edge_id_counter_++; }
   std::vector<std::vector<VertexId>> levels_;
   VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-  const Vertex& get_vertex(const VertexId& vertex_id) const;
-  const Edge& get_edge(const EdgeId& edge_id) const;
-  Vertex& get_vertex(const VertexId& vertex_id);
-  Edge& get_edge(const EdgeId& edge_id);
   void update_vertex_depth(const VertexId& from_vertex_id,
                            const VertexId& to_vertex_id);
   Edge::Color calculate_color(const VertexId& first_id,
