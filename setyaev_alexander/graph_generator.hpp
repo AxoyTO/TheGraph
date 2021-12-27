@@ -30,5 +30,4 @@ class GraphGenerator {
   const Params params_ = Params();
 };
 
-
-}
+}  // namespace uni_course_cpp

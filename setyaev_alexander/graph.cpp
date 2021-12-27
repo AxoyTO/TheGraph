@@ -5,7 +5,6 @@
 
 #include <unordered_map>
 
-
 namespace uni_course_cpp {
 const Edge& Graph::get_edge(EdgeId id) const {
   for (const auto& edge : edges_) {
@@ -20,11 +19,9 @@ const std::vector<Vertex>& Graph::get_vertices() const {
   return vertices_;
 }
 
-const std::vector<Edge>& Graph::get_edges() const{
-	return edges_;
+const std::vector<Edge>& Graph::get_edges() const {
+  return edges_;
 }
-
-
 
 Vertex Graph::add_vertex() {
   const Vertex& vertex = vertices_.emplace_back(get_new_vertex_id());
@@ -120,5 +117,4 @@ bool Graph::is_connected(VertexId from_vertex_id, VertexId to_vertex_id) const {
   }
   return false;
 }
-}
-
+}  // namespace uni_course_cpp

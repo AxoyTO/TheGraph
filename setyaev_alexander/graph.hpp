@@ -19,7 +19,7 @@ class Graph {
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
   const Edge& get_edge(EdgeId id) const;
-  const std::vector<VertexId>& get_vertex_ids_at_depth(Depth depth) const{
+  const std::vector<VertexId>& get_vertex_ids_at_depth(Depth depth) const {
     return depth_map_[depth];
   }
   Depth get_depth() const { return depth_map_.size(); }
@@ -47,4 +47,4 @@ class Graph {
   std::vector<std::vector<VertexId>> depth_map_;
 };
 
-}
+}  // namespace uni_course_cpp

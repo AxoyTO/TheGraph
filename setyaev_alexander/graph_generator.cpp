@@ -1,13 +1,9 @@
 #include "graph_generator.hpp"
 #include <random>
 
-
-
 namespace {
 constexpr double kGreenProbability = 0.1;
 constexpr double kRedProbability = 0.33;
-
-
 
 bool check_probability(double probability) {
   std::random_device rd;
@@ -22,7 +18,7 @@ int get_random_index(int size) {
   std::uniform_int_distribution<> distrib(0, size);
   return distrib(gen);
 }
-}
+}  // namespace
 namespace uni_course_cpp {
 
 void GraphGenerator::generate_gray_edges(Graph& graph) const {
@@ -124,4 +120,4 @@ Graph GraphGenerator::generate() const {
   return graph;
 }
 
-}
+}  // namespace uni_course_cpp

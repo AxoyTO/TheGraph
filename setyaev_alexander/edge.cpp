@@ -15,4 +15,4 @@ VertexId Edge::get_first_vertex_id() const {
 VertexId Edge::get_second_vertex_id() const {
   return second_vertex_id_;
 }
-}
+}  // namespace uni_course_cpp

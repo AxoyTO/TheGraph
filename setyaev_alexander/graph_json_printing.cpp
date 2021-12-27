@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace uni_course_cpp{
+namespace uni_course_cpp {
 namespace printing {
 namespace json {
 
@@ -52,9 +52,10 @@ std::string graph_to_string(const uni_course_cpp::Graph& graph) {
   return json.str();
 }
 
-std::string vertex_to_string(const uni_course_cpp::Vertex& vertex,
-                             uni_course_cpp::Graph::Depth depth,
-                             const std::vector<uni_course_cpp::EdgeId>& connected_edge_ids) {
+std::string vertex_to_string(
+    const uni_course_cpp::Vertex& vertex,
+    uni_course_cpp::Graph::Depth depth,
+    const std::vector<uni_course_cpp::EdgeId>& connected_edge_ids) {
   std::stringstream json;
   json << "{\n  \"id\": " << vertex.get_id() << ",\n  \"edge_ids\": [";
 
@@ -80,4 +81,4 @@ std::string edge_to_string(const uni_course_cpp::Edge& edge) {
 
 }  // namespace json
 }  // namespace printing
-}
+}  // namespace uni_course_cpp

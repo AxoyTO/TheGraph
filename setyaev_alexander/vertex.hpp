@@ -14,4 +14,4 @@ class Vertex {
  private:
   VertexId id_ = 0;
 };
-}
+}  // namespace uni_course_cpp
