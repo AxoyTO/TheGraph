@@ -1,4 +1,6 @@
 #include "graph_traverser.hpp"
+#include "graph_path.hpp"
+
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -20,7 +22,8 @@ namespace uni_course_cpp {
 
 GraphPath GraphTraverser::find_shortest_path(
     const VertexId& source_vertex_id,
-    const VertexId& destination_vertex_id) const {
+    const VertexId& destination_vertex_id,
+    bool fast) const {
   assert(graph_.has_vertex(source_vertex_id));
   assert(graph_.has_vertex(destination_vertex_id));
 
@@ -28,6 +31,8 @@ GraphPath GraphTraverser::find_shortest_path(
 
   std::vector<GraphPath::Distance> distances(vertices_count, MAX_DISTANCE);
   distances[source_vertex_id] = 0;
+  std::vector<Edge::Duration> durations(vertices_count, MAX_DISTANCE);
+  durations[source_vertex_id] = 0;
 
   std::queue<VertexId> queue;
   queue.push(source_vertex_id);
@@ -37,12 +42,20 @@ GraphPath GraphTraverser::find_shortest_path(
   while (!queue.empty()) {
     const auto current_vertex_id = queue.front();
     queue.pop();
+    const auto linked_vertex_map =
+        graph_.get_linked_vertex_ids(current_vertex_id);
+    for (auto vertex_iter = linked_vertex_map.begin();
+         vertex_iter != linked_vertex_map.end(); ++vertex_iter) {
+      const auto vertex_id = vertex_iter->first;
+      const auto duration = vertex_iter->second;
+      const auto distance =
+          distances[current_vertex_id] + (fast ? duration : 1);
+      const auto current_durations = durations[current_vertex_id] + duration;
 
-    for (const auto& vertex_id :
-         graph_.get_linked_vertex_ids(current_vertex_id)) {
-      if (distances[current_vertex_id] + 1 < distances[vertex_id]) {
+      if (distance < distances[vertex_id]) {
         queue.push(vertex_id);
-        distances[vertex_id] = distances[current_vertex_id] + 1;
+        distances[vertex_id] = distance;
+        durations[vertex_id] = current_durations;
         previous_ids[vertex_id] = current_vertex_id;
         if (destination_vertex_id == vertex_id) {
           break;
@@ -64,7 +77,7 @@ GraphPath GraphTraverser::find_shortest_path(
     return result;
   }();
 
-  return GraphPath(path);
+  return GraphPath(path, durations[destination_vertex_id]);
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths() const {
