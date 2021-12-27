@@ -1,8 +1,16 @@
 #include "graph_generator.hpp"
+#include <atomic>
+#include <functional>
+#include <list>
+#include <mutex>
 #include <random>
+#include <thread>
+#include <vector>
+
 namespace {
 constexpr float RED_GENERATION_PROBABILITY = 0.33;
 constexpr float GREEN_GENERATION_PROBABILITY = 0.1;
+const int MAX_THREAD_COUNT = std::thread::hardware_concurrency();
 
 bool checkProbability(float probability) {
   std::random_device seed{};
@@ -30,39 +38,108 @@ std::vector<uni_course_cpp::VertexId> getUnconnectedVertexIds(
 }  // namespace
 namespace uni_course_cpp {
 Graph GraphGenerator::generate() const {
+  std::mutex mutex;
   auto graph = Graph();
   graph.addVertex();
   generateGrayEdges(graph);
-  generateGreenEdges(graph);
-  generateYellowEdges(graph);
-  generateRedEdges(graph);
+  std::thread greenThread(
+      [&graph, &mutex, this]() { generateGreenEdges(graph, mutex); });
+  std::thread yellowThread(
+      [&graph, &mutex, this]() { generateYellowEdges(graph, mutex); });
+  std::thread redThread(
+      [&graph, &mutex, this]() { generateRedEdges(graph, mutex); });
+
+  greenThread.join();
+  yellowThread.join();
+  redThread.join();
   return graph;
 }
 
 void GraphGenerator::generateGrayEdges(Graph& graph) const {
-  float const step = 100.0 / (params_.depth - 1);
-  for (int currentDepth = 0; currentDepth < params_.depth; currentDepth++) {
-    bool generated = false;
-    const float generationProb = ((100.0 - (step * (currentDepth))) / 100);
-    for (auto parentId : graph.getVertexIdByDepth(currentDepth)) {
-      for (int j = 0; j < params_.new_vertices_num; j++) {
-        if (checkProbability(generationProb)) {
-          graph.spawnVertex(parentId);
-          generated = true;
+  graph.addVertex();
+  using JobCallback = std::function<void()>;
+  auto jobs = std::list<JobCallback>();
+  std::mutex jobsMutex;
+  std::atomic<bool> shouldTerminate = false;
+  std::atomic<int> jobsDone = 0;
+  for (int jobNumber = 0; jobNumber < params_.newVerticesNum; jobNumber++) {
+    jobs.push_back([&jobsDone, &jobsMutex, &graph, this]() {
+      generateGrayBranch(graph, 0, 0, jobsMutex);
+      jobsDone++;
+    });
+  }
+  auto const worker = [&shouldTerminate, &jobsMutex, &jobs]() {
+    while (true) {
+      if (shouldTerminate) {
+        return;
+      }
+      auto const jobOptional = [&jobs,
+                                &jobsMutex]() -> std::optional<JobCallback> {
+        std::lock_guard<std::mutex> const lock(jobsMutex);
+        if ([&jobs]() { return jobs.size(); }()) {
+          return [&jobs]() {
+            auto const job = jobs.back();
+            jobs.pop_back();
+            return job;
+          }();
         }
+        return std::nullopt;
+      }();
+
+      if (jobOptional.has_value()) {
+        auto const& job = jobOptional.value();
+        job();
       }
     }
-    if (!generated)
-      break;
+  };
+  auto const threadCount = std::min(MAX_THREAD_COUNT, params_.newVerticesNum);
+  auto threads = std::vector<std::thread>();
+  threads.reserve(threadCount);
+  for (int i = 0; i < threadCount; ++i) {
+    threads.push_back(std::thread(worker));
+  }
+
+  while (jobsDone < params_.newVerticesNum) {
+  }
+  shouldTerminate = true;
+  for (auto& thread : threads) {
+    thread.join();
   }
 }
-void GraphGenerator::generateGreenEdges(Graph& graph) const {
+
+void GraphGenerator::generateGrayBranch(Graph& graph,
+                                        Depth currentDepth,
+                                        VertexId const& currentVertexId,
+                                        std::mutex& jobsMutex) const {
+  if (currentDepth == params_.depth) {
+    return;
+  }
+  if (!checkProbability(float(params_.depth - currentDepth) / params_.depth)) {
+    return;
+  }
+
+  VertexId const newVertexId = [&graph, &jobsMutex, &currentVertexId]() {
+    std::lock_guard<std::mutex> const lock(jobsMutex);
+    auto const& newVertex = graph.addVertex();
+    graph.addEdge(currentVertexId, newVertex);
+    return newVertex;
+  }();
+  for (int jobNumber = 0; jobNumber < params_.newVerticesNum; ++jobNumber) {
+    generateGrayBranch(graph, currentDepth + 1, newVertexId, jobsMutex);
+  }
+}
+
+void GraphGenerator::generateGreenEdges(Graph& graph, std::mutex& mutex) const {
   for (Graph::Vertex const& vertex : graph.getVertexes()) {
-    if (checkProbability(GREEN_GENERATION_PROBABILITY))
+    if (checkProbability(GREEN_GENERATION_PROBABILITY)) {
+      std::lock_guard<std::mutex> const lock(mutex);
       graph.addEdge(vertex.id, vertex.id);
+    }
   }
 }
-void GraphGenerator::generateYellowEdges(Graph& graph) const {
+
+void GraphGenerator::generateYellowEdges(Graph& graph,
+                                         std::mutex& mutex) const {
   float const step = 100.0 / (params_.depth - 1);
   for (auto vertex : graph.getVertexes()) {
     if (checkProbability(
@@ -71,24 +148,29 @@ void GraphGenerator::generateYellowEdges(Graph& graph) const {
       auto const NextVertexesIds = getUnconnectedVertexIds(
           vertex.id, graph.getVertexIdByDepth(graph.getDepth(vertex.id) + 1),
           graph);
-      if (NextVertexesIds.size() > 0)
+      if (NextVertexesIds.size() > 0) {
+        std::lock_guard<std::mutex> const lock(mutex);
         graph.addEdge(
             vertex.id,
             NextVertexesIds[randomIntNumber(NextVertexesIds.size() - 1)]);
+      }
     }
   }
 }
-void GraphGenerator::generateRedEdges(Graph& graph) const {
+
+void GraphGenerator::generateRedEdges(Graph& graph, std::mutex& mutex) const {
   for (auto vertex : graph.getVertexes()) {
     if (graph.getDepth(vertex.id) < params_.depth - 2 &&
         checkProbability(RED_GENERATION_PROBABILITY)) {
       auto const NextVertexesIds = getUnconnectedVertexIds(
           vertex.id, graph.getVertexIdByDepth(graph.getDepth(vertex.id) + 2),
           graph);
-      if (NextVertexesIds.size() > 0)
+      if (NextVertexesIds.size() > 0) {
+        std::lock_guard<std::mutex> const lock(mutex);
         graph.addEdge(
             vertex.id,
             NextVertexesIds[randomIntNumber(NextVertexesIds.size() - 1)]);
+      }
     }
   }
 }
