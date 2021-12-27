@@ -7,6 +7,7 @@
 #include <set>
 #include <thread>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include "config.hpp"
@@ -132,7 +133,7 @@ std::vector<GraphPath> GraphTraverser::find_all_paths(
           find_shortest_path(source_vertex_id, destination_vertex_id);
       {
         const std::lock_guard result_lock(result_mutex);
-        result.push_back(current_path);
+        result.push_back(std::move(current_path));
       }
     });
   }
