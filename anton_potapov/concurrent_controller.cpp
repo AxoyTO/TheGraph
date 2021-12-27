@@ -4,10 +4,9 @@
 #include <thread>
 
 #include "concurrent_controller.hpp"
+#include "config.hpp"
 
 namespace uni_cource_cpp {
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
-
 ConcurrentController::Worker::Worker(const GetJobCallback& get_job_callback)
     : get_job_callback_(get_job_callback) {}
 
@@ -41,7 +40,7 @@ ConcurrentController::Worker::~Worker() {
 }
 
 void ConcurrentController::init_workers(int threads_count) {
-  const auto workers_count = std::min(MAX_THREADS_COUNT, threads_count);
+  const auto workers_count = std::min(config::MAX_THREADS_COUNT, threads_count);
   for (int i = 0; i < workers_count; ++i) {
     workers_.emplace_back([this]() -> std::optional<JobCallback> {
       const std::lock_guard queue_lock(jobs_queue_mutex_);

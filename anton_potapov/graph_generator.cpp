@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_generator.hpp"
 
@@ -34,8 +35,6 @@ bool is_lucky(float probability) {
 }  // namespace
 
 namespace uni_cource_cpp {
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
-
 void GraphGenerator::generate_vertices_branch(
     Graph& graph,
     std::mutex& graph_mutex,
@@ -98,7 +97,7 @@ void GraphGenerator::generate_vertices(Graph& graph) const {
   };
 
   const auto threads_count =
-      std::min(MAX_THREADS_COUNT, params_.new_vertices_num);
+      std::min(config::MAX_THREADS_COUNT, params_.new_vertices_num);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 

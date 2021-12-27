@@ -9,12 +9,11 @@
 #include <tuple>
 #include <vector>
 
+#include "config.hpp"
 #include "graph.hpp"
 #include "graph_traverser.hpp"
 
 namespace uni_cource_cpp {
-const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
-
 GraphTraverser::GraphTraverser(const Graph& graph) : graph_(graph) {}
 
 std::map<VertexId, int> GraphTraverser::get_updated_depths(
@@ -162,8 +161,9 @@ std::vector<GraphPath> GraphTraverser::find_all_paths(
     }
   };
 
-  const auto threads_count = std::min(
-      MAX_THREADS_COUNT, static_cast<int>(destination_vertices_ids.size()));
+  const auto threads_count =
+      std::min(config::MAX_THREADS_COUNT,
+               static_cast<int>(destination_vertices_ids.size()));
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
