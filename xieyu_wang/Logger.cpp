@@ -5,7 +5,7 @@
 namespace uni_course_cpp {
 
 Logger::Logger() : file_(config::loggerFilePath()) {
-  const std::lock_guard logger_usage_lock(mutex_);
+  const std::lock_guard lock(mutex_);
   if (!file_.is_open()) {
     throw std::runtime_error("Error to open/read log");
   }
