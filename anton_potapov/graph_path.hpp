@@ -5,15 +5,18 @@
 #include "graph.hpp"
 
 namespace uni_cource_cpp {
-struct GraphPath {
+class GraphPath {
  public:
   using Distance = int;
 
   GraphPath(std::vector<VertexId> vertex_ids, std::vector<EdgeId> edge_ids);
 
+  const std::vector<VertexId>& path_vector_ids() const;
+
   Distance distance() const;
 
-  std::vector<VertexId> vertex_ids;
-  std::vector<EdgeId> edge_ids;
+ private:
+  std::vector<VertexId> vertex_ids_;
+  std::vector<EdgeId> edge_ids_;
 };
 }  // namespace uni_cource_cpp

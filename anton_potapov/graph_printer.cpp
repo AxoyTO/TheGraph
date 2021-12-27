@@ -110,10 +110,10 @@ std::string GraphPrinter::print_paths(std::vector<GraphPath> paths) {
   graph_paths_stringstream << "[" << std::endl;
   for (auto it = paths.begin(); it != paths.end(); ++it) {
     graph_paths_stringstream << "\t{vertices: [";
-    for (auto vertex_id_it = it->vertex_ids.begin();
-         vertex_id_it != it->vertex_ids.end(); ++vertex_id_it) {
+    for (auto vertex_id_it = it->path_vector_ids().begin();
+         vertex_id_it != it->path_vector_ids().end(); ++vertex_id_it) {
       graph_paths_stringstream << *vertex_id_it;
-      if (std::next(vertex_id_it) != it->vertex_ids.end()) {
+      if (std::next(vertex_id_it) != it->path_vector_ids().end()) {
         graph_paths_stringstream << ", ";
       }
     }
