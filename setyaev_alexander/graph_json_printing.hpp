@@ -2,7 +2,6 @@
 #include <string>
 #include "graph.hpp"
 
-
 namespace uni_course_cpp {
 namespace printing {
 namespace json {
