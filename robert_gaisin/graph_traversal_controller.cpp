@@ -1,6 +1,6 @@
 #include "graph_traversal_controller.hpp"
-#include "graph_traverser.hpp"
 #include "graph_path.hpp"
+#include "graph_traverser.hpp"
 
 #include <algorithm>
 #include <cassert>
