@@ -9,8 +9,8 @@
 
 namespace uni_course_cpp {
 
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::GraphGenerator;
+using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerator;
 
 class GraphGenerationController {
  public:

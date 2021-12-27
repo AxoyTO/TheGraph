@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 
 using VertexId = int;
 using EdgeId = int;
@@ -74,4 +74,4 @@ class Graph {
   std::vector<std::vector<VertexId>> depth_map_;
   std::unordered_map<EdgeColor, std::vector<EdgeId>> edges_color_map_;
 };
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

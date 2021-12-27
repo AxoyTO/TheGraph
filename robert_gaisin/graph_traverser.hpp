@@ -5,8 +5,8 @@
 
 namespace uni_course_cpp {
 
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::VertexId;
+using uni_course_cpp::Graph;
+using uni_course_cpp::VertexId;
 
 class GraphTraverser {
  public:

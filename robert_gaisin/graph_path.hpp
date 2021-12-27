@@ -2,7 +2,7 @@
 
 namespace uni_course_cpp {
 
-using uni_cource_cpp::VertexId;
+using uni_course_cpp::VertexId;
 
 struct GraphPath {
  public:

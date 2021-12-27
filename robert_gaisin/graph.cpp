@@ -4,8 +4,8 @@
 #include <random>
 
 namespace {
-using uni_cource_cpp::Edge;
-using uni_cource_cpp::EdgeColor;
+using uni_course_cpp::Edge;
+using uni_course_cpp::EdgeColor;
 
 Edge::Duration determine_duration(const EdgeColor& color) {
   std::random_device rd;
@@ -25,7 +25,7 @@ Edge::Duration determine_duration(const EdgeColor& color) {
   throw std::runtime_error("Color error");
 }
 }  // namespace
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 bool Vertex::has_edge_id(const EdgeId& id) const {
   for (const auto& edge_id : edge_ids_)
     if (id == edge_id)
@@ -147,4 +147,4 @@ std::vector<VertexId> Graph::get_linked_vertex_ids(
   return linked_ids;
 }
 
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

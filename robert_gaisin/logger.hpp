@@ -6,7 +6,7 @@
 
 #include "config.hpp"
 
-namespace uni_cource_cpp {
+namespace uni_course_cpp {
 
 class Logger {
  public:
@@ -20,7 +20,7 @@ class Logger {
   ~Logger();
 
  private:
-  Logger() : file_stream_(uni_cource_cpp::config::log_file_path()) {
+  Logger() : file_stream_(uni_course_cpp::config::log_file_path()) {
     if (!file_stream_.is_open()) {
       throw std::runtime_error("Failed to open file stream");
     }
@@ -34,4 +34,4 @@ class Logger {
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
 };
-}  // namespace uni_cource_cpp
+}  // namespace uni_course_cpp

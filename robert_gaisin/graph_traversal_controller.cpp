@@ -9,7 +9,7 @@ const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 
 namespace uni_course_cpp {
 
-using uni_cource_cpp::Graph;
+using uni_course_cpp::Graph;
 
 void GraphTraversalController::Worker::start() {
   assert(state_ != State::Working && "Worker is already working");

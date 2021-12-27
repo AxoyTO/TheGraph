@@ -11,7 +11,7 @@
 
 namespace uni_course_cpp {
 
-using uni_cource_cpp::Graph;
+using uni_course_cpp::Graph;
 
 class GraphTraversalController {
  public:

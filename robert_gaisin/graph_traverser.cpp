@@ -87,7 +87,7 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
           GraphPath path = find_shortest_path(0, vertex_id);
           {
             std::lock_guard lock(paths_mutex);
-            paths.push_back(path);
+            paths.push_back(std::move(path));
           }
           finished_jobs_num++;
         });

@@ -14,13 +14,13 @@
 #include <iomanip>
 #include <iostream>
 
-using uni_cource_cpp::Graph;
-using uni_cource_cpp::GraphGenerator;
-using uni_cource_cpp::Logger;
-using uni_cource_cpp::config::log_file_path;
-using uni_cource_cpp::graph_printing::print_graph;
-using uni_cource_cpp::graph_printing::print_graph_description;
-using uni_cource_cpp::graph_printing::print_path;
+using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerator;
+using uni_course_cpp::Logger;
+using uni_course_cpp::config::log_file_path;
+using uni_course_cpp::graph_printing::print_graph;
+using uni_course_cpp::graph_printing::print_graph_description;
+using uni_course_cpp::graph_printing::print_path;
 using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphPath;
 using uni_course_cpp::GraphTraversalController;
@@ -87,11 +87,11 @@ int handle_graphs_count_input() {
 }
 
 void prepare_temp_directory() {
-  std::filesystem::create_directory(uni_cource_cpp::config::kTempDirectoryPath);
+  std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 }
 
 void write_to_file(const std::string& graph_json, const std::string& filename) {
-  std::ofstream out(uni_cource_cpp::config::kTempDirectoryPath + filename);
+  std::ofstream out(uni_course_cpp::config::kTempDirectoryPath + filename);
   out << graph_json;
   out.close();
 }
@@ -125,7 +125,7 @@ std::string traversal_started_string(int graph_num) {
 }
 
 std::string traversal_finished_string(int graph_number,
-                                      std::vector<GraphPath> paths) {
+                                      std::vector<GraphPath>& paths) {
   std::stringstream res;
   res << get_current_date_time() << ": Graph " << graph_number + 1
       << ", Traversal Finished, Paths: [";
