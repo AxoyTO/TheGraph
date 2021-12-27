@@ -85,10 +85,10 @@ GraphPath GraphTraverser::find_shortest_path(
                                         ? current_edge.vertex2_id
                                         : current_edge.vertex1_id);
       if (distance.find(next_vertex_id) == distance.end() ||
-          current_distance + current_edge.weight < distance[next_vertex_id]) {
+          current_distance + 1 < distance[next_vertex_id]) {
         lowest_distance_set.erase(
             std::make_pair(distance[next_vertex_id], next_vertex_id));
-        distance[next_vertex_id] = current_distance + current_edge.weight;
+        distance[next_vertex_id] = current_distance + 1;
         lowest_distance_set.insert(
             std::make_pair(distance[next_vertex_id], next_vertex_id));
         previous_vertex_id[next_vertex_id] =

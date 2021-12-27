@@ -15,13 +15,11 @@ Vertex::Vertex(const VertexId& vertex_id) : id(vertex_id) {}
 Edge::Edge(const EdgeId& edge_id,
            const VertexId& vertex1,
            const VertexId& vertex2,
-           const EdgeColor& edge_color,
-           const EdgeWeight& edge_weight)
+           const EdgeColor& edge_color)
     : vertex1_id(vertex1),
       vertex2_id(vertex2),
       color(edge_color),
-      id(edge_id),
-      weight(edge_weight) {}
+      id(edge_id) {}
 
 const std::set<EdgeId>& Vertex::connected_edges() const {
   return connected_edges_;
