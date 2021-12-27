@@ -2,8 +2,10 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_json_printer.hpp"
 #include "graph_printer.hpp"
@@ -11,6 +13,7 @@
 
 using uni_course_cpp::Depth;
 using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
 using uni_course_cpp::GraphJsonPrinter;
 using uni_course_cpp::GraphPrinter;
@@ -58,13 +61,25 @@ int handle_new_vertices_num_input() {
 
 int handle_graphs_count_input() {
   int graphs_count;
-  std::cout << "Input count of graphs:\n";
+  std::cout << "Input count of graphs:" << std::endl;
   std::cin >> graphs_count;
   while (graphs_count < 0) {
-    std::cout << "Graph count must be be >= 0\n";
+    std::cout << "Graph count must be be >= 0" << std::endl;
     std::cin >> graphs_count;
   }
   return graphs_count;
+}
+
+int handle_threads_count_input() {
+  int threads_num;
+  std::cout << "Enter the number of threads: " << std::endl;
+  std::cin >> threads_num;
+  while (threads_num < 1 || threads_num > std::thread::hardware_concurrency()) {
+    std::cout << "number of threads must be > 0 and < "
+              << std::thread::hardware_concurrency() << std::endl;
+    std::cin >> threads_num;
+  }
+  return threads_num;
 }
 
 void write_to_file(const std::string& graph_output,
@@ -75,26 +90,40 @@ void write_to_file(const std::string& graph_output,
   out_json.close();
 }
 
-int main() {
-  const auto new_vertices_num = handle_new_vertices_num_input();
-  const Depth depth = handle_depth_input();
-  const int graphs_count = handle_graphs_count_input();
-  const auto params = GraphGenerator::Params(depth, new_vertices_num);
-  const auto generator = GraphGenerator(params);
-  auto& logger = uni_course_cpp::Logger::get_instance();
+std::vector<Graph> generate_graphs(int graphs_count,
+                                   int threads_count,
+                                   const GraphGenerator::Params& params) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
 
+  auto& logger = Logger::get_instance();
+
+  auto graphs = std::vector<Graph>(graphs_count);
   std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
 
-  for (int i = 0; i < graphs_count; i++) {
-    logger.log(generation_started_string(i));
-    const auto graph = generator.generate_graph();
+  generation_controller.generate(
+      [&logger](int i) { logger.log(generation_started_string(i)); },
+      [&logger, &graphs](int i, Graph&& graph) {
+        const auto graph_printer = GraphPrinter(graph);
+        const auto graph_json_printer = GraphJsonPrinter(graph);
+        logger.log(generation_finished_string(i, graph_printer.print()));
+        const std::string file_name =
+            std::string(uni_course_cpp::config::kTempDirectoryPath) +
+            std::to_string(i) + ".json";
+        write_to_file(graph_json_printer.print(), file_name);
+        graphs.push_back(graph);
+      });
+  return graphs;
+}
 
-    const auto graph_printer = GraphPrinter(graph);
-    logger.log(generation_finished_string(i, graph_printer.print()));
+int main() {
+  const int depth = handle_depth_input();
+  const int new_vertices_num = handle_new_vertices_num_input();
+  const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
 
-    const auto graph_json_printer = GraphJsonPrinter(graph);
-    write_to_file(graph_json_printer.print(),
-                  uni_course_cpp::config::kTempDirectoryPath +
-                      std::to_string(i) + ".json");
-  }
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+  const auto graphs = generate_graphs(graphs_count, threads_count, params);
+
+  return 0;
 }

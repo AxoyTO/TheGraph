@@ -41,6 +41,23 @@ bool isLucky(float probability) {
   std::bernoulli_distribution distribution(probability);
   return distribution(gen);
 }
+}
+int getRandomVertexId(const std::vector<int> destinationLevelIds) {
+  assert(!destinationLevelIds.empty() && "destinationLevelIds is empty!!!");
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<std::mt19937::result_type> vertexIndex(
+      0, destinationLevelIds.size() - 1);
+  return destinationLevelIds[vertexIndex(gen)];
+}
+bool isLucky(float probability) {
+  assert(probability >= 0);
+  assert(probability <= 1.0);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::bernoulli_distribution distribution(probability);
+  return distribution(gen);
+}
 void generateGreen(uni_course_cpp::Graph& graph, std::mutex& mutex) {
   for (const auto& vertex : graph.getVertices()) {
     if (isLucky(GREEN_EDGE_PROBABILITY)) {
@@ -124,7 +141,9 @@ void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
 
 }  // namespace
 namespace uni_course_cpp {
-GraphGenerator::GraphGenerator(Params params) : params_(params) {}
+
+GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
+    : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
 
 void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   using JobCallback = std::function<void()>;
@@ -132,6 +151,7 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
 
   std::atomic<int> jobsDone = 0;
   std::mutex lockGraph;
+
 
   for (int i = 0; i < params_.newVerticesNum; i++) {
     jobs.emplace_back([this, &graph, &firstVertexId, &lockGraph, &jobsDone]() {
@@ -164,7 +184,6 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
       }
     }
   };
-
   const auto threads_count =
       std::min(MAX_THREADS_COUNT, params_.newVerticesNum);
   auto threads = std::vector<std::thread>();
@@ -194,14 +213,13 @@ void GraphGenerator::generateGrey(Graph& graph,
     return new_vertex_id;
   }();
 
-  if (parentDepth + 1 >= params_.maxDepth) {
+
+  if (parentDepth + 1 >= maxDepth_) {
     return;
   }
 
-  // const double percent = 100.0 / (double) maxDepth_;
-
-  for (int i = 0; i < params_.newVerticesNum; i++) {
-    if (isLucky(getProbabilityGray(parentDepth, params_.maxDepth))) {
+  for (int i = 0; i < newVerticesNum_; i++) {
+    if (isLucky(getProbabilityGray(parentDepth, maxDepth_))) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }
@@ -223,7 +241,6 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
-
 GraphGenerator::Params::Params(int maxDepth, int newVerticesNum)
     : maxDepth(maxDepth), newVerticesNum(newVerticesNum) {}
 }  // namespace uni_course_cpp

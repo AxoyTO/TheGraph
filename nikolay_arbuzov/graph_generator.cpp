@@ -1,6 +1,7 @@
 #include "graph_generator.hpp"
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <list>
 #include <mutex>
 #include <random>
@@ -50,9 +51,6 @@ uni_course_cpp::Graph::VertexId get_random_vertex_id(
 namespace uni_course_cpp {
 
 void GraphGenerator::generate_grey_edges(Graph& graph) const {
-  // Job - это lambda функция,
-  // которая энкапсулирует в себе генерацию однйо ветви
-
   graph.add_vertex();
 
   using JobCallback = std::function<void()>;
@@ -62,7 +60,6 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
   std::atomic<bool> should_terminate = false;
   std::atomic<int> attempts_count = 0;
 
-  // Заполняем список работ для воркеров
   for (int attempt_number = 0; attempt_number < params_.new_vertices_count();
        attempt_number++) {
     jobs.push_back([&attempts_count, &jobs_mutex, &graph, this]() {
@@ -70,24 +67,18 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
       attempts_count++;
     });
   }
-
-  // Создаем воркера,
-  // который в бесконечном цикле проверяет,
-  // есть ли работа, и выполняет её
   const auto worker = [&should_terminate, &jobs_mutex, &jobs]() {
     while (true) {
-      // Проверка флага, должны ли мы остановить поток
       if (should_terminate) {
         return;
       }
-      // Проверяем, есть ли для нас работа
       const auto job_optional = [&jobs,
                                  &jobs_mutex]() -> std::optional<JobCallback> {
         const std::lock_guard<std::mutex> lock(jobs_mutex);
         if ([&jobs]() { return jobs.size(); }()) {
           return [&jobs]() {
-            const auto job = jobs.back();
-            jobs.pop_back();
+            const auto job = jobs.front();
+            jobs.pop_front();
             return job;
           }();
         }
@@ -95,29 +86,23 @@ void GraphGenerator::generate_grey_edges(Graph& graph) const {
       }();
 
       if (job_optional.has_value()) {
-        // Работа есть, выполняем её
         const auto& job = job_optional.value();
         job();
       }
     }
   };
 
-  // Создаем и запускаем потоки с воркерами
-  // MAX_THREADS_COUNT = 4
   const auto threads_count =
       std::min(k_max_threads_count, params_.new_vertices_count());
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
-  // fill threads
   for (int i = 0; i < threads_count; ++i) {
     threads.push_back(std::thread(worker));
   }
 
-  // Ждем, когда все ветви будут сгенерированы
   while (attempts_count < params_.new_vertices_count()) {
   }
 
-  // Останавливем всех воркеров и потоки
   should_terminate = true;
   for (auto& thread : threads) {
     thread.join();
@@ -144,7 +129,7 @@ void GraphGenerator::generate_grey_branch(
     graph.add_edge(current_vertex_id, new_vertex.id);
     return new_vertex.id;
   }();
-  // рекурсивно вызывает сам себя
+
   for (int attempt_number = 0; attempt_number < params_.new_vertices_count();
        ++attempt_number) {
     generate_grey_branch(graph, current_depth + 1, new_vertex_id, jobs_mutex);

@@ -1,31 +1,22 @@
 #pragma once
+
 #include <fstream>
-#include <mutex>
-#include <string>
-
 namespace uni_course_cpp {
-
 class Logger {
  public:
-  static Logger& get_instance() {
+  static Logger& getLogger() {
     static Logger logger;
     return logger;
   }
-
-  void log(const std::string& string);
-
   ~Logger();
+  void log(const std::string& log_string);
 
  private:
-  std::mutex mutex_;
-  std::ofstream file_stream_;
-
   Logger();
-
   Logger(const Logger&) = delete;
   Logger& operator=(const Logger&) = delete;
+  std::ofstream file_;
   Logger(Logger&&) = delete;
   Logger& operator=(Logger&&) = delete;
 };
-
 }  // namespace uni_course_cpp
