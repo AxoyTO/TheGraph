@@ -124,8 +124,7 @@ void generateYellow(uni_course_cpp::Graph& graph, std::mutex& mutex) {
 
 }  // namespace
 namespace uni_course_cpp {
-GraphGenerator::GraphGenerator(int maxDepth, int newVerticesNum)
-    : maxDepth_(maxDepth), newVerticesNum_(newVerticesNum) {}
+GraphGenerator::GraphGenerator(Params params) : params_(params) {}
 
 void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   using JobCallback = std::function<void()>;
@@ -134,7 +133,7 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
   std::atomic<int> jobsDone = 0;
   std::mutex lockGraph;
 
-  for (int i = 0; i < newVerticesNum_; i++) {
+  for (int i = 0; i < params_.newVerticesNum; i++) {
     jobs.emplace_back([this, &graph, &firstVertexId, &lockGraph, &jobsDone]() {
       generateGrey(graph, firstVertexId, 0, lockGraph);
       jobsDone++;
@@ -166,7 +165,8 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
     }
   };
 
-  const auto threads_count = std::min(MAX_THREADS_COUNT, newVerticesNum_);
+  const auto threads_count =
+      std::min(MAX_THREADS_COUNT, params_.newVerticesNum);
   auto threads = std::vector<std::thread>();
   threads.reserve(threads_count);
 
@@ -174,7 +174,7 @@ void GraphGenerator::generateVertices(Graph& graph, int firstVertexId) const {
     threads.emplace_back(worker);
   }
 
-  while (jobsDone != newVerticesNum_) {
+  while (jobsDone != params_.newVerticesNum) {
   }
 
   shouldTerminate = true;
@@ -194,12 +194,11 @@ void GraphGenerator::generateGrey(Graph& graph,
     return new_vertex_id;
   }();
 
-  if (parentDepth + 1 >= maxDepth_) {
+  if (parentDepth + 1 >= params_.maxDepth) {
     return;
   }
-
-  for (int i = 0; i < newVerticesNum_; i++) {
-    if (isLucky(getProbabilityGray(parentDepth, maxDepth_))) {
+  for (int i = 0; i < params_.newVerticesNum; i++) {
+    if (isLucky(getProbabilityGray(parentDepth, params_.maxDepth))) {
       generateGrey(graph, new_vertex_id.id, parentDepth + 1, lockGraph);
     }
   }
@@ -221,4 +220,7 @@ Graph GraphGenerator::generate() const {
 
   return graph;
 }
+
+GraphGenerator::Params::Params(int maxDepth, int newVerticesNum)
+    : maxDepth(maxDepth), newVerticesNum(newVerticesNum) {}
 }  // namespace uni_course_cpp

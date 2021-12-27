@@ -1,19 +1,20 @@
 #pragma once
-
 #include <mutex>
 #include "Graph.hpp"
-
 namespace uni_course_cpp {
 class GraphGenerator {
  public:
-  GraphGenerator(int maxDepth, int newVerticesNum);
+  struct Params {
+    explicit Params(int maxDepth = 0, int newVerticesNum = 0);
+    const int maxDepth;
+    const int newVerticesNum;
+  };
+  GraphGenerator(Params params);
 
   Graph generate() const;
 
  private:
-  int maxDepth_;
-  int newVerticesNum_;
-
+  const Params params_;
   void generateGrey(Graph& graph,
                     int parent_vertex_id,
                     int parent_depth,
