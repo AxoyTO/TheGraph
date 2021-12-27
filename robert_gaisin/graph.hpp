@@ -36,7 +36,7 @@ struct Edge {
   const Duration& duration() const { return duration_; }
 
  private:
-  Duration duration_;
+  const Duration duration_;
 };
 
 class Graph {

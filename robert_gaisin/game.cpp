@@ -10,7 +10,6 @@ GraphPath Game::find_shortest_path() const {
 
 GraphPath Game::find_fastest_path() const {
   const auto traverser = GraphTraverser(map_);
-  return traverser.find_shortest_path(knight_position_, princess_position_,
-                                      true);
+  return traverser.find_fastest_path(knight_position_, princess_position_);
 }
 }  // namespace uni_course_cpp

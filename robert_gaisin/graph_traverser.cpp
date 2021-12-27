@@ -13,17 +13,17 @@
 #include <thread>
 
 namespace {
+using uni_course_cpp::GraphPath;
 const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 constexpr int MAX_DISTANCE = INT_MAX;
 constexpr int UNDEFINED_ID = -1;
+
 }  // namespace
 
 namespace uni_course_cpp {
-
-GraphPath GraphTraverser::find_shortest_path(
-    const VertexId& source_vertex_id,
-    const VertexId& destination_vertex_id,
-    bool fast) const {
+const GraphPath GraphTraverser::find_path(const VertexId& source_vertex_id,
+                                          const VertexId& destination_vertex_id,
+                                          bool fast) const {
   assert(graph_.has_vertex(source_vertex_id));
   assert(graph_.has_vertex(destination_vertex_id));
 
@@ -77,7 +77,18 @@ GraphPath GraphTraverser::find_shortest_path(
     return result;
   }();
 
-  return GraphPath(path, durations[destination_vertex_id]);
+  return GraphPath(std::move(path), durations[destination_vertex_id]);
+}
+
+const GraphPath GraphTraverser::find_shortest_path(
+    const VertexId& source_vertex_id,
+    const VertexId& destination_vertex_id) const {
+  return find_path(source_vertex_id, destination_vertex_id, false);
+}
+const GraphPath GraphTraverser::find_fastest_path(
+    const VertexId& source_vertex_id,
+    const VertexId& destination_vertex_id) const {
+  return find_path(source_vertex_id, destination_vertex_id, true);
 }
 
 std::vector<GraphPath> GraphTraverser::find_all_paths() const {

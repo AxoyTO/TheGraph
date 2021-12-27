@@ -42,9 +42,12 @@ Edge::Edge(const EdgeId& new_id,
            const VertexId& begin_vertex,
            const VertexId& end_vertex,
            const EdgeColor _color)
-    : id(new_id), begin(begin_vertex), end(end_vertex), color(_color) {
-  duration_ = determine_duration(color);
-}
+    : id(new_id),
+      begin(begin_vertex),
+      end(end_vertex),
+      color(_color),
+      duration_(determine_duration(_color)) {}
+
 Vertex& Graph::vertex(const VertexId& id) {
   for (auto& vertex : vertices_) {
     if (vertex.id == id)
