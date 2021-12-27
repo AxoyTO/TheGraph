@@ -1,29 +1,31 @@
 #include "graph_traverser.hpp"
 #include <atomic>
 #include <climits>
+#include <functional>
 #include <list>
 #include <mutex>
 #include <queue>
+#include <thread>
 #include <vector>
 #include "graph.hpp"
 #include "graph_path.hpp"
 
 namespace {
-MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+const unsigned long MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
 }
 
 namespace uni_course_cpp {
 
-GraphPath find_shortest_path(
+GraphPath GraphTraverser::find_shortest_path(
     const Graph& graph,
     const Graph::VertexId& source_vertex_id,
     const Graph::VertexId& destination_vertex_id) const {
-  std::unordered_map<Graph::VertexId, GraphDistance::Distance> distance_map;
+  std::unordered_map<Graph::VertexId, GraphPath::Distance> distance_map;
 
   int vertices_count = graph.vertices_id_counter();
   const auto& source_vertex = graph.get_vertex(source_vertex_id);
 
-  std::vector<VertexId> vertices(vertices_number, 0);
+  std::vector<Graph::VertexId> vertices(vertices_count, 0);
   vertices[source_vertex_id] = 1;
 
   std::vector<GraphPath::Distance> distance(vertices_count, INT_MAX);
@@ -31,8 +33,8 @@ GraphPath find_shortest_path(
   std::queue<Graph::Vertex> vertices_queue;
   vertices_queue.push(source_vertex);
 
-  std::vector<std::vector<VertexId>> all_pathes(vertices_number);
-  std::vector<VertexId> source_vector{source_vertex_id};
+  std::vector<std::vector<Graph::VertexId>> all_pathes(vertices_count);
+  std::vector<Graph::VertexId> source_vector{source_vertex_id};
   all_pathes[source_vertex_id] = source_vector;
 
   while (!vertices_queue.empty()) {
@@ -40,12 +42,11 @@ GraphPath find_shortest_path(
     vertices_queue.pop();
     for (const auto& edge_id : graph.connected_edge_ids(current_vertex.id)) {
       const auto& edge = graph.get_edge(edge_id);
-      VertexId next_vertex_id;
-      edge.connected_vertices.back();
+      Graph::VertexId next_vertex_id;
       if (edge.from_vertex_id != current_vertex.id) {
-        new_vertex_id = edge.from_vertex_id;
+        next_vertex_id = edge.from_vertex_id;
       } else if (edge.to_vertex_id != current_vertex.id) {
-        new_vertex_id = edge.to_vertex_id;
+        next_vertex_id = edge.to_vertex_id;
       }
       const auto& next_vertex = graph.get_vertex(next_vertex_id);
       if (distance[current_vertex.id] + 1 < distance[next_vertex_id]) {
@@ -54,7 +55,8 @@ GraphPath find_shortest_path(
         all_pathes[next_vertex_id] = all_pathes[current_vertex.id];
         all_pathes[next_vertex_id].push_back(next_vertex_id);
         if (destination_vertex_id == next_vertex_id) {
-          Path r_path(all_pathes[next_vertex_id], distance[next_vertex_id]);
+          GraphPath r_path(all_pathes[next_vertex_id],
+                           distance[next_vertex_id]);
           return r_path;
         }
       }

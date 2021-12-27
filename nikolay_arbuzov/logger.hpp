@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <mutex>
 #include <string>
 #include "config.hpp"
 
@@ -16,6 +17,7 @@ class Logger {
 
  private:
   std::ofstream log_file_;
+  std::mutex log_mutex_;
 
   Logger();
   ~Logger() { log_file_.close(); }

@@ -9,6 +9,8 @@
 #include "graph_generator.hpp"
 #include "graph_json_printing.hpp"
 #include "graph_printing.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
 
 namespace {
@@ -81,22 +83,28 @@ std::string generation_finished_string(const int graph_number,
   return log_string.str();
 }
 
-
 std::string traversing_started_string(const int graph_number) {
   std::stringstream log_string;
   log_string << "Graph " << graph_number << " Traversing Started" << std::endl;
   return log_string.str();
 }
 
-std::string traversing_finished_string(const int graph_number,
-                                       const std::string& graph_description) {
-  std::stringstream log_string;
-  log_string << "Graph " << graph_number << " Traversing Finished {"
-             << std::endl;
-  log_string << graph_description << std::endl << "}" << std::endl;
-  return log_string.str();
-}
+std::string traversing_finished_string(
+    const int graph_number,
+    const std::vector<uni_course_cpp::GraphPath>& paths) {
+  std::stringstream result_stream;
+  result_stream << "Graph " << graph_number << ", Traversal Finished, Paths: ["
+                << std::endl;
+  for (const auto& path : paths) {
+    result_stream << "  " << uni_course_cpp::printing::path_to_json(path);
+    if (path.vertex_ids.back() != paths.back().vertex_ids.back())
+      result_stream << ",";
+    result_stream << std::endl;
+  }
 
+  result_stream << "]" << std::endl;
+  return result_stream.str();
+}
 void prepare_temp_directory() {
   std::filesystem::create_directory(config::kTempDirectoryPath);
 }
@@ -117,27 +125,25 @@ std::vector<uni_course_cpp::Graph> generate_graphs(
         const auto graph_description =
             uni_course_cpp::printing::print_graph(graph);
         logger.log(generation_finished_string(index, graph_description));
-        graphs.push_back(graph);
         const auto graph_json =
             uni_course_cpp::printing::json::print_graph(graph);
+        graphs.push_back(std::move(graph));
         write_to_file(graph_json, "graph_" + std::to_string(index) + ".json");
       });
 
   return graphs;
 }
 
-void traverse_graphs(const std::vector<Graph>& graphs,
-                     Logger& logger,
-                     const int threads_count) {
-  auto traversal_controller = GraphTraversalController(threads_count, graphs);
+void traverse_graphs(int threads_count,
+                     const std::vector<uni_course_cpp::Graph>& graphs) {
+  auto traversal_controller =
+      uni_course_cpp::GraphTraversalController(threads_count, graphs);
+  auto& logger = uni_course_cpp::Logger::get_logger();
   traversal_controller.traverse_graphs(
-      [&logger](int index) {
-        logger.log(
-            uni_cpp_practice::logging_helping::write_traverse_start(index));
-      },
-      [&logger](int index, const std::vector<GraphTraverser::Path>& pathes) {
-        logger.log(uni_cpp_practice::logging_helping::write_traverse_end(
-            index, pathes));
+      [&logger](int index) { logger.log(traversing_started_string(index)); },
+      [&logger](int index,
+                const std::vector<uni_course_cpp::GraphPath>& paths) {
+        logger.log(traversing_finished_string(index, paths));
       });
 }
 
@@ -154,23 +160,6 @@ int main() {
   const auto params =
       uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
   const auto graphs = generate_graphs(params, graphs_count, threads_count);
-  /*
-    const auto params =
-        uni_course_cpp::GraphGenerator::Params(depth, new_vertices_count);
-    const auto generator = uni_course_cpp::GraphGenerator(params);
-    auto& logger = uni_course_cpp::Logger::get_logger();
-
-    for (int i = 0; i < graphs_count; i++) {
-      logger.log(generation_started_string(i));
-      const auto graph = generator.generate();
-
-      const auto graph_description =
-    uni_course_cpp::printing::print_graph(graph);
-      logger.log(generation_finished_string(i, graph_description));
-      const auto graph_json =
-    uni_course_cpp::printing::json::print_graph(graph);
-      write_to_file(graph_json, "graph_" + std::to_string(i) + ".json");
-    }
-  */
+  traverse_graphs(threads_count, graphs);
   return 0;
 }

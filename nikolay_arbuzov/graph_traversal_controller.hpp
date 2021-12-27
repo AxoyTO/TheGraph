@@ -2,7 +2,13 @@
 
 #include <atomic>
 #include <functional>
+#include <list>
+#include <mutex>
+#include <thread>
+#include <vector>
 #include "graph.hpp"
+#include "graph_path.hpp"
+#include "graph_traverser.hpp"
 namespace uni_course_cpp {
 class GraphTraversalController {
  public:
@@ -10,7 +16,7 @@ class GraphTraversalController {
   using GetJobCallback = std::function<std::optional<JobCallback>()>;
   using GenStartedCallback = std::function<void(int)>;
   using GenFinishedCallback =
-      std::function<void(int, const std::vector<GraphTraverser::Path>&)>;
+      std::function<void(int, const std::vector<GraphPath>&)>;
 
   class Worker {
    public:

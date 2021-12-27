@@ -65,10 +65,6 @@ void GraphGenerationController::generate(
     const GenFinishedCallback& gen_finished_callback) {
   std::atomic<int> jobs_done = 0;
 
-  for (auto& worker : workers_) {
-    worker.start();
-  }
-
   for (int graph_number = 0; graph_number < graphs_count_; graph_number++) {
     jobs_.emplace_back([&gen_started_callback = gen_started_callback,
                         &gen_finished_callback = gen_finished_callback,
@@ -90,6 +86,10 @@ void GraphGenerationController::generate(
 
       jobs_done++;
     });
+  }
+
+  for (auto& worker : workers_) {
+    worker.start();
   }
 
   while (jobs_done < graphs_count_) {

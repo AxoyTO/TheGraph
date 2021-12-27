@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include "graph.hpp"
+#include "graph_path.hpp"
 
 namespace uni_course_cpp {
 namespace printing {
@@ -19,6 +20,19 @@ std::string print_edge_color(const Graph::Edge::Color& color) {
     default:
       throw std::runtime_error("No such color");
   }
+}
+
+std::string path_to_json(const GraphPath& path) {
+  std::stringstream result_stream;
+  result_stream << "{vertices: [";
+  for (const auto& vertex_id : path.vertex_ids) {
+    result_stream << std::to_string(vertex_id);
+    if (vertex_id != path.vertex_ids.back())
+      result_stream << ", ";
+  }
+
+  result_stream << "], distance: " << path.distance << "}";
+  return result_stream.str();
 }
 
 std::string print_graph(const Graph& graph) {

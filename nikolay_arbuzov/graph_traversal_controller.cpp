@@ -1,6 +1,14 @@
 
 #include "graph_traversal_controller.hpp"
+#include <atomic>
+#include <cassert>
+#include <functional>
+#include <list>
+#include <mutex>
+#include <thread>
+#include <vector>
 #include "graph.hpp"
+#include "graph_path.hpp"
 #include "graph_traverser.hpp"
 
 namespace uni_course_cpp {
