@@ -22,7 +22,7 @@ GraphPath GraphTraverser::find_shortest_path(
     const Graph::VertexId& destination_vertex_id) const {
   std::unordered_map<Graph::VertexId, GraphPath::Distance> distance_map;
 
-  int vertices_count = graph.vertices_id_counter();
+  const int vertices_count = graph.vertices_id_counter();
   const auto& source_vertex = graph.get_vertex(source_vertex_id);
 
   std::vector<Graph::VertexId> vertices(vertices_count, 0);
@@ -77,8 +77,8 @@ std::vector<GraphPath> GraphTraverser::traverse_graph() {
                        &path_mutex]() {
       auto path = find_shortest_path(graph_, 0, vertex_id);
       {
-        std::lock_guard lock(path_mutex);
-        pathes.emplace_back(path);
+        const std::lock_guard lock(path_mutex);
+        pathes.emplace_back(std::move(path));
       }
       jobs_done++;
     });
