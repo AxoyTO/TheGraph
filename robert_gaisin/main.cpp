@@ -152,6 +152,7 @@ void traverse_graphs(const std::vector<Graph>& graphs) {
       });
 }
 
+
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_count = handle_new_vertices_count_input();
