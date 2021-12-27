@@ -1,13 +1,13 @@
 #include "graph_printer.hpp"
-#include "graph_path.hpp"
 #include <iostream>
+#include "graph_path.hpp"
 
 namespace {
 using uni_course_cpp::Edge;
 using uni_course_cpp::EdgeColor;
 using uni_course_cpp::Graph;
-using uni_course_cpp::Vertex;
 using uni_course_cpp::GraphPath;
+using uni_course_cpp::Vertex;
 
 using std::cin;
 using std::cout;

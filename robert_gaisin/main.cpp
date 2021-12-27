@@ -15,16 +15,16 @@
 #include <iostream>
 
 using uni_course_cpp::Graph;
+using uni_course_cpp::GraphGenerationController;
 using uni_course_cpp::GraphGenerator;
+using uni_course_cpp::GraphPath;
+using uni_course_cpp::GraphTraversalController;
+using uni_course_cpp::GraphTraverser;
 using uni_course_cpp::Logger;
 using uni_course_cpp::config::log_file_path;
 using uni_course_cpp::graph_printing::print_graph;
 using uni_course_cpp::graph_printing::print_graph_description;
 using uni_course_cpp::graph_printing::print_path;
-using uni_course_cpp::GraphGenerationController;
-using uni_course_cpp::GraphPath;
-using uni_course_cpp::GraphTraversalController;
-using uni_course_cpp::GraphTraverser;
 
 constexpr int INVALID_NEW_DEPTH = -1;
 constexpr int INVALID_NEW_VERTICES_NUMBER = -1;
