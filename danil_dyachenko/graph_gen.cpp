@@ -118,12 +118,15 @@ std::string print_graph(const Graph& graph) {
   for (const auto& vertex : vertices) {
     string += "    " + print_vertex(vertex, graph) + ",\n";
   }
-  string += "    " + print_vertex(*(vertices.end() - 1), graph) + "\n" +
-            "  ],\n  \"edges\": [\n";
+  string.pop_back();
+  string.pop_back();
+  string += "\n  ],\n  \"edges\": [\n";
   for (const auto& edge : edges) {
     string += "    " + print_edge(edge) + ",\n";
   }
-  string += "    " + print_edge(*(edges.end() - 1)) + "\n" + "  ]\n}\n";
+  string.pop_back();
+  string.pop_back();
+  string += "\n  ]\n}\n";
   return string;
 }
 }  // namespace json
