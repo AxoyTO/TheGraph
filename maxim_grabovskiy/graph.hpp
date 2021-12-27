@@ -34,6 +34,10 @@ class Graph {
     return vertexDepthMap_.at(vertexId);
   }
   void setDepth(VertexId vertexId, Depth depth) {
+    for (int i = 0; i < (int)vertexIdByDepth_[0].size(); i++) {
+      if ((vertexIdByDepth_[0][i] == vertexId) && vertexId)
+        vertexIdByDepth_[0].erase(vertexIdByDepth_[0].begin() + i);
+    }
     vertexDepthMap_[vertexId] = depth;
   }
   std::vector<EdgeId> const& getVertexIdByDepth(int depth) const {
