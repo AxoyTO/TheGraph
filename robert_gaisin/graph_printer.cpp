@@ -143,7 +143,7 @@ std::string print_graph_description(const Graph& graph) {
       log_string << ", ";
   }
 
-  log_string << "}}\n}\n";
+  log_string << "}}\n}";
 
   return log_string.str();
 }

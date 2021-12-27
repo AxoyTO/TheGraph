@@ -11,7 +11,7 @@
 #include "logger.hpp"
 
 #include <chrono>
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -90,10 +90,10 @@ int handle_graphs_count_input() {
   } while (graphs_quantity < INVALID_GRAPHS_NUMBER);
   return graphs_quantity;
 }
-
+/*
 void prepare_temp_directory() {
   std::filesystem::create_directory(uni_course_cpp::config::kTempDirectoryPath);
-}
+}*/
 
 void write_to_file(const std::string& graph_json, const std::string& filename) {
   std::ofstream out(filename);
@@ -184,7 +184,7 @@ std::string fastest_path_ready_string(const GraphPath& path) {
 int main() {
   const int depth = handle_depth_input();
   const int new_vertices_count = handle_new_vertices_count_input();
-  prepare_temp_directory();
+//  prepare_temp_directory();
 
   auto& logger = Logger::get_logger();
   logger.log(game_preparing_string());
