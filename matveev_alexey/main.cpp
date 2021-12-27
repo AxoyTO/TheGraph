@@ -100,7 +100,7 @@ std::string traversalStartedString(int index) {
 
 std::string traversalFinishedString(
     int index,
-    std::vector<uni_course_cpp::GraphPath> paths) {
+    const std::vector<uni_course_cpp::GraphPath>& paths) {
   std::string string =
       "Graph " + std::to_string(index) + ", Traversal Ended, Paths: {\n";
   for (const auto& path : paths) {

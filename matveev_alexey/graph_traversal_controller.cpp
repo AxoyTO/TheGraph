@@ -7,12 +7,16 @@
 #include "graph_path.hpp"
 #include "graph_traverser.hpp"
 
+namespace {
+
+const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
+}  // namespace
+
 namespace uni_course_cpp {
 
 GraphTraversalController::GraphTraversalController(
     const std::vector<Graph>& graphs)
     : graphs_(graphs) {
-  const int MAX_WORKERS_COUNT = std::thread::hardware_concurrency();
   threads_num_ = std::min(MAX_WORKERS_COUNT, static_cast<int>(graphs.size()));
   for (int i = 0; i < threads_num_; i++) {
     workers_.emplace_back([&jobs_ = jobs_, &mutex_jobs_ = mutex_jobs_,

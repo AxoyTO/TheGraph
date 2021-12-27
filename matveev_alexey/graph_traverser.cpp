@@ -12,8 +12,9 @@
 #include "graph.hpp"
 
 namespace {
-int MAX_DISTANCE = INT_MAX;
-}
+constexpr int MAX_DISTANCE = INT_MAX;
+const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
+}  // namespace
 
 namespace uni_course_cpp {
 
@@ -55,7 +56,7 @@ std::vector<GraphPath> GraphTraverser::findAllPaths() const {
   auto jobs = std::list<JobCallback>();
   std::mutex mutex;
   std::atomic<int> finished_paths = 0;
-  bool should_terminate = false;
+  std::atomic<bool> should_terminate = false;
   const VertexId START_VERTEX_ID = 0;
   std::vector<VertexId> finish_vertex_ids =
       graph_.vertexIdsAtLayer(graph_.depth());
@@ -66,7 +67,7 @@ std::vector<GraphPath> GraphTraverser::findAllPaths() const {
       const GraphPath new_path =
           findShortestPath(START_VERTEX_ID, end_vertex_id);
       {
-        std::lock_guard lock(mutex);
+        const std::lock_guard lock(mutex);
         paths.push_back(std::move(new_path));
       }
       finished_paths++;
@@ -94,7 +95,6 @@ std::vector<GraphPath> GraphTraverser::findAllPaths() const {
     }
   };
 
-  const int MAX_THREADS_COUNT = std::thread::hardware_concurrency();
   const auto threads_num = std::min(
       MAX_THREADS_COUNT,
       static_cast<int>(graph_.vertexIdsAtLayer(graph_.depth()).size()));

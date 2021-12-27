@@ -3,7 +3,6 @@
 
 namespace uni_course_cpp {
 GraphPath::Distance GraphPath::distance() const {
-  GraphPath::Distance distance = edge_ids.size();
-  return distance;
+  return edge_ids.size();
 }
 }  // namespace uni_course_cpp
