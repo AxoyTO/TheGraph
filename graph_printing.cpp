@@ -32,7 +32,7 @@ std::string GraphPrinter::printGraph(const uni_course_cpp::Graph& graph) {
   std::stringstream out;
   out << "{"
       << "\n"
-      << "  depth: " << std::to_string(graph.getCurrentDepth()) - 1 << ",\n";
+      << "  depth: " << std::to_string(graph.getCurrentDepth() - 1) << ",\n";
   out << "  verticles: {amount:" << graph.getVertexes().size()
       << " distribution: [";
   for (int i = 0; i < graph.getCurrentDepth(); i++)
