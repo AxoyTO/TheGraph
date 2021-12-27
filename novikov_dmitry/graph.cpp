@@ -1,5 +1,6 @@
 #include "graph.hpp"
 #include <cassert>
+#include <iterator>
 
 namespace {
 using Vertex = uni_cpp_practice::Vertex;
@@ -14,7 +15,7 @@ bool check_gray_valid(const Vertex& first_vertex, const Vertex& second_vertex) {
 
 bool check_green_valid(const Vertex& first_vertex,
                        const Vertex& second_vertex) {
-  if (first_vertex.depth == second_vertex.depth) {
+  if (first_vertex.id == second_vertex.id) {
     return true;
   }
   return false;
@@ -22,9 +23,7 @@ bool check_green_valid(const Vertex& first_vertex,
 
 bool check_blue_valid(const Vertex& first_vertex, const Vertex& second_vertex) {
   if (first_vertex.depth == second_vertex.depth) {
-    if (std::abs(first_vertex.id - second_vertex.id) == 1) {
-      return true;
-    }
+    return true;
   }
   return false;
 }

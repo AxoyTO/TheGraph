@@ -5,9 +5,24 @@
 #include <iostream>
 #include <vector>
 #include "graph.hpp"
+#include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
+#include "graph_traverser.hpp"
 #include "logger.hpp"
+
+const std::string temp_folder_path = "./temp";
+const std::string filename_prefix = "Graph";
+const std::string filename_suffix = ".json";
+
+using uni_cpp_practice::Graph;
+using uni_cpp_practice::GraphGenerationController;
+using uni_cpp_practice::GraphGenerator;
+using uni_cpp_practice::GraphPrinter;
+using uni_cpp_practice::GraphTraversalController;
+using uni_cpp_practice::GraphTraverser;
+using uni_cpp_practice::Logger;
 
 std::string get_current_date_time() {
   const auto date_time = std::chrono::system_clock::now();
@@ -34,17 +49,16 @@ set_count_edges_of_color(const uni_cpp_practice::Graph& graph) {
   return colors;
 }
 
-const std::string start_string(int graph_numbe) {
+std::string gen_started_string(int graph_number) {
   std::stringstream log_string;
-  log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
+  log_string << get_current_date_time() << ": Graph " << graph_number
              << ", Generation Started\n";
   return log_string.str();
 }
 
-const std::string end_string(int graph_numbe,
-                             const uni_cpp_practice::Graph& graph) {
+std::string gen_finished_string(int graph_number, const Graph& graph) {
   std::stringstream log_string;
-  log_string << get_current_date_time() << ": Graph " << graph_numbe + 1
+  log_string << get_current_date_time() << ": Graph " << graph_number
              << ", Generation Finished {  \n";
   log_string << "  depth: " << graph.get_depth() << ",\n";
   log_string << "  vertices: " << graph.get_vertex_map().size() << ", [";
@@ -71,7 +85,7 @@ const std::string end_string(int graph_numbe,
   return log_string.str();
 }
 
-const uni_cpp_practice::Depth handle_depth_input() {
+uni_cpp_practice::Depth handle_depth_input() {
   uni_cpp_practice::Depth
       depth;  //Глубина графов (int от 0 и до бесконечности).
   std::cout << "Enter the Depth of the graphs" << std::endl;
@@ -105,20 +119,31 @@ int handle_graphs_count_input() {
   }
   return graphs_count;
 }
-uni_cpp_practice::Logger& prepare_logger() {
+int handle_threads_count_input() {
+  int threads_count;  // Количество потоков генерации графов.
+  std::cout << "Enter the Count of threads for graphs generation" << std::endl;
+  std::cin >> threads_count;
+  while (threads_count <= 0) {
+    std::cout << "Try to enter a natural number" << std::endl;
+    std::cin >> threads_count;
+  }
+  return threads_count;
+}
+
+void prepare_temp_directory() {
   try {
-    if (!std::filesystem::create_directory("./temp")) {
-      std::cout << "A directory wasn't created\n";
-    }
+    std::filesystem::create_directory(temp_folder_path);
   } catch (const std::exception& ex) {
     std::cout << ex.what() << "\n";
   }
-  auto& logger = uni_cpp_practice::Logger::get_instance();
-  logger.set_file("./temp/log.txt");
-  return logger;
 }
 
-void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
+void prepare_logger() {
+  auto& logger = Logger::get_instance();
+  logger.set_file("./temp/log.txt");
+}
+
+void write_to_file(const GraphPrinter& graph_printer,
                    const std::string& filename) {
   std::ofstream file_out;
   file_out.open(filename, std::fstream::out | std::fstream::trunc);
@@ -130,26 +155,83 @@ void write_to_file(const uni_cpp_practice::GraphPrinter& graph_printer,
   }
 }
 
-int main() {
-  const std::string temp_folder_path = "./temp";
-  const std::string filename_prefix = "Graph";
-  const std::string filename_suffix = ".json";
+std::vector<Graph> generate_graphs(const GraphGenerator::Params& params,
+                                   int graphs_count,
+                                   int threads_count) {
+  auto generation_controller =
+      GraphGenerationController(threads_count, graphs_count, params);
+  auto graphs = std::vector<Graph>();
+  graphs.reserve(graphs_count);
 
+  generation_controller.generate(
+      [](int index) {
+        auto& logger = Logger::get_instance();
+        logger.log(gen_started_string(index));
+      },
+      [&graphs](int index, Graph graph) {
+        auto& logger = Logger::get_instance();
+        logger.log(gen_finished_string(index, graph));
+        graphs.push_back(graph);
+        const auto graph_printer = GraphPrinter(graph);
+        write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
+                                         "_" + std::to_string(index) +
+                                         filename_suffix);
+      });
+  return graphs;
+}
+
+std::string traversal_started_string(int graph_number) {
+  std::stringstream log_string;
+  log_string << get_current_date_time() << ": Graph " << graph_number
+             << ", Traversal Started\n";
+  return log_string.str();
+}
+
+std::string traversal_finished_string(
+    int graph_number,
+    const std::vector<GraphTraverser::Path>& paths) {
+  std::stringstream log_string;
+  log_string << get_current_date_time() << ": Graph " << graph_number
+             << ", Traversal Finished, Paths: [\n";
+
+  for (auto it = paths.begin(); it != paths.end(); ++it) {
+    if (it != paths.begin()) {
+      log_string << ",\n";
+    }
+    log_string << GraphPrinter::print_path(*it);
+  }
+
+  log_string << "\n]\n";
+  return log_string.str();
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs) {
+  auto traversal_controller = GraphTraversalController(graphs);
+
+  traversal_controller.traverse(
+      [](int index, const Graph& traversed_graph) {
+        auto& logger = Logger::get_instance();
+        logger.log(traversal_started_string(index));
+      },
+      [](int index, std::vector<GraphTraverser::Path> paths,
+         const Graph& traversed_graph) {
+        auto& logger = Logger::get_instance();
+        logger.log(traversal_finished_string(index, paths));
+      });
+}
+
+int main() {
   const int depth = handle_depth_input();
   const int new_vertices_num = handle_new_vertices_num_input();
   const int graphs_count = handle_graphs_count_input();
+  const int threads_count = handle_threads_count_input();
+  prepare_temp_directory();
+  prepare_logger();
 
-  auto& logger = prepare_logger();
-  const auto graph_generator =
-      uni_cpp_practice::GraphGenerator(depth, new_vertices_num);
-  for (int i = 0; i < graphs_count; ++i) {
-    logger.log(start_string(i));
-    const auto graph = graph_generator.generate();
-    logger.log(end_string(i, graph));
-    const auto graph_printer = uni_cpp_practice::GraphPrinter(graph);
-    write_to_file(graph_printer, temp_folder_path + '/' + filename_prefix +
-                                     "_" + std::to_string(i + 1) +
-                                     filename_suffix);
-  }
+  const auto params = GraphGenerator::Params(depth, new_vertices_num);
+  const auto graphs = generate_graphs(params, graphs_count, threads_count);
+
+  traverse_graphs(graphs);
+
   return 0;
 }

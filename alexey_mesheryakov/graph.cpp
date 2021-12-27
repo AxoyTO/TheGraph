@@ -1,142 +1,143 @@
+#include "graph.hpp"
 #include <assert.h>
-#include <array>
-#include <fstream>
+#include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
-
-constexpr int VERTEX_COUNT = 14;
-constexpr int EDGE_COUNT = 18;
-constexpr int INVALID_ID = -1;
+#include <utility>
 
 using std::pair;
 using std::vector;
-using EdgeId = int;
-using VertexId = int;
+namespace uni_course_cpp {
 
-class Graph {
- public:
-  class Edge {
-   public:
-    Edge(const pair<VertexId, VertexId>& new_vertex_ids, const EdgeId& edge_id)
-        : vertex_ids(new_vertex_ids), id(edge_id) {}
+void Vertex::add_edge_id(const EdgeId& edge_id) {
+  assert(!has_edge_id(edge_id) && "Edge id already exist");
+  edge_ids_.push_back(edge_id);
+}
 
-    std::string to_string() const {
-      std::stringstream buffer;
-      buffer << "{\"id\":" << id << ",\"vertex_ids\":[" << vertex_ids.first
-             << "," << vertex_ids.second << "]}";
-      return buffer.str();
+bool Vertex::has_edge_id(const EdgeId& new_edge_id) const {
+  for (const auto& edge_id : edge_ids_)
+    if (edge_id == new_edge_id) {
+      return true;
     }
-    const pair<VertexId, VertexId> vertex_ids = {};
-    const EdgeId id = INVALID_ID;
-  };
-  class Vertex {
-   public:
-    explicit Vertex(const VertexId& new_id) : id(new_id) {}
+  return false;
+}
 
-    std::string to_string() const {
-      std::stringstream buffer;
-      buffer << "{\"id\":" << id << ",\"edge_ids\":[";
-      for (int i = 0; i < edge_ids_.size() - 1; i++)
-        buffer << edge_ids_[i] << ",";
-      buffer << edge_ids_[edge_ids_.size() - 1] << "]}";
-      return buffer.str();
-    }
+bool Graph::vertex_exist(const VertexId& id) const {
+  for (const auto& vertex : vertices_)
+    if (vertex.id == id)
+      return true;
+  return false;
+}
 
-    void add_edge_id(const EdgeId& edge_id) {
-      assert(!has_edge_id(edge_id) && "Edge id already exist");
-      edge_ids_.push_back(edge_id);
-    }
-
-    bool has_edge_id(const EdgeId& new_edge_id) const {
-      for (const auto& edge_id : edge_ids_)
-        if (edge_id == new_edge_id) {
-          return true;
-        }
-      return false;
-    }
-    const vector<EdgeId>& get_edge_ids() const { return edge_ids_; }
-    const VertexId id = INVALID_ID;
-
-   private:
-    vector<EdgeId> edge_ids_ = {};
-  };
-
-  bool vertex_exist(const VertexId& id) const {
-    for (const auto& vertex : vertices_)
-      if (vertex.id == id)
+bool Graph::edge_exist(const VertexId& first, const VertexId& second) const {
+  if (first == second) {
+    for (const auto& edge_id_from_vertex : get_vertex(first).get_edge_ids())
+      if (get_edge(edge_id_from_vertex).vertex_ids.first ==
+          get_edge(edge_id_from_vertex).vertex_ids.second)
         return true;
     return false;
   }
-
-  bool edge_exist(const VertexId& first, const VertexId& second) const {
-    for (const auto& edge_id_from_first_vertex :
-         vertices_[first].get_edge_ids())
-      for (const auto& edge_id_from_second_vertex :
-           vertices_[second].get_edge_ids())
-        if (edge_id_from_first_vertex == edge_id_from_second_vertex)
-          return true;
-    return false;
-  }
-
-  void add_vertex() { vertices_.emplace_back(get_new_vertex_id()); }
-
-  void add_edge(const VertexId& first, const VertexId& second) {
-    assert(vertex_exist(first) && "Source vertex id doesn't exist");
-    assert(vertex_exist(second) && "Destination vertex id doesn't exist");
-    assert(!edge_exist(first, second) && "Such edge already exist");
-    const auto& new_edge = edges_.emplace_back(
-        pair<VertexId, VertexId>{first, second}, get_new_edge_id());
-    vertices_[first].add_edge_id(new_edge.id);
-    vertices_[second].add_edge_id(new_edge.id);
-  }
-
-  std::string to_json() const {
-    std::stringstream buffer;
-    buffer << "{\"vertices\":[";
-    for (int j = 0; j < vertices_.size(); j++) {
-      const Vertex vertex = vertices_[j];
-      buffer << vertex.to_string();
-      if (j != vertices_.size() - 1)
-        buffer << ",";
-    }
-    buffer << "],\"edges\":[";
-    for (int j = 0; j < edges_.size(); j++) {
-      const Edge edge = edges_[j];
-      buffer << edge.to_string();
-      if (j != edges_.size() - 1)
-        buffer << ",";
-    }
-    buffer << "]}\n";
-    return buffer.str();
-  }
-
- private:
-  vector<Edge> edges_ = {};
-  vector<Vertex> vertices_ = {};
-  VertexId vertex_id_counter_ = 0;
-  EdgeId edge_id_counter_ = 0;
-
-  EdgeId get_new_edge_id() { return edge_id_counter_++; }
-
-  VertexId get_new_vertex_id() { return vertex_id_counter_++; }
-};
-
-int main() {
-  Graph graph{};
-  pair<VertexId, VertexId> connections[EDGE_COUNT] = {
-      {0, 1},  {0, 2},  {0, 3},  {1, 4},   {1, 5},   {1, 6},
-      {2, 7},  {2, 8},  {3, 9},  {4, 10},  {5, 10},  {6, 10},
-      {7, 11}, {8, 11}, {9, 12}, {10, 13}, {11, 13}, {12, 13}};
-  for (int i = 0; i < VERTEX_COUNT; i++) {
-    graph.add_vertex();
-  }
-  for (const auto& connection : connections) {
-    graph.add_edge(connection.first, connection.second);
-  }
-  std::ofstream file;
-  file.open("graph.json", std::fstream::out | std::fstream::trunc);
-  file << graph.to_json();
-  file.close();
-  return 0;
+  for (const auto& edge_id_from_first_vertex : get_vertex(first).get_edge_ids())
+    for (const auto& edge_id_from_second_vertex :
+         get_vertex(second).get_edge_ids())
+      if (edge_id_from_first_vertex == edge_id_from_second_vertex)
+        return true;
+  return false;
 }
+
+VertexId Graph::add_vertex() {
+  const VertexId vertex_id = get_new_vertex_id();
+  if (levels_.size() == 0)
+    levels_.push_back({vertex_id});
+  else
+    levels_[0].emplace_back(vertex_id);
+  vertices_.emplace_back(vertex_id);
+  return vertex_id;
+}
+
+void Graph::add_edge(const VertexId& first_id, const VertexId& second_id) {
+  assert(vertex_exist(first_id) && "Source vertex id doesn't exist");
+  assert(vertex_exist(second_id) && "Destination vertex id doesn't exist");
+  assert(!edge_exist(first_id, second_id) && "Such edge already exist");
+  const Edge::Color color = calculate_color(first_id, second_id);
+  const auto& new_edge = edges_.emplace_back(
+      pair<VertexId, VertexId>{first_id, second_id}, get_new_edge_id(), color);
+  colored_edges_[color].emplace_back(new_edge.id);
+  get_vertex(first_id).add_edge_id(new_edge.id);
+  if (first_id != second_id)
+    get_vertex(second_id).add_edge_id(new_edge.id);
+  if (color == Edge::Color::Gray)
+    update_vertex_depth(first_id, second_id);
+}
+const vector<VertexId>& Graph::get_vertex_ids_at_depth(
+    const Depth& depth) const {
+  assert(depth < levels_.size() && "Depth out of range");
+  assert(depth >= 0 && "Depth out of range");
+  return levels_[depth];
+}
+void Graph::update_vertex_depth(const VertexId& from_vertex_id,
+                                const VertexId& to_vertex_id) {
+  const VertexId parent_vertex_id = std::min(from_vertex_id, to_vertex_id);
+  const VertexId son_vertex_id = std::max(from_vertex_id, to_vertex_id);
+  const auto new_son_depth = get_vertex(parent_vertex_id).depth + 1;
+  get_vertex(son_vertex_id).depth = new_son_depth;
+  for (auto iter = levels_[0].begin(); iter != levels_[0].end(); ++iter) {
+    if (*iter == son_vertex_id) {
+      levels_[0].erase(iter);
+      break;
+    }
+  }
+  if (new_son_depth >= levels_.size()) {
+    levels_.push_back(std::vector<VertexId>({son_vertex_id}));
+  } else {
+    levels_[new_son_depth].push_back(son_vertex_id);
+  }
+}
+
+const Vertex& Graph::get_vertex(const VertexId& vertex_id) const {
+  for (const auto& vertex : vertices_)
+    if (vertex.id == vertex_id)
+      return vertex;
+  throw std::runtime_error("Vertex doesn't exist");
+}
+const Edge& Graph::get_edge(const EdgeId& edge_id) const {
+  for (const auto& edge : edges_)
+    if (edge.id == edge_id)
+      return edge;
+  throw std::runtime_error("Edge doesn't exist");
+}
+Vertex& Graph::get_vertex(const VertexId& vertex_id) {
+  const auto& const_this = *this;
+  return const_cast<Vertex&>(const_this.get_vertex(vertex_id));
+}
+
+Edge& Graph::get_edge(const EdgeId& edge_id) {
+  const auto& const_this = *this;
+  return const_cast<Edge&>(const_this.get_edge(edge_id));
+}
+
+Edge::Color Graph::calculate_color(const VertexId& first_id,
+                                   const VertexId& second_id) {
+  if (get_vertex(first_id).get_edge_ids().size() == 0 ||
+      get_vertex(second_id).get_edge_ids().size() == 0)
+    return Edge::Color::Gray;
+  const Depth& first_depth = get_vertex(first_id).depth;
+  const Depth& second_depth = get_vertex(second_id).depth;
+  if (first_depth == second_depth)
+    return Edge::Color::Green;
+  if (abs(first_depth - second_depth) == 1)
+    return Edge::Color::Yellow;
+  if (abs(first_depth - second_depth) == 2)
+    return Edge::Color::Red;
+  throw std::runtime_error("Can't calculate color");
+}
+
+const std::vector<EdgeId>& Graph::get_colored_edges(
+    const Edge::Color& color) const {
+  if (colored_edges_.find(color) == colored_edges_.end()) {
+    static std::vector<EdgeId> empty_result = {};
+    return empty_result;
+  }
+  return colored_edges_.at(color);
+}
+
+}  // namespace uni_course_cpp

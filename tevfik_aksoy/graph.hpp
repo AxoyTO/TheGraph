@@ -34,7 +34,6 @@ struct Vertex {
 
 struct Edge {
  public:
-  // unknown нужно для return val of calculate_edge_color
   enum class Color { Gray, Green, Blue, Yellow, Red };
   const EdgeId id{};
   const Color color{};
@@ -61,11 +60,14 @@ class Graph {
                               const VertexId& destination) const;
   const std::vector<EdgeId>& get_colored_edges(const Edge::Color& color) const;
   int depth() const;
+  std::vector<VertexId> get_adjacent_vertex_ids(
+      const VertexId& vertex_id) const;
   const std::vector<Vertex>& get_vertices() const;
   const std::vector<Edge>& get_edges() const;
   const std::vector<VertexId>& get_vertices_in_depth(
       const VertexDepth& depth) const;
-  Vertex& get_vertex(const VertexId& id);
+  const Vertex& get_vertex(const VertexId& id) const;
+  const Edge& get_edge(const EdgeId& id) const;
 
  private:
   std::vector<Edge> edges_;

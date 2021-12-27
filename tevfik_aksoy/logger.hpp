@@ -1,15 +1,16 @@
 #pragma once
 
 #include <fstream>
+#include <mutex>
 #include <optional>
 #include <string>
 
 namespace uni_cpp_practice {
 class Logger {
  public:
-  static Logger& get_instance() {
-    static Logger instance;
-    return instance;
+  static Logger& get_logger() {
+    static Logger logger;
+    return logger;
   }
 
   void set_file(const std::optional<std::string>& filename);
@@ -20,6 +21,7 @@ class Logger {
 
  private:
   std::optional<std::ofstream> file_stream_;
+  std::mutex mutex_;
 
   Logger() = default;
   Logger(const Logger&) = delete;
