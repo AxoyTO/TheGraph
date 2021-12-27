@@ -81,12 +81,24 @@ std::string generation_finished_string(const int graph_number,
   return log_string.str();
 }
 
+
+std::string traversing_started_string(const int graph_number) {
+  std::stringstream log_string;
+  log_string << "Graph " << graph_number << " Traversing Started" << std::endl;
+  return log_string.str();
+}
+
+std::string traversing_finished_string(const int graph_number,
+                                       const std::string& graph_description) {
+  std::stringstream log_string;
+  log_string << "Graph " << graph_number << " Traversing Finished {"
+             << std::endl;
+  log_string << graph_description << std::endl << "}" << std::endl;
+  return log_string.str();
+}
+
 void prepare_temp_directory() {
-  if (!std::filesystem::exists(config::kTempDirectoryPath) ||
-      (std::filesystem::exists(config::kTempDirectoryPath) &&
-       !std::filesystem::is_directory(config::kTempDirectoryPath))) {
-    std::filesystem::create_directory(config::kTempDirectoryPath);
-  }
+  std::filesystem::create_directory(config::kTempDirectoryPath);
 }
 
 std::vector<uni_course_cpp::Graph> generate_graphs(
@@ -112,6 +124,21 @@ std::vector<uni_course_cpp::Graph> generate_graphs(
       });
 
   return graphs;
+}
+
+void traverse_graphs(const std::vector<Graph>& graphs,
+                     Logger& logger,
+                     const int threads_count) {
+  auto traversal_controller = GraphTraversalController(threads_count, graphs);
+  traversal_controller.traverse_graphs(
+      [&logger](int index) {
+        logger.log(
+            uni_cpp_practice::logging_helping::write_traverse_start(index));
+      },
+      [&logger](int index, const std::vector<GraphTraverser::Path>& pathes) {
+        logger.log(uni_cpp_practice::logging_helping::write_traverse_end(
+            index, pathes));
+      });
 }
 
 }  // namespace
