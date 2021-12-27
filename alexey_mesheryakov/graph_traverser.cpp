@@ -58,14 +58,14 @@ GraphPath find_shortest_path(const Graph& graph,
   }
   std::vector<VertexId> result_path;
   VertexId current_vertex_id = to_vertex_id;
-  while (1) {
+  while (true) {
     result_path.emplace(result_path.begin(), current_vertex_id);
     current_vertex_id = paths_to_verticies[current_vertex_id];
     if (current_vertex_id == INVALID_ID) {
       break;
     }
   };
-  return GraphPath(distance[to_vertex_id], result_path);
+  return GraphPath(distance[to_vertex_id], std::move(result_path));
 }
 
 }  // namespace
@@ -89,7 +89,7 @@ std::vector<GraphPath> GraphTraverser::find_all_paths() const {
           auto path = find_shortest_path(graph_, 0, vertex_id);
           {
             std::lock_guard lock(mutex);
-            paths.emplace_back(path);
+            paths.emplace_back(std::move(path));
           }
           jobs_counter++;
         });
