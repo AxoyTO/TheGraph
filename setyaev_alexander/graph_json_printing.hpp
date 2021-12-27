@@ -1,12 +1,11 @@
 #pragma once
 #include <string>
 #include "graph.hpp"
-#include "graph_printing.hpp"
+
 
 namespace uni_course_cpp {
 namespace printing {
 namespace json {
-std::string color_to_string(const uni_course_cpp::Edge::Color& color);
 std::string graph_to_string(const uni_course_cpp::Graph& graph);
 std::string vertex_to_string(
     const uni_course_cpp::Vertex& vertex,
