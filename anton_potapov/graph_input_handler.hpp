@@ -1,3 +1,5 @@
+#pragma once
+
 namespace uni_cource_cpp {
 class GraphInputHandler {
  public:

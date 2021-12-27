@@ -1,13 +1,16 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
 
 #include "config.hpp"
 #include "graph.hpp"
 #include "graph_generation_controller.hpp"
 #include "graph_generator.hpp"
 #include "graph_input_handler.hpp"
+#include "graph_path.hpp"
 #include "graph_printer.hpp"
+#include "graph_traversal_controller.hpp"
 #include "log_messages_generator.hpp"
 #include "logger.hpp"
 
@@ -15,7 +18,9 @@ using uni_cource_cpp::Graph;
 using uni_cource_cpp::GraphGenerationController;
 using uni_cource_cpp::GraphGenerator;
 using uni_cource_cpp::GraphInputHandler;
+using uni_cource_cpp::GraphPath;
 using uni_cource_cpp::GraphPrinter;
+using uni_cource_cpp::GraphTraversalController;
 using uni_cource_cpp::Logger;
 using uni_cource_cpp::LogMessagesGenerator;
 
@@ -34,13 +39,12 @@ void write_to_file(const std::string& file_text, const std::string& file_path) {
   json_file.close();
 }
 
-std::map<int, Graph> generate_graphs(const GraphGenerator::Params& params,
+std::map<int, Graph> generate_graphs(Logger& logger,
+                                     const GraphGenerator::Params& params,
                                      int graphs_count,
                                      int threads_count) {
   auto generation_controller =
       GraphGenerationController(threads_count, graphs_count, params);
-
-  auto& logger = Logger::get_logger();
 
   auto graphs = std::map<int, Graph>();
 
@@ -66,6 +70,21 @@ std::map<int, Graph> generate_graphs(const GraphGenerator::Params& params,
   return graphs;
 }
 
+void traverse_graphs(Logger& logger,
+                     std::map<int, Graph>& graphs,
+                     int threads_count) {
+  auto traversal_controller = GraphTraversalController(threads_count, graphs);
+
+  traversal_controller.traverse(
+      [&logger](int index) {
+        logger.log(LogMessagesGenerator::traversal_started_string(index));
+      },
+      [&logger](int index, std::vector<GraphPath> paths) {
+        logger.log(LogMessagesGenerator::traversal_finished_string(
+            index, GraphPrinter::print_paths(std::move(paths))));
+      });
+}
+
 int main() {
   const auto depth = GraphInputHandler::handle_depth_input();
   const auto new_vertices_count =
@@ -75,8 +94,12 @@ int main() {
 
   prepare_temp_directory();
 
+  auto& logger = Logger::get_logger();
+
   const auto params = GraphGenerator::Params(depth, new_vertices_count);
-  const auto graphs = generate_graphs(params, graphs_count, threads_count);
+  auto graphs = generate_graphs(logger, params, graphs_count, threads_count);
+
+  traverse_graphs(logger, graphs, threads_count);
 
   return 0;
 }
